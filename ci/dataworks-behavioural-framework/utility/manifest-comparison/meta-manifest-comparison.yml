@@ -34,7 +34,7 @@ meta-manifest-comparison:
               aws s3 sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
 
               export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
-              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+              aws s3 --endpoint-url=https://s3.${AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
         inputs:
           - name: dataworks-behavioural-framework
           - name: terraform-output-ingest

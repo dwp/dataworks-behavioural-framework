@@ -48,7 +48,7 @@ meta-dataworks-behavioural-framework:
               source /assume-role
               set +x
               export AWS_S3_INPUT_BUCKET="$(cat terraform-output-ingest/outputs.json | jq -r '.s3_buckets.value.input_bucket')"
-              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/fixture-data/ s3://${AWS_S3_INPUT_BUCKET}/fixture-data/business-data/kafka
+              aws s3 --endpoint-url=https://s3.${AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/fixture-data/ s3://${AWS_S3_INPUT_BUCKET}/fixture-data/business-data/kafka
         inputs:
           - name: dataworks-behavioural-framework
           - name: terraform-output-ingest
