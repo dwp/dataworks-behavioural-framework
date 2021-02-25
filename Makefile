@@ -97,7 +97,7 @@ build-and-run-other-script:
 
 .PHONY: terraform-workspace-new
 terraform-workspace-new: ## Creates new Terraform workspace with Concourse remote execution
-	declare -a workspace=( qa, integration, preprod, production ) \
+	declare -a workspace=( management ) \
 	make bootstrap ; \
 	cp terraform.tf workspaces.tf && \
 	for i in "$${workspace[@]}" ; do \
