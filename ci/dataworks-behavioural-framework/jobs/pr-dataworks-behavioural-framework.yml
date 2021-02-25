@@ -9,10 +9,12 @@ jobs:
             trigger: false
           - get: aws-analytical-env
             trigger: false
+          - get: dataworks-behavioural-framework
+            trigger: false
           - get: dataworks-behavioural-framework-pr
             trigger: true
             version: every
-            
+
       - put: dataworks-behavioural-framework-pr
         resource: dataworks-behavioural-framework-pr
         params:
