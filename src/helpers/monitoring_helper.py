@@ -3,11 +3,12 @@ from helpers import (
     console_printer,
 )
 
+
 def send_monitoring_alert(
-    monitoring_sns_topic_arn, 
-    status, 
-    severity, 
-    notification_type, 
+    monitoring_sns_topic_arn,
+    status,
+    severity,
+    notification_type,
     custom_elements=[],
 ):
     """Sends a monitoring alert to SNS.
@@ -20,9 +21,9 @@ def send_monitoring_alert(
     custom_elements -- an array of (key, value) tuples for custom elements to add to the alert
     """
     console_printer.print_info(
-        f"Sending out monitoring message with status of '{status}', " +
-        f"severity of '{severity}', notification_type of '{notification_type}' " +
-        f"and custom_elements of '{custom_elements}'"
+        f"Sending out monitoring message with status of '{status}', "
+        + f"severity of '{severity}', notification_type of '{notification_type}' "
+        + f"and custom_elements of '{custom_elements}'"
     )
 
     message = {
@@ -34,8 +35,8 @@ def send_monitoring_alert(
 
     if len(custom_elements) > 0:
         message["custom_elements"] = [
-            { "key": custom_element[0], "value": custom_element[1] }
+            {"key": custom_element[0], "value": custom_element[1]}
             for custom_element in custom_elements
         ]
-    
+
     aws_helper.publish_message_to_sns(message, monitoring_sns_topic_arn)

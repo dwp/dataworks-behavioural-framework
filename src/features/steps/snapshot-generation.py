@@ -39,8 +39,10 @@ def step_impl(context, snapshot_type):
             else context.snapshot_sender_scale_up_override
         )
 
-        context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
-            context.asg_prefix_snapshot_sender, int(desired_count)
+        context.last_scaled_asg = (
+            aws_helper.scale_asg_if_desired_count_is_not_already_set(
+                context.asg_prefix_snapshot_sender, int(desired_count)
+            )
         )
 
 

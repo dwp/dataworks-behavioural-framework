@@ -115,7 +115,7 @@ def send_start_export_message(
         "ss-reprocess-files": reprocess_files,
         "snapshot-type": snapshot_type,
     }
-    
+
     if mongo_snapshot_full_s3_location is not None:
         message["mongo_snapshot_full_s3_location"] = mongo_snapshot_full_s3_location
 

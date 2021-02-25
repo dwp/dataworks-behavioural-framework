@@ -24,7 +24,9 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 )
 def step_prepare_data_egress_test(context, template_name):
 
-    template_file = os.path.join(context.fixture_path_local, TEMPLATE_FOLDER, template_name)
+    template_file = os.path.join(
+        context.fixture_path_local, TEMPLATE_FOLDER, template_name
+    )
     with open(template_file, "r") as unencrypted_file:
         unencrypted_content = unencrypted_file.read()
     [
@@ -32,10 +34,8 @@ def step_prepare_data_egress_test(context, template_name):
         iv_whole,
     ] = historic_data_load_generator.generate_initialisation_vector()
     iv = base64.b64encode(iv_int).decode()
-    encrypted_content = (
-        historic_data_load_generator.generate_encrypted_record(
-            iv_whole, unencrypted_content, context.encryption_plaintext_key, False
-        )
+    encrypted_content = historic_data_load_generator.generate_encrypted_record(
+        iv_whole, unencrypted_content, context.encryption_plaintext_key, False
     )
     file_name = os.path.basename(template_file)
     s3_key = os.path.join(S3_PREFIX_FOR_INPUT, file_name)
@@ -54,10 +54,12 @@ def step_prepare_data_egress_test(context, template_name):
     )
     console_printer.print_info(f"Uploading success file to S3")
 
-    template_success_file = os.path.join(context.fixture_path_local, TEMPLATE_FOLDER, TEMPLATE_SUCCESS_FILE)
-    success_file_key = os.path.join(S3_PREFIX_FOR_INPUT,TEMPLATE_SUCCESS_FILE)
+    template_success_file = os.path.join(
+        context.fixture_path_local, TEMPLATE_FOLDER, TEMPLATE_SUCCESS_FILE
+    )
+    success_file_key = os.path.join(S3_PREFIX_FOR_INPUT, TEMPLATE_SUCCESS_FILE)
     aws_helper.upload_file_to_s3_and_wait_for_consistency(
-        template_success_file,context.published_bucket, 10, success_file_key
+        template_success_file, context.published_bucket, 10, success_file_key
     )
 
 
@@ -75,4 +77,6 @@ def step_verify_data_egress_content(context):
     ).decode()
     console_printer.print_info(f"file content is : {output_file_content}")
     console_printer.print_info(f"file content is : {output_file_content} 2")
-    assert output_file_content == "This is just sample data to test data egress service."
+    assert (
+        output_file_content == "This is just sample data to test data egress service."
+    )

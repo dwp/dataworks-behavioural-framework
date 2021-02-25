@@ -52,9 +52,13 @@ def step_impl(context, snapshot_type):
 
     for topic in topics:
         topic_qualified = template_helper.get_topic_name(topic)
-        topic_name = template_helper.remove_any_pipe_values_from_topic_name(topic_qualified)
+        topic_name = template_helper.remove_any_pipe_values_from_topic_name(
+            topic_qualified
+        )
 
-        snapshot_pattern = f"^{s3_qualified_prefix}/{topic_name}-\d{{3}}-\d{{3}}-\d+.txt.gz.enc$"
+        snapshot_pattern = (
+            f"^{s3_qualified_prefix}/{topic_name}-\d{{3}}-\d{{3}}-\d+.txt.gz.enc$"
+        )
 
         console_printer.print_info(
             f"Looking for snapshots using pattern '{snapshot_pattern}'"
@@ -68,9 +72,7 @@ def step_impl(context, snapshot_type):
 
         generated_snapshots_count = len(generated_snapshot_keys)
 
-        console_printer.print_info(
-            f"Found '{generated_snapshots_count}' snapshots"
-        )
+        console_printer.print_info(f"Found '{generated_snapshots_count}' snapshots")
 
         export_status_helper.update_item_in_export_status_table(
             context.dynamo_db_export_status_table_name,

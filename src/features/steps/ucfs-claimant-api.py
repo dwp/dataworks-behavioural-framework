@@ -6,7 +6,7 @@ import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from behave import given, when, then
 from helpers import (
-    ucfs_claimant_api_helper, 
+    ucfs_claimant_api_helper,
     console_printer,
     invoke_lambda,
     claimant_api_data_generator,
@@ -31,7 +31,7 @@ def step_impl(context, region_type, region):
         context.claimant_api_storage_region = region_to_use.lower()
     else:
         context.claimant_api_business_region = region_to_use.lower()
-    
+
     console_printer.print_info(
         f"Claimant API region of type '{region_type}' set to '{region}'"
     )
@@ -39,33 +39,37 @@ def step_impl(context, region_type, region):
 
 @given("The nino salt has been retrieved")
 def step_impl(context):
-    context.nino_salt = aws_helper.ssm_get_parameter_value(context.ucfs_claimant_api_salt_ssm_parameter_name, True)
-    
-    console_printer.print_info(
-        f"Claimant API nino salt set to '{context.nino_salt}'"
+    context.nino_salt = aws_helper.ssm_get_parameter_value(
+        context.ucfs_claimant_api_salt_ssm_parameter_name, True
     )
+
+    console_printer.print_info(f"Claimant API nino salt set to '{context.nino_salt}'")
 
 
 @given("The claimant API data has been reset")
 def step_impl(context):
     invoke_lambda.invoke_claimant_mysql_metadata_interface()
-    
-    console_printer.print_info(
-        f"Claimant API data reset"
-    )
+
+    console_printer.print_info(f"Claimant API data reset")
 
 
 @then("Take home pay can be successfully decoded as '{expected_value}'")
 def step_impl(context, expected_value):
-    assert context.claimant_api_status_code == 200, f"Status code from response was {context.claimant_api_status_code}, not 200"
+    assert (
+        context.claimant_api_status_code == 200
+    ), f"Status code from response was {context.claimant_api_status_code}, not 200"
     assert context.claimant_api_response is not None, f"Response body was empty"
 
     response = context.claimant_api_response
 
     try:
-        key_id = response['assessmentPeriod'][0]['amount']['keyId']
-        take_home_pay_enc = base64.urlsafe_b64decode(response['assessmentPeriod'][0]['amount']['takeHomePay'])
-        cipher_text_blob = base64.urlsafe_b64decode(response['assessmentPeriod'][0]['amount']['cipherTextBlob'])
+        key_id = response["assessmentPeriod"][0]["amount"]["keyId"]
+        take_home_pay_enc = base64.urlsafe_b64decode(
+            response["assessmentPeriod"][0]["amount"]["takeHomePay"]
+        )
+        cipher_text_blob = base64.urlsafe_b64decode(
+            response["assessmentPeriod"][0]["amount"]["cipherTextBlob"]
+        )
     except Exception as ex:
         console_printer.print_error_text(
             f"Could not retrieve information from claimant API response of '{response}' and error of '{ex}'"
@@ -75,10 +79,10 @@ def step_impl(context, expected_value):
     console_printer.print_info(
         f"Successfully retrieved cipher text of '{cipher_text_blob}' and take home pay of '{take_home_pay_enc}'"
     )
-    data_key = aws_helper.kms_decrypt_cipher_text(cipher_text_blob, context.claimant_api_storage_region)
-    console_printer.print_info(
-        f"Successfully decoded data key of '{data_key}'"
+    data_key = aws_helper.kms_decrypt_cipher_text(
+        cipher_text_blob, context.claimant_api_storage_region
     )
+    console_printer.print_info(f"Successfully decoded data key of '{data_key}'")
 
     nonce_size = 12
     nonce = take_home_pay_enc[:nonce_size]
@@ -89,8 +93,10 @@ def step_impl(context, expected_value):
     console_printer.print_info(
         f"Successfully decoded take home pay of '{take_home_pay}'"
     )
-    
-    assert take_home_pay == expected_value, f"Take home pay was {take_home_pay} which does not match expected value of {expected_value}"
+
+    assert (
+        take_home_pay == expected_value
+    ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value}"
 
 
 @given(
@@ -108,7 +114,11 @@ def step_impl(
     context.claimant_api_kafka_temp_folder = os.path.join(root_folder, folder)
     topic_prefix = streaming_data_helper.generate_topic_prefix(message_type)
 
-    (kafka_input_file_data, context.generated_ninos, context.generated_ids) = claimant_api_data_generator.generate_claimant_api_kafka_files(
+    (
+        kafka_input_file_data,
+        context.generated_ninos,
+        context.generated_ids,
+    ) = claimant_api_data_generator.generate_claimant_api_kafka_files(
         s3_input_bucket=context.s3_ingest_bucket,
         input_data_file_name=data_file_name,
         input_template_name=input_file_name,
@@ -124,7 +134,9 @@ def step_impl(
 
     for (id_field_name, generated_files) in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
-        context.local_generated_claimant_api_kafka_files.extend([db_object_tuple[1] for db_object_tuple in generated_files])
+        context.local_generated_claimant_api_kafka_files.extend(
+            [db_object_tuple[1] for db_object_tuple in generated_files]
+        )
         aws_helper.send_files_to_kafka_producer_sns(
             dynamodb_table_name=context.dynamo_db_table_name,
             s3_input_bucket=context.s3_ingest_bucket,
@@ -152,16 +164,22 @@ def step_impl(
 ):
     global message_type
 
-    existing_files_folder = os.path.join(context.claimant_api_kafka_temp_folder, "edited_files")
-    citizen_id = file_helper.get_id_from_claimant_by_id(existing_files_folder, context.generated_ninos[0], "nino", "citizenId")
-    contract_id = file_helper.get_id_from_claimant_by_id(existing_files_folder, citizen_id, "people", "contractId")
+    existing_files_folder = os.path.join(
+        context.claimant_api_kafka_temp_folder, "edited_files"
+    )
+    citizen_id = file_helper.get_id_from_claimant_by_id(
+        existing_files_folder, context.generated_ninos[0], "nino", "citizenId"
+    )
+    contract_id = file_helper.get_id_from_claimant_by_id(
+        existing_files_folder, citizen_id, "people", "contractId"
+    )
     topic_prefix = streaming_data_helper.generate_topic_prefix(message_type)
 
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
 
     kafka_input_file_data = claimant_api_data_generator.generate_updated_contract_and_statement_files_for_existing_claimant(
-        citizen_id=citizen_id, 
-        contract_id=contract_id, 
+        citizen_id=citizen_id,
+        contract_id=contract_id,
         fixture_files_root=context.fixture_path_local,
         fixture_data_folder=folder,
         input_data_file_name=data_file_name,
@@ -176,7 +194,9 @@ def step_impl(
 
     for (id_field_name, generated_files) in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
-        context.local_generated_claimant_api_kafka_files.extend([db_object_tuple[1] for db_object_tuple in generated_files])
+        context.local_generated_claimant_api_kafka_files.extend(
+            [db_object_tuple[1] for db_object_tuple in generated_files]
+        )
         aws_helper.send_files_to_kafka_producer_sns(
             dynamodb_table_name=context.dynamo_db_table_name,
             s3_input_bucket=context.s3_ingest_bucket,
@@ -203,16 +223,22 @@ def step_impl(
 ):
     global message_type
 
-    existing_files_folder = os.path.join(context.claimant_api_kafka_temp_folder, "edited_files")
-    citizen_id = file_helper.get_id_from_claimant_by_id(existing_files_folder, context.generated_ninos[0], "nino", "citizenId")
-    person_id = file_helper.get_id_from_claimant_by_id(existing_files_folder, context.generated_ninos[0], "nino", "personId")
+    existing_files_folder = os.path.join(
+        context.claimant_api_kafka_temp_folder, "edited_files"
+    )
+    citizen_id = file_helper.get_id_from_claimant_by_id(
+        existing_files_folder, context.generated_ninos[0], "nino", "citizenId"
+    )
+    person_id = file_helper.get_id_from_claimant_by_id(
+        existing_files_folder, context.generated_ninos[0], "nino", "personId"
+    )
     topic_prefix = streaming_data_helper.generate_topic_prefix(message_type)
 
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
 
     kafka_input_file_data = claimant_api_data_generator.generate_updated_claimant_file_for_existing_claimant(
-        citizen_id=citizen_id, 
-        person_id=person_id, 
+        citizen_id=citizen_id,
+        person_id=person_id,
         fixture_files_root=context.fixture_path_local,
         fixture_data_folder=folder,
         input_template_name=input_file_name,
@@ -227,7 +253,9 @@ def step_impl(
 
     for (id_field_name, generated_files) in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
-        context.local_generated_claimant_api_kafka_files.extend([db_object_tuple[1] for db_object_tuple in generated_files])
+        context.local_generated_claimant_api_kafka_files.extend(
+            [db_object_tuple[1] for db_object_tuple in generated_files]
+        )
         aws_helper.send_files_to_kafka_producer_sns(
             dynamodb_table_name=context.dynamo_db_table_name,
             s3_input_bucket=context.s3_ingest_bucket,
@@ -253,14 +281,19 @@ def step_impl(context, version):
     if version.lower() == "v1":
         api_path = context.ucfs_claimant_api_path_v1_get_award_details
 
-    (context.claimant_api_status_code, context.claimant_api_response) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
-        context.ucfs_claimant_domain_name, 
+    (
+        context.claimant_api_status_code,
+        context.claimant_api_response,
+    ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+        context.ucfs_claimant_domain_name,
         context.claimant_api_business_region,
-        api_path, 
-        ucfs_claimant_api_helper.hash_nino(context.generated_ninos[0], context.nino_salt),
-        context.test_run_name, 
+        api_path,
+        ucfs_claimant_api_helper.hash_nino(
+            context.generated_ninos[0], context.nino_salt
+        ),
+        context.test_run_name,
     )
-    
+
     console_printer.print_info(
         f"Query status code is '{context.claimant_api_status_code}' and response is '{context.claimant_api_response}'"
     )
@@ -273,14 +306,17 @@ def step_impl(context, version):
     if version.lower() == "v1":
         api_path = context.ucfs_claimant_api_path_v1_get_award_details
 
-    (context.claimant_api_status_code, context.claimant_api_response) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
-        context.ucfs_claimant_domain_name, 
+    (
+        context.claimant_api_status_code,
+        context.claimant_api_response,
+    ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+        context.ucfs_claimant_domain_name,
         context.claimant_api_business_region,
-        api_path, 
+        api_path,
         "test_unhashed_fake_nino",
-        context.test_run_name, 
+        context.test_run_name,
     )
-    
+
     console_printer.print_info(
         f"Query status code is '{context.claimant_api_status_code}' and response is '{context.claimant_api_response}'"
     )
@@ -304,62 +340,83 @@ def step_impl(context, version):
 
     while not claimants_found and time.time() < timeout_time:
         for nino in context.generated_ninos:
-            (context.claimant_api_status_code, context.claimant_api_response) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
-                context.ucfs_claimant_domain_name, 
+            (
+                context.claimant_api_status_code,
+                context.claimant_api_response,
+            ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+                context.ucfs_claimant_domain_name,
                 context.claimant_api_business_region,
-                api_path, 
+                api_path,
                 ucfs_claimant_api_helper.hash_nino(nino, context.nino_salt),
-                context.test_run_name, 
+                context.test_run_name,
             )
-            if context.claimant_api_status_code == 200 and "claimantFound" in context.claimant_api_response and context.claimant_api_response["claimantFound"]:
+            if (
+                context.claimant_api_status_code == 200
+                and "claimantFound" in context.claimant_api_response
+                and context.claimant_api_response["claimantFound"]
+            ):
                 found_ninos.append(nino)
                 console_printer.print_info(
                     f"Successfully found claimant with nino of '{nino}'"
                 )
-            
+
         if set(found_ninos) == set(context.generated_ninos):
-            console_printer.print_info(
-                f"Successfully found all new claimants"
-            )
+            console_printer.print_info(f"Successfully found all new claimants")
             claimants_found = True
 
         time.sleep(1)
         time_taken += 1
-    
+
     assert claimants_found, f"All claimants were not found"
 
 
 @when("The query succeeds and returns that the claimant has been found")
 @then("The query succeeds and returns that the claimant has been found")
 def step_impl(context):
-    assert context.claimant_api_status_code == 200, f"Status code from response was {context.claimant_api_status_code}, not 200"
+    assert (
+        context.claimant_api_status_code == 200
+    ), f"Status code from response was {context.claimant_api_status_code}, not 200"
     assert context.claimant_api_response is not None, f"Response body was empty"
-    assert "claimantFound" in context.claimant_api_response, f"claimantFound not present in response body"
-    assert context.claimant_api_response["claimantFound"] == True, f"claimantFound was not set to True"
+    assert (
+        "claimantFound" in context.claimant_api_response
+    ), f"claimantFound not present in response body"
+    assert (
+        context.claimant_api_response["claimantFound"] == True
+    ), f"claimantFound was not set to True"
 
 
 @then("The query succeeds and returns that the claimant has not been found")
 def step_impl(context):
-    assert context.claimant_api_status_code == 200, f"Status code from response was {context.claimant_api_status_code}, not 200"
+    assert (
+        context.claimant_api_status_code == 200
+    ), f"Status code from response was {context.claimant_api_status_code}, not 200"
     assert context.claimant_api_response is not None, f"Response body was empty"
-    assert "claimantFound" in context.claimant_api_response, f"claimantFound not present in response body"
-    assert context.claimant_api_response["claimantFound"] == False, f"claimantFound was not set to False"
+    assert (
+        "claimantFound" in context.claimant_api_response
+    ), f"claimantFound not present in response body"
+    assert (
+        context.claimant_api_response["claimantFound"] == False
+    ), f"claimantFound was not set to False"
 
 
 @when("The query succeeds and returns that the claimant is not suspended")
 @then("The query succeeds and returns that the claimant is not suspended")
 def step_impl(context):
-    assert context.claimant_api_status_code == 200, f"Status code from response was {context.claimant_api_status_code}, not 200"
+    assert (
+        context.claimant_api_status_code == 200
+    ), f"Status code from response was {context.claimant_api_status_code}, not 200"
     assert context.claimant_api_response is not None, f"Response body was empty"
-    assert "suspendedDate" not in context.claimant_api_response, f"suspendedDate not present in response body"
+    assert (
+        "suspendedDate" not in context.claimant_api_response
+    ), f"suspendedDate not present in response body"
 
 
-@then("I query the first claimant again from claimant API '{version}' and it is not found")
+@then(
+    "I query the first claimant again from claimant API '{version}' and it is not found"
+)
 def step_impl(context, version):
     nino = context.generated_ninos[0]
-    console_printer.print_info(
-        f"Waiting for '{nino}' claimant to be not found"
-    )
+    console_printer.print_info(f"Waiting for '{nino}' claimant to be not found")
 
     api_path = context.ucfs_claimant_api_path_v2_get_award_details
 
@@ -371,14 +428,21 @@ def step_impl(context, version):
     claimant_not_found = False
 
     while not claimant_not_found and time.time() < timeout_time:
-        (context.claimant_api_status_code, context.claimant_api_response) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
-            context.ucfs_claimant_domain_name, 
+        (
+            context.claimant_api_status_code,
+            context.claimant_api_response,
+        ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+            context.ucfs_claimant_domain_name,
             context.claimant_api_business_region,
-            api_path, 
+            api_path,
             ucfs_claimant_api_helper.hash_nino(nino, context.nino_salt),
-            context.test_run_name, 
+            context.test_run_name,
         )
-        if context.claimant_api_status_code == 200 and "claimantFound" in context.claimant_api_response and not context.claimant_api_response["claimantFound"]:
+        if (
+            context.claimant_api_status_code == 200
+            and "claimantFound" in context.claimant_api_response
+            and not context.claimant_api_response["claimantFound"]
+        ):
             console_printer.print_info(
                 f"Successfully retrieved the response and claimant is not found"
             )
@@ -386,16 +450,16 @@ def step_impl(context, version):
 
         time.sleep(1)
         time_taken += 1
-    
+
     assert claimant_not_found, f"claimantFound was set to True"
 
 
-@then("I query the first claimant again from claimant API '{version}' and it is suspended")
+@then(
+    "I query the first claimant again from claimant API '{version}' and it is suspended"
+)
 def step_impl(context, version):
     nino = context.generated_ninos[0]
-    console_printer.print_info(
-        f"Waiting for '{nino}' claimant to be suspended"
-    )
+    console_printer.print_info(f"Waiting for '{nino}' claimant to be suspended")
 
     api_path = context.ucfs_claimant_api_path_v2_get_award_details
 
@@ -407,15 +471,25 @@ def step_impl(context, version):
     claimant_suspended = False
 
     while not claimant_suspended and time.time() < timeout_time:
-        (context.claimant_api_status_code, context.claimant_api_response) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
-            context.ucfs_claimant_domain_name, 
+        (
+            context.claimant_api_status_code,
+            context.claimant_api_response,
+        ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+            context.ucfs_claimant_domain_name,
             context.claimant_api_business_region,
-            api_path, 
+            api_path,
             ucfs_claimant_api_helper.hash_nino(nino, context.nino_salt),
-            context.test_run_name, 
+            context.test_run_name,
         )
-        if context.claimant_api_status_code == 200 and "claimantFound" in context.claimant_api_response and context.claimant_api_response["claimantFound"]:
-            if "suspendedDate" in context.claimant_api_response and context.claimant_api_response["suspendedDate"]:
+        if (
+            context.claimant_api_status_code == 200
+            and "claimantFound" in context.claimant_api_response
+            and context.claimant_api_response["claimantFound"]
+        ):
+            if (
+                "suspendedDate" in context.claimant_api_response
+                and context.claimant_api_response["suspendedDate"]
+            ):
                 console_printer.print_info(
                     f"Successfully found claimant and they are suspended"
                 )
@@ -423,26 +497,34 @@ def step_impl(context, version):
 
         time.sleep(1)
         time_taken += 1
-    
+
     assert claimant_suspended, f"suspendedDate could not be found or was False"
 
 
-@then("The assessment periods are correctly returned using data file of '{data_file_name}'")
+@then(
+    "The assessment periods are correctly returned using data file of '{data_file_name}'"
+)
 def step_impl(context, data_file_name):
     global message_type
 
-    assert context.claimant_api_status_code == 200, f"Status code from response was {context.claimant_api_status_code}, not 200"
+    assert (
+        context.claimant_api_status_code == 200
+    ), f"Status code from response was {context.claimant_api_status_code}, not 200"
     assert context.claimant_api_response is not None, f"Response body was empty"
 
     response = context.claimant_api_response
 
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
-    expected_assessment_periods = ucfs_claimant_api_helper.retrieve_assessment_periods_from_claimant_data_file(
-        input_data_file_name=data_file_name, fixture_files_root=context.fixture_path_local, fixture_data_folder=folder
+    expected_assessment_periods = (
+        ucfs_claimant_api_helper.retrieve_assessment_periods_from_claimant_data_file(
+            input_data_file_name=data_file_name,
+            fixture_files_root=context.fixture_path_local,
+            fixture_data_folder=folder,
+        )
     )
 
     try:
-        actual_assessment_periods = response['assessmentPeriod']
+        actual_assessment_periods = response["assessmentPeriod"]
     except Exception as ex:
         console_printer.print_error_text(
             f"Could not retrieve assessment periods from claimant API response of '{response}' and error of '{ex}'"
@@ -452,8 +534,10 @@ def step_impl(context, data_file_name):
     console_printer.print_info(
         f"Successfully retrieved '{len(actual_assessment_periods)}' actual assessment periods"
     )
-    
-    assert len(actual_assessment_periods) == len(expected_assessment_periods), f"Expected ssessment period count does not match actual count"
+
+    assert len(actual_assessment_periods) == len(
+        expected_assessment_periods
+    ), f"Expected ssessment period count does not match actual count"
 
 
 @then("The messages are sent to the DLQ")
@@ -468,10 +552,10 @@ def step_impl(context):
 
     while time.time() < timeout_time:
         actual_dlq_files_content_for_today = aws_helper.retrieve_files_from_s3(
-            s3_bucket=context.s3_ingest_bucket, 
-            path=context.s3_dlq_path_and_date_prefix, 
-            pattern=None, 
-            remove_whitespace=True
+            s3_bucket=context.s3_ingest_bucket,
+            path=context.s3_dlq_path_and_date_prefix,
+            pattern=None,
+            remove_whitespace=True,
         )
 
         console_printer.print_info(
@@ -487,12 +571,10 @@ def step_impl(context):
                         f"Successfully found {ids_found} DLQ files"
                     )
                     if ids_found == len(expected_dlq_ids):
-                        console_printer.print_info(
-                            f"Successfully found all DLQ files"
-                        )
+                        console_printer.print_info(f"Successfully found all DLQ files")
                         return
 
         time.sleep(1)
         time_taken += 1
-    
+
     raise AssertionError("Could not find DLQ files within timeout")

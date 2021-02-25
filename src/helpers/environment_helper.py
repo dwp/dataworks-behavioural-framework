@@ -17,9 +17,7 @@ def set_test_run_common_variables(context):
     Keyword arguments:
     context -- the behave context object
     """
-    console_printer.print_info(
-        f"Setting test run variables common to all test runs"
-    )
+    console_printer.print_info(f"Setting test run variables common to all test runs")
 
     context.suppress_monitoring = (
         context.config.userdata.get("SUPPRESS_MONITORING_ALERTS") == "true"
@@ -207,7 +205,7 @@ def set_test_run_common_variables(context):
     default_topic_list_full = context.config.userdata.get(
         "HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT"
     ).split("\n")
-    
+
     default_topic_list_incrementals = context.config.userdata.get(
         "HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT"
     ).split("\n")
@@ -273,11 +271,15 @@ def set_test_run_common_variables(context):
         )
     )
     context.corporate_data_prefix_per_execution_count_override = (
-        context.config.userdata.get("CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE")
+        context.config.userdata.get(
+            "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
+        )
     )
 
     context.corporate_data_ingestion_partitions_count_override = (
-        context.config.userdata.get("CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE")
+        context.config.userdata.get(
+            "CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE"
+        )
     )
     context.corporate_data_ingestion_skip_later_than_override = (
         context.config.userdata.get("CORPORATE_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE")
@@ -394,12 +396,10 @@ def set_test_run_common_variables(context):
         )
     )
 
-    context.cdl_data_load_s3_base_prefix_tests = (
-        os.path.join(
-            context.config.userdata.get("CDL_DATA_LOAD_S3_BASE_PREFIX"),
-            "automatedtests",
-            context.test_run_name,
-        )
+    context.cdl_data_load_s3_base_prefix_tests = os.path.join(
+        context.config.userdata.get("CDL_DATA_LOAD_S3_BASE_PREFIX"),
+        "automatedtests",
+        context.test_run_name,
     )
 
     context.cdl_file_pattern_ucfs = context.config.userdata.get(
@@ -428,8 +428,10 @@ def set_test_run_common_variables(context):
     context.ucfs_claimant_api_kafka_consumer_service_name = context.config.userdata.get(
         "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME"
     )
-    context.ucfs_claimant_api_kafka_consumer_service_desired_task_count = context.config.userdata.get(
-        "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT"
+    context.ucfs_claimant_api_kafka_consumer_service_desired_task_count = (
+        context.config.userdata.get(
+            "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT"
+        )
     )
 
     context.monitoring_sns_topic_arn = context.config.userdata.get(
@@ -437,17 +439,15 @@ def set_test_run_common_variables(context):
     )
 
     context.analytical_test_data_s3_location = {
-        'path': 'e2e_test_dir/',
-        'file_name': 'e2e_test_file.txt'
+        "path": "e2e_test_dir/",
+        "file_name": "e2e_test_file.txt",
     }
 
     context.pdm_test_input_s3_prefix = "e2e-test-pdm-dataset"
 
     context.pdm_test_output_s3_prefix = "e2e-test-pdm-output"
 
-    context.aws_region_main = context.config.userdata.get(
-        "AWS_REGION_MAIN"
-    )
+    context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
     )
@@ -462,7 +462,7 @@ def set_manifest_variables(context):
     console_printer.print_info(
         f"Setting test run variables common to manifest test runs"
     )
-    
+
     context.manifest_templates_local = "manifest-comparison/templates"
     context.manifest_queries_local = "manifest-comparison/queries"
     context.manifest_query_tables_local = "manifest-comparison/query_tables"
@@ -641,10 +641,8 @@ def generate_test_run_topics(context):
     Keyword arguments:
     context -- the behave context object
     """
-    console_printer.print_info(
-        f"Generating the topics for this test run"
-    )
-    
+    console_printer.print_info(f"Generating the topics for this test run")
+
     if context.config.userdata.get("IS_SYNTHETIC_DATA_INGESTION"):
         context.topics = template_helper.generate_synthetic_data_topic_names(
             context.synthetic_rawdata_prefix, context.aws_datasets_bucket
@@ -665,6 +663,4 @@ def generate_test_run_topics(context):
         )
         context.topics_unique_delimited = ",".join(context.topics_unique)
 
-    console_printer.print_info(
-        f"Generated the topics for this test run"
-    )
+    console_printer.print_info(f"Generated the topics for this test run")

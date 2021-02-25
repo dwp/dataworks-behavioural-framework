@@ -99,7 +99,9 @@ def step_impl(context, table, id_format, message_type):
             f"Asserting exactly one response received for id of '{record_id}' and timestamp of '{str(record_timestamp)}' in topic '{topic_name}'"
         )
 
-        assert len(results) == 1, "Metadata table result not returned, try restarting the k2hb consumers"
+        assert (
+            len(results) == 1
+        ), "Metadata table result not returned, try restarting the k2hb consumers"
 
         results_iterator = iter(results.items())
         result_row_key_value_pair = next(results_iterator)

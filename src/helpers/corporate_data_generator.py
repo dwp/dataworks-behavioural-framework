@@ -52,7 +52,11 @@ def generate_corporate_data_files(
     timestamp_override -- the base timestamp or None to use default of "2018-11-01T03:02:01.001"
     """
     global _base_datetime_timestamp
-    timestamp_to_use = timestamp_override if timestamp_override is not None else _base_datetime_timestamp
+    timestamp_to_use = (
+        timestamp_override
+        if timestamp_override is not None
+        else _base_datetime_timestamp
+    )
 
     file_string = "files" if int(record_count) > 1 else "file"
 

@@ -6,7 +6,7 @@ from helpers import aws_helper, emr_step_generator
 @when("An emrfs '{step_type}' step is started on the ingest-hbase EMR cluster")
 def step_impl(context, step_type):
     s3_prefix = (
-        context.ingest_hbase_emrfs_prefix_override 
+        context.ingest_hbase_emrfs_prefix_override
         if context.ingest_hbase_emrfs_prefix_override
         else context.ingest_hbase_emr_cluster_root_s3_root_directory
     )
@@ -51,9 +51,9 @@ def step_impl(context, step_type):
     bash_script = None
 
     if step_type == "drop all tables":
-        bash_script = 'echo -e "drop_all \'.*\'\\ny" | hbase shell'
+        bash_script = "echo -e \"drop_all '.*'\\ny\" | hbase shell"
     elif step_type == "disable all tables":
-        bash_script = 'hbase shell <<< list | egrep \'^[a-z]\' | grep -v \'^list\' | while read; do echo -e \"disable \'$REPLY\'\"; done | hbase shell'
+        bash_script = "hbase shell <<< list | egrep '^[a-z]' | grep -v '^list' | while read; do echo -e \"disable '$REPLY'\"; done | hbase shell"
     elif step_type == "download cdl script":
         bash_script = f"aws s3 cp {context.cdl_run_script_s3_url} /opt/emr/run_cdl.sh && chmod +x /opt/emr/run_cdl.sh"
     elif step_type == "download hdl script":

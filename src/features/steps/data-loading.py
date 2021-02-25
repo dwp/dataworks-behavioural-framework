@@ -112,23 +112,32 @@ def step_impl(context, argument_type):
     )
 
 
-@when(
-    "The corporate data is loaded in to HBase with default settings"
-)
+@when("The corporate data is loaded in to HBase with default settings")
 def step_impl(context):
     context.execute_steps(
         f"when The corporate data is loaded in to HBase for the 'default' metadata store with arguments of 'default', start date days offset of 'None', end date days offset of 'None', partition count of 'None' and prefix per execution setting of 'false'"
     )
 
+
 @when(
     "The corporate data is loaded in to HBase for the '{metadata_store_table_name}' metadata store with arguments of '{argument_type}', start date days offset of '{start_days_offset}', end date days offset of '{end_days_offset}', partition count of '{partition_count}' and prefix per execution setting of '{prefix_per_execution}'"
 )
-def step_impl(context, metadata_store_table_name, argument_type, start_days_offset, end_days_offset, partition_count, prefix_per_execution):
+def step_impl(
+    context,
+    metadata_store_table_name,
+    argument_type,
+    start_days_offset,
+    end_days_offset,
+    partition_count,
+    prefix_per_execution,
+):
     arguments = context.corporate_data_load_run_script_arguments
 
     if argument_type.lower() != "default":
         start_date = (
-            (datetime.now() + timedelta(days=int(start_days_offset))).strftime("%Y-%m-%d")
+            (datetime.now() + timedelta(days=int(start_days_offset))).strftime(
+                "%Y-%m-%d"
+            )
             if start_days_offset and start_days_offset.lower() != "none"
             else None
         )

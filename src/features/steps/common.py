@@ -45,12 +45,12 @@ def step_impl(context):
 
             time.sleep(5)
             count += 5
-        
+
         if asg_finished_scaling:
             console_printer.print_info(
                 f"Autoscaling group with prefix of '{asg_prefix}' correctly set desired count of '{str(desired_count)}'"
             )
-            break;
+            break
         else:
             console_printer.print_info(
                 f"Autoscaling group with prefix of '{asg_prefix}' not set desired count of '{str(desired_count)}' after one minute, so trying to scale again"
@@ -58,5 +58,7 @@ def step_impl(context):
             aws_helper.scale_asg_if_desired_count_is_not_already_set(
                 asg_prefix, desired_count
             )
-    
-    assert asg_finished_scaling, f"Autoscaling group with prefix of '{asg_prefix}' not set desired count to '{str(desired_count)}' after '{str(context.timeout)}' seconds"
+
+    assert (
+        asg_finished_scaling
+    ), f"Autoscaling group with prefix of '{asg_prefix}' not set desired count to '{str(desired_count)}' after '{str(context.timeout)}' seconds"

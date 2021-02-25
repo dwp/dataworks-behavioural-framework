@@ -387,15 +387,14 @@ def setup_user(context, primary_policy_name, role_name=None, additional_policies
     arn_value = aws_helper.generate_arn("iam", arn_suffix)
     context.analytical_test_e2e_policies = [arn_value for policy in policy_list]
 
+
 @fixture
-def setup_user_and_role(context, primary_policy_name, role_name=None, additional_policies=None):
+def setup_user_and_role(
+    context, primary_policy_name, role_name=None, additional_policies=None
+):
     assume_role_document_json = {
         "Version": "2012-10-17",
-        "Statement": [{
-            "Effect": "Allow",
-            "Action": "sts:AssumeRole",
-            "Principal": {}
-        }]
+        "Statement": [{"Effect": "Allow", "Action": "sts:AssumeRole", "Principal": {}}],
     }
     arn_suffix = f"{context.aws_acc}:role/ci"
     ci_role_arn = aws_helper.generate_arn("iam", arn_suffix)
@@ -409,19 +408,20 @@ def setup_user_and_role(context, primary_policy_name, role_name=None, additional
 
     # remove role, if exists
     try:
-        policy_arns = aws_helper.list_policy_arns_for_role(context.analytical_test_e2e_role, context.aws_acc)
-        aws_helper.remove_role(
-            context.analytical_test_e2e_role,
-            policy_arns
+        policy_arns = aws_helper.list_policy_arns_for_role(
+            context.analytical_test_e2e_role, context.aws_acc
         )
+        aws_helper.remove_role(context.analytical_test_e2e_role, policy_arns)
         console_printer.print_info(
-            "Found orphaned \"analytical_test_e2e_role\" from previous test and removed it."
+            'Found orphaned "analytical_test_e2e_role" from previous test and removed it.'
         )
     except Exception as e:
         console_printer.print_info(e)
         pass
 
-    assume_role_document_json["Statement"][0]["Principal"].update({'AWS': [ci_role_arn]})
+    assume_role_document_json["Statement"][0]["Principal"].update(
+        {"AWS": [ci_role_arn]}
+    )
 
     # Set up role with trust policy
     try:
@@ -430,7 +430,7 @@ def setup_user_and_role(context, primary_policy_name, role_name=None, additional
             json.dumps(assume_role_document_json),
         )
     except ClientError as e:
-        if e.response['Error']['Code'] == "EntityAlreadyExists":
+        if e.response["Error"]["Code"] == "EntityAlreadyExists":
             time.sleep(10)
             role_name = aws_helper.create_role_and_wait_for_it_to_exist(
                 context.analytical_test_e2e_role,
@@ -466,9 +466,9 @@ def analytical_env_setup(context, timeout=30, **kwargs):
         aws_helper.remove_file_from_s3_and_wait_for_consistency,
         context.published_bucket,
         os.path.join(
-            context.analytical_test_data_s3_location['path'],
-            context.analytical_test_data_s3_location['file_name']
-        )
+            context.analytical_test_data_s3_location["path"],
+            context.analytical_test_data_s3_location["file_name"],
+        ),
     )
 
 
@@ -604,9 +604,7 @@ def dynamodb_clear_ingest_start_unique_incremental(context, timeout=30, **kwargs
 
 @fixture
 def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
-    console_printer.print_info(
-        "Executing 'dynamodb_clear_ingest_start' fixture"
-    )
+    console_printer.print_info("Executing 'dynamodb_clear_ingest_start' fixture")
     updated_topics = message_helper.get_consolidated_topics_list(
         topics_list,
         snapshot_type,
@@ -635,23 +633,19 @@ def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
 
 @fixture
 def claimant_api_setup(context):
-    console_printer.print_info(
-        "Executing 'claimant_api_setup' fixture"
-    )
+    console_printer.print_info("Executing 'claimant_api_setup' fixture")
     context.execute_steps(
         f"given The claimant API 'business' region is set to 'Ireland'"
     )
-    context.execute_steps(
-        f"given The claimant API 'storage' region is set to 'London'"
-    )
-    context.execute_steps(
-        f"given The nino salt has been retrieved"
-    )
+    context.execute_steps(f"given The claimant API 'storage' region is set to 'London'")
+    context.execute_steps(f"given The nino salt has been retrieved")
 
 
 @fixture
 def s3_clear_published_bucket_pdm_test_input(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 's3_clear_published_bucket_pdm_test_input' fixture")
+    console_printer.print_info(
+        "Executing 's3_clear_published_bucket_pdm_test_input' fixture"
+    )
     aws_helper.clear_s3_prefix(
         context.published_bucket, context.pdm_test_input_s3_prefix, False
     )
@@ -659,7 +653,9 @@ def s3_clear_published_bucket_pdm_test_input(context, timeout=30, **kwargs):
 
 @fixture
 def s3_clear_published_bucket_pdm_test_output(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 's3_clear_published_bucket_pdm_test_output' fixture")
+    console_printer.print_info(
+        "Executing 's3_clear_published_bucket_pdm_test_output' fixture"
+    )
     aws_helper.clear_s3_prefix(
         context.published_bucket, context.pdm_test_output_s3_prefix, False
     )

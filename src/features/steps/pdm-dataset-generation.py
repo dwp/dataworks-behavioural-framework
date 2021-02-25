@@ -2,8 +2,13 @@ import json
 import os
 
 from behave import given, then, when
-from helpers import (aws_helper, console_printer, emr_step_generator,
-                     file_helper, invoke_lambda)
+from helpers import (
+    aws_helper,
+    console_printer,
+    emr_step_generator,
+    file_helper,
+    invoke_lambda,
+)
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"

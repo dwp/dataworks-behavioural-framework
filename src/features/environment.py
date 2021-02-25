@@ -90,6 +90,7 @@ def before_scenario(context, scenario):
     # Set the scenario
     current_scenario = scenario
 
+
 def before_tag(context, tag):
     if tag == "fixture.setup.non_sc_user_and_role":
         use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__nonpii")
@@ -100,57 +101,115 @@ def before_tag(context, tag):
     if tag == "fixture.setup.sc_user":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc__pii")
     if tag == "fixture.setup.auditlog_secure_user_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_secure")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_secure"
+        )
     if tag == "fixture.setup.auditlog_secure_user":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_secure")
     if tag == "fixture.setup.auditlog_unredacted_user_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_unredacted")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_unredacted"
+        )
     if tag == "fixture.setup.auditlog_unredacted_user":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_unredacted")
     if tag == "fixture.setup.auditlog_redacted_user_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_redacted")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_redacted"
+        )
     if tag == "fixture.setup.auditlog_redacted_user":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_redacted")
     if tag == "fixture.setup.rbac_ucs_opsmi_redacted__all_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_opsmi_redacted__all")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_ucs_opsmi_redacted__all"
+        )
     if tag == "fixture.setup.rbac_ucs_opsmi_redacted__all":
         use_fixture(before_fixtures.setup_user, context, "rbac_ucs_opsmi_redacted__all")
     if tag == "fixture.setup.rbac_ucs_opsmi_unredacted__all_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_opsmi_unredacted__all")
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_opsmi_unredacted__all",
+        )
     if tag == "fixture.setup.rbac_ucs_opsmi_unredacted__all":
-        use_fixture(before_fixtures.setup_user, context, "rbac_ucs_opsmi_unredacted__all")
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_ucs_opsmi_unredacted__all"
+        )
     if tag == "fixture.setup.rbac_uc_ris_redacted__all_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc_ris_redacted__all")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_uc_ris_redacted__all"
+        )
     if tag == "fixture.setup.rbac_uc_ris_redacted__all":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc_ris_redacted__all")
     if tag == "fixture.setup.rbac_uc_ris_unredacted__all_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc_ris_unredacted__all")
+        use_fixture(
+            before_fixtures.setup_user_and_role, context, "rbac_uc_ris_unredacted__all"
+        )
     if tag == "fixture.setup.rbac_uc_ris_unredacted__all":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc_ris_unredacted__all")
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_sc_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_sc", ["rbac_uc__pii"])
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_sc",
+            ["rbac_uc__pii"],
+        )
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_sc":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_sc", ["rbac_uc__pii"])
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_sc",
+            ["rbac_uc__pii"],
+        )
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_non_sc_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_non_sc", ["rbac_uc__nonpii"])
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_non_sc",
+            ["rbac_uc__nonpii"],
+        )
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_non_sc":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_non_sc", ["rbac_uc__nonpii"])
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_non_sc",
+            ["rbac_uc__nonpii"],
+        )
     if tag == "fixture.setup.rbac_uc__sc_and_non_sc_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__pii",
-                    "e2e_rbac_uc__sc_and_non_sc", ["rbac_uc__nonpii"])
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc__pii",
+            "e2e_rbac_uc__sc_and_non_sc",
+            ["rbac_uc__nonpii"],
+        )
     if tag == "fixture.setup.rbac_uc__sc_and_non_sc":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc__pii",
-                    "e2e_rbac_uc__sc_and_non_sc", ["rbac_uc__nonpii"])
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc__pii",
+            "e2e_rbac_uc__sc_and_non_sc",
+            ["rbac_uc__nonpii"],
+        )
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_auditlog_secure_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure", ["rbac_uc__auditlog_secure"])
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure",
+            ["rbac_uc__auditlog_secure"],
+        )
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_auditlog_secure":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc__auditlog_redacted",
-                    "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure", ["rbac_uc__auditlog_secure"])
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc__auditlog_redacted",
+            "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure",
+            ["rbac_uc__auditlog_secure"],
+        )
     if tag == "fixture.htme.start.full":
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
@@ -220,7 +279,9 @@ def before_tag(context, tag):
     if tag == "fixture.dynamodb.clear.ingest.start.unique.full":
         use_fixture(before_fixtures.dynamodb_clear_ingest_start_unique_full, context)
     if tag == "fixture.dynamodb.clear.ingest.start.unique.incremental":
-        use_fixture(before_fixtures.dynamodb_clear_ingest_start_unique_incremental, context)
+        use_fixture(
+            before_fixtures.dynamodb_clear_ingest_start_unique_incremental, context
+        )
     if tag == "fixture.ucfs.claimant.kafka.consumer.start":
         use_fixture(before_fixtures.ucfs_claimant_kafka_consumer_start, context)
     if tag == "fixture.ucfs.claimant.kafka.consumer.stop":
@@ -244,11 +305,13 @@ def after_all(context):
         console_printer.print_info("Sending out notification")
 
         custom_elements = []
-        is_test = (current_feature is not None and "test" in current_feature.tags)
+        is_test = current_feature is not None and "test" in current_feature.tags
 
         if failed_feature is not None:
             custom_elements.append(("Feature", failed_feature.name))
-            custom_elements.append(("Is hook failure?", str(failed_feature.hook_failed)))
+            custom_elements.append(
+                ("Is hook failure?", str(failed_feature.hook_failed))
+            )
 
         if failed_scenario is not None:
             custom_elements.append(("Scenario", failed_scenario.name))

@@ -52,7 +52,9 @@ def generate_claimant_api_kafka_files(
         + f"id of '{new_uuid}' and base timestamp of '{_base_datetime_timestamp}'"
     )
 
-    data_file_name = os.path.join(fixture_files_root, fixture_data_folder, input_data_file_name)
+    data_file_name = os.path.join(
+        fixture_files_root, fixture_data_folder, input_data_file_name
+    )
     input_data = yaml.safe_load(open(data_file_name))
 
     claimant_file_data = []
@@ -63,9 +65,7 @@ def generate_claimant_api_kafka_files(
 
     increment = 0
     for item in input_data:
-        console_printer.print_info(
-            f"Generating claimant data for item of '{item}'"
-        )
+        console_printer.print_info(f"Generating claimant data for item of '{item}'")
         contract_id = new_uuid if new_uuid is not None else uuid.uuid4()
         citizen_id = new_uuid if new_uuid is not None else uuid.uuid4()
         person_id = new_uuid if new_uuid is not None else uuid.uuid4()
@@ -76,60 +76,133 @@ def generate_claimant_api_kafka_files(
 
         if "count" in item:
             count = 0
-            while count < item['count']:
+            while count < item["count"]:
                 nino = generate_national_insurance_number(citizen_id)
                 unique_suffix = f"{increment}{count}"
-                claimant_db_object = _generate_claimant_db_object(citizen_id, person_id, nino, unique_suffix)
+                claimant_db_object = _generate_claimant_db_object(
+                    citizen_id, person_id, nino, unique_suffix
+                )
                 all_ninos.append(nino)
-                (contract_db_object, statement_db_objects_array) = _generate_contract_and_statement_db_objects(
+                (
+                    contract_db_object,
+                    statement_db_objects_array,
+                ) = _generate_contract_and_statement_db_objects(
                     contract_id, item, [citizen_id], unique_suffix, timestamp_string
                 )
 
-                claimant_file_data.append((citizen_id, timestamp_string, claimant_db_object))
+                claimant_file_data.append(
+                    (citizen_id, timestamp_string, claimant_db_object)
+                )
                 all_ids.append(citizen_id)
-                contract_file_data.append((contract_id, timestamp_string, contract_db_object))
+                contract_file_data.append(
+                    (contract_id, timestamp_string, contract_db_object)
+                )
                 all_ids.append(contract_id)
-                statement_file_data.extend([(statement_id, timestamp_string, statement_db_object) for (statement_id, statement_db_object) in statement_db_objects_array])
-                all_ids.extend([statement_id for (statement_id, statement_db_object) in statement_db_objects_array])
+                statement_file_data.extend(
+                    [
+                        (statement_id, timestamp_string, statement_db_object)
+                        for (
+                            statement_id,
+                            statement_db_object,
+                        ) in statement_db_objects_array
+                    ]
+                )
+                all_ids.extend(
+                    [
+                        statement_id
+                        for (
+                            statement_id,
+                            statement_db_object,
+                        ) in statement_db_objects_array
+                    ]
+                )
 
                 count += 1
         else:
             nino = generate_national_insurance_number(citizen_id)
-            claimant_db_objects_array = [(citizen_id, _generate_claimant_db_object(citizen_id, person_id, nino, increment))]
+            claimant_db_objects_array = [
+                (
+                    citizen_id,
+                    _generate_claimant_db_object(
+                        citizen_id, person_id, nino, increment
+                    ),
+                )
+            ]
             all_ninos.append(nino)
             if "partner_nino" in item:
                 citizen_id = new_uuid if new_uuid is not None else uuid.uuid4()
                 person_id = new_uuid if new_uuid is not None else uuid.uuid4()
                 partner_nino = generate_national_insurance_number(citizen_id)
                 increment += 1
-                claimant_db_objects_array.append((citizen_id, _generate_claimant_db_object(citizen_id, person_id, partner_nino, increment)))
+                claimant_db_objects_array.append(
+                    (
+                        citizen_id,
+                        _generate_claimant_db_object(
+                            citizen_id, person_id, partner_nino, increment
+                        ),
+                    )
+                )
                 all_ninos.append(partner_nino)
-            
-            citizen_ids_array = [citizen_id for (citizen_id, claimant_db_object) in claimant_db_objects_array]
-            (contract_db_object, statement_db_objects_array) = _generate_contract_and_statement_db_objects(
+
+            citizen_ids_array = [
+                citizen_id
+                for (citizen_id, claimant_db_object) in claimant_db_objects_array
+            ]
+            (
+                contract_db_object,
+                statement_db_objects_array,
+            ) = _generate_contract_and_statement_db_objects(
                 contract_id, item, citizen_ids_array, increment, timestamp_string
             )
 
-            claimant_file_data.extend([(citizen_id, timestamp_string, claimant_db_object) for (citizen_id, claimant_db_object) in claimant_db_objects_array])
-            all_ids.extend([citizen_id for (citizen_id, claimant_db_object) in claimant_db_objects_array])
-            contract_file_data.append((contract_id, timestamp_string, contract_db_object))
+            claimant_file_data.extend(
+                [
+                    (citizen_id, timestamp_string, claimant_db_object)
+                    for (citizen_id, claimant_db_object) in claimant_db_objects_array
+                ]
+            )
+            all_ids.extend(
+                [
+                    citizen_id
+                    for (citizen_id, claimant_db_object) in claimant_db_objects_array
+                ]
+            )
+            contract_file_data.append(
+                (contract_id, timestamp_string, contract_db_object)
+            )
             all_ids.append(contract_id)
-            statement_file_data.extend([(statement_id, timestamp_string, statement_db_object) for (statement_id, statement_db_object) in statement_db_objects_array])
-            all_ids.extend([statement_id for (statement_id, statement_db_object) in statement_db_objects_array])
+            statement_file_data.extend(
+                [
+                    (statement_id, timestamp_string, statement_db_object)
+                    for (
+                        statement_id,
+                        statement_db_object,
+                    ) in statement_db_objects_array
+                ]
+            )
+            all_ids.extend(
+                [
+                    statement_id
+                    for (
+                        statement_id,
+                        statement_db_object,
+                    ) in statement_db_objects_array
+                ]
+            )
 
         increment += 1
 
     kafka_input_file_data = [
         ("citizenId", claimant_file_data),
         ("contractId", contract_file_data),
-        ("statementId", statement_file_data)
+        ("statementId", statement_file_data),
     ]
 
     return_data = generate_return_data(
-        kafka_input_file_data, 
-        input_template_name, 
-        s3_input_bucket, 
-        fixture_data_folder, 
+        kafka_input_file_data,
+        input_template_name,
+        s3_input_bucket,
+        fixture_data_folder,
         local_files_temp_folder,
         fixture_files_root,
         s3_output_prefix,
@@ -140,10 +213,10 @@ def generate_claimant_api_kafka_files(
 
 
 def generate_return_data(
-    kafka_input_file_data, 
-    input_template_name, 
-    s3_input_bucket, 
-    fixture_data_folder, 
+    kafka_input_file_data,
+    input_template_name,
+    s3_input_bucket,
+    fixture_data_folder,
     local_files_temp_folder,
     fixture_files_root,
     s3_output_prefix,
@@ -186,7 +259,7 @@ def generate_return_data(
                 )
             )
         return_data.append((id_field_name, generated_files))
-    
+
     return return_data
 
 
@@ -230,7 +303,10 @@ def _generate_kafka_file(
         record = open_file.read()
 
     topic_name = ucfs_claimant_api_helper.get_topic_by_id_type(id_field_name)
-    (database, collection) = template_helper.get_database_and_collection_from_topic_name(topic_name)
+    (
+        database,
+        collection,
+    ) = template_helper.get_database_and_collection_from_topic_name(topic_name)
 
     record = record.replace("||newid||", f"{new_uuid}")
     record = record.replace("||id_field_name||", id_field_name)
@@ -267,11 +343,26 @@ def _month_delta(date, delta):
     date -- the date to use a datetime
     delta -- the offset as in int
     """
-    m, y = (date.month+delta) % 12, date.year + (date.month+delta-1) // 12
+    m, y = (date.month + delta) % 12, date.year + (date.month + delta - 1) // 12
     if not m:
         m = 12
-    d = min(date.day, [31,
-                       29 if y % 4 == 0 and not y % 400 == 0 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m-1])
+    d = min(
+        date.day,
+        [
+            31,
+            29 if y % 4 == 0 and not y % 400 == 0 else 28,
+            31,
+            30,
+            31,
+            30,
+            31,
+            31,
+            30,
+            31,
+            30,
+            31,
+        ][m - 1],
+    )
     return date.replace(day=d, month=m, year=y)
 
 
@@ -287,31 +378,24 @@ def _generate_claimant_db_object(citizen_id, person_id, nino, unique_suffix):
     global time_stamp_format
 
     claimant = {
-        "_id": {
-            "citizenId": str(citizen_id)
-        },
+        "_id": {"citizenId": str(citizen_id)},
         "personId": str(person_id),
         "firstName": f"Joe{unique_suffix}",
         "lastName": f"Bloggs{unique_suffix}",
         "nino": nino,
         "claimantProvidedNino": None,
-        "createdDateTime": _month_delta(datetime.today(), -3).strftime(time_stamp_format),
+        "createdDateTime": _month_delta(datetime.today(), -3).strftime(
+            time_stamp_format
+        ),
         "_version": 29,
         "hasVerifiedEmailId": True,
         "inactiveAccountEmailReminderSentDate": None,
-        "managedJourney": {
-            "type": "REG_SINGLE",
-            "currentStep": "COMPLETE"
-        },
+        "managedJourney": {"type": "REG_SINGLE", "currentStep": "COMPLETE"},
         "anonymous": False,
         "govUkVerifyStatus": "VERIFY_NOT_ATTEMPTED",
         "cisInterestStatus": "NOT_SET",
-        "deliveryUnits": [
-            "76783bd7-f709-46bf-8ea4-b0379e7ae1d3"
-        ],
-        "workCoach": {
-            "type": "WORK_COACH_NOT_REQUIRED"
-        },
+        "deliveryUnits": ["76783bd7-f709-46bf-8ea4-b0379e7ae1d3"],
+        "workCoach": {"type": "WORK_COACH_NOT_REQUIRED"},
         "supportingAgents": [],
         "currentWorkGroupOnCurrentContract": "INTENSIVE",
         "caseManager": None,
@@ -320,20 +404,21 @@ def _generate_claimant_db_object(citizen_id, person_id, nino, unique_suffix):
         "firstNameCaseInsensitive": "jdata",
         "lastNameCaseInsensitive": "works",
         "_entityVersion": 0,
-        "_lastModifiedDateTime": _month_delta(datetime.today(), -1).strftime(time_stamp_format),
+        "_lastModifiedDateTime": _month_delta(datetime.today(), -1).strftime(
+            time_stamp_format
+        ),
         "identityDocumentsStatus": None,
         "bookAppointmentStatus": "ALL_BOOKED",
         "webAnalyticsUserId": None,
-        "searchableNames": [
-            "data",
-            "works"
-        ]
+        "searchableNames": ["data", "works"],
     }
 
     return claimant
 
 
-def _generate_contract_and_statement_db_objects(contract_id, item, citizen_ids_array, unique_suffix, timestamp_string):
+def _generate_contract_and_statement_db_objects(
+    contract_id, item, citizen_ids_array, unique_suffix, timestamp_string
+):
     """Generates contract and statement db objects and returns it them as a tuple of dict and array(dict).
 
     Keyword arguments:
@@ -349,15 +434,19 @@ def _generate_contract_and_statement_db_objects(contract_id, item, citizen_ids_a
 
     # Note: Date offsets are simply to make data more natural, nothing known to depend on them
     contract = {
-        "_id": {
-            "contractId": str(contract_id)
-        },
+        "_id": {"contractId": str(contract_id)},
         "assessmentPeriods": [],
         "people": [str(citizen_id) for citizen_id in citizen_ids_array],
-        "declaredDate": int((_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")),
-        "startDate": int((_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")),
+        "declaredDate": int(
+            (_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")
+        ),
+        "startDate": int(
+            (_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")
+        ),
         "entitlementDate": int(_month_delta(datetime.today(), -2).strftime("%Y%m%d")),
-        "closedDate": int(item['contract_closed_date']) if "contract_closed_date" in item else None,
+        "closedDate": int(item["contract_closed_date"])
+        if "contract_closed_date" in item
+        else None,
         "annualVerificationEligibilityDate": None,
         "annualVerificationCompletionDate": None,
         "paymentDayOfMonth": payment_day_of_month,
@@ -371,51 +460,73 @@ def _generate_contract_and_statement_db_objects(contract_id, item, citizen_ids_a
         "_entityVersion": 2,
         "_lastModifiedDateTime": timestamp_string,
         "stillSingle": True,
-        "contractType": "INITIAL"
+        "contractType": "INITIAL",
     }
 
     if "suspension_date" in item:
-        contract['claimSuspension'] = {
-            "suspensionDate": int(item['suspension_date'])
-        }
+        contract["claimSuspension"] = {"suspensionDate": int(item["suspension_date"])}
     elif "suspension_date_offset" in item:
-        contract['claimSuspension'] = {
+        contract["claimSuspension"] = {
             "suspensionDate": int(
-                (datetime.today() - timedelta(days=int(item['suspension_date_offset']))).strftime("%Y%m%d"))
+                (
+                    datetime.today()
+                    - timedelta(days=int(item["suspension_date_offset"]))
+                ).strftime("%Y%m%d")
+            )
         }
     elif unique_suffix % 10 == 0:
-        contract['claimSuspension'] = {
-            "suspensionDate": None
-        }
+        contract["claimSuspension"] = {"suspensionDate": None}
 
     statement_db_objects = []
 
-    if 'assessment_periods' in item:
-        for assessment_period in item['assessment_periods']:
+    if "assessment_periods" in item:
+        for assessment_period in item["assessment_periods"]:
             assessment_period_id = f"{uuid.uuid4()}"
-            end_date = datetime.strptime(assessment_period['end_date'], "%Y%m%d") \
-                if 'end_date' in assessment_period else \
-                datetime.today() - timedelta(days=int(assessment_period['end_date_offset']))
-            start_date = datetime.strptime(assessment_period['start_date'], "%Y%m%d") \
-                if 'start_date' in assessment_period else \
-                _month_delta(end_date, -1) - timedelta(days=1)
+            end_date = (
+                datetime.strptime(assessment_period["end_date"], "%Y%m%d")
+                if "end_date" in assessment_period
+                else datetime.today()
+                - timedelta(days=int(assessment_period["end_date_offset"]))
+            )
+            start_date = (
+                datetime.strptime(assessment_period["start_date"], "%Y%m%d")
+                if "start_date" in assessment_period
+                else _month_delta(end_date, -1) - timedelta(days=1)
+            )
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
                 "contractId": str(contract_id),
                 "startDate": int(start_date.strftime("%Y%m%d")),
                 "endDate": int(end_date.strftime("%Y%m%d")),
-                "paymentDate": int(end_date.strftime("%Y%m") + str(payment_day_of_month)),
+                "paymentDate": int(
+                    end_date.strftime("%Y%m") + str(payment_day_of_month)
+                ),
                 "processDate": None,
-                "createdDateTime": timestamp_string
+                "createdDateTime": timestamp_string,
             }
-            contract['assessmentPeriods'].append(ap_to_append)
-            statement_db_objects.append(_generate_statement_db_object(
-                assessment_period, citizen_ids_array, contract_id, unique_suffix, ap_to_append, timestamp_string))
+            contract["assessmentPeriods"].append(ap_to_append)
+            statement_db_objects.append(
+                _generate_statement_db_object(
+                    assessment_period,
+                    citizen_ids_array,
+                    contract_id,
+                    unique_suffix,
+                    ap_to_append,
+                    timestamp_string,
+                )
+            )
 
     return (contract, statement_db_objects)
 
 
-def _generate_statement_db_object(item, citizen_ids_array, contract_id, unique_suffix, assessment_period, timestamp_string):
+def _generate_statement_db_object(
+    item,
+    citizen_ids_array,
+    contract_id,
+    unique_suffix,
+    assessment_period,
+    timestamp_string,
+):
     """Generates a statement id and db object and returns them as a tuple of string, dict.
 
     Keyword arguments:
@@ -443,25 +554,19 @@ def _generate_statement_db_object(item, citizen_ids_array, contract_id, unique_s
                 "mobileNumber": f"07{unique_suffix - (len(citizen_ids_array)-1) + offset}",
                 "dateOfBirth": {
                     "type": "PersonDateOfBirth",
-                    "cryptoId": str(crypto_id)
+                    "cryptoId": str(crypto_id),
                 },
                 "contactPreference": "MOBILE",
                 "gender": "female",
                 "verifiedUsingBioQuestionsOrThirdParty": None,
-                "effectiveDate": {
-                    "type": "FROM_START_OF_CLAIM"
-                },
-                "paymentEffectiveDate": {
-                    "type": "FROM_START_OF_CLAIM"
-                },
-                "declaredDateTime": "20180510"
+                "effectiveDate": {"type": "FROM_START_OF_CLAIM"},
+                "paymentEffectiveDate": {"type": "FROM_START_OF_CLAIM"},
+                "declaredDateTime": "20180510",
             }
         )
 
     statement = {
-        "_id": {
-            "statementId": str(statement_id)
-        },
+        "_id": {"statementId": str(statement_id)},
         "_version": 1,
         "people": claimant_data,
         "assessmentPeriod": assessment_period,
@@ -477,12 +582,12 @@ def _generate_statement_db_object(item, citizen_ids_array, contract_id, unique_s
         "numberEligibleChildrenInChildCare": 0,
         "carerElement": "0.00",
         "numberPeopleCaredFor": 0,
-        "takeHomePay": item['amount'],
+        "takeHomePay": item["amount"],
         "takeHomeBreakdown": {
             "rte": "0.00",
             "selfReported": "0.00",
             "selfEmployed": "0.00",
-            "selfEmployedWithMif": "0.00"
+            "selfEmployedWithMif": "0.00",
         },
         "unaffectedPayElement": "0.00",
         "totalReducedForHomePay": "0.00",
@@ -508,7 +613,7 @@ def _generate_statement_db_object(item, citizen_ids_array, contract_id, unique_s
         "benefitCapThreshold": None,
         "benefitCapAdjustment": None,
         "gracePeriodEndDate": None,
-        "landlordPayment": "0"
+        "landlordPayment": "0",
     }
 
     return (statement_id, statement)
@@ -524,13 +629,13 @@ def generate_national_insurance_number(citizen_id):
 
 
 def generate_updated_contract_and_statement_files_for_existing_claimant(
-    citizen_id, 
-    contract_id, 
-    fixture_files_root, 
-    fixture_data_folder, 
+    citizen_id,
+    contract_id,
+    fixture_files_root,
+    fixture_data_folder,
     input_data_file_name,
-    input_template_name, 
-    s3_input_bucket, 
+    input_template_name,
+    s3_input_bucket,
     local_files_temp_folder,
     s3_output_prefix,
     seconds_timeout,
@@ -551,7 +656,9 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
     """
     global _base_datetime_timestamp
 
-    data_file_name = os.path.join(fixture_files_root, fixture_data_folder, input_data_file_name)
+    data_file_name = os.path.join(
+        fixture_files_root, fixture_data_folder, input_data_file_name
+    )
     input_data = yaml.safe_load(open(data_file_name))
 
     claimant_file_data = []
@@ -565,34 +672,60 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
         )
         if "count" in item:
             count = 0
-            while count < item['count']:
+            while count < item["count"]:
                 unique_suffix = f"{increment}{count}"
-                (contract_db_object, statement_db_objects_array) = _generate_contract_and_statement_db_objects(
+                (
+                    contract_db_object,
+                    statement_db_objects_array,
+                ) = _generate_contract_and_statement_db_objects(
                     contract_id, item, [citizen_id], unique_suffix, timestamp_string
                 )
                 count += 1
-            
-            contract_file_data.append((contract_id, timestamp_string, contract_db_object))
-            statement_file_data.extend([(statement_id, timestamp_string, statement_db_object) for (statement_id, statement_db_object) in statement_db_objects_array])
+
+            contract_file_data.append(
+                (contract_id, timestamp_string, contract_db_object)
+            )
+            statement_file_data.extend(
+                [
+                    (statement_id, timestamp_string, statement_db_object)
+                    for (
+                        statement_id,
+                        statement_db_object,
+                    ) in statement_db_objects_array
+                ]
+            )
         else:
-            (contract_db_object, statement_db_objects_array) = _generate_contract_and_statement_db_objects(
+            (
+                contract_db_object,
+                statement_db_objects_array,
+            ) = _generate_contract_and_statement_db_objects(
                 contract_id, item, [citizen_id], increment, timestamp_string
             )
 
-            contract_file_data.append((contract_id, timestamp_string, contract_db_object))
-            statement_file_data.extend([(statement_id, timestamp_string, statement_db_object) for (statement_id, statement_db_object) in statement_db_objects_array])
+            contract_file_data.append(
+                (contract_id, timestamp_string, contract_db_object)
+            )
+            statement_file_data.extend(
+                [
+                    (statement_id, timestamp_string, statement_db_object)
+                    for (
+                        statement_id,
+                        statement_db_object,
+                    ) in statement_db_objects_array
+                ]
+            )
         increment += 1
 
     kafka_input_file_data = [
         ("contractId", contract_file_data),
-        ("statementId", statement_file_data)
+        ("statementId", statement_file_data),
     ]
 
     return_data = generate_return_data(
-        kafka_input_file_data, 
-        input_template_name, 
-        s3_input_bucket, 
-        fixture_data_folder, 
+        kafka_input_file_data,
+        input_template_name,
+        s3_input_bucket,
+        fixture_data_folder,
         local_files_temp_folder,
         fixture_files_root,
         s3_output_prefix,
@@ -603,12 +736,12 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
 
 
 def generate_updated_claimant_file_for_existing_claimant(
-    citizen_id, 
-    person_id, 
-    fixture_files_root, 
-    fixture_data_folder, 
-    input_template_name, 
-    s3_input_bucket, 
+    citizen_id,
+    person_id,
+    fixture_files_root,
+    fixture_data_folder,
+    input_template_name,
+    s3_input_bucket,
     local_files_temp_folder,
     s3_output_prefix,
     seconds_timeout,
@@ -639,18 +772,18 @@ def generate_updated_claimant_file_for_existing_claimant(
     )
 
     nino = generate_national_insurance_number(citizen_id)
-    claimant_db_object = _generate_claimant_db_object(citizen_id, person_id, nino, increment)
+    claimant_db_object = _generate_claimant_db_object(
+        citizen_id, person_id, nino, increment
+    )
     claimant_file_data = [(citizen_id, timestamp_string, claimant_db_object)]
 
-    kafka_input_file_data = [
-        ("citizenId", claimant_file_data)
-    ]
+    kafka_input_file_data = [("citizenId", claimant_file_data)]
 
     return_data = generate_return_data(
-        kafka_input_file_data, 
-        input_template_name, 
-        s3_input_bucket, 
-        fixture_data_folder, 
+        kafka_input_file_data,
+        input_template_name,
+        s3_input_bucket,
+        fixture_data_folder,
         local_files_temp_folder,
         fixture_files_root,
         s3_output_prefix,

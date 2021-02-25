@@ -81,7 +81,11 @@ def step_(context, template_name):
 @then("start adg '{snapshot_type}' cluster and wait for the step '{step_name}'")
 def step_(context, snapshot_type, step_name):
     s3_prefix = os.path.join(context.mongo_snapshot_path, context.test_run_name)
-    payload = {CORRELATION_ID: context.test_run_name, S3_PREFIX: s3_prefix, SNAPSHOT_TYPE: snapshot_type}
+    payload = {
+        CORRELATION_ID: context.test_run_name,
+        S3_PREFIX: s3_prefix,
+        SNAPSHOT_TYPE: snapshot_type,
+    }
     payload_json = json.dumps(payload)
     cluster_response = invoke_lambda.invoke_adg_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
@@ -142,12 +146,16 @@ def step_verify_analytical_datasets(context, snapshot_type):
                 assert value == ADG_DB, f"DB tag value is '{value}' and not '{ADG_DB}'"
             if key == "table":
                 found_tag_count += 1
-                assert value == collection, f"Table tag value is '{value}' and not '{collection}'"
+                assert (
+                    value == collection
+                ), f"Table tag value is '{value}' and not '{collection}'"
             if key == "snapshot_type":
                 found_tag_count += 1
-                assert value == snapshot_type, f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
-        
-        assert found_tag_count == 4,  f"One or more tags not found"
+                assert (
+                    value == snapshot_type
+                ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
+
+        assert found_tag_count == 4, f"One or more tags not found"
 
         metadata = aws_helper.get_s3_object_metadata(
             context.published_bucket, part_file_key

@@ -33,7 +33,10 @@ def add_milliseconds_to_timestamp(timestamp, number_of_milliseconds, add_offset)
     )[:-3]
 
     offset = "+0000" if add_offset else ""
-    return (timestamp_edited, "{0}{1}".format(timestamp_with_three_digit_microseconds, offset))
+    return (
+        timestamp_edited,
+        "{0}{1}".format(timestamp_with_three_digit_microseconds, offset),
+    )
 
 
 def format_time_to_timezome_free(timestamp):

@@ -1594,7 +1594,7 @@ def attach_policies_to_role(policy_arns, role_name, iam_client=None):
 
 
 def wait_for_policy_to_be_attached_to_role(role_name, iam_client=None):
-    """ Waits for policy to attach to a role
+    """Waits for policy to attach to a role
 
     Keyword arguments:
         role_name -- The name of the role the policy is being attached to
@@ -1609,16 +1609,14 @@ def wait_for_policy_to_be_attached_to_role(role_name, iam_client=None):
 
     while (policy_count is 0) and (tries < 5):
         try:
-            policies = iam_client.list_attached_role_policies(
-                RoleName=role_name
-            )
+            policies = iam_client.list_attached_role_policies(RoleName=role_name)
         except ClientError as e:
-            if e.response['Error']['Code'] is "NoSuchEntityException":
+            if e.response["Error"]["Code"] is "NoSuchEntityException":
                 pass
             else:
                 raise e
-        policy_count = len(policies['AttachedPolicies'])
-        tries +=1
+        policy_count = len(policies["AttachedPolicies"])
+        tries += 1
         time.sleep(5)
 
 

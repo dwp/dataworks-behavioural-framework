@@ -46,11 +46,11 @@ def generate_arguments_for_historic_data_load(
 
 
 def generate_arguments_for_corporate_data_load(
-    correlation_id, 
-    topics, 
-    s3_base_prefix, 
-    metadata_table_name, 
-    default_topic_list, 
+    correlation_id,
+    topics,
+    s3_base_prefix,
+    metadata_table_name,
+    default_topic_list,
     file_pattern,
     skip_earlier_than,
     skip_later_than,
@@ -70,7 +70,7 @@ def generate_arguments_for_corporate_data_load(
     skip_later_than -- format of date time must be `yyyy-MM-dd` (or None)
     partition_count -- number of partitions to split the run by (or None)
     prefix_per_execution -- true (as a string) to enable a prefix per execution when running the jar
-    
+
     """
     console_printer.print_info(
         f"Attempting to generate arguments for corporate data load"
@@ -90,7 +90,7 @@ def generate_arguments_for_corporate_data_load(
     partitions = "NOT_SET" if partition_count is None else partition_count
     per_execution = "NOT_SET" if prefix_per_execution is None else prefix_per_execution
 
-    return f"{topics_qualified} {s3_base_prefix} {metadata_table_name} {correlation_id} \"{file_pattern}\" {start_date} {end_date} {partitions} {per_execution}"
+    return f'{topics_qualified} {s3_base_prefix} {metadata_table_name} {correlation_id} "{file_pattern}" {start_date} {end_date} {partitions} {per_execution}'
 
 
 def generate_corporate_data_s3_prefix(base_prefix, database, collection, timestamp):
@@ -104,7 +104,7 @@ def generate_corporate_data_s3_prefix(base_prefix, database, collection, timesta
     """
     day_padded = "{:02d}".format(timestamp.day)
     month_padded = "{:02d}".format(timestamp.month)
-    
+
     return os.path.join(
         base_prefix,
         str(timestamp.year),

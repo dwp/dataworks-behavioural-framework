@@ -194,7 +194,10 @@ def get_id_from_claimant_by_id(folder, match_value, match_type, return_type):
 
         if root_object_match in message and match_type in message[root_object_match]:
             if match_value in message[root_object_match][match_type]:
-                if root_object_return in message and return_type in message[root_object_return]:
+                if (
+                    root_object_return in message
+                    and return_type in message[root_object_return]
+                ):
                     return_value = message[root_object_return][return_type]
                     console_printer.print_info(
                         f"Found returnable value of '{return_value}' in file '{file_name}'"
@@ -302,7 +305,7 @@ def create_local_file(file_name, path="./", file_contents=""):
     path -- The path in which to create the local file with trailing slash - defaults to current dir
     file_contents -- The contents for the file - defaults to empty file
     """
-    with open(path+file_name, "w") as file:
+    with open(path + file_name, "w") as file:
         file.write(file_contents)
 
 
@@ -312,4 +315,4 @@ def delete_local_file(file_name, path="./"):
     file_name -- The name of the local file to be deleted
     path -- The path to the local file - defaults to current dir
     """
-    os.remove(path+file_name)
+    os.remove(path + file_name)
