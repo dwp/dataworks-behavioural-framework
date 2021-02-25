@@ -10,6 +10,7 @@ jobs:
           - get: aws-analytical-env
             trigger: false
           - get: dataworks-behavioural-framework
+            resource: dataworks-behavioural-framework-pr
             trigger: false
           - get: dataworks-behavioural-framework-pr
             trigger: true
