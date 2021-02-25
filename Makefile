@@ -51,7 +51,7 @@ update-load-test-pipeline: ## Update the load-test pipeline
 
 .PHONY: pause-pipeline
 pause-pipeline: ## Pause the main pipeline
-	fly --target aws-concourse pause-pipeline --pipeline aws-dataworks-e2e-framework
+	fly --target aws-concourse pause-pipeline --pipeline pull-request-dataworks-behavioural-framework
 
 .PHONY: pause-manifest-pipeline
 pause-manifest-pipeline: ## Pause the manifest comparison pipeline
@@ -63,7 +63,7 @@ pause-load-test-pipeline: ## Pause the load-test pipeline
 
 .PHONY: unpause-pipeline
 unpause-pipeline: ## Unpause the main pipeline
-	fly --target aws-concourse unpause-pipeline --pipeline aws-dataworks-e2e-framework
+	fly --target aws-concourse unpause-pipeline --pipeline pull-request-dataworks-behavioural-framework
 
 .PHONY: unpause-manifest-pipeline
 unpause-manifest-pipeline: ## Unpause the manifest comparison pipeline

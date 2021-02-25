@@ -1,8 +1,8 @@
 jobs:
   - name: update-pipeline
     plan:
-      - get: aws-dataworks-e2e-framework
-        resource: aws-dataworks-e2e-framework-load-test
+      - get: dataworks-behavioural-framework
+        resource: dataworks-behavioural-framework-load-test
         trigger: true
       - task: aviator
         config:
@@ -20,9 +20,9 @@ jobs:
                 sed -i 's/fly/nofly/' aviator-load-tests.yml
                 /usr/bin/aviator -f aviator-load-tests.yml
                 mv aviator_load_test.yml ../pipeline
-            dir: aws-dataworks-e2e-framework
+            dir: dataworks-behavioural-framework
           inputs:
-            - name: aws-dataworks-e2e-framework
+            - name: dataworks-behavioural-framework
           outputs:
             - name: pipeline
       - set_pipeline: load-test

@@ -9,7 +9,7 @@ groups:
   
 - name: pull-request
   jobs:
-  - pull-request-dataworks-e2e-framework
+   - pull-request
 
 - name: mirror
   jobs:

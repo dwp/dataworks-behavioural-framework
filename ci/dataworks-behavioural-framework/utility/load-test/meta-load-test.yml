@@ -15,7 +15,7 @@ meta-load-test:
           ASSUME_DURATION: 43200
           E2E_TEST_TIMEOUT: 90000
         run:
-          dir: aws-dataworks-e2e-framework
+          dir: pull-request-dataworks-behavioural-framework
           path: sh
           args:
             - -exc
@@ -32,5 +32,5 @@ meta-load-test:
               ./run-ci.sh \
               "../../../meta"
         inputs:
-          - name: aws-dataworks-e2e-framework
+          - name: pull-request-dataworks-behavioural-framework
           - name: meta

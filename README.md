@@ -1,4 +1,4 @@
-# aws-dataworks-e2e-framework
+# dataworks-behavioural-framework
 
 End to end framework for automated checks on the AWS DataWorks platform.
 
@@ -146,11 +146,11 @@ You need to ensure you do not commit the `@work-in-progress` tags to master.
 
 There are multiple pipelines which are released to the CI system:
 
-1. `aws-dataworks-e2e-framework`
+1. `dataworks-behavioural-framework`
 2. `manifest-comparison`
 3. `load-test`
 
-### Pipeline: aws-dataworks-e2e-framework
+### Pipeline: dataworks-behavioural-framework
 
 This is used to deploy the e2e fixture data to S3 after successful test runs on dev and QA. The files for this pipeline are in the ci/dataworks-behavioural-framework folder in this repo. To update this pipeline in CI, you can run the following make command:
 

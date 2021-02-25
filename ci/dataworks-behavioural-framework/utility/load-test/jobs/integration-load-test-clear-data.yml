@@ -5,7 +5,7 @@ jobs:
       - in_parallel:
           - put: meta
             resource: meta-integration
-          - get: aws-dataworks-e2e-framework
+          - get: dataworks-behavioural-framework
             trigger: false
       - .: (( inject meta-load-test.plan.load-tests ))
         config:

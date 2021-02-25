@@ -1,8 +1,8 @@
 jobs:
   - name: update-pipeline
     plan:
-      - get: aws-dataworks-e2e-framework
-        resource: aws-dataworks-e2e-framework-update-manifest-comparison
+      - get: dataworks-behavioural-framework
+        resource: dataworks-behavioural-framework-update-manifest-comparison
         trigger: true
       - task: aviator
         config:
@@ -20,9 +20,9 @@ jobs:
                 sed -i 's/fly/nofly/' aviator-manifest-comparison.yml
                 /usr/bin/aviator -f aviator-manifest-comparison.yml
                 mv aviator_manifest_comparison.yml ../pipeline
-            dir: aws-dataworks-e2e-framework
+            dir: dataworks-behavioural-framework
           inputs:
-            - name: aws-dataworks-e2e-framework
+            - name: dataworks-behavioural-framework
           outputs:
             - name: pipeline
       - set_pipeline: manifest-comparison

@@ -1,7 +1,7 @@
 jobs:
   - name: update-pipeline
     plan:
-      - get: aws-dataworks-e2e-framework
+      - get: dataworks-behavioural-framework
         resource: dataworks-behavioural-framework-update-pipeline
         trigger: true
       - task: aviator
@@ -20,10 +20,10 @@ jobs:
                 sed -i 's/fly/nofly/' aviator.yml
                 /usr/bin/aviator -f aviator.yml
                 mv aviator_pipeline_aviator_e2e_framework.yml ../pipeline
-            dir: aws-dataworks-e2e-framework
+            dir: dataworks-behavioural-framework
           inputs:
-            - name: aws-dataworks-e2e-framework
+            - name: dataworks-behavioural-framework
           outputs:
             - name: pipeline
-      - set_pipeline: aws-dataworks-e2e-framework
+      - set_pipeline: dataworks-behavioural-framework
         file: pipeline/aviator_pipeline_aviator_e2e_framework.yml

@@ -1,12 +1,10 @@
 resources:
-- name: aws-dataworks-e2e-framework-load-test
+- name: dataworks-behavioural-framework-load-test
   type: git
   source:
-    branch: master
-    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
-    username: ((dataworks.enterprise_github_username))
-    password: ((dataworks-secrets.enterprise_github_pat))
-    uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+      branch: master
+      uri: https://github.com/dwp/dataworks-behavioural-framework.git
+      access_token: ((dataworks-secrets.concourse_github_pat))
     paths:
       - ci/dataworks-behavioural-framework/utility/load-test/*
       - ci/shared/*

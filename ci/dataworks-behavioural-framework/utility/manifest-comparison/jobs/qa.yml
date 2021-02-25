@@ -9,11 +9,11 @@ jobs:
             trigger: false
           - get: aws-ingestion
             trigger: false
-          - get: aws-dataworks-e2e-framework
+          - get: dataworks-behavioural-framework
             trigger: false
           - get: aws-snapshot-sender
             trigger: false
-          - get: aws-dataworks-e2e-framework-manifest-comparison
+          - get: dataworks-behavioural-framework-manifest-comparison
             trigger: true
       - in_parallel:
           - .: (( inject meta.plan.terraform-output-ingest ))

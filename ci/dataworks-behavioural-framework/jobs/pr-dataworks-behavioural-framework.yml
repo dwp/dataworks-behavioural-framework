@@ -1,5 +1,5 @@
 jobs:
-  - name: pull-request-dataworks-e2e-framework
+  - name: pull-request
     max_in_flight: 1
     plan:
       - in_parallel:
@@ -16,7 +16,7 @@ jobs:
       - put: dataworks-behavioural-framework
         resource: dataworks-behavioural-framework-pr
         params:
-          context: pull-request-dataworks-e2e-framework
+          context: dataworks-behavioural-framework
           path: dataworks-behavioural-framework
           status: pending
       - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-bootstrap ))
@@ -26,7 +26,7 @@ jobs:
           put: dataworks-behavioural-framework
           resource: dataworks-behavioural-framework-pr
           params:
-            context: pull-request-dataworks-e2e-framework
+            context: dataworks-behavioural-framework
             path: dataworks-behavioural-framework
             status: failure
       - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-plan ))
@@ -39,7 +39,7 @@ jobs:
           put: dataworks-behavioural-framework
           resource: dataworks-behavioural-framework-pr
           params:
-            context: pull-request-dataworks-e2e-framework
+            context: dataworks-behavioural-framework
             path: dataworks-behavioural-framework
             status: failure
       - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
@@ -53,14 +53,14 @@ jobs:
           put: dataworks-behavioural-framework
           resource: dataworks-behavioural-framework-pr
           params:
-            context: pull-request-dataworks-e2e-framework
+            context: dataworks-behavioural-framework
             path: dataworks-behavioural-framework
             status: failure
         on_success:
           put: dataworks-behavioural-framework
           resource: dataworks-behavioural-framework-pr
           params:
-            context: pull-request-dataworks-e2e-framework
+            context: dataworks-behavioural-framework
             path: dataworks-behavioural-framework
             status: success
     ensure:

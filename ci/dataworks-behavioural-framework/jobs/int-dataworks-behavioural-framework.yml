@@ -1,29 +1,29 @@
 jobs:
-  - name: qa
+  - name: integration
     max_in_flight: 1
     plan:
       - in_parallel:
           - put: meta
-            resource: meta-qa
-          - get: aws-dataworks-e2e-framework
-            trigger: true
+            resource: meta-integration
+          - get: dataworks-behavioural-framework
+            trigger: false
           - get: aws-ingestion
             trigger: false
 
       - .: (( inject meta.plan.terraform-output-ingest ))
         config:
           params:
-            TF_WORKSPACE: qa
+            TF_WORKSPACE: integration
       - .: (( inject meta-dataworks-behavioural-framework.plan.upload-fixture-data ))
         config:
           params:
-            AWS_ACC: ((aws_account.qa))
-            AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
       - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
         config:
           params:
-            AWS_ACC: ((aws_account.qa))
-            AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
             E2E_TEST_TIMEOUT: 600
             E2E_FEATURE_TAG_FILTER: "@end-to-end"
     ensure:
@@ -31,5 +31,5 @@ jobs:
         - .: (( inject meta-dataworks-behavioural-framework.plan.tear-down ))
           config:
             params:
-              AWS_ACC: ((aws_account.qa))
-              AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+              AWS_ACC: ((aws_account.integration))
+              AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci

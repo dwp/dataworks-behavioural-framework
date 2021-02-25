@@ -31,12 +31,12 @@ meta-manifest-comparison:
                 export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
               fi
 
-              aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+              aws s3 sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
 
               export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
-              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
         inputs:
-          - name: aws-dataworks-e2e-framework
+          - name: dataworks-behavioural-framework
           - name: terraform-output-ingest
           - name: terraform-output-internal-compute
 
@@ -56,7 +56,7 @@ meta-manifest-comparison:
           E2E_TEST_TIMEOUT: 200
           ASSUME_DURATION: 36000
         run:
-          dir: aws-dataworks-e2e-framework
+          dir: dataworks-behavioural-framework
           path: sh
           args:
             - -exc
@@ -80,7 +80,7 @@ meta-manifest-comparison:
               ./run-ci.sh \
               "../../../meta"
         inputs:
-          - name: aws-dataworks-e2e-framework
+          - name: dataworks-behavioural-framework
           - name: meta
 
     toggle-manifest-lifecycle-configuration:
