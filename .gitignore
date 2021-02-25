@@ -5,7 +5,7 @@ build/
 dist/
 dataworks_corporate_data_coalescence.egg-info
 *.gz
-aviator_*.yml
+#aviator_*.yml
 
 **/.idea/
 **/.terraform/

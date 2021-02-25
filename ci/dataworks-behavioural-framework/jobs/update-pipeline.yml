@@ -19,11 +19,11 @@ jobs:
               - |
                 sed -i 's/fly/nofly/' aviator.yml
                 /usr/bin/aviator -f aviator.yml
-                mv aviator_pipeline_aviator_e2e_framework.yml ../pipeline
+                mv aviator_pipeline.yml ../pipeline
             dir: dataworks-behavioural-framework
           inputs:
             - name: dataworks-behavioural-framework
           outputs:
             - name: pipeline
       - set_pipeline: dataworks-behavioural-framework
-        file: pipeline/aviator_pipeline_aviator_e2e_framework.yml
+        file: pipeline/aviator_pipeline.yml
