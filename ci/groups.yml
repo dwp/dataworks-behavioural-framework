@@ -5,8 +5,8 @@ groups:
       - management
   - name: pull-request
     jobs:
-      - dataworks-repo-template-docker-pr
+      - dataworks-behavioural-framework-pr
   - name: mirror
     jobs:
-      - mirror-dwpdigital-dataworks-repo-template-docker-dev
-      - mirror-dwpdigital-dataworks-repo-template-docker
+      - mirror-dwpdigital-dataworks-behavioural-framework-dev
+      - mirror-dwpdigital-dataworks-behavioural-framework

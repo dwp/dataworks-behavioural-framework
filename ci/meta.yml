@@ -41,9 +41,9 @@ meta:
             - |
               python bootstrap_terraform.py
               cp terraform.tf ../terraform-bootstrap
-          dir: dataworks-repo-template-docker
+          dir: dataworks-behavioural-framework
         inputs:
-          - name: dataworks-repo-template-docker
+          - name: dataworks-behavioural-framework
         outputs:
           - name: terraform-bootstrap
     terraform-apply:
@@ -57,12 +57,12 @@ meta:
             - |
               cp ../terraform-bootstrap/terraform.tf .
               terraform workspace show
-              #ENABLE_BY_INITIAL_COMMIT terraform init
-              #ENABLE_BY_INITIAL_COMMIT terraform plan -out terraform.plan
-              #ENABLE_BY_INITIAL_COMMIT terraform apply -auto-approve terraform.plan
-          dir: dataworks-repo-template-docker
+              terraform init
+              terraform plan -out terraform.plan
+              terraform apply -auto-approve terraform.plan
+          dir: dataworks-behavioural-framework
         inputs:
-          - name: dataworks-repo-template-docker
+          - name: dataworks-behavioural-framework
           - name: terraform-bootstrap
     terraform-plan:
       task: terraform-plan
@@ -75,12 +75,11 @@ meta:
             - |
               cp ../terraform-bootstrap/terraform.tf .
               terraform workspace show
-              terraform init -backend=false; terraform validate #REMOVE_BY_INITIAL_COMMIT
-              #ENABLE_BY_INITIAL_COMMIT terraform init
-              #ENABLE_BY_INITIAL_COMMIT terraform plan $DETAILED_EXITCODE
-          dir: dataworks-repo-template-docker
+              terraform init
+              terraform plan $DETAILED_EXITCODE
+          dir: dataworks-behavioural-framework
         inputs:
-          - name: dataworks-repo-template-docker
+          - name: dataworks-behavioural-framework
           - name: terraform-bootstrap
       params:
         DETAILED_EXITCODE: -detailed-exitcode

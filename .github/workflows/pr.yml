@@ -7,7 +7,7 @@ on:
       - '**/*.md'
 
 env:
-  IMAGE_NAME: dwpdigital/dataworks-repo-template-docker
+  IMAGE_NAME: dwpdigital/dataworks-behavioural-framework
 
 jobs:
   docker-build-and-scan:
