@@ -12,22 +12,23 @@ jobs:
           - get: dataworks-behavioural-framework-pr
             trigger: true
             version: every
-      - put: dataworks-behavioural-framework
+            
+      - put: dataworks-behavioural-framework-pr
         resource: dataworks-behavioural-framework-pr
         params:
-          context: dataworks-behavioural-framework
-          path: dataworks-behavioural-framework
+          path: dataworks-behavioural-framework-pr
           status: pending
+
       - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-bootstrap ))
         input_mapping:
           dataworks-behavioural-framework: dataworks-behavioural-framework-pr
         on_failure:
-          put: dataworks-behavioural-framework
+          put: dataworks-behavioural-framework-pr
           resource: dataworks-behavioural-framework-pr
           params:
-            context: dataworks-behavioural-framework
-            path: dataworks-behavioural-framework
+            path: dataworks-behavioural-framework-pr
             status: failure
+
       - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-plan ))
         input_mapping:
           dataworks-behavioural-framework: dataworks-behavioural-framework-pr
@@ -35,12 +36,12 @@ jobs:
           TF_WORKSPACE: "management"
           DETAILED_EXITCODE: ""
         on_failure:
-          put: dataworks-behavioural-framework
+          put: dataworks-behavioural-framework-pr
           resource: dataworks-behavioural-framework-pr
           params:
-            context: dataworks-behavioural-framework
-            path: dataworks-behavioural-framework
+            path: dataworks-behavioural-framework-pr
             status: failure
+
       - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
         config:
           params:
@@ -49,18 +50,16 @@ jobs:
             E2E_TEST_TIMEOUT: 600
             E2E_FEATURE_TAG_FILTER: "@pull-request"
         on_failure:
-          put: dataworks-behavioural-framework
+          put: dataworks-behavioural-framework-pr
           resource: dataworks-behavioural-framework-pr
           params:
-            context: dataworks-behavioural-framework
-            path: dataworks-behavioural-framework
+            path: dataworks-behavioural-framework-pr
             status: failure
         on_success:
-          put: dataworks-behavioural-framework
+          put: dataworks-behavioural-framework-pr
           resource: dataworks-behavioural-framework-pr
           params:
-            context: dataworks-behavioural-framework
-            path: dataworks-behavioural-framework
+            path: dataworks-behavioural-framework-pr
             status: success
     ensure:
       do:

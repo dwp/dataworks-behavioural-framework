@@ -34,7 +34,7 @@ The manifests contains the following:
 
 In development and QA environments, static manifest data is used. This data is in the repository in the `src/manifest-comparison/fixture-data` folder. It contains two import manifest files and two export ones and attempts to generate data scenarios for all the report scenarios that exist.
 
-This data is uploaded to S3 in the concourse pipeline for this repository called `pull-request-dataworks-behavioural-framework` after PRs merge successfully.
+This data is uploaded to S3 in the concourse pipeline for this repository called `dataworks-behavioural-framework` after PRs merge successfully.
 
 ## CI
 
