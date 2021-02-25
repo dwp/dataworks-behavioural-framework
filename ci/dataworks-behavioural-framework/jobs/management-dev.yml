@@ -1,0 +1,13 @@
+jobs:
+  - name: management-dev
+    max_in_flight: 1
+    plan:
+      - get: dataworks-behavioural-framework
+        trigger: true
+      - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-bootstrap ))
+      - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-apply ))
+        params:
+          TF_WORKSPACE: "default"
+      - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-plan ))
+        params:
+          TF_WORKSPACE: "default"

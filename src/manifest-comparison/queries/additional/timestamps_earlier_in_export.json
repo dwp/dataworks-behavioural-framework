@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Timestamps earlier in export",
+    "query_type": "additional",
+    "query_description": "Shows IDs which are in both export and import manifests but have an earlier timestamp in the export manifest",
+    "query_file": "timestamps_earlier_in_export.sql",
+    "results_file": "timestamps_earlier_in_export.csv",
+    "show_column_names": true,
+    "order": 6
+}

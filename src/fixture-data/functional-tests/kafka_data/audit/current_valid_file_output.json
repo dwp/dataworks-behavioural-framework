@@ -1,0 +1,57 @@
+{
+    "traceId": "00001111-abcd-4567-1234-1234567890ab",
+    "unitOfWorkId": "00002222-abcd-4567-1234-1234567890ab",
+    "@type": "V4",
+    "version": "core-X.release_XXX.XX",
+    "timestamp": "2018-12-10T15:01:02.000+0000",
+    "put_time": "2018-12-12T15:01:02.000",
+    "message": {
+        "@type": "E2E_IMPORT",
+        "_id": {
+            "auditId": "||newid||"
+        },
+        "_lastModifiedDateTime": "||timestamp||",
+        "timestamp_created_from": "_lastModifiedDateTime",
+        "encryption": {
+            "encryptionKeyId": "55556666-abcd-89ab-1234-1234567890ab",
+            "encryptedEncryptionKey": "AQIDAHjiy+BTcsCfk/GFcJ8xdA/0GYGJps6XKXid4BjmfuPSGQHPunZV68ob/w+mY29J6hoIAAAAbjBsBgkqhkiG9w0BBwagXzBdAgEAMFgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMDuKuG+NFe3ZCA5wRAgEQgCuYybvIiBcMuj6UMzcW1KL8Djdj5hT8SRCbLFcrGx8DYVsh0De3nOW1RsYJ",
+            "initialisationVector": "kjGyvY67jhJHVdo2",
+            "keyEncryptionKeyId": "temp_value_replaced_by_kafka_producer"
+        },
+        "dbObject": {
+            "_id": {
+                "auditId": "||newid||"
+            },
+            "@type": "E2E_KAFKA",
+            "contractId": "f28ecbdc-5da5-4ac0-9365-5123d703fb34",
+            "addressNumber": {
+                "type": "AddressLine",
+                "cryptoId": "e1f4b523-95a3-4f51-9244-0b0799300242"
+            },
+            "addressLine2": null,
+            "townCity": {
+                "type": "AddressLine",
+                "cryptoId": "3c0b833e-3886-46b4-8357-b00b584d80e5"
+            },
+            "postcode": "SM5 2LE",
+            "processId": "45324bbc-9881-43b8-9a9c-1c2eb50f7014",
+            "effectiveDate": {
+                "type": "SPECIFIC_EFFECTIVE_DATE",
+                "date": 20150320,
+                "knownDate": 20150320
+            },
+            "paymentEffectiveDate": {
+                "type": "SPECIFIC_EFFECTIVE_DATE",
+                "date": 20150320,
+                "knownDate": 20150320
+            },
+            "createdDateTime": {
+                "$date": "2015-03-20T12:23:25.183Z"
+            },
+            "_version": 2,
+            "_lastModifiedDateTime": {
+                "$date": "||timestamp||"
+            }
+        }
+    }
+}

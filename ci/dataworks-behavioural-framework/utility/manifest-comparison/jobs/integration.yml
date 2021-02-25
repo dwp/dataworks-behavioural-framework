@@ -1,0 +1,63 @@
+jobs:
+  - name: integration
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-integration
+          - get: aws-internal-compute
+            trigger: false
+          - get: aws-ingestion
+            trigger: false
+          - get: aws-dataworks-e2e-framework
+            trigger: false
+          - get: aws-snapshot-sender
+            trigger: false
+          - get: aws-dataworks-e2e-framework-manifest-comparison
+            trigger: true
+      - in_parallel:
+          - .: (( inject meta.plan.terraform-output-ingest ))
+            params:
+              TF_WORKSPACE: integration
+          - .: (( inject meta-manifest-comparison.plan.terraform-output-internal-compute ))
+            params:
+              TF_WORKSPACE: integration
+          - .: (( inject meta-manifest-comparison.plan.terraform-output-snapshot-sender ))
+            params:
+              TF_WORKSPACE: integration
+      - .: (( inject meta-manifest-comparison.plan.upload-manifest-comparison-data ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+            MANIFEST_COMPARISON_SNAPSHOT_TYPE: "full"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: generate-manifest-comparison-full-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+            MANIFEST_COMPARISON_CUT_OFF_DATE_END: "2019-11-15T09:09:55.000"
+            MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: run-main-queries-full-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+            MANIFEST_COMPARISON_CUT_OFF_DATE_END: "2019-11-15T09:09:55.000"
+            MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison-main"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: run-additional-queries-full-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+            MANIFEST_COMPARISON_CUT_OFF_DATE_END: "2019-11-15T09:09:55.000"
+            MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison-additional"

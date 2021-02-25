@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Export totals by collection",
+    "query_type": "additional",
+    "query_description": "Shows stats on the total amount of data exported per collection",
+    "query_file": "export_totals_by_collection.sql",
+    "results_file": "export_totals_by_collection.csv",
+    "show_column_names": true,
+    "order": 10
+}

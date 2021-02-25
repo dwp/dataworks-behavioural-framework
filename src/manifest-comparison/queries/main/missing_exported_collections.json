@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Missing exported collections",
+    "query_type": "main",
+    "query_description": "Shows collections which have been imported from the historic data dump, but not were missing from the exported snapshots sent to Crown - excludes collections that are in databases that have not been exported as a whole database",
+    "query_file": "missing_exported_collections.sql",
+    "results_file": "missing_exported_collections.csv",
+    "show_column_names": false,
+    "order": 2
+}

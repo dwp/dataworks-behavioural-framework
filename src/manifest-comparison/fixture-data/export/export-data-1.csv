@@ -1,0 +1,32 @@
+{""id"": ""1""}|1573809421000|dbone|collectionone|export|automatedtests|{""id"": ""1""}|test_insert
+{""exportonlyid"": ""2""}|1573808725000|dbexportonly|collectionone|export|automatedtests|{""exportonlyid"": ""2""}|test_insert
+{""exportonlyidtwo"": ""3""}|1573809420000|dbthree|collectionone|export|automatedtests|{""exportonlyidtwo"": ""3""}|test_insert
+{""id"": ""4""}|1573809422000|dbone|collectionone|export|automatedtests|{""id"": ""4""}|test_insert
+{""id"": ""5""}|1573809423000|dbone|collectionfive|export|automatedtests|{""id"": ""5""}|test_insert
+{""earlierinimportid"": ""21""}|1573809429000|dbone|collectionfive|export|automatedtests|{""earlierinimportid"": ""21""}|test_insert
+{""earlierinimportid"": ""22""}|1573809429000|dbone|collectionfive|export|automatedtests|{""earlierinimportid"": ""22""}|test_insert
+{""earlierinimportid"": ""23""}|1573809429000|dbone|collectionfive|export|automatedtests|{""earlierinimportid"": ""23""}|test_insert
+{""earlierinexportid"": ""24""}|1573809419000|dbone|collectionfive|export|automatedtests|{""earlierinimportid"": ""24""}|test_insert
+{""earlierinexportid"": ""25""}|1573809419000|dbone|collectionfive|export|automatedtests|{""earlierinimportid"": ""25""}|test_insert
+{""earlierinimportoutsidemarginid"": ""30""}|1573809730000|dbone|collectionfive|export|automatedtests|{""earlierinimportoutsidemarginid"": ""30""}|test_insert
+{""earlierinimportoutsidemarginid"": ""31""}|1573809731000|dbone|collectionfive|export|automatedtests|{""earlierinimportoutsidemarginid"": ""31""}|test_insert
+{""earlierinimportinsidemarginid"": ""32""}|1573809030000|dbone|collectionfive|export|automatedtests|{""earlierinimportinsidemarginid"": ""32""}|test_insert
+{""earlierinimportinsidemarginid"": ""33""}|1573809031000|dbone|collectionfive|export|automatedtests|{""earlierinimportinsidemarginid"": ""33""}|test_insert
+{""earlierinimportbeforebackuptakenid"": ""34""}|1573808723000|dbone|collectionfive|export|automatedtests|{""earlierinimportbeforebackuptakenid"": ""34""}|test_insert
+{""$oid"": ""35""}|1573808724000|dbone|collectionfive|export|automatedtests|35|test_insert
+{""exportonlyoutsidemarginid"": ""40""}|1573809650000|dbone|collectionfive|export|automatedtests|{""exportonlyoutsidemarginid"": ""40""}|test_insert
+{""exportonlyoutsidemarginid"": ""41""}|1573809651000|dbone|collectionfive|export|automatedtests|{""exportonlyoutsidemarginid"": ""41""}|test_insert
+{""exportonlyinsidemarginid"": ""42""}|1573809006000|dbone|collectionfive|export|automatedtests|{""exportonlyinsidemarginid"": ""42""}|test_insert
+{""exportonlyinsidemarginid"": ""43""}|1573809005000|dbone|collectionfive|export|automatedtests|{""exportonlyinsidemarginid"": ""43""}|test_insert
+{""exportonlybeforebackuptakenid"": ""44""}|1573808725000|dbone|collectionfive|export|automatedtests|{""exportonlybeforebackuptakenid"": ""44""}|test_insert
+{""exportonlybeforebackuptakenid"": ""45""}|1573808726000|dbone|collectionfive|export|automatedtests|{""exportonlybeforebackuptakenid"": ""45""}|test_insert
+{""earlierinexportoutsidemarginid"": ""50""}|1573809730000|dbone|collectionfive|export|automatedtests|{""earlierinexportoutsidemarginid"": ""50""}|test_insert
+{""earlierinexportinsidemarginid"": ""51""}|1573809030000|dbone|collectionfive|export|automatedtests|{""earlierinexportinsidemarginid"": ""51""}|test_insert
+{""earlierinexportinsidemarginid"": ""52""}|1573809031000|dbone|collectionfive|export|automatedtests|{""earlierinexportinsidemarginid"": ""52""}|test_insert
+{""earlierinexportinsidemarginid"": ""53""}|1573809031000|dbone|collectionfive|export|automatedtests|{""earlierinexportinsidemarginid"": ""53""}|test_insert
+{""earlierinexportbeforebackuptakenid"": ""54""}|1573808723000|dbone|collectionfive|export|automatedtests|{""earlierinexportbeforebackuptakenid"": ""54""}|test_insert
+{""earlierinexportbeforebackuptakenid"": ""55""}|1573808724000|dbone|collectionmismatched|export|automatedtests|{""earlierinexportbeforebackuptakenid"": ""55""}|test_insert
+"{""earlierinexportbeforebackuptakenid"": ""56""}"|1573808724000|dbone|collectionmismatched|export|automatedtests|"{""earlierinexportbeforebackuptakenid"": ""56""}"|test_insert
+{""$oid"":""guid58""}|1573808725000|dbone|collectionfive|export|automatedtests|guid58|test_insert
+{""$oid"":""guid59""}|1573808725000|dbone|collectionfive|export|automatedtests|guid59|test_insert
+{""$oid"":""guid60""}|1573808725000|dbone|collectionfive|export|automatedtests|guid60|test_insert

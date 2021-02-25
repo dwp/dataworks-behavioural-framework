@@ -1,0 +1,3606 @@
+groups:
+- jobs:
+  - production-daily-comparison
+  name: scheduled-comparison-jobs
+- jobs:
+  - development
+  - qa
+  - integration
+  - production-full-snapshots
+  - production-incremental-snapshots
+  name: manual-comparison-jobs
+- jobs:
+  - production-main-queries-full-snapshots
+  - production-additional-queries-full-snapshots
+  - production-specific-queries-full-snapshots
+  - production-main-queries-incremental-snapshots
+  - production-additional-queries-incremental-snapshots
+  - production-specific-queries-incremental-snapshots
+  name: manual-query-jobs
+- jobs:
+  - update-pipeline
+  name: update-pipeline
+jobs:
+- max_in_flight: 1
+  name: development
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-development
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: true
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+          version: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: terraform-output-ingest
+      - name: terraform-output-internal-compute
+      params:
+        AWS_ACC: ((aws_account.development))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+          export AWS_S3_MANIFEST_BUCKET="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')"
+
+          if [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_main" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+          elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
+          else
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+          fi
+
+          aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+
+          export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
+          aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+        path: sh
+    task: upload-manifest-comparison-data
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.development))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.development))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.development))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-full-snapshots
+- max_in_flight: 1
+  name: integration
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-integration
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: true
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: integration
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: integration
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: integration
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+          version: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: terraform-output-ingest
+      - name: terraform-output-internal-compute
+      params:
+        AWS_ACC: ((aws_account.integration))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+          export AWS_S3_MANIFEST_BUCKET="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')"
+
+          if [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_main" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+          elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
+          else
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+          fi
+
+          aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+
+          export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
+          aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+        path: sh
+    task: upload-manifest-comparison-data
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.integration))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.integration))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.integration))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-full-snapshots
+- max_in_flight: 1
+  name: production-additional-queries-full-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-full-snapshots
+- max_in_flight: 1
+  name: production-additional-queries-incremental-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-incremental-snapshots
+- ensure:
+    do:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            tag: ((dataworks.docker_awscli_version))
+          type: docker-image
+        inputs:
+        - name: terraform-output-internal-compute
+        params:
+          ASSUME_DURATION: 3600
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+          STATUS: Enabled
+          TYPE: main
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            source /assume-role
+            set +x
+
+            function get_lifecycle_rules {
+              aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+            }
+
+            function update_status_and_save_to_file {
+              jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+              '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+              <<EOF
+            $LIFE_CYCLE_RULES_EXISTING
+            EOF
+            }
+
+            function update_lifecycle_rule {
+              aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+              --lifecycle-configuration "${UPDATED_FILE_URL}"
+            }
+
+            echo "Setting variables"
+            if [[ "${TYPE}" == "main" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+            elif [[ "${TYPE}" == "equality" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+            else
+              echo "Invalid type of '${TYPE}'"
+              exit 1
+            fi
+
+            if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+              echo "Invalid status of '${STATUS}'"
+              exit 1
+            fi
+
+            export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+            echo "Variables set"
+
+            echo "Validating the terraform outputs"
+            if [[ -z "${S3_BUCKET}" ]]; then
+              echo "S3 bucket could not be retrieved from terraform outputs"
+              exit 1
+            elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+              echo "Lifecycle rule could not be retrieved from terraform outputs"
+              exit 1
+            fi
+            echo "Terraform outputs validated"
+
+            echo "Getting existing lifecycle configurations"
+            export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+            echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+            export UPDATED_FILE_NAME="./updated_configuration.json"
+            export UPDATED_FILE_URL="file://updated_configuration.json"
+
+            echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+            update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+            new_configuration=$(cat "${UPDATED_FILE_NAME}")
+            echo "Configuration updated with new status to '${new_configuration}'"
+
+            echo "Updating lifecycle rule configuration"
+            update_lifecycle_rule
+            echo "Lifecycle rule configuration successfully updated"
+          path: sh
+      task: enable-manifest-lifecycle-configuration-main
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            tag: ((dataworks.docker_awscli_version))
+          type: docker-image
+        inputs:
+        - name: terraform-output-internal-compute
+        params:
+          ASSUME_DURATION: 3600
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+          STATUS: Enabled
+          TYPE: equality
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            source /assume-role
+            set +x
+
+            function get_lifecycle_rules {
+              aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+            }
+
+            function update_status_and_save_to_file {
+              jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+              '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+              <<EOF
+            $LIFE_CYCLE_RULES_EXISTING
+            EOF
+            }
+
+            function update_lifecycle_rule {
+              aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+              --lifecycle-configuration "${UPDATED_FILE_URL}"
+            }
+
+            echo "Setting variables"
+            if [[ "${TYPE}" == "main" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+            elif [[ "${TYPE}" == "equality" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+            else
+              echo "Invalid type of '${TYPE}'"
+              exit 1
+            fi
+
+            if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+              echo "Invalid status of '${STATUS}'"
+              exit 1
+            fi
+
+            export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+            echo "Variables set"
+
+            echo "Validating the terraform outputs"
+            if [[ -z "${S3_BUCKET}" ]]; then
+              echo "S3 bucket could not be retrieved from terraform outputs"
+              exit 1
+            elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+              echo "Lifecycle rule could not be retrieved from terraform outputs"
+              exit 1
+            fi
+            echo "Terraform outputs validated"
+
+            echo "Getting existing lifecycle configurations"
+            export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+            echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+            export UPDATED_FILE_NAME="./updated_configuration.json"
+            export UPDATED_FILE_URL="file://updated_configuration.json"
+
+            echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+            update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+            new_configuration=$(cat "${UPDATED_FILE_NAME}")
+            echo "Configuration updated with new status to '${new_configuration}'"
+
+            echo "Updating lifecycle rule configuration"
+            update_lifecycle_rule
+            echo "Lifecycle rule configuration successfully updated"
+          path: sh
+      task: enable-manifest-lifecycle-configuration-equality
+  max_in_flight: 1
+  name: production-daily-comparison
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: utc-9am
+      trigger: true
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      passed:
+      - qa
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Disabled
+        TYPE: main
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: disable-manifest-lifecycle-configuration-main
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Disabled
+        TYPE: equality
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: disable-manifest-lifecycle-configuration-equality
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: TODAY_MIDNIGHT
+        MANIFEST_COMPARISON_CUT_OFF_DATE_START: PREVIOUS_DAY_MIDNIGHT
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 0
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-incremental-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-incremental-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-incremental-snapshots
+- max_in_flight: 1
+  name: production-full-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      passed:
+      - qa
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 15
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 15
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 15
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-full-snapshots
+- max_in_flight: 1
+  name: production-incremental-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      passed:
+      - qa
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Disabled
+        TYPE: main
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: disable-manifest-lifecycle-configuration-main
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Disabled
+        TYPE: equality
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: disable-manifest-lifecycle-configuration-equality
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 0
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-incremental-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-incremental-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-incremental-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Enabled
+        TYPE: main
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: enable-manifest-lifecycle-configuration-main
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: terraform-output-internal-compute
+      params:
+        ASSUME_DURATION: 3600
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        STATUS: Enabled
+        TYPE: equality
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+
+          function get_lifecycle_rules {
+            aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+          }
+
+          function update_status_and_save_to_file {
+            jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+            '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+            <<EOF
+          $LIFE_CYCLE_RULES_EXISTING
+          EOF
+          }
+
+          function update_lifecycle_rule {
+            aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+            --lifecycle-configuration "${UPDATED_FILE_URL}"
+          }
+
+          echo "Setting variables"
+          if [[ "${TYPE}" == "main" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+          elif [[ "${TYPE}" == "equality" ]]; then
+              export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+              export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+          else
+            echo "Invalid type of '${TYPE}'"
+            exit 1
+          fi
+
+          if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+            echo "Invalid status of '${STATUS}'"
+            exit 1
+          fi
+
+          export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+          echo "Variables set"
+
+          echo "Validating the terraform outputs"
+          if [[ -z "${S3_BUCKET}" ]]; then
+            echo "S3 bucket could not be retrieved from terraform outputs"
+            exit 1
+          elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+            echo "Lifecycle rule could not be retrieved from terraform outputs"
+            exit 1
+          fi
+          echo "Terraform outputs validated"
+
+          echo "Getting existing lifecycle configurations"
+          export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+          echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+          export UPDATED_FILE_NAME="./updated_configuration.json"
+          export UPDATED_FILE_URL="file://updated_configuration.json"
+
+          echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+          update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+          new_configuration=$(cat "${UPDATED_FILE_NAME}")
+          echo "Configuration updated with new status to '${new_configuration}'"
+
+          echo "Updating lifecycle rule configuration"
+          update_lifecycle_rule
+          echo "Lifecycle rule configuration successfully updated"
+        path: sh
+    task: enable-manifest-lifecycle-configuration-equality
+- max_in_flight: 1
+  name: production-main-queries-full-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-full-snapshots
+- max_in_flight: 1
+  name: production-main-queries-incremental-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-incremental-snapshots
+- max_in_flight: 1
+  name: production-specific-queries-full-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-specific'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-specific-queries-full-snapshots
+- max_in_flight: 1
+  name: production-specific-queries-incremental-snapshots
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-prod
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: false
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: production
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.production))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-specific'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_IMPORT_TYPE: streaming_main
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "15"
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: incremental
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-specific-queries-incremental-snapshots
+- max_in_flight: 1
+  name: qa
+  plan:
+  - in_parallel:
+    - put: meta
+      resource: meta-qa
+    - get: aws-internal-compute
+      trigger: false
+    - get: aws-ingestion
+      trigger: false
+    - get: aws-dataworks-e2e-framework
+      trigger: false
+    - get: aws-snapshot-sender
+      trigger: false
+    - get: aws-dataworks-e2e-framework-manifest-comparison
+      trigger: true
+  - in_parallel:
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-ingestion
+        outputs:
+        - name: terraform-output-ingest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-ingest/outputs.json
+          dir: aws-ingestion
+          path: sh
+      params:
+        TF_WORKSPACE: qa
+      task: terraform-output-ingest
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      params:
+        TF_WORKSPACE: qa
+      task: terraform-output-internal-compute
+    - config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      params:
+        TF_WORKSPACE: qa
+      task: terraform-output-snapshot-sender
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_awscli_repository))
+          tag: ((dataworks.docker_awscli_version))
+          version: ((dataworks.docker_awscli_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: terraform-output-ingest
+      - name: terraform-output-internal-compute
+      params:
+        AWS_ACC: ((aws_account.qa))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+        MANIFEST_COMPARISON_SNAPSHOT_TYPE: full
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          source /assume-role
+          set +x
+          export AWS_S3_MANIFEST_BUCKET="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')"
+
+          if [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_main" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+          elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
+          else
+            export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+          fi
+
+          aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+
+          export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
+          aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+        path: sh
+    task: upload-manifest-comparison-data
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.qa))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: generate-manifest-comparison-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.qa))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-main'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-main-queries-full-snapshots
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_python_boto_behave_repository))
+          tag: ((dataworks.docker_python_boto_behave_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      - name: meta
+      params:
+        ASSUME_DURATION: 36000
+        AWS_ACC: ((aws_account.qa))
+        AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        AWS_REGION: ((dataworks.aws_region))
+        AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+        E2E_FEATURE_TAG_FILTER: '@manifest-comparison-additional'
+        E2E_TEST_TIMEOUT: 200
+        MANIFEST_COMPARISON_CUT_OFF_DATE_END: 2019-11-15T09:09:55.000
+        MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: "2"
+        MANIFEST_COMPARISON_VERIFY_RESULTS: "true"
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+          fi
+
+          if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+          elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+            export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+          fi
+
+          export ASSUME_DURATION
+          source /assume-role
+          set +x
+          cd src/runners
+          ./run-ci.sh \
+          "../../../meta"
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: run-additional-queries-full-snapshots
+- name: update-pipeline
+  plan:
+  - get: aws-dataworks-e2e-framework
+    resource: aws-dataworks-e2e-framework-update-manifest-comparison
+    trigger: true
+  - config:
+      image_resource:
+        source:
+          repository: ((dataworks.docker_aviator_repository))
+          version: ((dataworks.docker_aviator_version))
+        type: docker-image
+      inputs:
+      - name: aws-dataworks-e2e-framework
+      outputs:
+      - name: pipeline
+      platform: linux
+      run:
+        args:
+        - -exc
+        - |
+          sed -i 's/fly/nofly/' aviator-manifest-comparison.yml
+          /usr/bin/aviator -f aviator-manifest-comparison.yml
+          mv aviator_manifest_comparison.yml ../pipeline
+        dir: aws-dataworks-e2e-framework
+        path: sh
+    task: aviator
+  - file: pipeline/aviator_manifest_comparison.yml
+    set_pipeline: manifest-comparison
+meta-manifest-comparison:
+  plan:
+    generate-manifest-comparison:
+      config:
+        image_resource:
+          source:
+            repository: ((dataworks.docker_python_boto_behave_repository))
+            tag: ((dataworks.docker_python_boto_behave_version))
+          type: docker-image
+        inputs:
+        - name: aws-dataworks-e2e-framework
+        - name: meta
+        params:
+          ASSUME_DURATION: 36000
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+          E2E_TEST_TIMEOUT: 200
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+              export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+            elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+              export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+            fi
+
+            if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+              export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+            elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+              export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+            fi
+
+            export ASSUME_DURATION
+            source /assume-role
+            set +x
+            cd src/runners
+            ./run-ci.sh \
+            "../../../meta"
+          dir: aws-dataworks-e2e-framework
+          path: sh
+      task: generate-manifest-comparison
+    terraform-output-internal-compute:
+      config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-internal-compute
+        outputs:
+        - name: terraform-output-internal-compute
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+          path: sh
+      task: terraform-output-internal-compute
+    terraform-output-snapshot-sender:
+      config:
+        image_resource:
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_version))
+          type: docker-image
+        inputs:
+        - name: aws-snapshot-sender
+        outputs:
+        - name: terraform-output-snapshot-sender
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_INPUT: false
+          TF_VAR_slack_webhook_url: ((dataworks.slack_webhook_url))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            terraform workspace show
+            terraform init
+            terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+          path: sh
+      task: terraform-output-snapshot-sender
+    toggle-manifest-lifecycle-configuration:
+      config:
+        image_resource:
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            tag: ((dataworks.docker_awscli_version))
+          type: docker-image
+        inputs:
+        - name: terraform-output-internal-compute
+        params:
+          ASSUME_DURATION: 3600
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          AWS_REGION: ((dataworks.aws_region))
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            source /assume-role
+            set +x
+
+            function get_lifecycle_rules {
+              aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+            }
+
+            function update_status_and_save_to_file {
+              jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+              '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+              <<EOF
+            $LIFE_CYCLE_RULES_EXISTING
+            EOF
+            }
+
+            function update_lifecycle_rule {
+              aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+              --lifecycle-configuration "${UPDATED_FILE_URL}"
+            }
+
+            echo "Setting variables"
+            if [[ "${TYPE}" == "main" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+            elif [[ "${TYPE}" == "equality" ]]; then
+                export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+            else
+              echo "Invalid type of '${TYPE}'"
+              exit 1
+            fi
+
+            if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+              echo "Invalid status of '${STATUS}'"
+              exit 1
+            fi
+
+            export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+            echo "Variables set"
+
+            echo "Validating the terraform outputs"
+            if [[ -z "${S3_BUCKET}" ]]; then
+              echo "S3 bucket could not be retrieved from terraform outputs"
+              exit 1
+            elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+              echo "Lifecycle rule could not be retrieved from terraform outputs"
+              exit 1
+            fi
+            echo "Terraform outputs validated"
+
+            echo "Getting existing lifecycle configurations"
+            export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+            echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+            export UPDATED_FILE_NAME="./updated_configuration.json"
+            export UPDATED_FILE_URL="file://updated_configuration.json"
+
+            echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+            update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+            new_configuration=$(cat "${UPDATED_FILE_NAME}")
+            echo "Configuration updated with new status to '${new_configuration}'"
+
+            echo "Updating lifecycle rule configuration"
+            update_lifecycle_rule
+            echo "Lifecycle rule configuration successfully updated"
+          path: sh
+      task: toggle-manifest-lifecycle-configuration
+    upload-manifest-comparison-data:
+      config:
+        image_resource:
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            tag: ((dataworks.docker_awscli_version))
+            version: ((dataworks.docker_awscli_version))
+          type: docker-image
+        inputs:
+        - name: aws-dataworks-e2e-framework
+        - name: terraform-output-ingest
+        - name: terraform-output-internal-compute
+        params:
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+        platform: linux
+        run:
+          args:
+          - -exc
+          - |
+            source /assume-role
+            set +x
+            export AWS_S3_MANIFEST_BUCKET="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')"
+
+            if [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_main" ]]; then
+              export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+            elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
+              export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
+            else
+              export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+            fi
+
+            aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+
+            export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
+            aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+          path: sh
+      task: upload-manifest-comparison-data
+resource_types:
+- name: pull-request
+  source:
+    repository: teliaoss/github-pr-resource
+    tag: latest
+  type: docker-image
+- name: meta
+  source:
+    repository: olhtbr/metadata-resource
+    tag: 2.0.1
+  type: docker-image
+- name: ami
+  source:
+    repository: dwpdigital/ami-resource
+    tag: latest
+  type: docker-image
+- name: registry-image-resource
+  source:
+    repository: dwpdigital/registry-image-resource
+    tag: latest
+  type: docker-image
+resources:
+- check_every: 5m
+  name: aws-dataworks-e2e-framework-manifest-comparison
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    paths:
+    - src/manifest-comparison/*
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- check_every: 5m
+  name: aws-dataworks-e2e-framework-update-manifest-comparison
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    paths:
+    - ci/dataworks-behavioural-framework/utility/manifest-comparison/*
+    - ci/shared/*
+    - aviator-manifest-comparison.yml
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- check_every: 5m
+  name: aws-ingestion
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-ingestion.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- check_every: 5m
+  name: aws-internal-compute
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-internal-compute.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- check_every: 5m
+  name: aws-snapshot-sender
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-snapshot-sender.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- name: utc-9am
+  source:
+    location: UTC
+    start: 9:00 AM
+    stop: 9:05 AM
+  type: time
+- name: meta-prod
+  type: meta
+- name: meta-qa
+  type: meta
+- name: meta-integration
+  type: meta
+- check_every: 5m
+  name: aws-dataworks-e2e-framework
+  source:
+    api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+    branch: master
+    password: ((dataworks-secrets.enterprise_github_pat))
+    uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+    username: ((dataworks.enterprise_github_username))
+  type: git
+  webhook_token: ((dataworks.concourse_github_webhook_token))
+- name: meta-development
+  type: meta

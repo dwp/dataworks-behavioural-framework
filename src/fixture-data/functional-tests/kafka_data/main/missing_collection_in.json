@@ -1,0 +1,54 @@
+{
+    "traceId": "00001111-abcd-4567-1234-1234567890ab",
+    "unitOfWorkId": "00002222-abcd-4567-1234-1234567890ab",
+    "@type": "V4",
+    "version": "core-X.release_XXX.XX",
+    "timestamp": "2018-12-14T15:01:02.000+0000",
+    "message": {
+        "@type": "E2E_IMPORT",
+        "db": "exampleDbName",
+        "_id": "||newid||",
+        "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+        "encryption": {
+            "encryptionKeyId": "55556666-abcd-89ab-1234-1234567890ab",
+            "encryptedEncryptionKey": "AQIDAHjiy+BTcsCfk/GFcJ8xdA/0GYGJps6XKXid4BjmfuPSGQHPunZV68ob/w+mY29J6hoIAAAAbjBsBgkqhkiG9w0BBwagXzBdAgEAMFgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMDuKuG+NFe3ZCA5wRAgEQgCuYybvIiBcMuj6UMzcW1KL8Djdj5hT8SRCbLFcrGx8DYVsh0De3nOW1RsYJ",
+            "initialisationVector": "kjGyvY67jhJHVdo2",
+            "keyEncryptionKeyId": "temp_value_replaced_by_kafka_producer"
+        },
+        "dbObject": {
+            "_id": {
+                "someId": "||newid||"
+            },
+            "type": "addressDeclaration",
+            "contractId": "4b467533-0f5c-4dc1-b228-4e3e53ce35e5",
+            "addressNumber": {
+                "type": "AddressLine",
+                "cryptoId": "67b4019a-9218-4a94-ab6d-5f7acc7baf96"
+            },
+            "addressLine2": null,
+            "townCity": {
+                "type": "AddressLine",
+                "cryptoId": "2671daf9-274a-402c-aea7-8fd5286584ac"
+            },
+            "postcode": "SM5 2LE",
+            "processId": "a48a66be-aef5-479a-a73d-28cf85d8f253",
+            "effectiveDate": {
+                "type": "SPECIFIC_EFFECTIVE_DATE",
+                "date": 20150320,
+                "knownDate": 20150320
+            },
+            "paymentEffectiveDate": {
+                "type": "SPECIFIC_EFFECTIVE_DATE",
+                "date": 20150320,
+                "knownDate": 20150320
+            },
+            "createdDateTime": {
+                "$date":"2015-03-20T12:23:25.183Z"
+            },
+            "_version": 2,
+            "_lastModifiedDateTime": {
+                "$date": "2018-12-14T15:01:02.000+0000"
+            }
+        }
+    }
+}

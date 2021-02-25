@@ -1,0 +1,29 @@
+jobs:
+  - name: update-pipeline
+    plan:
+      - get: aws-dataworks-e2e-framework
+        resource: dataworks-behavioural-framework-update-pipeline
+        trigger: true
+      - task: aviator
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((dataworks.docker_aviator_repository))
+              version: ((dataworks.docker_aviator_version))
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                sed -i 's/fly/nofly/' aviator.yml
+                /usr/bin/aviator -f aviator.yml
+                mv aviator_pipeline_aviator_e2e_framework.yml ../pipeline
+            dir: aws-dataworks-e2e-framework
+          inputs:
+            - name: aws-dataworks-e2e-framework
+          outputs:
+            - name: pipeline
+      - set_pipeline: aws-dataworks-e2e-framework
+        file: pipeline/aviator_pipeline_aviator_e2e_framework.yml

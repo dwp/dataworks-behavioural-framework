@@ -1,0 +1,26 @@
+{
+    "unitOfWorkId": "||jobId||",
+    "traceId": "||traceId||",
+    "@type": "HDI",
+    "version": "0.0.1",
+    "timestamp": "||timeOfMessageCreation||",
+    "message": {
+        "@type": "E2E_IMPORT",
+        "collection": "||collection||",
+        "db": "||db||",
+        "_id": {
+            "e2eId": "||newid||"
+        },
+        "mongo_format_stripped_from_id": false,
+        "last_modified_date_time_was_altered": true,
+        "created_date_time_was_altered": true,
+        "removed_date_time_was_altered": false,
+        "archived_date_time_was_altered": false,
+        "historic_removed_record_altered_on_import": false,
+        "historic_archived_record_altered_on_import": false,
+        "_lastModifiedDateTime": "2017-12-25T12:23:25.183+0000",
+        "timestamp_created_from": "_lastModifiedDateTimeStripped",
+        "encryption": ||encryption||,
+        "dbObject": "||dbObject||"
+    }
+}

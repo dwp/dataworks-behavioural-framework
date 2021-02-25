@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Import totals by collection",
+    "query_type": "additional",
+    "query_description": "Shows stats on the total amount of data imported per collection",
+    "query_file": "import_totals_by_collection.sql",
+    "results_file": "import_totals_by_collection.csv",
+    "show_column_names": true,
+    "order": 9
+}

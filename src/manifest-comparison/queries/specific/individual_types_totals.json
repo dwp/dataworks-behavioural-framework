@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Individual types totals",
+    "query_type": "specific",
+    "query_description": "Lists totals from the import and export tables, before they are combined to parquet",
+    "query_file": "individual_types_totals.sql",
+    "results_file": "individual_types_totals.csv",
+    "show_column_names": false,
+    "order": 6
+}

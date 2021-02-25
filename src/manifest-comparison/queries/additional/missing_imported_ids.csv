@@ -1,0 +1,5 @@
+dbone, collectionfive, guid60, 1573808725000, automatedtests, test_insert
+dbone, collectionfive, {""exportonlybeforebackuptakenid"": ""44""}, 1573808725000, automatedtests, test_insert
+dbone, collectionfive, {""exportonlybeforebackuptakenid"": ""45""}, 1573808726000, automatedtests, test_insert
+dbone, collectionfive, {""exportonlyinsidemarginid"": ""42""}, 1573809006000, automatedtests, test_insert
+dbone, collectionfive, {""exportonlyinsidemarginid"": ""43""}, 1573809005000, automatedtests, test_insert

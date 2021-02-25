@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Missing imported totals",
+    "query_type": "main",
+    "query_description": "Shows stats on the total amount of data missing from import",
+    "query_file": "missing_imported_totals.sql",
+    "results_file": "missing_imported_totals.csv",
+    "show_column_names": true,
+    "order": 6
+}

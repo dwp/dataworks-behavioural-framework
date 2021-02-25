@@ -1,0 +1,21 @@
+jobs:
+  - name: dev-load-test-upload
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-development
+          - get: aws-dataworks-e2e-framework
+            trigger: false
+      - .: (( inject meta-load-test.plan.load-tests ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.development))
+            NUMBER_OF_TOPICS_TO_USE: 100
+            LOAD_TESTS_FILE_COUNT: 10
+            LOAD_TESTS_RECORD_COUNT: 100000
+            LOAD_TESTS_DATA_MAX_WORKER_COUNT: 20
+            LOAD_TEST_TYPE: upload
+            LOAD_TEST_KEY_METHOD: "different"
+            ENVIRONMENT_JOB_NAME: "dev-load-test"
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci

@@ -1,0 +1,31 @@
+jobs:
+  - name: development
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-development
+          - get: aws-dataworks-e2e-framework
+            trigger: true
+          - get: aws-ingestion
+            trigger: false
+
+      - .: (( inject meta.plan.terraform-output-ingest ))
+        config:
+          params:
+            TF_WORKSPACE: default
+      - .: (( inject meta-dataworks-behavioural-framework.plan.upload-fixture-data ))
+      - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.development))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+            E2E_TEST_TIMEOUT: 600
+            E2E_FEATURE_TAG_FILTER: "@end-to-end"
+    ensure:
+      do:
+        - .: (( inject meta-dataworks-behavioural-framework.plan.tear-down ))
+          config:
+            params:
+              AWS_ACC: ((aws_account.development))
+              AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci

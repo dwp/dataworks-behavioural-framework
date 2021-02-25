@@ -1,0 +1,23 @@
+{
+    "traceId": "00001111-abcd-4567-1234-1234567890ab",
+    "unitOfWorkId": "00002222-abcd-4567-1234-1234567890ab",
+    "@type": "V4",
+    "version": "core-X.release_XXX.XX",
+    "timestamp": "2018-12-12T15:01:02.000+0000",
+    "message": {
+        "@type": "MONGO_UPDATE",
+        "_id": {
+            "||id_field_name||": "||newid||"
+        },
+        "collection": "||collection||",
+        "db": "||db||",
+        "_lastModifiedDateTime": "||timestamp||",
+        "encryption": {
+            "encryptionKeyId": "55556666-abcd-89ab-1234-1234567890ab",
+            "encryptedEncryptionKey": "AQIDAHjiy+BTcsCfk/GFcJ8xdA/0GYGJps6XKXid4BjmfuPSGQHPunZV68ob/w+mY29J6hoIAAAAbjBsBgkqhkiG9w0BBwagXzBdAgEAMFgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMDuKuG+NFe3ZCA5wRAgEQgCuYybvIiBcMuj6UMzcW1KL8Djdj5hT8SRCbLFcrGx8DYVsh0De3nOW1RsYJ",
+            "initialisationVector": "kjGyvY67jhJHVdo2",
+            "keyEncryptionKeyId": "temp_value_replaced_by_kafka_producer"
+        },
+        "dbObject": ||db_object||
+    }
+}

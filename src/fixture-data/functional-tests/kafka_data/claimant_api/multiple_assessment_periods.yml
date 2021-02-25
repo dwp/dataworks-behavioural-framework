@@ -1,0 +1,13 @@
+# DataWorks test data
+# -------------------
+# Active Claimant on Universal Credit with multiple assessment periods
+- assessment_periods:
+    - start_date: "20280301"
+      end_date: "20280331"
+      amount: "123.45"
+    - start_date: "20280201"
+      end_date: "20280228"
+      amount: "123.45"
+    - start_date: "20280101"
+      end_date: "20280131"
+      amount: "123.45"

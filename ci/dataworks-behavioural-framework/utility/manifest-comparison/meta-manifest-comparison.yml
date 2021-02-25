@@ -1,0 +1,221 @@
+meta-manifest-comparison:
+  plan:
+    upload-manifest-comparison-data:
+      task: upload-manifest-comparison-data
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            version: ((dataworks.docker_awscli_version))
+            tag: ((dataworks.docker_awscli_version))
+        params:
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              source /assume-role
+              set +x
+              export AWS_S3_MANIFEST_BUCKET="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')"
+
+              if [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_main" ]]; then
+                export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+              elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
+                export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
+              else
+                export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+              fi
+
+              aws s3 sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
+
+              export AWS_S3_MANIFEST_EXPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.export_folder')"
+              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync aws-dataworks-e2e-framework/src/manifest-comparison/fixture-data/export/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_EXPORT}/${MANIFEST_COMPARISON_SNAPSHOT_TYPE}
+        inputs:
+          - name: aws-dataworks-e2e-framework
+          - name: terraform-output-ingest
+          - name: terraform-output-internal-compute
+
+    generate-manifest-comparison:
+      task: generate-manifest-comparison
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_python_boto_behave_repository))
+            tag: ((dataworks.docker_python_boto_behave_version))
+        params:
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          E2E_TEST_TIMEOUT: 200
+          ASSUME_DURATION: 36000
+        run:
+          dir: aws-dataworks-e2e-framework
+          path: sh
+          args:
+            - -exc
+            - |
+              if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" ]]; then
+                export MANIFEST_COMPARISON_CUT_OFF_DATE_START="1983-11-15T09:09:55.000"
+              elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_START" == "PREVIOUS_DAY_MIDNIGHT" ]]; then
+                export MANIFEST_COMPARISON_CUT_OFF_DATE_START=$(date -d "yesterday 00:00" '+%Y-%m-%dT00:00:00.000')
+              fi
+
+              if [[ -z "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" ]]; then
+                export MANIFEST_COMPARISON_CUT_OFF_DATE_END="2099-01-01T00:00:00.000"
+              elif [[ "$MANIFEST_COMPARISON_CUT_OFF_DATE_END" == "TODAY_MIDNIGHT" ]]; then
+                export MANIFEST_COMPARISON_CUT_OFF_DATE_END=$(date +"%Y-%m-%dT00:00:00.000")
+              fi
+
+              export ASSUME_DURATION
+              source /assume-role
+              set +x
+              cd src/runners
+              ./run-ci.sh \
+              "../../../meta"
+        inputs:
+          - name: aws-dataworks-e2e-framework
+          - name: meta
+
+    toggle-manifest-lifecycle-configuration:
+      task: toggle-manifest-lifecycle-configuration
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            tag: ((dataworks.docker_awscli_version))
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          ASSUME_DURATION: 3600
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              source /assume-role
+              set +x
+
+              function get_lifecycle_rules {
+                aws s3api get-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}"
+              }
+
+              function update_status_and_save_to_file {
+                jq --arg enabled_value "${S3_LIFECYCLE_RULE_STATUS}" --arg rule_id "${S3_LIFECYCLE_RULE_ID}" \
+                '.Rules |= map(if .ID==$rule_id then .Status=$enabled_value else . end)' \
+                <<EOF
+              $LIFE_CYCLE_RULES_EXISTING
+              EOF
+              }
+
+              function update_lifecycle_rule {
+                aws s3api put-bucket-lifecycle-configuration --region="$AWS_REGION" --bucket "${S3_BUCKET}" \
+                --lifecycle-configuration "${UPDATED_FILE_URL}"
+              }
+
+              echo "Setting variables"
+              if [[ "${TYPE}" == "main" ]]; then
+                  export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                  export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_main')
+              elif [[ "${TYPE}" == "equality" ]]; then
+                  export S3_BUCKET=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.id')
+                  export S3_LIFECYCLE_RULE_ID=$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_bucket.value.streaming_manifest_lifecycle_name_equality')
+              else
+                echo "Invalid type of '${TYPE}'"
+                exit 1
+              fi
+
+              if [[ ! "${STATUS}" == "Enabled" ]] && [[ ! "${STATUS}" == "Disabled" ]]; then
+                echo "Invalid status of '${STATUS}'"
+                exit 1
+              fi
+
+              export S3_LIFECYCLE_RULE_STATUS="${STATUS}"
+              echo "Variables set"
+
+              echo "Validating the terraform outputs"
+              if [[ -z "${S3_BUCKET}" ]]; then
+                echo "S3 bucket could not be retrieved from terraform outputs"
+                exit 1
+              elif [[ -z "${S3_LIFECYCLE_RULE_ID}" ]]; then
+                echo "Lifecycle rule could not be retrieved from terraform outputs"
+                exit 1
+              fi
+              echo "Terraform outputs validated"
+
+              echo "Getting existing lifecycle configurations"
+              export LIFE_CYCLE_RULES_EXISTING=$(get_lifecycle_rules)
+              echo "Retrieved lifecycle configurations as '${LIFE_CYCLE_RULES_EXISTING}'"
+
+              export UPDATED_FILE_NAME="./updated_configuration.json"
+              export UPDATED_FILE_URL="file://updated_configuration.json"
+
+              echo "Updating status to '${S3_LIFECYCLE_RULE_STATUS}' for id of '${S3_LIFECYCLE_RULE_ID}' and saving to file at '${UPDATED_FILE_NAME}'"
+              update_status_and_save_to_file > ${UPDATED_FILE_NAME}
+
+              new_configuration=$(cat "${UPDATED_FILE_NAME}")
+              echo "Configuration updated with new status to '${new_configuration}'"
+
+              echo "Updating lifecycle rule configuration"
+              update_lifecycle_rule
+              echo "Lifecycle rule configuration successfully updated"
+        inputs:
+          - name: terraform-output-internal-compute
+
+    terraform-output-internal-compute:
+      task: terraform-output-internal-compute
+      .: (( inject meta.plan.terraform-common-config ))
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.terraform_repository))
+            version: ((dataworks.terraform_version))
+            tag: ((dataworks.terraform_version))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              terraform workspace show
+              terraform init
+              terraform output --json > ../terraform-output-internal-compute/outputs.json
+          dir: aws-internal-compute
+        inputs:
+          - name: aws-internal-compute
+        outputs:
+          - name: terraform-output-internal-compute
+
+    terraform-output-snapshot-sender:
+      task: terraform-output-snapshot-sender
+      .: (( inject meta.plan.terraform-common-config ))
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.terraform_repository))
+            version: ((dataworks.terraform_version))
+            tag: ((dataworks.terraform_version))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              terraform workspace show
+              terraform init
+              terraform output --json > ../terraform-output-snapshot-sender/outputs.json
+          dir: aws-snapshot-sender
+        inputs:
+          - name: aws-snapshot-sender
+        outputs:
+          - name: terraform-output-snapshot-sender

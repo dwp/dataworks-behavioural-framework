@@ -1,0 +1,29 @@
+jobs:
+  - name: update-pipeline
+    plan:
+      - get: aws-dataworks-e2e-framework
+        resource: aws-dataworks-e2e-framework-update-manifest-comparison
+        trigger: true
+      - task: aviator
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((dataworks.docker_aviator_repository))
+              version: ((dataworks.docker_aviator_version))
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                sed -i 's/fly/nofly/' aviator-manifest-comparison.yml
+                /usr/bin/aviator -f aviator-manifest-comparison.yml
+                mv aviator_manifest_comparison.yml ../pipeline
+            dir: aws-dataworks-e2e-framework
+          inputs:
+            - name: aws-dataworks-e2e-framework
+          outputs:
+            - name: pipeline
+      - set_pipeline: manifest-comparison
+        file: pipeline/aviator_manifest_comparison.yml

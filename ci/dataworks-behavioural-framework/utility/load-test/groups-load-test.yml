@@ -1,0 +1,22 @@
+groups:
+- name: integration
+  jobs:
+  - integration-load-test-full
+  - integration-load-test-upload
+  - integration-load-test-import
+  - integration-load-test-export
+  - integration-load-test-clear-data
+  - integration-load-test-kafka
+  
+- name: dev
+  jobs:
+  - dev-load-test-full
+  - dev-load-test-upload
+  - dev-load-test-import
+  - dev-load-test-export
+  - dev-load-test-clear-data
+  - dev-load-test-kafka
+
+- name: update-pipeline
+  jobs:
+  - update-pipeline

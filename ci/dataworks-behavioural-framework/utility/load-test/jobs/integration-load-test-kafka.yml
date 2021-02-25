@@ -1,0 +1,20 @@
+jobs:
+  - name: integration-load-test-kafka
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-integration
+          - get: aws-dataworks-e2e-framework
+            trigger: false
+      - .: (( inject meta-load-test.plan.load-tests ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.integration))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.integration)):role/ci
+            NUMBER_OF_TOPICS_TO_USE: 1000
+            LOAD_TESTS_KAFKA_MESSAGE_VOLUME: 300
+            LOAD_TESTS_KAFKA_RECORD_COUNT: 100
+            LOAD_TESTS_KAFKA_RANDOM_KEY: "True"
+            LOAD_TEST_TYPE: "kafka"
+            ENVIRONMENT_JOB_NAME: "integration-load-test"

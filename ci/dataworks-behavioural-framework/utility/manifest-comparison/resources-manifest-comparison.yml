@@ -1,0 +1,77 @@
+resources:
+  - name: aws-dataworks-e2e-framework-manifest-comparison
+    type: git
+    source:
+      branch: master
+      api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+      username: ((dataworks.enterprise_github_username))
+      password: ((dataworks-secrets.enterprise_github_pat))
+      uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+      paths:
+        - src/manifest-comparison/*
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: aws-dataworks-e2e-framework-update-manifest-comparison
+    type: git
+    source:
+      branch: master
+      api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+      username: ((dataworks.enterprise_github_username))
+      password: ((dataworks-secrets.enterprise_github_pat))
+      uri: https://((dataworks.enterprise_github_url))/dip/aws-dataworks-e2e-framework.git
+      paths:
+        - ci/dataworks-behavioural-framework/utility/manifest-comparison/*
+        - ci/shared/*
+        - aviator-manifest-comparison.yml
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: aws-ingestion
+    type: git
+    source:
+      branch: master
+      api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+      username: ((dataworks.enterprise_github_username))
+      password: ((dataworks-secrets.enterprise_github_pat))
+      uri: https://((dataworks.enterprise_github_url))/dip/aws-ingestion.git
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: aws-internal-compute
+    type: git
+    source:
+      branch: master
+      api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+      username: ((dataworks.enterprise_github_username))
+      password: ((dataworks-secrets.enterprise_github_pat))
+      uri: https://((dataworks.enterprise_github_url))/dip/aws-internal-compute.git
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: aws-snapshot-sender
+    type: git
+    source:
+      branch: master
+      api_endpoint: https://((dataworks.enterprise_github_url))/api/v3/
+      username: ((dataworks.enterprise_github_username))
+      password: ((dataworks-secrets.enterprise_github_pat))
+      uri: https://((dataworks.enterprise_github_url))/dip/aws-snapshot-sender.git
+    check_every: 5m
+    webhook_token: ((dataworks.concourse_github_webhook_token))
+
+  - name: utc-9am
+    type: time
+    source:
+      start: 9:00 AM
+      stop: 9:05 AM
+      location: UTC
+
+  - name: meta-prod
+    type: meta
+
+  - name: meta-qa
+    type: meta
+
+  - name: meta-integration
+    type: meta

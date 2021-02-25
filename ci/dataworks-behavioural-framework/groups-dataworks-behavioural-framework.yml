@@ -1,0 +1,21 @@
+groups:
+- name: master
+  jobs:
+  - development
+  - qa
+  - integration
+  - management-dev
+  - management
+  
+- name: pull-request
+  jobs:
+  - pull-request-dataworks-e2e-framework
+
+- name: mirror
+  jobs:
+    - mirror-dwpdigital-dataworks-behavioural-framework-dev
+    - mirror-dwpdigital-dataworks-behavioural-framework
+
+- name: update-pipeline
+  jobs:
+  - update-pipeline

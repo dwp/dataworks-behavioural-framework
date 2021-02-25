@@ -1,0 +1,195 @@
+meta-dataworks-behavioural-framework:
+  resources:
+    - name: ecr-resource
+      type: registry-image-resource
+      source:
+        repository: unset
+        aws_region: ((dataworks.aws_region))
+        aws_role_arn: arn:aws:iam::((dataworks.aws_management_dev_acc)):role/ci
+        aws_access_key_id: ((dataworks-secrets.ci_aws_access_key_id))
+        aws_secret_access_key: ((dataworks-secrets.ci_aws_secret_access_key))
+        
+    - name: dwpdigital-dataworks-behavioural-framework
+      type: registry-image-resource
+      source:
+        repository: dwpdigital/dataworks-behavioural-framework
+      check_every: 5m
+
+    - name: ecr-dwpdigital-dataworks-behavioural-framework-dev
+      .: (( inject meta-dataworks-behavioural-framework.resources.ecr-resource ))
+      source:
+        repository: "dataworks-behavioural-framework"
+
+    - name: ecr-dwpdigital-dataworks-behavioural-framework
+      .: (( inject meta-dataworks-behavioural-framework.resources.ecr-resource ))
+      source:
+        repository: "dataworks-behavioural-framework"
+        aws_role_arn: arn:aws:iam::((dataworks.aws_management_acc)):role/ci
+  plan:
+    upload-fixture-data:
+      task: upload-fixture-data
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            version: ((dataworks.docker_awscli_version))
+            tag: ((dataworks.docker_awscli_version))
+        params:
+          AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              source /assume-role
+              set +x
+              export AWS_S3_INPUT_BUCKET="$(cat terraform-output-ingest/outputs.json | jq -r '.s3_buckets.value.input_bucket')"
+              aws s3 --endpoint-url=https://s3.{AWS_REGION}.amazonaws.com sync dataworks-behavioural-framework/src/fixture-data/ s3://${AWS_S3_INPUT_BUCKET}/fixture-data/business-data/kafka
+        inputs:
+          - name: dataworks-behavioural-framework
+          - name: terraform-output-ingest
+
+    phase-one-e2e-tests:
+      task: phase-one-e2e-tests
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_python_boto_behave_repository))
+            tag: ((dataworks.docker_python_boto_behave_version))
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          NUMBER_OF_TOPICS_TO_USE: 3
+        run:
+          dir: dataworks-behavioural-framework
+          path: sh
+          args:
+            - -exc
+            - |
+              source /assume-role
+              set +x
+              cd src/runners
+              ./run-ci.sh \
+              "../../../meta"
+        inputs:
+          - name: dataworks-behavioural-framework
+          - name: meta
+
+    tear-down:
+      task: tear-down
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            version: ((dataworks.docker_awscli_version))
+            tag: ((dataworks.docker_awscli_version))
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              source /assume-role
+              set +x
+              pipeline_name=`cat "meta/build_pipeline_name"`
+              job_name=`cat "meta/build_job_name"`
+              build_number=`cat "meta/build_name"`
+              cat <<EOF> key.json
+              {
+                "JobId": {
+                  "S": "${pipeline_name}_${job_name}_${build_number}"
+                }
+              }
+              EOF
+              aws dynamodb delete-item --region $AWS_REGION --table-name StubUcfsJobStatus --key file://key.json
+        inputs:
+          - name: dataworks-behavioural-framework
+          - name: meta
+
+    terraform-common-config:
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.terraform_repository))
+            tag: ((dataworks.terraform_version))
+        params:
+          TF_INPUT: false
+          TF_CLI_ARGS_apply: -lock-timeout=300s
+          TF_CLI_ARGS_plan: -lock-timeout=300s
+          TF_VAR_costcode: ((dataworks.costcode))
+          
+    terraform-bootstrap:
+      task: terraform-bootstrap
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.docker_awscli_repository))
+            version: ((dataworks.docker_awscli_version))
+            tag: ((dataworks.docker_awscli_version))
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              python bootstrap_terraform.py
+              cp terraform.tf ../terraform-bootstrap
+          dir: dataworks-behavioural-framework
+        inputs:
+          - name: dataworks-behavioural-framework
+        outputs:
+          - name: terraform-bootstrap
+
+    terraform-apply:
+      task: terraform-apply
+      .: (( inject meta.plan.terraform-common-config ))
+      config:
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cp ../terraform-bootstrap/terraform.tf .
+              terraform workspace show
+              terraform init
+              terraform plan -out terraform.plan
+              terraform apply -auto-approve terraform.plan
+          dir: dataworks-behavioural-framework
+        inputs:
+          - name: dataworks-behavioural-framework
+          - name: terraform-bootstrap
+
+    terraform-plan:
+      task: terraform-plan
+      .: (( inject meta.plan.terraform-common-config ))
+      config:
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cp ../terraform-bootstrap/terraform.tf .
+              terraform workspace show
+              terraform init
+              terraform plan $DETAILED_EXITCODE
+          dir: dataworks-behavioural-framework
+        inputs:
+          - name: dataworks-behavioural-framework
+          - name: terraform-bootstrap
+      params:
+        DETAILED_EXITCODE: -detailed-exitcode

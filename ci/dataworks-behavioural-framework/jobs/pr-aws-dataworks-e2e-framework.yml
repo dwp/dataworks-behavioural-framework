@@ -1,0 +1,72 @@
+jobs:
+  - name: pull-request-dataworks-e2e-framework
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-development
+          - get: aws-ingestion
+            trigger: false
+          - get: aws-analytical-env
+            trigger: false
+          - get: dataworks-behavioural-framework
+            resource: dataworks-behavioural-framework-pr
+            trigger: true
+            version: every
+      - put: dataworks-behavioural-framework
+        resource: dataworks-behavioural-framework-pr
+        params:
+          context: pull-request-dataworks-e2e-framework
+          path: dataworks-behavioural-framework
+          status: pending
+      - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-bootstrap ))
+        input_mapping:
+          dataworks-behavioural-framework: dataworks-behavioural-framework-pr
+        on_failure:
+          put: dataworks-behavioural-framework
+          resource: dataworks-behavioural-framework-pr
+          params:
+            context: pull-request-dataworks-e2e-framework
+            path: dataworks-behavioural-framework
+            status: failure
+      - .: (( inject meta-dataworks-behavioural-framework.plan.terraform-plan ))
+        input_mapping:
+          dataworks-behavioural-framework: dataworks-behavioural-framework-pr
+        params:
+          TF_WORKSPACE: "management"
+          DETAILED_EXITCODE: ""
+        on_failure:
+          put: dataworks-behavioural-framework
+          resource: dataworks-behavioural-framework-pr
+          params:
+            context: pull-request-dataworks-e2e-framework
+            path: dataworks-behavioural-framework
+            status: failure
+      - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.qa))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
+            E2E_TEST_TIMEOUT: 600
+            E2E_FEATURE_TAG_FILTER: "@pull-request"
+        on_failure:
+          put: dataworks-behavioural-framework
+          resource: dataworks-behavioural-framework-pr
+          params:
+            context: pull-request-dataworks-e2e-framework
+            path: dataworks-behavioural-framework
+            status: failure
+        on_success:
+          put: dataworks-behavioural-framework
+          resource: dataworks-behavioural-framework-pr
+          params:
+            context: pull-request-dataworks-e2e-framework
+            path: dataworks-behavioural-framework
+            status: success
+    ensure:
+      do:
+        - .: (( inject meta-dataworks-behavioural-framework.plan.tear-down ))
+          config:
+            params:
+              AWS_ACC: ((aws_account.qa))
+              AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
