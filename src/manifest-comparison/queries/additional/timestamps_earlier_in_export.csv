@@ -1,0 +1,6 @@
+dbone, collectionfive, {""earlierinexportbeforebackuptakenid"": ""54""}, automatedtests, test_insert, 1573808723000, 1573808724000, export
+dbone, collectionfive, {""earlierinexportinsidemarginid"": ""51""}, automatedtests, test_insert, 1573809030000, 1573809031000, export
+dbone, collectionfive, {""earlierinexportinsidemarginid"": ""52""}, automatedtests, test_insert, 1573809031000, 1573809032000, export
+dbone, collectionfive, {""earlierinexportinsidemarginid"": ""53""}, automatedtests, test_insert, 1573809031000, 1573809033000, export
+dbone, collectionmismatched, {""earlierinexportbeforebackuptakenid"": ""55""}, automatedtests, test_insert, 1573808724000, 1573808725000, export
+dbone, collectionmismatched, {"earlierinexportbeforebackuptakenid": "56"}, automatedtests, test_insert, 1573808724000, 1573808726000, export

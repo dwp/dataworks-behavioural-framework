@@ -1,0 +1,24 @@
+{
+    "unitOfWorkId": "||jobId||",
+    "traceId": "||traceId||",
+    "@type": "HDI",
+    "version": "0.0.1",
+    "timestamp": "||timeOfMessageCreation||",
+    "message": {
+        "@type": "MONGO_IMPORT",
+        "collection": "||collection||",
+        "db": "||db||",
+        "_id": "||newid||",
+        "mongo_format_stripped_from_id": true,
+        "last_modified_date_time_was_altered": true,
+        "created_date_time_was_altered": false,
+        "removed_date_time_was_altered": true,
+        "archived_date_time_was_altered": false,
+        "historic_removed_record_altered_on_import": false,
+        "historic_archived_record_altered_on_import": false,
+        "_lastModifiedDateTime": "||timestamp||",
+        "timestamp_created_from": "_lastModifiedDateTimeStripped",
+        "encryption": ||encryption||,
+        "dbObject": "||dbObject||"
+    }
+}

@@ -1,0 +1,18 @@
+spruce:
+  - base: ci/dataworks-behavioural-framework/utility/load-test/meta-load-test.yml
+    prune:
+      - meta
+    merge:
+      - with_in: ci/dataworks-behavioural-framework/utility/load-test/
+        regexp: ".*yml"
+      - with_in: ci/dataworks-behavioural-framework/utility/load-test/jobs/
+        regexp: ".*yml"
+      - with_in: ci/shared/
+        regexp: ".*yml"
+    to: aviator_load_test.yml
+fly:
+  name: load-test
+  target: utility
+  check_creds: true
+  config: aviator_load_test.yml
+  expose: true

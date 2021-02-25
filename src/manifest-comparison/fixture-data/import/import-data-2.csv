@@ -1,0 +1,20 @@
+{""id"": ""6""}|1573809425000|dbone|collectionone|import|HDI|{""id"": ""6""}|test_update
+{""id"": ""7""}|1573809426000|dbseven|collectionone|import|HDI|{""id"": ""7""}|test_update
+{""id"": ""8""}|1573809427000|dbthree|collectionone|import|HDI|{""id"": ""8""}|test_update
+9|1573809428000|dbone|collectionone|import|HDI|{""$oid"": ""9""}|test_update
+{""collectionimportonly"": ""10""}|1573809420000|dbone|collectionimportonly|import|HDI|{""collectionimportonly"": ""10""}|test_update
+{""collectionimportonly"": ""16""}|1573809420000|dbone|collectionimportonly|import|HDI|{""collectionimportonly"": ""16""}|test_update
+{""collectionimportonly"": ""17""}|1573809420000|dbone|collectionimportonlytwo|import|HDI|{""collectionimportonly"": ""17""}|test_update
+{""collectionimportonlyoutsidemarginid"": ""31""}|1573809624000|dbone|collectionimportonly|import|HDI|{""collectionimportonlyoutsidemarginid"": ""31""}|test_update
+{""collectionimportonlyinsidemarginid"": ""33""}|1573809010000|dbone|collectionimportonly|import|HDI|{""collectionimportonlyinsidemarginid"": ""33""}|test_update
+{""collectionimportonlybeforebackuptakenid"": ""35""}|1573808726000|dbone|collectionimportonlytwo|import|HDI|{""collectionimportonlybeforebackuptakenid"": ""35""}|test_update
+{""sameinbothid"": ""60""}|1573808722000|dbone|collectionmismatched|import|HDI|{""sameinbothid"": ""60""}|test_update
+{""sameinbothid"": ""61""}|1573808721000|dbone|collectionfive|import|HDI|{""sameinbothid"": ""61""}|test_update
+{""duplicatedcollectionname"": ""62""}|1573808721000|dbone|collectionduplicatedone|import|HDI|{""duplicatedcollectionname"": ""62""}|test_update
+{""duplicatedcollectionname"": ""63""}|1573808721000|dbone|dbduplicatedone|import|HDI|{""duplicatedcollectionname"": ""63""}|test_update
+{""duplicatedcollectionname"": ""64""}|1573808721000|dbduplicatedone|dbduplicatedone|import|HDI|{""duplicatedcollectionname"": ""64""}|test_update
+{""duplicatedcollectionname"": ""65""}|1573808721000|dbduplicatedone|collectionduplicatedone|import|HDI|{""duplicatedcollectionname"": ""65""}|test_update
+{""defaulttopicid"": ""1""}|1573808721000|core|claimant|import|HDI|{""defaulttopicid"": ""1""}|test_update
+{""defaulttopicid"": ""2""}|1573808721000|dbone|claimant|import|HDI|{""defaulttopicid"": ""2""}|test_update
+{""defaulttopicid"": ""3""}|1573808721000|accepted-data|address|import|HDI|{""defaulttopicid"": ""3""}|test_update
+{""defaulttopicid"": ""4""}|1573808721000|accepted-data|bankDetails|import|HDI|{""defaulttopicid"": ""4""}|test_update

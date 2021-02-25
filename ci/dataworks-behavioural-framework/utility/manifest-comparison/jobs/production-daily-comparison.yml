@@ -1,0 +1,94 @@
+jobs:
+  - name: production-daily-comparison
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-prod
+          - get: utc-9am
+            trigger: true
+          - get: aws-internal-compute
+            trigger: false
+          - get: aws-ingestion
+            trigger: false
+          - get: dataworks-behavioural-framework
+            trigger: false
+          - get: aws-snapshot-sender
+            trigger: false
+          - get: dataworks-behavioural-framework-manifest-comparison
+            passed:
+              - qa
+            trigger: false
+      - in_parallel:
+          - .: (( inject meta.plan.terraform-output-ingest ))
+            params:
+              TF_WORKSPACE: production
+          - .: (( inject meta-manifest-comparison.plan.terraform-output-internal-compute ))
+            params:
+              TF_WORKSPACE: production
+          - .: (( inject meta-manifest-comparison.plan.terraform-output-snapshot-sender ))
+            params:
+              TF_WORKSPACE: production
+      - .: (( inject meta-manifest-comparison.plan.toggle-manifest-lifecycle-configuration ))
+        task: disable-manifest-lifecycle-configuration-main
+        config:
+          params:
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+            TYPE: "main"
+            STATUS: "Disabled"
+      - .: (( inject meta-manifest-comparison.plan.toggle-manifest-lifecycle-configuration ))
+        task: disable-manifest-lifecycle-configuration-equality
+        config:
+          params:
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+            TYPE: "equality"
+            STATUS: "Disabled"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: generate-manifest-comparison-incremental-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.production))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+            MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES: 0
+            MANIFEST_COMPARISON_SNAPSHOT_TYPE: "incremental"
+            MANIFEST_COMPARISON_IMPORT_TYPE: "streaming_main"
+            MANIFEST_COMPARISON_CUT_OFF_DATE_START: "PREVIOUS_DAY_MIDNIGHT"
+            MANIFEST_COMPARISON_CUT_OFF_DATE_END: "TODAY_MIDNIGHT"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: run-main-queries-incremental-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.production))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+            MANIFEST_COMPARISON_SNAPSHOT_TYPE: "incremental"
+            MANIFEST_COMPARISON_IMPORT_TYPE: "streaming_main"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison-main"
+      - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
+        task: run-additional-queries-incremental-snapshots
+        config:
+          params:
+            AWS_ACC: ((aws_account.production))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+            MANIFEST_COMPARISON_VERIFY_RESULTS: "false"
+            MANIFEST_COMPARISON_SNAPSHOT_TYPE: "incremental"
+            MANIFEST_COMPARISON_IMPORT_TYPE: "streaming_main"
+            E2E_FEATURE_TAG_FILTER: "@manifest-comparison-additional"
+    ensure:
+      do:
+        - .: (( inject meta-manifest-comparison.plan.toggle-manifest-lifecycle-configuration ))
+          task: enable-manifest-lifecycle-configuration-main
+          config:
+            params:
+              AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+              TYPE: "main"
+              STATUS: "Enabled"
+        - .: (( inject meta-manifest-comparison.plan.toggle-manifest-lifecycle-configuration ))
+          task: enable-manifest-lifecycle-configuration-equality
+          config:
+            params:
+              AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci
+              TYPE: "equality"
+              STATUS: "Enabled"

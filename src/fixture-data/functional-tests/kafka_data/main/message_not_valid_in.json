@@ -1,0 +1,16 @@
+{
+    "traceId": "00001111-abcd-4567-1234-1234567890ab",
+    "unitOfWorkId": "00002222-abcd-4567-1234-1234567890ab",
+    "@type": "V4",
+    "version": "core-X.release_XXX.XX",
+    "timestamp": "2018-12-14T15:01:02.000+0000",
+    "message": {
+        "@type": "E2E_IMPORT",
+        "collection": "exampleCollectionName",
+        "db": "exampleDbName",
+        "_id": "||newid||",
+        "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+        "encryption": {
+
+    }
+}

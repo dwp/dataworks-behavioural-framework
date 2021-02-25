@@ -26,7 +26,7 @@ data "terraform_remote_state" "management" {
 }
 
 provider "aws" {
-  version = "~> 2.66.0"
+  version = "~> 3.28.0"
   region  = "{{provider_region}}"
 
   assume_role {

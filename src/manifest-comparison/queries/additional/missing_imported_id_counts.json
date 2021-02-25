@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Missing imported id counts",
+    "query_type": "additional",
+    "query_description": "Shows counts and percentages of ids which were in the exported snapshots sent to Crown, but were missing from the import of the historic data dump - excludes id in collections or databases that have not been imported as a whole",
+    "query_file": "missing_imported_id_counts.sql",
+    "results_file": "missing_imported_id_counts.csv",
+    "show_column_names": true,
+    "order": 3
+}

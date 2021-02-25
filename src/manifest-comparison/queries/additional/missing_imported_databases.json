@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Missing imported databases",
+    "query_type": "additional",
+    "query_description": "Shows databases which have been exported in the snapshots sent to Crown, but not were missing from the imported historic data dump",
+    "query_file": "missing_imported_databases.sql",
+    "results_file": "missing_imported_databases.csv",
+    "show_column_names": false,
+    "order": 1
+}

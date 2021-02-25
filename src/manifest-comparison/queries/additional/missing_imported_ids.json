@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Missing imported ids",
+    "query_type": "additional",
+    "query_description": "Shows the top X ids from each collection (where X is passed in as 'MANIFEST_REPORT_COUNT_OF_IDS') which were in the exported snapshots sent to Crown, but were missing from the import of the historic data dump - excludes id in collections or databases that have not been imported as a whole",
+    "query_file": "missing_imported_ids.sql",
+    "results_file": "missing_imported_ids.csv",
+    "show_column_names": false,
+    "order": 4
+}

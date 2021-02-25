@@ -1,0 +1,8 @@
+accepted-data, address, 1, 0, 1, 1573808721000, 1573808721000
+dbduplicatedone, collectionduplicatedone, 1, 0, 1, 1573808721000, 1573808721000
+dbduplicatedone, dbduplicatedone, 1, 0, 1, 1573808721000, 1573808721000
+dbexportonly, collectionone, 1, 0, 1, 1573808725000, 1573808725000
+dbone, collectionexportonly, 1, 0, 1, 1573809009000, 1573809009000
+dbone, collectionexportonlytwo, 1, 0, 1, 1573808725000, 1573808725000
+dbone, collectionfive, 16, 0, 16, 1573809031000, 1573808721000
+dbone, collectionmismatched, 3, 0, 3, 1573808724000, 1573808722000

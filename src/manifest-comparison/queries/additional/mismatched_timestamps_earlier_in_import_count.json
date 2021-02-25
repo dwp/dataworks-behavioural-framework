@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Mismatched timestamps count earlier in the import",
+    "query_type": "additional",
+    "query_description": "Shows count and percentage of IDs which are in both export and import manifests but have a timestamp that is earlier in the import",
+    "query_file": "mismatched_timestamps_earlier_in_import_count.sql",
+    "results_file": "mismatched_timestamps_earlier_in_import_count.csv",
+    "show_column_names": true,
+    "order": 5
+}

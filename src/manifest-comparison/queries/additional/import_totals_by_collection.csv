@@ -1,0 +1,13 @@
+accepted-data, address, 1, 1573808721000, 1573808721000
+accepted-data, bankDetails, 1, 1573808721000, 1573808721000
+core, claimant, 1, 1573808721000, 1573808721000
+dbduplicatedone, collectionduplicatedone, 1, 1573808721000, 1573808721000
+dbduplicatedone, dbduplicatedone, 1, 1573808721000, 1573808721000
+dbimportonly, collectionfive, 1, 1573808725000, 1573808725000
+dbone, claimant, 1, 1573808721000, 1573808721000
+dbone, collectionduplicatedone, 1, 1573808721000, 1573808721000
+dbone, collectionfive, 17, 1573809033000, 1573808721000
+dbone, collectionimportonly, 1, 1573809010000, 1573809010000
+dbone, collectionimportonlytwo, 1, 1573808726000, 1573808726000
+dbone, collectionmismatched, 3, 1573808726000, 1573808722000
+dbone, dbduplicatedone, 1, 1573808721000, 1573808721000

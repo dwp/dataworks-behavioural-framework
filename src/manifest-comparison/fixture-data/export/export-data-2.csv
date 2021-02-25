@@ -1,0 +1,14 @@
+{""id"": ""6""}|1573809425000|dbone|collectionone|export|automatedtests|{""id"": ""6""}|test_insert
+{""id"": ""7""}|1573809426000|dbseven|collectionone|export|automatedtests|{""id"": ""7""}|test_insert
+{""id"": ""8""}|1573809427000|dbthree|collectionone|export|automatedtests|{""id"": ""8""}|test_insert
+{""$oid"": ""9""}|1573809428000|dbone|collectionone|export|automatedtests|9|test_insert
+{""collectionexportonly"": ""12""}|1573809420000|dbone|collectionexportonly|export|automatedtests|{""collectionexportonly"": ""12""}|test_insert
+{""collectionexportonly"": ""13""}|1573809420000|dbone|collectionexportonlytwo|export|automatedtests|{""collectionexportonly"": ""13""}|test_insert
+{""collectionexportonlyoutsidemarginid"": ""30""}|1573809625000|dbone|collectionexportonly|export|automatedtests|{""collectionexportonlyoutsidemarginid"": ""30""}|test_insert
+{""collectionexportonlyinsidemarginid"": ""32""}|1573809009000|dbone|collectionexportonly|export|automatedtests|{""collectionexportonlyinsidemarginid"": ""32""}|test_insert
+{""collectionexportonlybeforebackuptakenid"": ""34""}|1573808725000|dbone|collectionexportonlytwo|export|automatedtests|{""collectionexportonlybeforebackuptakenid"": ""34""}|test_insert
+{""sameinbothid"": ""60""}|1573808722000|dbone|collectionmismatched|export|automatedtests|{""sameinbothid"": ""60""}|test_insert
+{""sameinbothid"": ""61""}|1573808721000|dbone|collectionfive|export|automatedtests|{""sameinbothid"": ""61""}|test_insert
+{""duplicatedcollectionname"": ""64""}|1573808721000|dbduplicatedone|dbduplicatedone|export|automatedtests|{""duplicatedcollectionname"": ""64""}|test_insert
+{""duplicatedcollectionname"": ""65""}|1573808721000|dbduplicatedone|collectionduplicatedone|export|automatedtests|{""duplicatedcollectionname"": ""65""}|test_insert
+{""defaulttopicid"": ""3""}|1573808721000|accepted-data|address|export|automatedtests|{""defaulttopicid"": ""3""}|test_insert

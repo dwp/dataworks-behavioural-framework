@@ -1,0 +1,25 @@
+groups:
+- name: scheduled-comparison-jobs
+  jobs:
+  - production-daily-comparison
+  
+- name: manual-comparison-jobs
+  jobs:
+  - development
+  - qa
+  - integration
+  - production-full-snapshots
+  - production-incremental-snapshots
+
+- name: manual-query-jobs
+  jobs:
+  - production-main-queries-full-snapshots
+  - production-additional-queries-full-snapshots
+  - production-specific-queries-full-snapshots
+  - production-main-queries-incremental-snapshots
+  - production-additional-queries-incremental-snapshots
+  - production-specific-queries-incremental-snapshots
+
+- name: update-pipeline
+  jobs:
+  - update-pipeline

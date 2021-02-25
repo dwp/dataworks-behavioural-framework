@@ -1,0 +1,17 @@
+jobs:
+  - name: dev-load-test-clear-data
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-development
+          - get: dataworks-behavioural-framework
+            trigger: false
+      - .: (( inject meta-load-test.plan.load-tests ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.development))
+            NUMBER_OF_TOPICS_TO_USE: 100
+            LOAD_TEST_TYPE: clear-hdi
+            ENVIRONMENT_JOB_NAME: "dev-load-test"
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.development)):role/ci

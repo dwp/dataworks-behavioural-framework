@@ -1,0 +1,44 @@
+resources:
+  - name: dwpdigital-dataworks-behavioural-framework
+    type: registry-image-resource
+    source:
+      repository: dwpdigital/dataworks-behavioural-framework
+    check_every: 5m
+
+  - name: ecr-dwpdigital-dataworks-behavioural-framework-dev
+    .: (( inject meta-dataworks-behavioural-framework.resources.ecr-resource ))
+    source:
+      repository: "dataworks-behavioural-framework"
+
+  - name: ecr-dwpdigital-dataworks-behavioural-framework
+    .: (( inject meta-dataworks-behavioural-framework.resources.ecr-resource ))
+    source:
+      repository: "dataworks-behavioural-framework"
+      aws_role_arn: arn:aws:iam::((dataworks.aws_management_acc)):role/ci
+
+jobs:
+  - name: mirror-dwpdigital-dataworks-behavioural-framework-dev
+    serial_groups: [dataworks-behavioural-framework]
+    plan:
+      - get: dwpdigital-dataworks-behavioural-framework
+        trigger: true
+        params:
+          format: oci
+        attempts: 3
+      - put: ecr-dwpdigital-dataworks-behavioural-framework-dev
+        params:
+          image: "dwpdigital-dataworks-behavioural-framework/image.tar"
+        attempts: 3
+
+  - name: mirror-dwpdigital-dataworks-behavioural-framework
+    serial_groups: [dataworks-behavioural-framework]
+    plan:
+      - get: dwpdigital-dataworks-behavioural-framework
+        trigger: true
+        params:
+          format: oci
+        attempts: 3
+      - put: ecr-dwpdigital-dataworks-behavioural-framework
+        params:
+          image: "dwpdigital-dataworks-behavioural-framework/image.tar"
+        attempts: 3

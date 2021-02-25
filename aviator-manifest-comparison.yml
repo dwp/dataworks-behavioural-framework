@@ -1,0 +1,18 @@
+spruce:
+  - base: ci/dataworks-behavioural-framework/utility/manifest-comparison/meta-manifest-comparison.yml
+    prune:
+      - meta
+    merge:
+      - with_in: ci/dataworks-behavioural-framework/utility/manifest-comparison/
+        regexp: ".*yml"
+      - with_in: ci/dataworks-behavioural-framework/utility/manifest-comparison/jobs/
+        regexp: ".*yml"
+      - with_in: ci/shared/
+        regexp: ".*yml"
+    to: aviator_manifest_comparison.yml
+fly:
+  name: manifest-comparison
+  target: utility
+  check_creds: true
+  config: aviator_manifest_comparison.yml
+  expose: true

@@ -1,0 +1,10 @@
+{
+    "enabled": true,
+    "query_name": "Output missing exported ids after given timestamp",
+    "query_type": "specific",
+    "query_description": "Output missing exported ids after given timestamp",
+    "query_file": "missing_exported_ids_after_date.sql",
+    "results_file": "missing_exported_ids_after_date.csv",
+    "show_column_names": false,
+    "order": 1
+}

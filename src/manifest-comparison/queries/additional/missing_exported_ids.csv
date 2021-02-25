@@ -1,0 +1,6 @@
+dbone, collectionfive, guid57, 1573808725000, HDI, MONGO_UPDATE
+dbone, collectionfive, {""importonlybeforebackuptakenid"": ""44"", "secondid": "44-2", "thirdid": "44-3"}, 1573808725000, HDI, MONGO_DELETE
+dbone, collectionfive, {""importonlybeforebackuptakenid"": ""45"", "secondid": "45-2", "thirdid": "45-3"}, 1573808726000, HDI, MONGO_DELETE
+dbone, collectionfive, {""importonlybeforebackuptakenid"": ""46"", "secondid": "46-2", "thirdid": "46-3"}, 1573808726000, HDI, test_update
+dbone, collectionfive, {""importonlyinsidemarginid"": ""42""}, 1573809008000, HDI, test_update
+dbone, collectionfive, {""importonlyinsidemarginid"": ""43"", "secondid": "43-2"}, 1573809007000, HDI, MONGO_INSERT
