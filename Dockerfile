@@ -5,6 +5,7 @@ RUN apk add libffi-dev openssl-dev python3-dev rust
 RUN mkdir /src
 RUN mkdir /resources
 
+COPY assume_role.sh /
 COPY requirements.txt /resources/
 COPY src/ /src/
 
