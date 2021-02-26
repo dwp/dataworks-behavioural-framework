@@ -8,8 +8,8 @@ jobs:
           - get: ecr-dwpdigital-dataworks-behavioural-framework
             trigger: true
           - get: dataworks-behavioural-framework
-            trigger: false]
-]
+            trigger: false
+            
       - .: (( inject meta-dataworks-behavioural-framework.plan.dataworks-e2e-tests-run-with-image ))
         config:
           params:
