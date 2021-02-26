@@ -1,25 +1,16 @@
 jobs:
-  - name: qa
+  - name: qa-run-with-image
     max_in_flight: 1
     plan:
       - in_parallel:
           - put: meta
             resource: meta-qa
-          - get: dataworks-behavioural-framework
+          - get: ecr-dwpdigital-dataworks-behavioural-framework
             trigger: true
-          - get: aws-ingestion
-            trigger: false
-
-      - .: (( inject meta.plan.terraform-output-ingest ))
-        config:
-          params:
-            TF_WORKSPACE: qa
-      - .: (( inject meta-dataworks-behavioural-framework.plan.upload-fixture-data ))
-        config:
-          params:
-            AWS_ACC: ((aws_account.qa))
-            AWS_ROLE_ARN: arn:aws:iam::((aws_account.qa)):role/ci
-      - .: (( inject meta-dataworks-behavioural-framework.plan.dataworks-e2e-tests ))
+          - get: dataworks-behavioural-framework
+            trigger: false]
+]
+      - .: (( inject meta-dataworks-behavioural-framework.plan.dataworks-e2e-tests-run-with-image ))
         config:
           params:
             AWS_ACC: ((aws_account.qa))

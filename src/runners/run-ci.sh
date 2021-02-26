@@ -11,6 +11,10 @@ if [[ ! "${LOCAL_PROFILE}" == *"-profile"* ]]; then
     export LOCAL_PROFILE="" # Backwards compatability with existing pipeline calls
 fi
 
+if [[ ! -z "${META_FOLDER_OVERRIDE}" ]]; then
+    export META_FOLDER="${META_FOLDER_OVERRIDE}" # Allow for direct running as a container in CI
+fi
+
 function get_secret_values() {
     secret_value=$(aws secretsmanager get-secret-value --secret-id  "/concourse/dataworks/end-to-end" ${LOCAL_PROFILE} | jq -r '.SecretBinary' | base64 --decode)
     s3_bucket=$(echo "$secret_value" | jq -r '.["terraform-outputs"].s3_bucket')

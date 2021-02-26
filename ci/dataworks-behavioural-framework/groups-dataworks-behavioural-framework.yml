@@ -2,7 +2,9 @@ groups:
 - name: master
   jobs:
   - development
+  - development-run-with-image
   - qa
+  - qa-run-with-image
   - integration
   - management-dev
   - management

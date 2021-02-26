@@ -53,8 +53,8 @@ meta-dataworks-behavioural-framework:
           - name: dataworks-behavioural-framework
           - name: terraform-output-ingest
 
-    phase-one-e2e-tests:
-      task: phase-one-e2e-tests
+    dataworks-e2e-tests:
+      task: dataworks-e2e-tests
       config:
         platform: linux
         image_resource:
@@ -79,6 +79,22 @@ meta-dataworks-behavioural-framework:
               "../../../meta"
         inputs:
           - name: dataworks-behavioural-framework
+          - name: meta
+
+    dataworks-e2e-tests-run-with-image:
+      task: dataworks-e2e-tests
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ((dataworks.dataworks_behavioural_framework_repository))
+            tag: latest
+        params:
+          AWS_REGION: ((dataworks.aws_region))
+          AWS_DEFAULT_REGION: ((dataworks.aws_region))
+          NUMBER_OF_TOPICS_TO_USE: 3
+        inputs:
           - name: meta
 
     tear-down:

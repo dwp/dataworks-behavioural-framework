@@ -43,7 +43,7 @@ jobs:
             path: dataworks-behavioural-framework-pr
             status: failure
 
-      - .: (( inject meta-dataworks-behavioural-framework.plan.phase-one-e2e-tests ))
+      - .: (( inject meta-dataworks-behavioural-framework.plan.dataworks-e2e-tests ))
         config:
           params:
             AWS_ACC: ((aws_account.qa))
