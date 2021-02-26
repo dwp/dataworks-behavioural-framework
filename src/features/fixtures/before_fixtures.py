@@ -659,3 +659,11 @@ def s3_clear_published_bucket_pdm_test_output(context, timeout=30, **kwargs):
     aws_helper.clear_s3_prefix(
         context.published_bucket, context.pdm_test_output_s3_prefix, False
     )
+
+@fixture
+def s3_clear_kickstart_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_kickstart_adg_start' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, "kickstart-e2e-tests", False
+    )
+

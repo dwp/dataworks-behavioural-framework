@@ -1,0 +1,69 @@
+{
+  "vacancy": {
+    "schema" : {
+      "bids" : {
+        "Bid ID": "uuid",
+        "Has Intermediary": "boolean",
+        "Intermediary Name": "string",
+        "Intermediary Id": "string",
+        "Created at": "timestamp",
+        "Modified At": "timestamp"
+      },
+      "bid_employers": {
+        "Bid Employer Id": "uuid",
+        "Bid Id": "uuid",
+        "Employer Id": "uuid",
+        "Employer Name": "string",
+        "Number of Roles": "smallint",
+        "Created at": "timestamp",
+        "Modified At": "timestamp",
+        "Is Gateway?": "string"
+      },
+      "introductions": {
+        "Introduction ID": "uuid",
+        "Vacancy Id": "bigint",
+        "Claimant Identifier": "uuid",
+        "Created At": "timestamp",
+        "Modified At": "timestamp",
+        "Status": "text",
+        "Anticipated Start Date": "date",
+        "Start Date": "date",
+        "End Date": "date",
+        "End Reason": "string"
+      },
+      "vacancies" : {
+        "Vacancy Id": "bigint",
+        "Bid Employer Id": "uuid",
+        "Bid Id": "uuid",
+        "Closing Date": "date",
+        "End Date": "date",
+        "Employability Support": "text",
+        "Employer Job Reference": "text",
+        "Employer Name": "string",
+        "Hours per Week": "numeric",
+        "Hourly Rate": "numeric",
+        "Is Public Transport Available": "string",
+        "Vacancy Level": "string",
+        "Max Number of Applications": "integer",
+        "Sector": "string",
+        "Skills": "string",
+        "Start Date": "date",
+        "Title": "string",
+        "Working Pattern": "string",
+        "Location Address Line 1": "text",
+        "Location Address Line 2": "text",
+        "Location City": "string",
+        "Location Postcode": "string",
+        "Created At": "timestamp",
+        "Modified At": "timestamp",
+        "Number of Roles": "smallint",
+        "Status": "string",
+        "Work Type": "string",
+        "Geography": "string"
+      }
+    },
+    "record_layout" : "CSV",
+    "record_delimiter" : ",",
+    "output_file_pattern": "run-date_collection_epoc-time.csv"
+  }
+}
