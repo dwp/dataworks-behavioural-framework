@@ -94,6 +94,7 @@ meta-dataworks-behavioural-framework:
           AWS_REGION: ((dataworks.aws_region))
           AWS_DEFAULT_REGION: ((dataworks.aws_region))
           NUMBER_OF_TOPICS_TO_USE: 3
+          META_FOLDER_OVERRIDE: "meta"
         inputs:
           - name: meta
 
