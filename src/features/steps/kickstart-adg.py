@@ -17,7 +17,7 @@ CLUSTER_ARN = "ClusterArn"
 AUDIT_TABLE_HASH_KEY = "Correlation_Id"
 AUDIT_TABLE_RANGE_KEY = "DataProduct"
 DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
-
+RUNNING_STATUS = "RUNNING"
 
 @given(
     "The template file '{template_name}' as an input, generate '{record_count}' records per table for '{module_name}' with PII flag is '{PII_Flag}' and upload to s3 bucket"
@@ -63,7 +63,7 @@ def step_impl(context, template_name, record_count, module_name, PII_Flag):
 
 
 @then(
-    "Start kickstart adg emr process for module '{module_name}' and wait for step '{step_name}' to complete"
+    "Start kickstart adg emr process for module '{module_name}' and wait for step '{step_name}' to run"
 )
 def step_impl(context, module_name, step_name):
 
@@ -124,20 +124,19 @@ def step_impl(context, module_name, step_name):
     context.kickstart_adg_cluster_id = cluster_id
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
     step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
-    step_id = step["Id"]
-    console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
+    context.kickstart_step_id = step["Id"]
+    console_printer.print_info(f"Step id for '{step_name}' : '{context.kickstart_step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, 1200
+            context.kickstart_step_id, cluster_id, 1200
         )
-        if execution_state != COMPLETED_STATUS:
+        if execution_state != RUNNING_STATUS:
             raise AssertionError(
                 f"'{step_name}' step failed with final status of '{execution_state}'"
             )
 
-
 @then(
-    "Add steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and wait for these steps to completed"
+    "Add steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and wait for all steps to be completed"
 )
 def step_impl(context, step_name, module_name):
 
@@ -156,14 +155,33 @@ def step_impl(context, step_name, module_name):
         f"add hive queries as step to kickstart adg EMR cluster to get end result"
     )
 
+    hive_query_step_lst = []
+
     for hive_query in hive_queries_list:
-        context.pdm_cluster_step_id = emr_step_generator.generate_bash_step(
+        kickstart_hive_query_step_id = emr_step_generator.generate_bash_step(
             context.kickstart_adg_cluster_id,
             hive_query,
             context.kickstart_adg_hive_cluster_step_name,
         )
+        hive_query_step_lst.append(kickstart_hive_query_step_id)
+
+    console_printer.print_info(
+        f"check if spark step with {context.kickstart_step_id} is complete or not"
+    )
+    execution_state = aws_helper.poll_emr_cluster_step_status(
+        context.kickstart_step_id, context.kickstart_adg_cluster_id, 1200
+    )
+    if execution_state != COMPLETED_STATUS:
+        raise AssertionError(
+            f"spark-submit step with step Id {context.kickstart_step_id} failed with final status of '{execution_state}'"
+        )
+
+    for hive_query_step in hive_query_step_lst:
+        console_printer.print_info(
+            f"check if hive validation queries step with {hive_query_step} is complete or not"
+        )
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            context.pdm_cluster_step_id, context.kickstart_adg_cluster_id, 1200
+            context.hive_query_step, context.kickstart_adg_cluster_id, 1200
         )
         if execution_state != COMPLETED_STATUS:
             raise AssertionError(
