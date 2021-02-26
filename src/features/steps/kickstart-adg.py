@@ -162,7 +162,7 @@ def step_impl(context, step_name, module_name):
             f"check if hive validation queries step with {step} is complete or not"
         )
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            context.hive_query_step, context.kickstart_adg_cluster_id, 1200
+            step, context.kickstart_adg_cluster_id, 1200
         )
         if execution_state != COMPLETED_STATUS:
             raise AssertionError(
