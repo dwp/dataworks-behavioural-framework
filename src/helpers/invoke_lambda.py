@@ -76,6 +76,7 @@ def invoke_claimant_mysql_metadata_interface(payload=None):
     response = aws_helper.invoke_lambda_function("ucfs_claimant_mysql_interface")
     return json.loads(response.decode())
 
+
 def invoke_kickstart_adg_emr_launcher_lambda(payload):
     """Triggers kickstart_adg_emr_launcher lambda with the given payload.
 
