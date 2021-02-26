@@ -128,7 +128,7 @@ def step_impl(context, module_name, step_name):
     console_printer.print_info(f"Step id for '{step_name}' : '{context.kickstart_step_id}'")
 
 @then(
-    "Add steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and wait for all steps to be completed"
+    "Add steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and wait for all steps to completed"
 )
 def step_impl(context, step_name, module_name):
 
