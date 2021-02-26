@@ -3,13 +3,11 @@ FROM dwpdigital/python-boto-behave
 RUN apk add libffi-dev openssl-dev python3-dev rust
 
 RUN mkdir /src
-RUN mkdir /resources
 
 COPY assume_role.sh /
-COPY requirements.txt /resources/
+COPY requirements.txt /
 COPY src/ /src/
 
-WORKDIR /resources
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 ENV PATH=$PATH:/root/.local/bin
 RUN pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --user
