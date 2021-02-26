@@ -26,6 +26,7 @@ meta-dataworks-behavioural-framework:
         repository: "dataworks-behavioural-framework"
         aws_role_arn: arn:aws:iam::((dataworks.aws_management_acc)):role/ci
       check_every: 5m
+      
   plan:
     upload-fixture-data:
       task: upload-fixture-data
@@ -92,15 +93,18 @@ meta-dataworks-behavioural-framework:
             repository: ((dataworks.dataworks_behavioural_framework_repository))
             tag: latest
         run:
+          dir: meta
           path: sh
           args:
             - -exc
             - |
+              cp -r ../meta/ /src/
+              cd /src/runners
+              
               source /assume-role
-              set +x
-              cd src/runners
+
               ./run-ci.sh \
-              "../../meta"
+              "../meta"
         params:
           AWS_REGION: ((dataworks.aws_region))
           AWS_DEFAULT_REGION: ((dataworks.aws_region))
