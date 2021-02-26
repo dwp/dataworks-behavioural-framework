@@ -91,6 +91,7 @@ meta-dataworks-behavioural-framework:
           source:
             repository: ((dataworks.dataworks_behavioural_framework_repository))
             tag: latest
+        run:
           path: sh
           args:
             - -exc
