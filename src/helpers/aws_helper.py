@@ -1682,8 +1682,6 @@ def generate_arn(service, arn_suffix, region=None):
     """
     arn_value = "arn"
     aws_value = "aws"
-    service = "sns"
-
     region_qualified = region if region else ""
 
     return f"{arn_value}:{aws_value}:{service}:{region_qualified}:{arn_suffix}"
