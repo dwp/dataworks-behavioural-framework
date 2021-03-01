@@ -225,6 +225,6 @@
       }
     },
     "record_layout" : "JSON",
-    "output_file_pattern" : "run-date_collection_epoc-time.json.gz.enc"
+    "output_file_pattern" : "run-date_collection_epoc-time.json"
   }
 }
