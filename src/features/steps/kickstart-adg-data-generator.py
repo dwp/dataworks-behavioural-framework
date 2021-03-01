@@ -81,7 +81,7 @@ def step_impl(context, data_encryption):
             ] = historic_data_load_generator.generate_initialisation_vector()
 
             console_printer.print_info(f"Extracting the raw data from local directory")
-            data = file_helper.get_contents_of_file(file, False)
+            data = file_helper.get_contents_of_file(file, False).encode("utf-8")
 
             console_printer.print_info(f"Applying encryption to the raw data")
             input_data = historic_data_load_generator.encrypt(
