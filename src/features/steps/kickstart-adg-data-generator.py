@@ -97,5 +97,5 @@ def step_impl(context, data_encryption):
             )
 
             aws_helper.put_object_in_s3_with_metadata(
-                input_data, context.published_bucket, inputs_s3_key, Metadata=json.loads(metadata)
+                input_data, context.published_bucket, inputs_s3_key, metadata=json.loads(metadata)
             )
