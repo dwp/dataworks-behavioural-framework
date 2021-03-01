@@ -383,9 +383,11 @@ def setup_user(context, primary_policy_name, role_name=None, additional_policies
         policy_list = [primary_policy_name]
 
     # Add policy to context to allow for removal in cleanup
-    arn_suffix = f"{context.aws_acc}:policy/{policy}"
-    arn_value = aws_helper.generate_arn("iam", arn_suffix)
-    context.analytical_test_e2e_policies = [arn_value for policy in policy_list]
+    context.analytical_test_e2e_policies = []
+    for policy in policy_list:
+        arn_suffix = f"{context.aws_acc}:policy/{policy}"
+        arn_value = aws_helper.generate_arn("iam", arn_suffix)
+        context.analytical_test_e2e_policies.append(arn_value)
 
 
 @fixture
@@ -448,9 +450,11 @@ def setup_user_and_role(
         policy_list = [primary_policy_name]
 
     # Add policy to context to allow for removal in cleanup
-    arn_suffix = f"{context.aws_acc}:policy/{policy}"
-    arn_value = aws_helper.generate_arn("iam", arn_suffix)
-    context.analytical_test_e2e_policies = [arn_value for policy in policy_list]
+    context.analytical_test_e2e_policies = []
+    for policy in policy_list:
+        arn_suffix = f"{context.aws_acc}:policy/{policy}"
+        arn_value = aws_helper.generate_arn("iam", arn_suffix)
+        context.analytical_test_e2e_policies.append(arn_value)
 
     aws_helper.attach_policies_to_role(
         context.analytical_test_e2e_policies,
