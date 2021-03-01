@@ -65,5 +65,166 @@
     "record_layout" : "CSV",
     "record_delimiter" : ",",
     "output_file_pattern": "run-date_collection_epoc-time.csv"
+  },
+  "application" : {
+    "schema" : {
+      "grant_applications" : {
+        "application_id": {
+          "value"   : "uuid"
+        },
+        "full_reference_number": {
+          "value"   : "uuid"
+        },
+        "application_type": {
+          "value"   : "string"
+        },
+        "full_name": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "email": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "telephone_number": {
+          "value"   : "bigint",
+          "pii_flg" : true
+        },
+        "organisation_name": {
+          "value"   : "string"
+        },
+        "company_house_number": {
+          "value"   : "bigint",
+          "pii_flg" : true
+        },
+        "address_line_1": {
+          "value"   : "text",
+          "pii_flg" : true
+        },
+        "address_line_2": {
+          "value"   : "text",
+          "pii_flg" : true
+        },
+        "town": {
+          "value"   : "string"
+        },
+        "county": {
+          "value"   : "string"
+        },
+        "postcode": {
+          "value"   : "string"
+        },
+        "contact_notes" : {
+          "value"   : "text"
+        },
+        "employers_represented": {
+          "value"   : "string"
+        },
+        "number_of_job_placements": {
+          "value"   : "integer"
+        },
+        "roles_to_be_created": {
+          "value": "string"
+        },
+        "employbility_support_information": {
+          "value": "text"
+        },
+        "expected_date_of_decision": {
+          "value": "date"
+        },
+        "linked_application_ids": {
+          "value": "string"
+        },
+        "main_or_additional_application": {
+          "value": "string"
+        },
+        "assigned_team": {
+          "value": "string"
+        },
+        "sent_for_spotlight_check": {
+          "value": "boolean"
+        },
+        "spotlight_approved": {
+          "value": "boolean"
+        },
+        "reason_rejected_by_spotlight": {
+          "value": "string"
+        },
+        "date_work_started_on_application": {
+          "value": "date"
+        },
+        "assessment_criteria_approved": {
+          "value": "boolean"
+        },
+        "Contacted employer": {
+          "value": "boolean"
+        },
+        "date_info_request_made": {
+          "value": "date"
+        },
+        "reason_for_rejection": {
+          "value": "string"
+        },
+        "recommended_decision": {
+          "value": "string"
+        },
+        "date_sent_to_decision_board_secretariat": {
+          "value": "date"
+        },
+        "date_of_original_decision_board": {
+          "value": "date"
+        },
+        "original_number_of_job_placements": {
+          "value": "string"
+        },
+        "total_amount_of_funding": {
+          "value": "string"
+        },
+        "original_approval_board_decision": {
+          "value": "string"
+        },
+        "date_of_second_approval_board": {
+          "value": "date"
+        },
+        "second_approval_board_decision": {
+          "value": "string"
+        },
+        "higher_DFA_decision": {
+          "value": "string"
+        },
+        "number_of_approved_job_placements": {
+          "value": "integer"
+        },
+        "main_reason_for_DFA_rejection": {
+          "value": "string"
+        },
+        "batch_number_if_pending_approval": {
+          "value": "string"
+        },
+        "date_decision_email_sent": {
+          "value": "date"
+        },
+        "date_award_letter_sent": {
+          "value": "date"
+        },
+        "date_grant_agreement_sent": {
+          "value": "date"
+        },
+        "date_vacancy_template_sent": {
+          "value": "date"
+        },
+        "date_grant_agreement_received": {
+          "value": "date"
+        },
+        "date_completed_templates_sent_to_assessment_team_vacancy_team": {
+          "value": "date"
+        },
+        "date_schedule_sent_to_payments_team": {
+          "value": "date"
+        }
+      }
+    },
+    "record_layout" : "JSON",
+    "output_file_pattern" : "run-date_collection_epoc-time.json.gz.enc"
   }
 }

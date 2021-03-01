@@ -43,7 +43,7 @@ def dataGenTimestamp():
 
 
 def dataGenUUID():
-    return uuid.uuid1()
+    return str(uuid.uuid1())
 
 
 def dataGenString():
@@ -151,6 +151,30 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                             ]
                         )
                         writer.write(record_data + "\n")
+                        num += 1
+
+        elif schema_config["record_layout"].lower() == "json":
+
+            for collection, collection_schema in schema_config["schema"].items():
+                run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+                epoc_time = str(date_helper.get_current_epoch_seconds())
+                output_file_name = (
+                    schema_config["output_file_pattern"]
+                        .replace("run-date", run_date)
+                        .replace("collection", collection)
+                        .replace("epoc-time", epoc_time)
+                )
+                output_file = os.path.join(local_output_folder, output_file_name)
+                with open(output_file, "w+") as writer:
+                    num = 1
+                    while num <= int(record_count):
+                        record={}
+                        for column, column_property in collection_schema.items():
+                            if 'value' in column_property:
+                                record.update({ column : {"value" : dataTypeMapping(column_property["value"])()}})
+                            if 'pii_flg' in column_property:
+                                record[column].update({"pii_flg" : column_property["pii_flg"]})
+                        writer.write(json.dumps(record)+'\n')
                         num += 1
 
         return [
