@@ -22,7 +22,7 @@ DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
 @given(
     "The template file '{template_name}' as an input, generate '{record_count}' records per table for '{module_name}'"
 )
-def step_impl(context, template_name, record_count, module_name, PII_Flag):
+def step_impl(context, template_name, record_count, module_name):
 
     console_printer.print_info(
         f"Extracting the file properties from {template_name} for module {module_name}"
@@ -91,7 +91,7 @@ def step_impl(context, data_encryption):
             metadata=historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
                 encrypted_key, master_key, plaintext_key, file_iv_int
             )
-            
+
             console_printer.print_info(
                 f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key} and along with metadata"
             )
