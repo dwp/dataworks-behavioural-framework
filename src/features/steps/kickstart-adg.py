@@ -19,6 +19,7 @@ AUDIT_TABLE_RANGE_KEY = "DataProduct"
 DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
 RUNNING_STATUS = "RUNNING"
 
+
 @given(
     "The template file '{template_name}' as an input, generate '{record_count}' records per table for '{module_name}' with PII flag as '{PII_Flag}' and upload to s3 bucket"
 )
@@ -125,7 +126,10 @@ def step_impl(context, module_name, step_name):
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
     step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
     context.kickstart_step_id = step["Id"]
-    console_printer.print_info(f"Step id for '{step_name}' : '{context.kickstart_step_id}'")
+    console_printer.print_info(
+        f"Step id for '{step_name}' : '{context.kickstart_step_id}'"
+    )
+
 
 @then(
     "Add steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and wait for all steps to completed"
