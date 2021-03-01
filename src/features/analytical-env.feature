@@ -74,7 +74,7 @@ Feature: Creating Analytical Environment for End Users
 
   @fixture.setup.auditlog_secure_user_and_role
   Scenario: An auditlog_secure user attempts to access PII data in the auditlog_red_v table in the published S3 bucket
-    Given A user is cleared to access data in the auditlog_red_v table in the published S3 bucket
+    Given A user is not cleared to access data in the auditlog_red_v table in the published S3 bucket
     When The user attempts to read data from the auditlog_red_v table in the published S3 bucket
     Then The user is unable to read the data
 
