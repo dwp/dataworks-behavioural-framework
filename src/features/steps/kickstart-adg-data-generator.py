@@ -93,8 +93,9 @@ def step_impl(context, data_encryption):
                 encrypted_key, master_key, plaintext_key, file_iv_int
             ))
 
-            console_printer.print_info(f"Metadata of for encrypted file is {json.dumps(all_metadata)}")
-
+            console_printer.print_info("Metadata of for encrypted file is \n")
+            console_printer.print_info(f"{json.dumps(all_metadata)}")
+            
             metadata = {
                 "iv" : all_metadata["initialisationVector"],
                 "ciphertext" : all_metadata["encryptedencryptionkey"],
