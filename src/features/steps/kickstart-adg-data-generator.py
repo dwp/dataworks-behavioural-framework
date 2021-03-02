@@ -89,9 +89,9 @@ def step_impl(context, data_encryption):
             )
             inputs_s3_key = os.path.join(S3_KEY_KICSKTART_TEST, file_name+'.enc')
 
-            all_metadata=historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
+            all_metadata=json.loads(historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
                 encrypted_key, master_key, plaintext_key, file_iv_int
-            )
+            ))
 
             metadata = {
                 "iv" : all_metadata["initialisationvector"],
@@ -103,5 +103,5 @@ def step_impl(context, data_encryption):
             )
 
             aws_helper.put_object_in_s3_with_metadata(
-                input_data, context.published_bucket, inputs_s3_key, metadata=json.loads(metadata)
+                input_data, context.published_bucket, inputs_s3_key, metadata=metadata
             )
