@@ -88,10 +88,16 @@ def step_impl(context, data_encryption):
                 file_iv_whole, plaintext_key, data
             )
             inputs_s3_key = os.path.join(S3_KEY_KICSKTART_TEST, file_name+'.enc')
-            metadata=historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
+
+            all_metadata=historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
                 encrypted_key, master_key, plaintext_key, file_iv_int
             )
 
+            metadata = {
+                "iv" : all_metadata["initialisationvector"],
+                "ciphertext" : all_metadata["encryptedencryptionkey"],
+                "datakeyencryptionkeyid" : all_metadata["keyencryptionkeyid"]
+            }
             console_printer.print_info(
                 f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key} and along with metadata"
             )
