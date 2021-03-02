@@ -48,7 +48,6 @@ def step_read_file_from_s3(context):
 def step_user_has_read_access(context):
     assert context.read_access == True
 
-
 @given(
     "A user is not cleared to access PII data from the UC database in the published S3 bucket"
 )
@@ -69,6 +68,9 @@ def step_non_sc_role_assumed(context):
     aws_helper.clear_session()
 
 
+@when(
+    "The user attempts to read data in the published S3 bucket location"
+)
 @when(
     "The user Attempts to read data tagged with the pii:false tag from the UC database in the published S3 bucket"
 )
@@ -94,7 +96,7 @@ def step_non_sc_role_assumed(context):
 @when(
     "The user Attempts to read data tagged with the pii:true tag in the published S3 bucket"
 )
-def step_attempt_to_read_pii_data(context):
+def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.published_bucket,
         os.path.join(
@@ -102,7 +104,6 @@ def step_attempt_to_read_pii_data(context):
             context.analytical_test_data_s3_location["file_name"],
         ),
     )
-
 
 @then("The user is unable to read the data")
 def step_no_read_access(context):
@@ -385,6 +386,79 @@ def step_ucs_opsmi_unredacted_upload(context):
         arn_value, context.aws_session_timeout_seconds
     )
     aws_helper.clear_session()
+
+
+@given("A user is cleared to read uc_mongo_latest DB data in the published S3 bucket")
+def step_uc_mongo_latest_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
+
+    tag_map = {"pii": "true", "db": "uc_mongo_latest", "table": "uc_mongo_latest_test_table"}
+    setup_test_file_in_s3(context, tag_map)
+    arn_value = analytical_env_helper.generate_policy_arn(
+        context.aws_acc, context.analytical_test_e2e_role
+    )
+
+    aws_helper.set_details_for_role_assumption(
+        arn_value, context.aws_session_timeout_seconds
+    )
+    aws_helper.clear_session()
+
+
+@given("A user is only cleared to write to the uc_mongo_latest DB location in the published S3 bucket")
+def step_uc_mongo_latest_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
+
+    tag_map = {"pii": "false", "db": "ucs_latest_redacted", "table": "ucs_latest_redacted_test_table"}
+    setup_test_file_in_s3(context, tag_map)
+    arn_value = analytical_env_helper.generate_policy_arn(
+        context.aws_acc, context.analytical_test_e2e_role
+    )
+
+    aws_helper.set_details_for_role_assumption(
+        arn_value, context.aws_session_timeout_seconds
+    )
+    aws_helper.clear_session()
+
+
+@given("A user is not cleared to write to uc_mongo_latest DB location in the published S3 bucket")
+@given("A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket")
+def step_uc_mongo_latest_user_write_access(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
+    arn_value = analytical_env_helper.generate_policy_arn(
+        context.aws_acc, context.analytical_test_e2e_role
+    )
+
+    aws_helper.set_details_for_role_assumption(
+        arn_value, context.aws_session_timeout_seconds
+    )
+    aws_helper.clear_session()
+
+
+@when('The user attempts to write to another S3 bucket location')
+@when('The user attempts to write to the published S3 bucket location')
+def step_attempt_to_write_data(context):
+    with open(context.analytical_test_data_s3_location["file_name"], 'a'):
+        os.utime(context.analytical_test_data_s3_location["file_name"], None)
+
+    context.write_access = aws_helper.test_s3_access_write(
+        context.published_bucket,
+        os.path.join(
+            context.analytical_test_data_s3_location["path"],
+            context.analytical_test_data_s3_location["file_name"],
+        ),
+        context.analytical_test_data_s3_location["file_name"],
+        30
+    )
+
+
+@then("The user is able to write to the location")
+def step_user_has_write_access(context):
+    assert context.write_access == True
+
+
+@then("The user is unable to write to the location")
+def step_user_has_write_access(context):
+    assert context.write_access == False
 
 
 def setup_test_file_in_s3(context, tag_map):
