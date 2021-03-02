@@ -95,11 +95,11 @@ def step_impl(context, data_encryption):
 
             console_printer.print_info("Metadata of for encrypted file is \n")
             console_printer.print_info(f"{json.dumps(all_metadata)}")
-            
+
             metadata = {
                 "iv" : all_metadata["initialisationVector"],
-                "ciphertext" : all_metadata["encryptedencryptionkey"],
-                "datakeyencryptionkeyid" : all_metadata["keyencryptionkeyid"]
+                "ciphertext" : all_metadata["encryptedEncryptionKey"],
+                "datakeyencryptionkeyid" : all_metadata["keyEncryptionKeyId"]
             }
             console_printer.print_info(
                 f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key} and along with metadata"
