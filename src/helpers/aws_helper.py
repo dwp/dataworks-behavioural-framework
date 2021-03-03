@@ -1532,7 +1532,7 @@ def test_s3_access_write(s3_bucket, key, local_file, timeout, s3_client=None):
         )
         return True
 
-#   Raises ClientError whilst s3 call is happening asynchronously then returns S3UploadFailedError from the api call
+    #   Raises ClientError whilst s3 call is happening asynchronously then returns S3UploadFailedError from the api call
     except ClientError as e:
         if "PutObject operation: Access Denied" in str(e):
             return False

@@ -48,6 +48,7 @@ def step_read_file_from_s3(context):
 def step_user_has_read_access(context):
     assert context.read_access == True
 
+
 @given(
     "A user is not cleared to access PII data from the UC database in the published S3 bucket"
 )
@@ -72,9 +73,7 @@ def step_non_sc_role_assumed(context):
     )
 
 
-@when(
-    "The user attempts to read data in the published S3 bucket location"
-)
+@when("The user attempts to read data in the published S3 bucket location")
 @when(
     "The user Attempts to read data tagged with the pii:false tag from the UC database in the published S3 bucket"
 )
@@ -108,6 +107,7 @@ def step_attempt_to_read_data(context):
             context.analytical_test_data_s3_location["file_name"],
         ),
     )
+
 
 @then("The user is unable to read the data")
 def step_no_read_access(context):
@@ -436,7 +436,9 @@ def step_ucs_opsmi_unredacted_upload(context):
     )
 
 
-@given("A user is cleared to read ucs_latest_redacted DB data in the published S3 bucket")
+@given(
+    "A user is cleared to read ucs_latest_redacted DB data in the published S3 bucket"
+)
 def step_ucs_latest_redacted_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
 
@@ -474,7 +476,9 @@ def step_uc_mongo_latest_assumed(context):
     )
 
 
-@given("A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket")
+@given(
+    "A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket"
+)
 def step_ucs_latest_unredacted_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_unredacted/"
 
@@ -493,7 +497,9 @@ def step_ucs_latest_unredacted_assumed(context):
     )
 
 
-@given("A user is only cleared to write to the uc_mongo_latest DB location in the published S3 bucket")
+@given(
+    "A user is only cleared to write to the uc_mongo_latest DB location in the published S3 bucket"
+)
 def step_uc_mongo_latest_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
 
@@ -512,19 +518,26 @@ def step_uc_mongo_latest_assumed(context):
     )
 
 
-@given("A user is not cleared to write to ucs_latest_redacted DB location in the published S3 bucket")
-@given("A user is cleared to write to ucs_latest_redacted DB location in the published S3 bucket")
+@given(
+    "A user is not cleared to write to ucs_latest_redacted DB location in the published S3 bucket"
+)
+@given(
+    "A user is cleared to write to ucs_latest_redacted DB location in the published S3 bucket"
+)
 def step_ucs_latest_redacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
-    analytical_env_helper.assume_role_for_test( 
+    analytical_env_helper.assume_role_for_test(
         context.aws_acc, 
         context.analytical_test_e2e_role, 
         context.aws_session_timeout_seconds
     )
 
-
-@given("A user is not cleared to write to ucs_latest_unredacted DB location in the published S3 bucket")
-@given("A user is cleared to write to ucs_latest_unredacted DB location in the published S3 bucket")
+@given(
+    "A user is not cleared to write to ucs_latest_unredacted DB location in the published S3 bucket"
+)
+@given(
+    "A user is cleared to write to ucs_latest_unredacted DB location in the published S3 bucket"
+)
 def step_ucs_latest_unredacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_unredacted/"
     analytical_env_helper.assume_role_for_test( 
@@ -534,10 +547,18 @@ def step_ucs_latest_unredacted_user_write_access(context):
     )
 
 
-@given("A user is only cleared to write to the ucs_latest_unredacted DB location in the published S3 bucket")
-@given("A user is only cleared to write to the ucs_latest_redacted DB location in the published S3 bucket")
-@given("A user is not cleared to write to uc_mongo_latest DB location in the published S3 bucket")
-@given("A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket")
+@given(
+    "A user is only cleared to write to the ucs_latest_unredacted DB location in the published S3 bucket"
+)
+@given(
+    "A user is only cleared to write to the ucs_latest_redacted DB location in the published S3 bucket"
+)
+@given(
+    "A user is not cleared to write to uc_mongo_latest DB location in the published S3 bucket"
+)
+@given(
+    "A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket"
+)
 def step_uc_mongo_latest_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
     analytical_env_helper.assume_role_for_test( 
@@ -547,10 +568,10 @@ def step_uc_mongo_latest_user_write_access(context):
     )
 
 
-@when('The user attempts to write to another S3 bucket location')
-@when('The user attempts to write to the published S3 bucket location')
+@when("The user attempts to write to another S3 bucket location")
+@when("The user attempts to write to the published S3 bucket location")
 def step_attempt_to_write_data(context):
-    with open(context.analytical_test_data_s3_location["file_name"], 'a'):
+    with open(context.analytical_test_data_s3_location["file_name"], "a"):
         os.utime(context.analytical_test_data_s3_location["file_name"], None)
 
     context.write_access = aws_helper.test_s3_access_write(
@@ -560,7 +581,7 @@ def step_attempt_to_write_data(context):
             context.analytical_test_data_s3_location["file_name"],
         ),
         context.analytical_test_data_s3_location["file_name"],
-        30
+        30,
     )
 
 

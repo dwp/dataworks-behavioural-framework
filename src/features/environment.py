@@ -210,30 +210,94 @@ def before_tag(context, tag):
             "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure",
             ["rbac_uc__auditlog_secure"],
         )
-    if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc_mongo_latest_full_access")
+    if (
+        tag
+        == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_mongo_latest_full_access",
+        )
     if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc_mongo_latest_full_access")    
-    if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_read_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_uc_mongo_latest_read_access")
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest_full_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_mongo_latest_read_access",
+        )
     if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_read_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_uc_mongo_latest_read_access")
-    if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_latest_redacted_full_access")
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest_read_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_redacted_full_access",
+        )
     if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_ucs_latest_redacted_full_access")
-    if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_read_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_latest_redacted_read_access")
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_ucs_latest_redacted_full_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_redacted_read_access",
+        )
     if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_read_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_ucs_latest_redacted_read_access")
-    if tag == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_latest_unredacted_full_access")
-    if tag == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_ucs_latest_unredacted_full_access")
-    if tag == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access_and_role":
-        use_fixture(before_fixtures.setup_user_and_role, context, "rbac_ucs_latest_unredacted_read_access")
-    if tag == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access":
-        use_fixture(before_fixtures.setup_user, context, "rbac_ucs_latest_unredacted_read_access")
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_ucs_latest_redacted_read_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_unredacted_full_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_ucs_latest_unredacted_full_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_unredacted_read_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_ucs_latest_unredacted_read_access",
+        )
     if tag == "fixture.htme.start.full":
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
