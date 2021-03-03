@@ -335,99 +335,99 @@ Feature: Creating Analytical Environment for End Users
     When The user attempts to read data from the auditlog_sec_v table in the published S3 bucket
     Then The user is unable to read the data
 
-  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access_and_role
+  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access_and_role
   Scenario: A user with read access to uc_mongo_latest DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read uc_mongo_latest DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access
+  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access
   @fixture.cleanup.s3
   Scenario: A user with write access to uc_mongo_latest DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
     Then The user is able to write to the location
 
-  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access
+  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with write access to uc_mongo_latest DB attempts to write data in another S3 bucket location
     Given A user is only cleared to write to the uc_mongo_latest DB location in the published S3 bucket
     When The user attempts to write to another S3 bucket location
     Then The user is unable to write to the location
 
-  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_read_access_and_role
+  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__read_access_and_role
   Scenario: A user with read access to uc_mongo_latest DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read uc_mongo_latest DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_read_access
+  @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__read_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with read only access to uc_mongo_latest DB attempts to access data in the published S3 bucket location
     Given A user is not cleared to write to uc_mongo_latest DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
     Then The user is unable to write to the location
 
-  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access_and_role
+  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access_and_role
   Scenario: A user with read access to ucs_latest_redacted DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read ucs_latest_redacted DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access
+  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access
   @fixture.cleanup.s3
   Scenario: A user with write access to ucs_latest_redacted DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to ucs_latest_redacted DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
     Then The user is able to write to the location
 
-  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access
+  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with write access to ucs_latest_redacted DB attempts to access data in another S3 bucket location
     Given A user is only cleared to write to the ucs_latest_redacted DB location in the published S3 bucket
     When The user attempts to write to another S3 bucket location
     Then The user is unable to write to the location
 
-  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_read_access_and_role
+  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access_and_role
   Scenario: A user with read access to ucs_latest_redacted DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read ucs_latest_redacted DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_read_access
+  @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with read only access to ucs_latest_redacted DB attempts to write data in the published S3 bucket location
     Given A user is not cleared to write to ucs_latest_redacted DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
     Then The user is unable to write to the location
 
-  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access_and_role
+  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__full_access_and_role
   Scenario: A user with read access to ucs_latest_unredacted DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access
+  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__full_access
   @fixture.cleanup.s3
   Scenario: A user with write access to ucs_latest_unredacted DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to ucs_latest_unredacted DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
     Then The user is able to write to the location
 
-  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access
+  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__full_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with write access to ucs_latest_unredacted DB attempts to access data in another S3 bucket location
     Given A user is only cleared to write to the ucs_latest_unredacted DB location in the published S3 bucket
     When The user attempts to write to another S3 bucket location
     Then The user is unable to write to the location
 
-  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access_and_role
+  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__read_access_and_role
   Scenario: A user with read access to ucs_latest_unredacted DB attempts to access data in the published S3 bucket location
     Given A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is able to read the data
 
-  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_read_access
+  @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__read_access
   @fixture.cleanup.role_and_s3
   Scenario: A user with read only access to ucs_latest_unredacted DB attempts to write data in the published S3 bucket location
     Given A user is not cleared to write to ucs_latest_unredacted DB location in the published S3 bucket
