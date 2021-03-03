@@ -245,7 +245,10 @@ def before_tag(context, tag):
             context,
             "rbac_ucs_latest_redacted__full_access",
         )
-    if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access":
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access"
+    ):
         use_fixture(
             before_fixtures.setup_user, context, "rbac_ucs_latest_redacted__full_access"
         )
@@ -258,7 +261,10 @@ def before_tag(context, tag):
             context,
             "rbac_ucs_latest_redacted__read_access",
         )
-    if tag == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access":
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access"
+    ):
         use_fixture(
             before_fixtures.setup_user, context, "rbac_ucs_latest_redacted__read_access"
         )
