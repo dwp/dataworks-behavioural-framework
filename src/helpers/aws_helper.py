@@ -1698,10 +1698,10 @@ def generate_arn(service, arn_suffix, region=None):
 def check_if_s3_object_exists(bucket, key, s3_client=None):
     """Returns True or False based on object existing in s3 location
 
-     Keyword arguments:
-        bucket -- the s3 bucket id
-        key -- the key/prefix for the location of the file
-        s3_client -- an established s3 client (optional)
+    Keyword arguments:
+       bucket -- the s3 bucket id
+       key -- the key/prefix for the location of the file
+       s3_client -- an established s3 client (optional)
     """
 
     if s3_client == None:
@@ -1711,8 +1711,8 @@ def check_if_s3_object_exists(bucket, key, s3_client=None):
         Bucket=bucket,
         Prefix=key,
     )
-    for obj in response.get('Contents', []):
-        if obj['Key'] == key:
+    for obj in response.get("Contents", []):
+        if obj["Key"] == key:
             return True
 
     return False

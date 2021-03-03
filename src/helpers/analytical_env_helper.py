@@ -13,7 +13,9 @@ def generate_policy_arn(aws_acc, analytical_test_e2e_role):
     return aws_helper.generate_arn("iam", arn_suffix)
 
 
-def assume_role_for_test(aws_acc, analytical_test_e2e_role, aws_session_timeout_seconds):
+def assume_role_for_test(
+    aws_acc, analytical_test_e2e_role, aws_session_timeout_seconds
+):
     """CI assumes role for testing policy permissions
 
     Keyword arguments:
@@ -21,14 +23,9 @@ def assume_role_for_test(aws_acc, analytical_test_e2e_role, aws_session_timeout_
         analytical_test_e2e_role -- the role name
         aws_session_timeout_seconds -- timeout (already in context)
     """
-    arn_value = generate_policy_arn(
-        aws_acc,
-        analytical_test_e2e_role
-    )
+    arn_value = generate_policy_arn(aws_acc, analytical_test_e2e_role)
 
-    aws_helper.set_details_for_role_assumption(
-        arn_value, aws_session_timeout_seconds
-    )
+    aws_helper.set_details_for_role_assumption(arn_value, aws_session_timeout_seconds)
     aws_helper.clear_session()
 
 
@@ -45,9 +42,7 @@ def setup_test_file_in_s3(file_name, path, s3_bucket, timeout, tag_map):
     local_dir = "/tmp/"
 
     #  Create local file, upload to s3 then delete local file
-    file_helper.create_local_file(
-        file_name, local_dir
-    )
+    file_helper.create_local_file(file_name, local_dir)
 
     aws_helper.upload_file_to_s3_and_wait_for_consistency(
         os.path.join(local_dir, file_name),
@@ -59,9 +54,7 @@ def setup_test_file_in_s3(file_name, path, s3_bucket, timeout, tag_map):
         ),
     )
 
-    file_helper.delete_local_file(
-        file_name, local_dir
-    )
+    file_helper.delete_local_file(file_name, local_dir)
 
     aws_helper.add_tags_to_file_in_s3(
         s3_bucket,

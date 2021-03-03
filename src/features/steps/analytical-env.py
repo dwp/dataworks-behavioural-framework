@@ -59,17 +59,17 @@ def step_non_sc_role_assumed(context):
 
     tag_map = {"pii": "true", "db": "uc", "table": "pii_test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -123,17 +123,17 @@ def step_non_sc_role_assumed(context):
 
     tag_map = {"pii": "false", "db": "uc", "table": "pii_test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -159,18 +159,18 @@ def step_non_sc_role_assumed(context):
         tag_map = {"db": db}
         context.analytical_test_data_s3_location["path"] = f"data/{db}/"
         analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
-    )
+            context.analytical_test_data_s3_location["file_name"],
+            context.analytical_test_data_s3_location["path"],
+            context.published_bucket,
+            context.timeout,
+            tag_map,
+        )
         del context.analytical_test_data_s3_location["path"]
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -191,18 +191,18 @@ def step_non_sc_role_assumed(context):
         tag_map = {"pii": "false", "db": db, "table": "test_table"}
         context.analytical_test_data_s3_location["path"] = f"data/{db}/"
         analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
-    )
+            context.analytical_test_data_s3_location["file_name"],
+            context.analytical_test_data_s3_location["path"],
+            context.published_bucket,
+            context.timeout,
+            tag_map,
+        )
         del context.analytical_test_data_s3_location["path"]
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -218,18 +218,18 @@ def step_non_sc_role_assumed(context):
         tag_map = {"pii": "true", "db": "uc", "table": table}
         context.analytical_test_data_s3_location["path"] = f"data/uc/{table}/"
         analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
-    )
+            context.analytical_test_data_s3_location["file_name"],
+            context.analytical_test_data_s3_location["path"],
+            context.published_bucket,
+            context.timeout,
+            tag_map,
+        )
         del context.analytical_test_data_s3_location["path"]
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -272,17 +272,17 @@ def step_auditlog_red_v_upload(context):
 
     tag_map = {"pii": "true", "db": "uc", "table": "auditlog_red_v"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -297,17 +297,17 @@ def step_auditlog_sec_v_upload(context):
 
     tag_map = {"pii": "true", "db": "uc", "table": "auditlog_sec_v"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -322,17 +322,17 @@ def step_auditlog_unred_v_upload(context):
 
     tag_map = {"pii": "true", "db": "uc", "table": "auditlog_unred_v"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -347,17 +347,17 @@ def step_ucs_opsmi_redacted_upload(context):
 
     tag_map = {"pii": "false", "db": "ucs_opsmi_redacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -372,17 +372,17 @@ def step_ucs_opsmi_unredacted_upload(context):
 
     tag_map = {"pii": "true", "db": "ucs_opsmi_unredacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -397,17 +397,17 @@ def step_ucs_opsmi_unredacted_upload(context):
 
     tag_map = {"pii": "false", "db": "uc_ris_redacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -422,17 +422,17 @@ def step_ucs_opsmi_unredacted_upload(context):
 
     tag_map = {"pii": "false", "db": "uc_ris_unredacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
 
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -444,16 +444,16 @@ def step_ucs_latest_redacted_assumed(context):
 
     tag_map = {"pii": "true", "db": "ucs_latest_redacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -463,16 +463,16 @@ def step_uc_mongo_latest_assumed(context):
 
     tag_map = {"pii": "true", "db": "uc_mongo_latest", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -484,16 +484,16 @@ def step_ucs_latest_unredacted_assumed(context):
 
     tag_map = {"pii": "true", "db": "ucs_latest_unredacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -505,16 +505,16 @@ def step_uc_mongo_latest_assumed(context):
 
     tag_map = {"pii": "false", "db": "ucs_latest_redacted", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
-        context.analytical_test_data_s3_location["file_name"], 
-        context.analytical_test_data_s3_location["path"], 
-        context.published_bucket, 
-        context.timeout, 
-        tag_map 
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
     )
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -527,10 +527,11 @@ def step_uc_mongo_latest_assumed(context):
 def step_ucs_latest_redacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
     analytical_env_helper.assume_role_for_test(
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
+
 
 @given(
     "A user is not cleared to write to ucs_latest_unredacted DB location in the published S3 bucket"
@@ -540,10 +541,10 @@ def step_ucs_latest_redacted_user_write_access(context):
 )
 def step_ucs_latest_unredacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_unredacted/"
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
@@ -561,10 +562,10 @@ def step_ucs_latest_unredacted_user_write_access(context):
 )
 def step_uc_mongo_latest_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
-    analytical_env_helper.assume_role_for_test( 
-        context.aws_acc, 
-        context.analytical_test_e2e_role, 
-        context.aws_session_timeout_seconds
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
     )
 
 
