@@ -45,7 +45,7 @@ def step_read_file_from_s3(context):
 
 
 @then("the user is able to read the file from S3")
-def step_user_has_read_access(context):
+def step_user_has__read_access(context):
     assert context.read_access == True
 
 
@@ -110,7 +110,7 @@ def step_attempt_to_read_data(context):
 
 
 @then("The user is unable to read the data")
-def step_no_read_access(context):
+def step_no__read_access(context):
     assert context.read_access is False
 
 
@@ -138,7 +138,7 @@ def step_non_sc_role_assumed(context):
 
 
 @then("The user is able to read the data")
-def step_read_access(context):
+def step__read_access(context):
     assert context.read_access is True
 
 
@@ -256,7 +256,7 @@ def step_attempt_to_read_pii_data(context):
 
 
 @then("The user is unable to read any of the data")
-def no_read_access_for_restricted_paths(context):
+def no__read_access_for_restricted_paths(context):
     for read_access in context.read_access_path_list:
         assert read_access is False
 
