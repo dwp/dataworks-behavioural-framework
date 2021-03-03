@@ -315,19 +315,30 @@ def step_ucs_opsmi_unredacted_upload(context):
 
     assume_role_for_test(context)
 
+
 @given("A user is cleared to read ucs_latest_redacted DB data in the published S3 bucket")
-def step_uc_mongo_latest_assumed(context):
+def step_ucs_latest_redacted_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
 
-    tag_map = {"pii": "true", "db": "uc_mongo_latest", "table": "test_table"}
+    tag_map = {"pii": "true", "db": "ucs_latest_redacted", "table": "test_table"}
     setup_test_file_in_s3(context, tag_map)
     assume_role_for_test(context)
+
 
 @given("A user is cleared to read uc_mongo_latest DB data in the published S3 bucket")
 def step_uc_mongo_latest_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
 
     tag_map = {"pii": "true", "db": "uc_mongo_latest", "table": "test_table"}
+    setup_test_file_in_s3(context, tag_map)
+    assume_role_for_test(context)
+
+
+@given("A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket")
+def step_ucs_latest_unredacted_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/ucs_latest_unredacted/"
+
+    tag_map = {"pii": "true", "db": "ucs_latest_unredacted", "table": "test_table"}
     setup_test_file_in_s3(context, tag_map)
     assume_role_for_test(context)
 
@@ -345,9 +356,17 @@ def step_uc_mongo_latest_assumed(context):
 @given("A user is cleared to write to ucs_latest_redacted DB location in the published S3 bucket")
 def step_ucs_latest_redacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
+    assume_role_for_test(context)\
+
+
+@given("A user is not cleared to write to ucs_latest_unredacted DB location in the published S3 bucket")
+@given("A user is cleared to write to ucs_latest_unredacted DB location in the published S3 bucket")
+def step_ucs_latest_unredacted_user_write_access(context):
+    context.analytical_test_data_s3_location["path"] = "data/ucs_latest_unredacted/"
     assume_role_for_test(context)
 
 
+@given("A user is only cleared to write to the ucs_latest_unredacted DB location in the published S3 bucket")
 @given("A user is only cleared to write to the ucs_latest_redacted DB location in the published S3 bucket")
 @given("A user is not cleared to write to uc_mongo_latest DB location in the published S3 bucket")
 @given("A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket")
