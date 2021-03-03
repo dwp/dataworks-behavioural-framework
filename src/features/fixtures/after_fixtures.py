@@ -37,6 +37,22 @@ def clean_up_role_and_s3_objects(context, timeout=30, **kwargs):
                 ),
             )
 
+@fixture
+def clean_up_s3_object(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'clean_up_s3_object' fixture")
+
+    if aws_helper.check_if_s3_object_exists(
+            context.published_bucket,
+            context.analytical_test_data_s3_location.get("path")
+    ):
+        aws_helper.remove_file_from_s3_and_wait_for_consistency(
+            context.published_bucket,
+            os.path.join(
+                context.analytical_test_data_s3_location["path"],
+                context.analytical_test_data_s3_location["file_name"],
+            ),
+        )
+
 
 @fixture
 def terminate_adg_cluster(context, timeout=30, **kwargs):

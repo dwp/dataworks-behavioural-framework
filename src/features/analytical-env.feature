@@ -342,6 +342,7 @@ Feature: Creating Analytical Environment for End Users
     Then The user is able to read the data
 
   @fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest_full_access
+  @fixture.cleanup.s3
   Scenario: A user with write access to uc_mongo_latest DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to uc_mongo_latest DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
@@ -374,6 +375,7 @@ Feature: Creating Analytical Environment for End Users
     Then The user is able to read the data
 
   @fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted_full_access
+  @fixture.cleanup.s3
   Scenario: A user with write access to ucs_latest_redacted DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to ucs_latest_redacted DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location
@@ -406,6 +408,7 @@ Feature: Creating Analytical Environment for End Users
     Then The user is able to read the data
 
   @fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted_full_access
+  @fixture.cleanup.s3
   Scenario: A user with write access to ucs_latest_unredacted DB attempts to write data in the published S3 bucket location
     Given A user is cleared to write to ucs_latest_unredacted DB location in the published S3 bucket
     When The user attempts to write to the published S3 bucket location

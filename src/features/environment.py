@@ -401,6 +401,8 @@ def after_scenario(context, scenario):
 def after_tag(context, tag):
     if tag == "fixture.cleanup.role_and_s3":
         use_fixture(after_fixtures.clean_up_role_and_s3_objects, context)
+    if tag == "fixture.cleanup.s3":
+        use_fixture(after_fixtures.clean_up_s3_object, context)
     if tag == "fixture.terminate.adg.cluster":
         use_fixture(after_fixtures.terminate_adg_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":

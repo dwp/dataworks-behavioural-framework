@@ -1693,3 +1693,26 @@ def generate_arn(service, arn_suffix, region=None):
     region_qualified = region if region else ""
 
     return f"{arn_value}:{aws_value}:{service}:{region_qualified}:{arn_suffix}"
+
+
+def check_if_s3_object_exists(bucket, key, s3_client=None):
+    """Returns True or False based on object existing in s3 location
+
+     Keyword arguments:
+        bucket -- the s3 bucket id
+        key -- the key/prefix for the location of the file
+        s3_client -- an established s3 client (optional)
+    """
+
+    if s3_client == None:
+        s3_client = get_client(service_name="s3")
+
+    response = s3_client.list_objects_v2(
+        Bucket=bucket,
+        Prefix=key,
+    )
+    for obj in response.get('Contents', []):
+        if obj['Key'] == key:
+            return True
+
+    return False
