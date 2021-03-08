@@ -167,6 +167,7 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                 output_file = os.path.join(local_output_folder, output_file_name)
                 with open(output_file, "w+") as writer:
                     num = 1
+                    data = []
                     while num <= int(record_count):
                         record={}
                         for column, column_property in collection_schema.items():
@@ -174,8 +175,9 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                                 record.update({ column : {"value" : dataTypeMapping(column_property["value"])()}})
                             if 'pii_flg' in column_property:
                                 record[column].update({"pii_flg" : column_property["pii_flg"]})
-                        writer.write(json.dumps(record)+'\n')
+                        data.append(record)
                         num += 1
+                    writer.write(json.dumps(data, indent=4))
 
         return [
             os.path.join(local_output_folder, x)
