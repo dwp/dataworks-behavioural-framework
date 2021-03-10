@@ -206,4 +206,4 @@ def metadata_table_step_impl(context, snapshot_type):
     assert (item["CurrentStep"]["S"] == "sns-notification" or item["CurrentStep"]['S'] == final_step), f"CurrentStep was '{item['CurrentStep']['S']}', expected 'sns-notification' or '{final_step}'"
     assert item["Cluster_Id"]["S"] == context.adg_cluster_id, f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.adg_cluster_id}'"
     assert item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix, f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.adg_s3_prefix}'"
-    assert item["Snapshot_Type"]["S"] == context.adg_cluster_id, f"Snapshot_Type Id was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
+    assert item["Snapshot_Type"]["S"] == snapshot_type, f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
