@@ -138,8 +138,7 @@ def get_client(service_name, profile=None, region=None, read_timeout_seconds=120
     max_connections = 25 if service_name.lower() == "s3" else 10
 
     client_config = Config(
-        read_timeout=read_timeout_seconds,
-        max_pool_connections=max_connections,
+        read_timeout=read_timeout_seconds, max_pool_connections=max_connections,
     )
 
     if region is None:
@@ -733,11 +732,7 @@ def add_tags_to_file_in_s3(s3_bucket, s3_key, tagging_object_array, s3_client=No
         s3_client = get_client(service_name="s3")
 
     s3_client.put_object_tagging(
-        Bucket=s3_bucket,
-        Key=s3_key,
-        Tagging={
-            "TagSet": tagging_object_array,
-        },
+        Bucket=s3_bucket, Key=s3_key, Tagging={"TagSet": tagging_object_array,},
     )
 
 
@@ -796,8 +791,7 @@ def send_message_to_sqs(queue_url, message_body):
     )
     sqs_client = get_client(service_name="sqs")
     sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=message_body,
+        QueueUrl=queue_url, MessageBody=message_body,
     )
 
 
@@ -908,10 +902,7 @@ def publish_message_to_sns(message, sns_topic_arn):
     sns_client = get_client(service_name="sns")
     json_message = json.dumps(message)
 
-    sns_response = sns_client.publish(
-        TopicArn=sns_topic_arn,
-        Message=json_message,
-    )
+    sns_response = sns_client.publish(TopicArn=sns_topic_arn, Message=json_message,)
 
     return sns_response["MessageId"]
 
@@ -1650,9 +1641,7 @@ def list_policy_arns_for_role(role_name, account_id, iam_client=None):
     if iam_client is None:
         iam_client = get_client("iam")
 
-    response = iam_client.list_attached_role_policies(
-        RoleName=role_name,
-    )
+    response = iam_client.list_attached_role_policies(RoleName=role_name,)
 
     return [policy.get("PolicyArn") for policy in response.get("AttachedPolicies")]
 
@@ -1685,3 +1674,20 @@ def generate_arn(service, arn_suffix, region=None):
     region_qualified = region if region else ""
 
     return f"{arn_value}:{aws_value}:{service}:{region_qualified}:{arn_suffix}"
+
+
+def check_tags_of_cluster(cluster_id, emr_client=None):
+    """Adds additional tags to an EMR cluster and its instances.
+
+    Keyword arguments:
+    cluster_id -- the id of the cluster
+    dict_of_tags -- a dictionary of key value pairs. eg. {"Correlation_Id": "test"}
+    emr_client -- client to override the standard one
+    """
+    if emr_client is None:
+        emr_client = get_client(service_name="emr")
+
+    response = emr_client.describe_cluster(cluster_id)
+    cluster_tags = response["Cluster"]["Tags"]
+
+    return cluster_tags

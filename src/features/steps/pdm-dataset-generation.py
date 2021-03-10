@@ -91,3 +91,17 @@ def step_(context, expected_result_file_name):
     assert (
         expected_comma_deliminated == actual_comma_deliminated
     ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
+
+
+@then("check cluster tags")
+def check_cluster_tags(context):
+
+    cluster_id = context.pdm_cluster_id
+
+    console_printer.print_info(f"Cluster id : {cluster_id}")
+
+    cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
+
+    tags_to_check = {"Correlation_Id": f"{context.test_run_name}"}
+
+    assert tags_to_check in cluster_tags
