@@ -189,6 +189,9 @@ def metadata_table_step_impl(context, snapshot_type):
         final_step = "flush-pushgateway"
 
     assert item is not None, f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
+
+    console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
+
     assert item["TimeToExist"] is not None, f"Time to exist was not set"
     assert item["Run_Id"] == 1, f"Run_Id was '{item['Run_Id']}', expected '1'"
     assert item["Date"] == 1, f"Date was '{item['Date']}', expected '{context.adg_export_date}'"
