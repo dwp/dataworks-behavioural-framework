@@ -168,7 +168,6 @@ def check_cluster_tags(context):
     cluster_id = context.cluster_id
 
     console_printer.print_info(f"Cluster id : {cluster_id}")
-    assert type(cluster_id) == str
 
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
 

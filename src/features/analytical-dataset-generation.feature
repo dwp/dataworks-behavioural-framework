@@ -4,7 +4,6 @@ Feature: Analytical data set generation end to end test
 
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
-    @work-in-progress
     Scenario: Analytical data set generation end to end test for full
       Given the data of the format in the template file 'snapshot_record_valid.json' as an input to analytical data set generation emr
       Then start adg 'full' cluster and wait for the step 'sns-notification'
@@ -14,7 +13,6 @@ Feature: Analytical data set generation end to end test
 
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
-    @work-in-progress
     Scenario: Analytical data set generation end to end test for incremental
       Given the data of the format in the template file 'snapshot_record_valid.json' as an input to analytical data set generation emr
       Then start adg 'incremental' cluster and wait for the step 'flush-pushgateway'
