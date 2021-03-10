@@ -201,9 +201,9 @@ def metadata_table_step_impl(context, snapshot_type):
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
-    assert item["Run_Id"]["N"] == "1", f"Run_Id was '{item['Run_Id']["N"]}', expected '1'"
-    assert item["Date"]["S"] == context.adg_export_date, f"Date was '{item['Date']["S"]}', expected '{context.adg_export_date}'"
-    assert (item["CurrentStep"]["S"] == "sns-notification" or item["CurrentStep"]["S"] == final_step), f"CurrentStep was '{item['CurrentStep']["S"]}', expected 'sns-notification' or '{final_step}'"
-    assert item["Cluster_Id"]["S"] == context.adg_cluster_id, f"Cluster_Id was '{item['Cluster_Id']["S"]}', expected '{context.adg_cluster_id}'"
-    assert item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix, f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']["S"]}', expected '{context.adg_s3_prefix}'"
-    assert item["Snapshot_Type"]["S"] == context.adg_cluster_id, f"Snapshot_Type Id was '{item['Snapshot_Type']["S"]}', expected '{snapshot_type}'"
+    assert item["Run_Id"]["N"] == "1", f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
+    assert item["Date"]["S"] == context.adg_export_date, f"Date was '{item['Date']['S']}', expected '{context.adg_export_date}'"
+    assert (item["CurrentStep"]["S"] == "sns-notification" or item["CurrentStep"]['S'] == final_step), f"CurrentStep was '{item['CurrentStep']['S']}', expected 'sns-notification' or '{final_step}'"
+    assert item["Cluster_Id"]["S"] == context.adg_cluster_id, f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.adg_cluster_id}'"
+    assert item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix, f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.adg_s3_prefix}'"
+    assert item["Snapshot_Type"]["S"] == context.adg_cluster_id, f"Snapshot_Type Id was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
