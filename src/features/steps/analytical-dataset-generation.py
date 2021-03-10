@@ -162,8 +162,7 @@ def step_verify_analytical_datasets(context, snapshot_type):
         assert "x-amz-matdesc" in metadata
 
 
-@then("the ADG-full cluster tags have been created correctly")
-@then("the ADG-incremental cluster tags have been created correctly")
+@then("the ADG cluster tags have been created correctly for '{snapshot-type}")
 def check_cluster_tags(context):
     cluster_id = context.cluster_id
     console_printer.print_info(f"Cluster id : {cluster_id}")
