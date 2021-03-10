@@ -364,6 +364,10 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.k2hb_start, context)
     if tag == "fixture.k2hb.stop":
         use_fixture(before_fixtures.k2hb_stop, context)
+    if tag == "fixture.ingest.ecs.cluster.start":
+        use_fixture(before_fixtures.ingest_ecs_cluster_start, context)
+    if tag == "fixture.ingest.ecs.cluster.stop":
+        use_fixture(before_fixtures.ingest_ecs_cluster_stop, context)
     if tag == "fixture.analytical.setup":
         use_fixture(before_fixtures.analytical_env_setup, context)
     if tag == "fixture.dynamodb.clear.ingest.start.full":

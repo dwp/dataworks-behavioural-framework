@@ -71,3 +71,13 @@ Feature: Administrative processes and workflows
   @fixture.k2hb.stop
   Scenario: Stop the K2HB instances
     Then The asg has scaled correctly
+
+  @admin-scale-up-ingestion-ecs-cluster
+  @fixture.ingest.ecs.cluster.start
+  Scenario: Start the Ingestion ECS cluster instances
+    Then The asg has scaled correctly
+
+  @admin-scale-down-ingestion-ecs-cluster
+  @fixture.ingestion.ecs.cluster.stop
+  Scenario: Stop the Ingestion ECS cluster instances
+    Then The asg has scaled correctly
