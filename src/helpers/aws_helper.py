@@ -178,7 +178,7 @@ def get_item_from_dynamodb(table_name, key_dict):
         f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
     )
 
-    return dynamodb_client.get_item(TableName=f"{table_name}", Key=key_dict)
+    return dynamodb_client.get_item(TableName=table_name, Key=key_dict)
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
