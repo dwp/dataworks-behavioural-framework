@@ -9,7 +9,7 @@ Feature: Analytical data set generation end to end test
       Then start adg 'full' cluster and wait for the step 'sns-notification'
       And read metadata of the analytical data sets from the path 'analytical-dataset/full/adg_output/adg_params.csv'
       And verify metadata, tags of the analytical data sets for 'full'
-      And the metadata table is correct for 'incremental'
+      And the metadata table is correct for 'full'
 
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
