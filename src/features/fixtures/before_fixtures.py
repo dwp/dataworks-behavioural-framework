@@ -555,6 +555,25 @@ def k2hb_stop(context, timeout=30, **kwargs):
 
 
 @fixture
+def ingest_ecs_cluster_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'ingestion_ecs_cluster_start' fixture")
+
+    context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
+        context.asg_prefix_ingestion_ecs_cluster,
+        int(context.asg_max_count_k2hb_main_london),
+    )
+
+
+@fixture
+def ingest_ecs_cluster_stop(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'ingestion_ecs_cluster_stop' fixture")
+
+    context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
+        context.asg_prefix_ingestion_ecs_cluster, 0
+    )
+
+
+@fixture
 def ucfs_claimant_kafka_consumer_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'ucfs_claimant_kafka_consumer_start' fixture")
 
