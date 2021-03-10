@@ -171,6 +171,7 @@ def step_verify_analytical_datasets(context, snapshot_type):
 
 
 @then("the metadata table is correct for '{snapshot_type}'")
+def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"
 
     key_dict = {
@@ -189,9 +190,9 @@ def step_verify_analytical_datasets(context, snapshot_type):
 
     assert item is not None, f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
     assert item["TimeToExist"] is not None, f"Time to exist was not set"
-    assert item["Run_Id"] == 1, f"Run_Id was '{item["Run_Id"]}', expected '1'"
-    assert item["Date"] == 1, f"Date was '{item["Date"]}', expected '{context.adg_export_date}'"
-    assert (item["CurrentStep"] == "sns-notification" or item["CurrentStep"] == final_step), f"CurrentStep was '{item["CurrentStep"]}', expected 'sns-notification' or '{final_step}'"
-    assert item["Cluster_Id"] == context.adg_cluster_id, f"Cluster_Id was '{item["Cluster_Id"]}', expected '{context.adg_cluster_id}'"
-    assert item["S3_Prefix_Snapshots"] == context.adg_s3_prefix, f"S3_Prefix_Snapshots was '{item["S3_Prefix_Snapshots"]}', expected '{context.adg_s3_prefix}'"
-    assert item["Snapshot_Type"] == context.adg_cluster_id, f"Snapshot_Type Id was '{item["Snapshot_Type"]}', expected '{snapshot_type}'"
+    assert item["Run_Id"] == 1, f"Run_Id was '{item['Run_Id']}', expected '1'"
+    assert item["Date"] == 1, f"Date was '{item['Date']}', expected '{context.adg_export_date}'"
+    assert (item["CurrentStep"] == "sns-notification" or item["CurrentStep"] == final_step), f"CurrentStep was '{item['CurrentStep']}', expected 'sns-notification' or '{final_step}'"
+    assert item["Cluster_Id"] == context.adg_cluster_id, f"Cluster_Id was '{item['Cluster_Id']}', expected '{context.adg_cluster_id}'"
+    assert item["S3_Prefix_Snapshots"] == context.adg_s3_prefix, f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']}', expected '{context.adg_s3_prefix}'"
+    assert item["Snapshot_Type"] == context.adg_cluster_id, f"Snapshot_Type Id was '{item['Snapshot_Type']}', expected '{snapshot_type}'"
