@@ -244,35 +244,35 @@ function execute_behave() {
         echo "Skipping TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
     fi
 
-    if [[ -f $META_FOLDER/build-pipeline-name ]]; then
-        PIPELINE_NAME=$(cat "$META_FOLDER/build-pipeline-name")
-    elif [[ -f $META_FOLDER/build_pipeline_name ]]; then
-        PIPELINE_NAME=$(cat "$META_FOLDER/build_pipeline_name")
-    else
-        PIPELINE_NAME=$(uuidgen)
-    fi
-
-    if [[ -f $META_FOLDER/build_job_name ]]; then
-        JOB_NAME=$(cat "$META_FOLDER/build_job_name")
-    else
-        JOB_NAME=$(cat "$META_FOLDER/build_job_name")
-    fi
-
-    if [[ -f $META_FOLDER/build-name ]]; then
-        BUILD_NUMBER=$(cat "$META_FOLDER/build-name")
-        UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
-    elif [[ -f $META_FOLDER/build_name ]]; then
-        BUILD_NUMBER=$(cat "$META_FOLDER/build_name")
-        UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
-    else
-        UNIQUE_JOB_NAME="${JOB_NAME}"
-    fi
-
-    if [[ -z "${UNIQUE_JOB_NAME}" ]]; then
-        UNIQUE_JOB_NAME=$(uuidgen)
-    fi
-
     if [[ -z "${TEST_RUN_NAME}" ]]; then
+        if [[ -f $META_FOLDER/build-pipeline-name ]]; then
+            PIPELINE_NAME=$(cat "$META_FOLDER/build-pipeline-name")
+        elif [[ -f $META_FOLDER/build_pipeline_name ]]; then
+            PIPELINE_NAME=$(cat "$META_FOLDER/build_pipeline_name")
+        else
+            PIPELINE_NAME=$(uuidgen)
+        fi
+
+        if [[ -f $META_FOLDER/build_job_name ]]; then
+            JOB_NAME=$(cat "$META_FOLDER/build_job_name")
+        else
+            JOB_NAME=$(cat "$META_FOLDER/build_job_name")
+        fi
+
+        if [[ -f $META_FOLDER/build-name ]]; then
+            BUILD_NUMBER=$(cat "$META_FOLDER/build-name")
+            UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
+        elif [[ -f $META_FOLDER/build_name ]]; then
+            BUILD_NUMBER=$(cat "$META_FOLDER/build_name")
+            UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
+        else
+            UNIQUE_JOB_NAME="${JOB_NAME}"
+        fi
+
+        if [[ -z "${UNIQUE_JOB_NAME}" ]]; then
+            UNIQUE_JOB_NAME=$(uuidgen)
+        fi
+
         TEST_RUN_NAME="${PIPELINE_NAME}_${UNIQUE_JOB_NAME}"
     fi
 
