@@ -163,7 +163,7 @@ def step_verify_analytical_datasets(context, snapshot_type):
 
 
 @then("the ADG cluster tags have been created correctly for '{snapshot-type}'")
-def check_adg_cluster_tags(context, snapshot_type):
+def step_check_adg_cluster_tags(context, snapshot_type):
     console_printer.print_info(f"Checking cluster Tags")
     assert True
     # cluster_id = context.cluster_id
