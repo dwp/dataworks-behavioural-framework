@@ -560,7 +560,7 @@ def ingest_ecs_cluster_start(context, timeout=30, **kwargs):
 
     context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
         context.asg_prefix_ingestion_ecs_cluster,
-        int(context.asg_max_count_k2hb_main_london),
+        int(context.asg_max_count_ingestion_ecs_cluster),
     )
 
 
