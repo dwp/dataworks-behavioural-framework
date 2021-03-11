@@ -553,12 +553,14 @@ def k2hb_stop(context, timeout=30, **kwargs):
         context.asg_prefix_k2hb_audit_london, 0
     )
 
+
 @fixture
 def ingest_ecs_cluster_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'ingestion_ecs_cluster_start' fixture")
 
     context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
-        context.asg_prefix_ingestion_ecs_cluster, int(context.asg_max_count_ingestion_ecs_cluster)
+        context.asg_prefix_ingestion_ecs_cluster,
+        int(context.asg_max_count_ingestion_ecs_cluster),
     )
 
 
@@ -569,6 +571,7 @@ def ingest_ecs_cluster_stop(context, timeout=30, **kwargs):
     context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
         context.asg_prefix_ingestion_ecs_cluster, 0
     )
+
 
 @fixture
 def ingest_ecs_cluster_start(context, timeout=30, **kwargs):
