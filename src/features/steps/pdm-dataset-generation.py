@@ -94,7 +94,7 @@ def step_(context, expected_result_file_name):
 
 
 @then("the PDM cluster tags have been created correctly")
-def pdm_cluster_tags_have_been_created_correctly(context):
+def step_pdm_cluster_tags_have_been_created_correctly(context):
 
     cluster_id = context.pdm_cluster_id
 
