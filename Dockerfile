@@ -16,7 +16,6 @@ WORKDIR /src
 RUN chmod -R +x runners/
 
 WORKDIR /src/runners
-ENV TEST_RUN_NAME=default_test_run_name
 ENV E2E_FEATURE_TAG_FILTER=
 ENV RUNNER_SCRIPT=./run-ci.sh
 
