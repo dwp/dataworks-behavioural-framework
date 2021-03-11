@@ -167,6 +167,6 @@ def check_cluster_tags(context):
     cluster_id = context.cluster_id
     console_printer.print_info(f"Cluster id : {cluster_id}")
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
-    tags_to_check = {CORRELATION_ID: CORRELATION_ID_VALUE}
+    tags_to_check = {"Correlation_Id": context.test_run_name}
 
     assert tags_to_check in cluster_tags
