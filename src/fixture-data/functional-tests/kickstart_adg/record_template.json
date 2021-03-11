@@ -69,16 +69,20 @@
   "application" : {
     "schema" : {
       "grant_applications" : {
-        "application_id": {
-          "value"   : "uuid"
+        "applicationId": {
+          "value"   : "uuid",
+          "pii_flg" : false
         },
-        "full_reference_number": {
-          "value"   : "uuid"
+        "fullReferenceNumber": {
+          "value"   : "uuid",
+          "pii_flg" : false
         },
-        "application_type": {
-          "value"   : "string"
+        "applicationType": {
+          "value"   : "string",
+          "pii_flg" : false,
+          "default" : ["Employer", "Gateway"]
         },
-        "full_name": {
+        "fullName": {
           "value"   : "string",
           "pii_flg" : true
         },
@@ -86,141 +90,202 @@
           "value"   : "string",
           "pii_flg" : true
         },
-        "telephone_number": {
+        "telephoneNumber": {
           "value"   : "bigint",
           "pii_flg" : true
         },
-        "organisation_name": {
-          "value"   : "string"
+        "organisationName": {
+          "value"   : "string",
+          "pii_flg" : false
         },
-        "company_house_number": {
+        "charityRegistrationNumber": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "companyHouseNumber": {
           "value"   : "bigint",
           "pii_flg" : true
         },
-        "address_line_1": {
+        "addressLine1": {
           "value"   : "text",
           "pii_flg" : true
         },
-        "address_line_2": {
+        "addressLine2": {
           "value"   : "text",
           "pii_flg" : true
         },
         "town": {
-          "value"   : "string"
+          "value"   : "string",
+          "pii_flg" : true
         },
         "county": {
-          "value"   : "string"
+          "value"   : "string",
+          "pii_flg" : true
         },
         "postcode": {
-          "value"   : "string"
+          "value"   : "string",
+          "pii_flg" : true
         },
-        "contact_notes" : {
-          "value"   : "text"
+        "numberOfPaidEmployees": {
+          "value"   : "integer",
+          "pii_flg" : false
         },
-        "employers_represented": {
-          "value"   : "string"
+        "numberOfJobPlacements": {
+          "value"   : "integer",
+          "pii_flg" : false
         },
-        "number_of_job_placements": {
-          "value"   : "integer"
+        "totalAmountOfFundingAppliedFor": {
+          "value"   : "numeric",
+          "pii_flg" : false
         },
-        "roles_to_be_created": {
-          "value": "string"
+        "expectedDateOfDecision": {
+          "value"   : "date",
+          "pii_flg" : false
         },
-        "employbility_support_information": {
-          "value": "text"
+        "linkedApplicationIds": {
+          "value" : "string",
+          "pii_flg" : false
         },
-        "expected_date_of_decision": {
-          "value": "date"
+        "mainOrAdditionalApplication": {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Main Application", "Additional Application"]
         },
-        "linked_application_ids": {
-          "value": "string"
+        "contactNotes" : {
+          "value" : "string",
+          "pii_flg" : true
         },
-        "main_or_additional_application": {
-          "value": "string"
+        "employersRepresented" : {
+          "value" : "string",
+          "pii_flg" : true
         },
-        "assigned_team": {
-          "value": "string"
+        "rolesToBeCreated" : {
+          "value" : "string",
+          "pii_flg" : true
         },
-        "sent_for_spotlight_check": {
-          "value": "boolean"
+        "informationThatTheVacancyIsJustForKickstart" : {
+          "value" : "string",
+          "pii_flg" : true
         },
-        "spotlight_approved": {
-          "value": "boolean"
+        "employabilitySupportInformation" : {
+          "value" : "string",
+          "pii_flg" : true
         },
-        "reason_rejected_by_spotlight": {
-          "value": "string"
+        "sentForSpotlightCheck" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No", "Not Applicable"]
         },
-        "date_work_started_on_application": {
-          "value": "date"
+        "spotlightApproved" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
         },
-        "assessment_criteria_approved": {
-          "value": "boolean"
+        "reasonRejectedBySpotlight" : {
+          "value" : "string",
+          "pii_flg" : false
         },
-        "Contacted employer": {
-          "value": "boolean"
+        "dateWorkStartedOnApplication" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "date_info_request_made": {
-          "value": "date"
+        "contactedEmployer" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
         },
-        "reason_for_rejection": {
-          "value": "string"
+        "contactedEmployerDate" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "recommended_decision": {
-          "value": "string"
+        "assessmentCriteriaApproved" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
         },
-        "date_sent_to_decision_board_secretariat": {
-          "value": "date"
+        "reasonForRejection" : {
+          "value" : "string",
+          "pii_flg" : false
         },
-        "date_of_original_decision_board": {
-          "value": "date"
+        "recommendedDecision" : {
+          "value" : "string",
+          "pii_flg" : false
         },
-        "original_number_of_job_placements": {
-          "value": "string"
+        "dateSentToDecisionBoardSecretariat" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "total_amount_of_funding": {
-          "value": "string"
+        "dateOfOriginalDecisionBoard" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "original_approval_board_decision": {
-          "value": "string"
+        "originalApprovalBoardDecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Partially approved", "Rejected", "Requires Higher DFA", "Additional info needed - external", "Additional info needed - internal", "Returned - Spotlight rework action", "Returned - multiple application", "Withdrawn"]
         },
-        "date_of_second_approval_board": {
-          "value": "date"
+        "numberOfJobPlacementApproved" : {
+          "value" : "integer",
+          "pii_flg" : false
         },
-        "second_approval_board_decision": {
-          "value": "string"
+        "cummulativeNumberOfJobPlacements" : {
+          "value" : "integer",
+          "pii_flg" : false
         },
-        "higher_DFA_decision": {
-          "value": "string"
+        "dateOfSecondApprovalBoard" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "number_of_approved_job_placements": {
-          "value": "integer"
+        "secondApprovalBoardDecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Partially approved", "Rejected", "Requires Higher DFA", "Additional info needed - external", "Additional info needed - internal", "Returned - Spotlight rework action", "Returned - multiple application", "Withdrawn"]
         },
-        "main_reason_for_DFA_rejection": {
-          "value": "string"
+        "higherDFADecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Rejected"]
         },
-        "batch_number_if_pending_approval": {
-          "value": "string"
+        "numberOfApprovedJobPlacements" : {
+          "value" : "integer",
+          "pii_flg" : false
         },
-        "date_decision_email_sent": {
-          "value": "date"
+        "mainReasonForDFARejection" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Spotlight / Financial", "Fail", "Ratio Fail", "Additionality & Employment Support", "Incorrect Application", "Unable to Contact"]
         },
-        "date_award_letter_sent": {
-          "value": "date"
+        "batchNumberIfPendingApproval" : {
+          "value" : "uuid",
+          "pii_flg" : false
         },
-        "date_grant_agreement_sent": {
-          "value": "date"
+        "dateDecisionEmailSent" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "date_vacancy_template_sent": {
-          "value": "date"
+        "dateAwardLetterSent" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "date_grant_agreement_received": {
-          "value": "date"
+        "dateGrantAgreementSent" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "date_completed_templates_sent_to_assessment_team_vacancy_team": {
-          "value": "date"
+        "dateVacancyTemplateSent" : {
+          "value" : "date",
+          "pii_flg" : false
         },
-        "date_schedule_sent_to_payments_team": {
-          "value": "date"
+        "dateGrantAgreementReceived" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateCompletedTemplatesSentToAssessmentTeam&VacancyTeam" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateScheduleSentToPaymentsTeam" : {
+          "value" : "date",
+          "pii_flg" : false
         }
       }
     },
