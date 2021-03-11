@@ -163,10 +163,12 @@ def step_verify_analytical_datasets(context, snapshot_type):
 
 
 @then("the ADG cluster tags have been created correctly for '{snapshot-type}")
-def check_cluster_tags(context):
+def check_cluster_tags(context, snapshot_type):
+    console_printer.print_info(f"Checking cluster Tags")
     cluster_id = context.cluster_id
     console_printer.print_info(f"Cluster id : {cluster_id}")
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
+    console_printer.print_info(f"Cluster tags : {cluster_tags}")
     tags_to_check = {"Correlation_Id": context.test_run_name}
 
     assert tags_to_check in cluster_tags
