@@ -168,7 +168,6 @@ def set_test_run_common_variables(context):
         "ASG_MAX_COUNT_INGESTION_ECS_CLUSTER"
     )
 
-
     context.asg_prefix_htme = context.config.userdata.get("ASG_PREFIX_HTME")
     context.asg_prefix_hdi = context.config.userdata.get("ASG_PREFIX_HDI")
     context.asg_prefix_snapshot_sender = context.config.userdata.get(
