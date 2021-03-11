@@ -162,7 +162,7 @@ def step_verify_analytical_datasets(context, snapshot_type):
         assert "x-amz-matdesc" in metadata
 
 
-@then("the ADG cluster tags have been created correctly for '{snapshot-type}")
+@then("the ADG cluster tags have been created correctly for '{snapshot-type}'")
 def check_cluster_tags(context, snapshot_type):
     console_printer.print_info(f"Checking cluster Tags")
     cluster_id = context.cluster_id
@@ -170,5 +170,7 @@ def check_cluster_tags(context, snapshot_type):
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
     console_printer.print_info(f"Cluster tags : {cluster_tags}")
     tags_to_check = {"Correlation_Id": context.test_run_name}
+
+    # assert any("Correlation_Id" in d for d in cluster_tags)
 
     assert tags_to_check in cluster_tags
