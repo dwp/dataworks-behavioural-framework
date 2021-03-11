@@ -188,10 +188,6 @@ def metadata_table_step_impl(context, snapshot_type):
 
     response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
 
-    final_step = "executeUpdateAll"
-    if snapshot_type.lower() == "full":
-        final_step = "flush-pushgateway"
-
     console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
 
     assert (
@@ -201,6 +197,8 @@ def metadata_table_step_impl(context, snapshot_type):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
+    allowed_steps = ["flush-pushgateway", "sns-notification", "executeUpdateAll"]
+
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
         item["Run_Id"]["N"] == "1"
@@ -209,9 +207,8 @@ def metadata_table_step_impl(context, snapshot_type):
         item["Date"]["S"] == context.adg_export_date
     ), f"Date was '{item['Date']['S']}', expected '{context.adg_export_date}'"
     assert (
-        item["CurrentStep"]["S"] == "sns-notification"
-        or item["CurrentStep"]["S"] == final_step
-    ), f"CurrentStep was '{item['CurrentStep']['S']}', expected 'sns-notification' or '{final_step}'"
+        item["CurrentStep"]["S"] in allowed_steps
+    ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
     assert (
         item["Cluster_Id"]["S"] == context.adg_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.adg_cluster_id}'"
