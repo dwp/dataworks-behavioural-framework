@@ -246,8 +246,10 @@ function execute_behave() {
 
     if [[ -f $META_FOLDER/build-pipeline-name ]]; then
         PIPELINE_NAME=$(cat "$META_FOLDER/build-pipeline-name")
-    else
+    elif [[ -f $META_FOLDER/build_pipeline_name ]]; then
         PIPELINE_NAME=$(cat "$META_FOLDER/build_pipeline_name")
+    else
+        PIPELINE_NAME=$(uuidgen)
     fi
 
     if [[ -f $META_FOLDER/build_job_name ]]; then
@@ -264,6 +266,10 @@ function execute_behave() {
         UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
     else
         UNIQUE_JOB_NAME="${JOB_NAME}"
+    fi
+
+    if [[ -z "${UNIQUE_JOB_NAME}" ]]; then
+        UNIQUE_JOB_NAME=$(uuidgen)
     fi
 
     if [[ -z "${TEST_RUN_NAME}" ]]; then
