@@ -1687,7 +1687,7 @@ def check_tags_of_cluster(cluster_id, emr_client=None):
     if emr_client is None:
         emr_client = get_client(service_name="emr")
 
-    response = emr_client.describe_cluster(cluster_id)
+    response = emr_client.describe_cluster(ClusterId=cluster_id)
     cluster_tags = response["Cluster"]["Tags"]
 
     return cluster_tags
