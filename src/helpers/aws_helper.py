@@ -1695,6 +1695,23 @@ def generate_arn(service, arn_suffix, region=None):
     return f"{arn_value}:{aws_value}:{service}:{region_qualified}:{arn_suffix}"
 
 
+def check_tags_of_cluster(cluster_id, emr_client=None):
+    """Adds additional tags to an EMR cluster and its instances.
+
+    Keyword arguments:
+    cluster_id -- the id of the cluster
+    dict_of_tags -- a dictionary of key value pairs. eg. {"Correlation_Id": "test"}
+    emr_client -- client to override the standard one
+    """
+    if emr_client is None:
+        emr_client = get_client(service_name="emr")
+
+    response = emr_client.describe_cluster(ClusterId=cluster_id)
+    cluster_tags = response["Cluster"]["Tags"]
+
+    return cluster_tags
+
+
 def check_if_s3_object_exists(bucket, key, s3_client=None):
     """Returns True or False based on object existing in s3 location
 
