@@ -10,6 +10,7 @@ Feature: Analytical data set generation end to end test
       And read metadata of the analytical data sets from the path 'analytical-dataset/full/adg_output/adg_params.csv'
       And verify metadata, tags of the analytical data sets for 'full'
       And the ADG cluster tags have been created correctly for 'full'
+      And the metadata table is correct for 'full'
 
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
@@ -19,3 +20,4 @@ Feature: Analytical data set generation end to end test
       And read metadata of the analytical data sets from the path 'analytical-dataset/incremental/adg_output/adg_params.csv'
       And verify metadata, tags of the analytical data sets for 'incremental'
       And the ADG cluster tags have been created correctly for 'incremental'
+      And the metadata table is correct for 'incremental'

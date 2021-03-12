@@ -15,6 +15,7 @@ if [[ ! -z "${META_FOLDER_OVERRIDE}" ]]; then
     export META_FOLDER="${META_FOLDER_OVERRIDE}" # Allow for direct running as a container in CI
 fi
 
+# shellcheck disable=SC2112
 function get_secret_values() {
     secret_value=$(aws secretsmanager get-secret-value --secret-id  "/concourse/dataworks/end-to-end" ${LOCAL_PROFILE} | jq -r '.SecretBinary' | base64 --decode)
     s3_bucket=$(echo "$secret_value" | jq -r '.["terraform-outputs"].s3_bucket')
@@ -30,6 +31,7 @@ function get_secret_values() {
     export CONFIG_LOCATION="s3://${s3_bucket}/${s3_prefix}/"
 }
 
+# shellcheck disable=SC2112
 function download_config() {
     echo "Downloading the config files from S3 for the environment under test"
 
@@ -46,12 +48,14 @@ function download_config() {
     aws s3 cp ${s3_location} ${local_file_folder} --recursive ${LOCAL_PROFILE}
 }
 
+# shellcheck disable=SC2112
 function delete_config() {
     echo "Deleting locally store config files"
 
     rm -rf ${1}
 }
 
+# shellcheck disable=SC2112
 function set_file_locations() {
     echo "Setting the specific file locations from locally downloaded config files"
 
@@ -66,8 +70,10 @@ function set_file_locations() {
     export TF_UCFS_CLAIMANT_OUTPUT_FILE="${local_file_location}/ucfs-claimant.json"
     export TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER="${local_file_location}/dataworks-aws-ucfs-claimant-consumer.json"
     export TF_COMMON_OUTPUT_FILE="${local_file_location}/aws-common-infrastructure.json"
+    export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}/dataworks-aws-ingestion-ecs-cluster.json"
 }
 
+# shellcheck disable=SC2112
 function execute_behave() {
     echo "Executing tests against the environment under test"
 
@@ -158,6 +164,16 @@ function execute_behave() {
         echo "Skipping TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE=${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE}"
     fi
 
+    if [[ ! -z "${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}" && "${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}" != "${NOT_SET_FLAG}" ]]; then
+        echo "Using ${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER} ..."
+        ASG_MAX_COUNT_INGESTION_ECS_CLUSTER="$(cat ${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER} | jq -r '.ingestion_ecs_cluster_autoscaling_group.value.max_size // empty')"
+        ASG_PREFIX_INGESTION_ECS_CLUSTER="$(cat ${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER} | jq -r '.ingestion_ecs_cluster_autoscaling_group.value.name_prefix // empty')"
+        echo "ASG_MAX_COUNT_INGESTION_ECS_CLUSTER=${ASG_MAX_COUNT_INGESTION_ECS_CLUSTER}"
+        echo "ASG_PREFIX_INGESTION_ECS_CLUSTER=${ASG_PREFIX_INGESTION_ECS_CLUSTER}"
+    else
+        echo "Skipping TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER=${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}"
+    fi
+
     if [[ ! -z "${TF_INTERNAL_COMPUTE_OUTPUT_FILE}" && "${TF_INTERNAL_COMPUTE_OUTPUT_FILE}" != "${NOT_SET_FLAG}" ]]; then
         echo "Using ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} ..."
         AWS_SNS_UC_ECC_ARN="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.uc_export_to_crown_controller_messages_sns_topic.value.arn')"
@@ -228,29 +244,35 @@ function execute_behave() {
         echo "Skipping TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
     fi
 
-    if [[ -f $META_FOLDER/build-pipeline-name ]]; then
-        PIPELINE_NAME=$(cat "$META_FOLDER/build-pipeline-name")
-    else
-        PIPELINE_NAME=$(cat "$META_FOLDER/build_pipeline_name")
-    fi
-
-    if [[ -f $META_FOLDER/build_job_name ]]; then
-        JOB_NAME=$(cat "$META_FOLDER/build_job_name")
-    else
-        JOB_NAME=$(cat "$META_FOLDER/build_job_name")
-    fi
-
-    if [[ -f $META_FOLDER/build-name ]]; then
-        BUILD_NUMBER=$(cat "$META_FOLDER/build-name")
-        UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
-    elif [[ -f $META_FOLDER/build_name ]]; then
-        BUILD_NUMBER=$(cat "$META_FOLDER/build_name")
-        UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
-    else
-        UNIQUE_JOB_NAME="${JOB_NAME}"
-    fi
-
     if [[ -z "${TEST_RUN_NAME}" ]]; then
+        if [[ -f $META_FOLDER/build-pipeline-name ]]; then
+            PIPELINE_NAME=$(cat "$META_FOLDER/build-pipeline-name")
+        elif [[ -f $META_FOLDER/build_pipeline_name ]]; then
+            PIPELINE_NAME=$(cat "$META_FOLDER/build_pipeline_name")
+        else
+            PIPELINE_NAME=$(uuidgen)
+        fi
+
+        if [[ -f $META_FOLDER/build_job_name ]]; then
+            JOB_NAME=$(cat "$META_FOLDER/build_job_name")
+        else
+            JOB_NAME=$(cat "$META_FOLDER/build_job_name")
+        fi
+
+        if [[ -f $META_FOLDER/build-name ]]; then
+            BUILD_NUMBER=$(cat "$META_FOLDER/build-name")
+            UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
+        elif [[ -f $META_FOLDER/build_name ]]; then
+            BUILD_NUMBER=$(cat "$META_FOLDER/build_name")
+            UNIQUE_JOB_NAME="${JOB_NAME}_${BUILD_NUMBER}"
+        else
+            UNIQUE_JOB_NAME="${JOB_NAME}"
+        fi
+
+        if [[ -z "${UNIQUE_JOB_NAME}" ]]; then
+            UNIQUE_JOB_NAME=$(uuidgen)
+        fi
+
         TEST_RUN_NAME="${PIPELINE_NAME}_${UNIQUE_JOB_NAME}"
     fi
 
@@ -393,6 +415,8 @@ function execute_behave() {
     -D ASG_PREFIX_K2HB_MAIN_DEDICATED_LONDON="${ASG_PREFIX_K2HB_MAIN_DEDICATED_LONDON}" \
     -D ASG_PREFIX_K2HB_EQUALITY_LONDON="${ASG_PREFIX_K2HB_EQUALITY_LONDON}" \
     -D ASG_PREFIX_K2HB_AUDIT_LONDON="${ASG_PREFIX_K2HB_AUDIT_LONDON}" \
+    -D ASG_PREFIX_INGESTION_ECS_CLUSTER="${ASG_PREFIX_INGESTION_ECS_CLUSTER}" \
+    -D ASG_MAX_COUNT_INGESTION_ECS_CLUSTER="${ASG_MAX_COUNT_INGESTION_ECS_CLUSTER}" \
     -D AWS_DATASETS_BUCKET="${AWS_DATASETS_BUCKET}" \
     -D AWS_PUBLISHED_BUCKET="${AWS_PUBLISHED_BUCKET}" \
     -D SYNTHETIC_RAWDATA_AWS_ACC="${SYNTHETIC_RAWDATA_AWS_ACC}" \
@@ -501,6 +525,7 @@ echo "Inputs: TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
 echo "Inputs: TF_UCFS_CLAIMANT_OUTPUT_FILE=${TF_UCFS_CLAIMANT_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
 echo "Inputs: TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
+echo "Inputs: TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER=${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}"
 
 execute_behave
 
