@@ -185,7 +185,7 @@ def step_check_adg_cluster_tags(context, snapshot_type):
     assert tags_to_check in cluster_tags
 
 
-@then("the metadata table is correct for '{snapshot_type}'")
+@then("the ADG metadata table is correct for '{snapshot_type}'")
 def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"
     table_name = "data_pipeline_metadata"
