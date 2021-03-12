@@ -197,7 +197,7 @@ def metadata_table_step_impl(context, snapshot_type):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["flush-pushgateway", "sns-notification", "executeUpdateAll"]
+    allowed_steps = ["flush-pushgateway", "send_notification", "executeUpdateAll"]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
