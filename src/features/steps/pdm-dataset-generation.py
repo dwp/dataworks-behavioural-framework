@@ -9,6 +9,7 @@ from helpers import (
     file_helper,
     invoke_lambda,
 )
+from datetime import datetime
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
