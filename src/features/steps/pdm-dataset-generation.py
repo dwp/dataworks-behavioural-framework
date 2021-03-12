@@ -93,7 +93,7 @@ def step_(context, expected_result_file_name):
     ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
 
 
-@then("the PDM cluster tags have been created correctly")
+@when("the PDM cluster tags have been created correctly")
 def step_pdm_cluster_tags_have_been_created_correctly(context):
 
     cluster_id = context.pdm_cluster_id
