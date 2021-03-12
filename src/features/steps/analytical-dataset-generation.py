@@ -172,6 +172,19 @@ def step_verify_analytical_datasets(context, snapshot_type):
         assert "x-amz-matdesc" in metadata
 
 
+@then("the ADG cluster tags have been created correctly for '{snapshot_type}'")
+def step_check_adg_cluster_tags(context, snapshot_type):
+    console_printer.print_info(f"Checking cluster Tags")
+    cluster_id = context.adg_cluster_id
+    console_printer.print_info(f"Cluster id : {cluster_id}")
+    cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
+    console_printer.print_info(f"Cluster tags : {cluster_tags}")
+    tags_to_check = {"Key": "Correlation_Id", "Value": context.test_run_name}
+    console_printer.print_info(f"Tags to check : {tags_to_check}")
+
+    assert tags_to_check in cluster_tags
+
+
 @then("the metadata table is correct for '{snapshot_type}'")
 def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"

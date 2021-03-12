@@ -10,5 +10,6 @@ Feature: PDM data set generation tests, to source data and valid final tables fo
     Given the ADG uncompressed output 'agent-core/youthObligationDetails/youth_obligation_details.json' as an input data source on S3
     When I start the PDM cluster
     And insert the 'hive-query' step onto the cluster
+    And the PDM cluster tags have been created correctly
     And wait a maximum of '120' minutes for the step to finish
     Then the PDM result matches the expected results of 'youth_obligation_model_results.csv'
