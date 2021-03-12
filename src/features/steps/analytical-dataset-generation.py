@@ -39,16 +39,18 @@ ADG_COLLECTIONS = ["agent", "agentToDo", "team"]
 def step_(context, template_name):
 
     for topic in ADG_TOPICS:
-        snapshot_local_file = snapshot_data_generator.generate_hbase_record_for_snapshot_file(
-            template_name,
-            TIMESTAMP,
-            uuid.uuid4(),
-            RUN_TYPE,
-            context.test_run_name,
-            topic,
-            context.fixture_path_local,
-            context.snapshot_files_hbase_records_temp_folder,
-            True,
+        snapshot_local_file = (
+            snapshot_data_generator.generate_hbase_record_for_snapshot_file(
+                template_name,
+                TIMESTAMP,
+                uuid.uuid4(),
+                RUN_TYPE,
+                context.test_run_name,
+                topic,
+                context.fixture_path_local,
+                context.snapshot_files_hbase_records_temp_folder,
+                True,
+            )
         )
         with open(snapshot_local_file, "r") as unencrypted_file:
             unencrypted_content = unencrypted_file.read()
@@ -57,8 +59,10 @@ def step_(context, template_name):
             iv_whole,
         ] = historic_data_load_generator.generate_initialisation_vector()
         iv = base64.b64encode(iv_int).decode()
-        compressed_encrypted_content = historic_data_load_generator.generate_encrypted_record(
-            iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+        compressed_encrypted_content = (
+            historic_data_load_generator.generate_encrypted_record(
+                iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+            )
         )
         file_name = os.path.basename(snapshot_local_file)
         s3_prefix = os.path.join(context.mongo_snapshot_path, context.test_run_name)
@@ -175,12 +179,12 @@ def step_check_adg_cluster_tags(context, snapshot_type):
     console_printer.print_info(f"Cluster id : {cluster_id}")
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
     console_printer.print_info(f"Cluster tags : {cluster_tags}")
-    tags_to_check = {'Key': 'Correlation_Id', 'Value': context.test_run_name}
+    tags_to_check = {"Key": "Correlation_Id", "Value": context.test_run_name}
     console_printer.print_info(f"Tags to check : {tags_to_check}")
 
     assert tags_to_check in cluster_tags
 
-    
+
 @then("the metadata table is correct for '{snapshot_type}'")
 def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"

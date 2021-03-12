@@ -102,6 +102,6 @@ def step_pdm_cluster_tags_have_been_created_correctly(context):
 
     cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
 
-    tags_to_check = {'Key': 'Correlation_Id', 'Value': context.test_run_name}
+    tags_to_check = {"Key": "Correlation_Id", "Value": context.test_run_name}
 
     assert tags_to_check in cluster_tags
