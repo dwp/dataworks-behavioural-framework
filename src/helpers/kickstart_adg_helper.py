@@ -186,7 +186,7 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                         data.append(record)
                         num += 1
                     JSON_BLOB.update({"data": data})
-                    writer.write(json.dumps(data, indent=4))
+                    writer.write(json.dumps(JSON_BLOB, indent=4))
 
         return [
             os.path.join(local_output_folder, x)
