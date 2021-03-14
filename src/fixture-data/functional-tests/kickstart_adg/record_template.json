@@ -279,7 +279,7 @@
           "value" : "date",
           "pii_flg" : false
         },
-        "dateCompletedTemplatesSentToAssessmentTeam&VacancyTeam" : {
+        "dateCompletedTemplatesSentToAssessmentTeamVacancyTeam" : {
           "value" : "date",
           "pii_flg" : false
         },
