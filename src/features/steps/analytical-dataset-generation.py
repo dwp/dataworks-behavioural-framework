@@ -107,7 +107,7 @@ def step_(context, snapshot_type, step_name):
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, 1200
+            step_id, cluster_id, 2400
         )
         if execution_state != COMPLETED_STATUS:
             raise AssertionError(
@@ -215,7 +215,12 @@ def metadata_table_step_impl(context, snapshot_type):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["flush-pushgateway", "send_notification", "executeUpdateAll"]
+    allowed_steps = [
+        "flush-pushgateway",
+        "send_notification",
+        "executeUpdateStatement",
+        "executeUpdateAll",
+    ]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
