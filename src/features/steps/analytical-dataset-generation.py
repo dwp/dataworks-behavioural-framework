@@ -35,7 +35,7 @@ ADG_TOPICS = [
     "db.core.statement",
 ]
 ADG_DB = "agent-core"
-ADG_COLLECTIONS = ["agent", "agentToDo", "team"]
+ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement"]
 
 
 @given(
@@ -135,6 +135,10 @@ def step_verify_analytical_datasets(context, snapshot_type):
     console_printer.print_info(f"Keys in data location : {keys}")
     assert len(keys) == len(ADG_TOPICS)
     for collection in ADG_COLLECTIONS:
+        if collection == "statement":
+            ADG_DB = "core"
+        else:
+            ADG_DB = "agent-core"
         part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
         assert part_file_key in keys
         tags = aws_helper.get_tags_of_file_in_s3(
