@@ -177,7 +177,10 @@ def step_impl(context, statuses, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
-        [context.send_snapshots_topics_override, context.generate_snapshots_topics_override],
+        [
+            context.send_snapshots_topics_override,
+            context.generate_snapshots_topics_override,
+        ],
     )
     correlation_id = (
         snapshots_helper.get_snapshot_run_correlation_id(
