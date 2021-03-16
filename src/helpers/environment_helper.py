@@ -133,6 +133,9 @@ def set_test_run_common_variables(context):
     context.send_snapshots_date_override = context.config.userdata.get(
         "SEND_SNAPSHOTS_DATE_OVERRIDE"
     )
+    context.generate_snapshots_export_date_override = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_EXPORT_DATE_OVERRIDE"
+    )
 
     send_snapshots_reprocess_filescontext_string = context.config.userdata.get(
         "SEND_SNAPSHOTS_REPROCESS_FILES_OVERRIDE"
