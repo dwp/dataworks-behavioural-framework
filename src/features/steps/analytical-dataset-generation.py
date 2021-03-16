@@ -107,7 +107,7 @@ def step_(context, snapshot_type, step_name):
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, 2400
+            step_id, cluster_id, 100000
         )
         if execution_state != COMPLETED_STATUS:
             raise AssertionError(
