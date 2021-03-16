@@ -77,7 +77,11 @@ def step_impl(context, snapshot_type):
         if not context.generate_snapshots_correlation_id_override
         else context.generate_snapshots_correlation_id_override
     )
-    today_yyyymmdd = datetime.now().strftime("%Y-%m-%d")
+    today_yyyymmdd = (
+        context.generate_snapshots_export_date_override
+        if context.generate_snapshots_export_date_override
+        else datetime.now().strftime("%Y-%m-%d")
+    )
     mongo_snapshot_full_s3_location = (
         f"{context.mongo_snapshot_path}/{today_yyyymmdd}/{snapshot_type}"
     )
@@ -173,7 +177,7 @@ def step_impl(context, statuses, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
-        [context.send_snapshots_topics_override],
+        [context.send_snapshots_topics_override, context.generate_snapshots_topics_override],
     )
     correlation_id = (
         snapshots_helper.get_snapshot_run_correlation_id(
