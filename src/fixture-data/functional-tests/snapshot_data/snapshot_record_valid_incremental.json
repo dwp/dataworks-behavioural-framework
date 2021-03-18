@@ -27,7 +27,7 @@
         "type": "FROM_START_OF_CLAIM"
       },
       "declaredDateTime": {
-        "$date": "2026-05-10T12:11:19.019Z"
+        "d_date": "2026-05-10T12:11:19.019Z"
       }
     }
   ],
@@ -39,7 +39,7 @@
     "paymentDate": 20280223,
     "processDate": null,
     "createdDateTime": {
-      "$date": "2028-01-01T00:00:00.000000Z"
+      "d_date": "2028-01-01T00:00:00.000000Z"
     }
   },
   "standardAllowanceElement": "317.82",
@@ -72,7 +72,7 @@
   "deductions": "0.00",
   "totalPayment": "0.00",
   "createdDateTime": {
-    "$date": "2028-01-01T00:00:00.000000Z"
+    "d_date": "2028-01-01T00:00:00.000000Z"
   },
   "earningsSource": null,
   "otherBenefitAwards": [],
@@ -83,7 +83,7 @@
   "preAdjustmentTotal": "317.82",
   "_entityVersion": 4,
   "_lastModifiedDateTime": {
-    "$date": "2028-01-01T00:00:00.000000Z"
+    "d_date": "2028-01-01T00:00:00.000000Z"
   },
   "workCapabilityElement": null,
   "benefitCapThreshold": null,
