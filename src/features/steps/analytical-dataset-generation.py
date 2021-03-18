@@ -12,6 +12,7 @@ from helpers import (
     invoke_lambda,
     console_printer,
     emr_step_generator,
+    file_helper,
 )
 from datetime import datetime
 
