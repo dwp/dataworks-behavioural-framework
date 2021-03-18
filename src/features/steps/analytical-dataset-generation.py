@@ -11,6 +11,7 @@ from helpers import (
     aws_helper,
     invoke_lambda,
     console_printer,
+    emr_step_generator,
 )
 from datetime import datetime
 
@@ -44,16 +45,18 @@ ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement"]
 def step_(context, template_name):
 
     for topic in ADG_TOPICS:
-        snapshot_local_file = snapshot_data_generator.generate_hbase_record_for_snapshot_file(
-            template_name,
-            TIMESTAMP,
-            uuid.uuid4(),
-            RUN_TYPE,
-            context.test_run_name,
-            topic,
-            context.fixture_path_local,
-            context.snapshot_files_hbase_records_temp_folder,
-            True,
+        snapshot_local_file = (
+            snapshot_data_generator.generate_hbase_record_for_snapshot_file(
+                template_name,
+                TIMESTAMP,
+                uuid.uuid4(),
+                RUN_TYPE,
+                context.test_run_name,
+                topic,
+                context.fixture_path_local,
+                context.snapshot_files_hbase_records_temp_folder,
+                True,
+            )
         )
         with open(snapshot_local_file, "r") as unencrypted_file:
             unencrypted_content = unencrypted_file.read()
@@ -62,8 +65,10 @@ def step_(context, template_name):
             iv_whole,
         ] = historic_data_load_generator.generate_initialisation_vector()
         iv = base64.b64encode(iv_int).decode()
-        compressed_encrypted_content = historic_data_load_generator.generate_encrypted_record(
-            iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+        compressed_encrypted_content = (
+            historic_data_load_generator.generate_encrypted_record(
+                iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+            )
         )
         file_name = os.path.basename(snapshot_local_file)
         s3_prefix = os.path.join(context.mongo_snapshot_path, context.test_run_name)
@@ -113,6 +118,62 @@ def step_(context, snapshot_type, step_name):
             raise AssertionError(
                 f"'{step_name}' step failed with final status of '{execution_state}'"
             )
+
+
+@then("insert the '{step_name}' step onto the cluster")
+def step_impl(context, step_name):
+    context.adg_cluster_step_name = step_name
+    s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
+    file_name = f"{context.test_run_name}.csv"
+    adg_hive_export_bash_command = (
+        f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+        + f" &>> /var/log/adg/e2e.log"
+    )
+
+    context.adg_cluster_step_id = emr_step_generator.generate_bash_step(
+        context.adg_cluster_id,
+        adg_hive_export_bash_command,
+        context.adg_cluster_step_name,
+    )
+    context.adg_results_s3_file = os.path.join(s3_path, file_name)
+
+
+@then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+def step_impl(context, timeout_mins):
+    timeout_secs = int(timeout_mins) * 60
+    execution_state = aws_helper.poll_emr_cluster_step_status(
+        context.adg_cluster_step_id, context.adg_cluster_id, timeout_secs
+    )
+
+    if execution_state != "COMPLETED":
+        raise AssertionError(
+            f"'{context.adg_cluster_step_name}' step failed with final status of '{execution_state}'"
+        )
+
+
+@then(
+    "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
+)
+def step_(context, expected_result_file_name):
+    console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
+    actual = aws_helper.get_s3_object(
+        None, context.published_bucket, context.adg_results_s3_file
+    ).decode("ascii")
+    actual_comma_deliminated = actual.replace("\t", ",").strip()
+
+    expected_file_name = os.path.join(
+        context.fixture_path_local,
+        "snapshot_data",
+        "expected",
+        expected_result_file_name,
+    )
+    expected = file_helper.get_contents_of_file(expected_file_name, False)
+    expected_comma_deliminated = expected.replace("\t", ",").strip()
+
+    assert (
+        expected_comma_deliminated == actual_comma_deliminated
+    ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
 
 
 @then("read metadata of the analytical data sets from the path '{metadata_path}'")
