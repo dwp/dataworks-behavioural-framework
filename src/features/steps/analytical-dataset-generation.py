@@ -292,7 +292,6 @@ def metadata_table_step_impl(context, snapshot_type):
     allowed_steps = [
         "flush-pushgateway",
         "send_notification",
-        "executeUpdateStatement",
         "executeUpdateAll",
         "create_pdm_trigger",
         "bash"
