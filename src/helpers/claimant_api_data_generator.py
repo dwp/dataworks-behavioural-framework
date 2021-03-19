@@ -208,7 +208,7 @@ def generate_claimant_api_kafka_files(
         s3_output_prefix,
         seconds_timeout,
     )
-    console_printer(return_data)
+
     return (return_data, all_ninos, all_ids)
 
 
