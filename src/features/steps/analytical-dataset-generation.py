@@ -160,8 +160,8 @@ def step_(context, expected_result_file_name):
     console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
     actual = aws_helper.get_s3_object(
         None, context.published_bucket, context.adg_results_s3_file
-    ).decode("ascii")
-    actual_comma_deliminated = actual.replace("\t", ",").strip()
+    ).decode("ascii").strip()
+    #actual_comma_deliminated = actual.replace("\t", ",").strip()
 
     expected_file_name = os.path.join(
         context.fixture_path_local,
@@ -169,12 +169,12 @@ def step_(context, expected_result_file_name):
         "expected",
         expected_result_file_name,
     )
-    expected = file_helper.get_contents_of_file(expected_file_name, False)
-    expected_comma_deliminated = expected.replace("\t", ",").strip()
+    expected = file_helper.get_contents_of_file(expected_file_name, False).strip()
+    #expected_comma_deliminated = expected.replace("\t", ",").strip()
 
     assert (
-        expected_comma_deliminated == actual_comma_deliminated
-    ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
+        expected == actual
+    ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
 @then("read metadata of the analytical data sets from the path '{metadata_path}'")
