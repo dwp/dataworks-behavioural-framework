@@ -158,10 +158,17 @@ def step_impl(context, timeout_mins):
 )
 def step_(context, expected_result_file_name):
     console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
-    actual = aws_helper.get_s3_object(
-        None, context.published_bucket, context.adg_results_s3_file
-    ).decode("ascii").replace("\t", "").replace(" ", "").strip()
     #actual_comma_deliminated = actual.replace("\t", ",").strip()
+    actual = (
+        aws_helper.get_s3_object(
+            None, context.published_bucket, context.adg_results_s3_file
+        )
+        .decode("ascii")
+        .replace("\t", "")
+        .replace(" ", "")
+        .strip()
+    )
+    # actual_comma_deliminated = actual.replace("\t", ",").strip()
 
     expected_file_name = os.path.join(
         context.fixture_path_local,
@@ -170,7 +177,7 @@ def step_(context, expected_result_file_name):
         expected_result_file_name,
     )
     expected = file_helper.get_contents_of_file(expected_file_name, False).replace("\t", "").replace(" ", "").strip()
-    #expected_comma_deliminated = expected.replace("\t", ",").strip()
+    # expected_comma_deliminated = expected.replace("\t", ",").strip()
 
     assert (
         expected == actual
