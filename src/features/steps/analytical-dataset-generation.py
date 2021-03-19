@@ -289,8 +289,12 @@ def metadata_table_step_impl(context, snapshot_type):
     allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "send_notification"]
 
     if snapshot_type.lower() == "incremental":
-        allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "executeUpdateAll", "bash"]
-
+        allowed_steps = [
+            "create_pdm_trigger",
+            "flush-pushgateway",
+            "executeUpdateAll",
+            "bash",
+        ]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
