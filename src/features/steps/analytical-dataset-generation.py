@@ -295,6 +295,7 @@ def metadata_table_step_impl(context, snapshot_type):
         "executeUpdateStatement",
         "executeUpdateAll",
         "create_pdm_trigger",
+        "bash"
     ]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
