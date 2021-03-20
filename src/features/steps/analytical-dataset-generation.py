@@ -11,8 +11,6 @@ from helpers import (
     aws_helper,
     invoke_lambda,
     console_printer,
-    emr_step_generator,
-    file_helper,
 )
 from datetime import datetime
 
@@ -30,14 +28,9 @@ CORRELATION_ID_VALUE = "e2e_test"
 S3_PREFIX = "s3_prefix"
 SNAPSHOT_TYPE = "snapshot_type"
 EXPORT_DATE = "export_date"
-ADG_TOPICS = [
-    "db.agent-core.agent",
-    "db.agent-core.agentToDo",
-    "db.agent-core.team",
-    "db.core.statement",
-]
+ADG_TOPICS = ["db.agent-core.agent", "db.agent-core.agentToDo", "db.agent-core.team"]
 ADG_DB = "agent-core"
-ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement"]
+ADG_COLLECTIONS = ["agent", "agentToDo", "team"]
 
 
 @given(
@@ -113,77 +106,12 @@ def step_(context, snapshot_type, step_name):
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, 2500
+            step_id, cluster_id, 1200
         )
         if execution_state != COMPLETED_STATUS:
             raise AssertionError(
                 f"'{step_name}' step failed with final status of '{execution_state}'"
             )
-
-
-@then("insert the '{step_name}' step onto the cluster")
-def step_impl(context, step_name):
-    context.adg_cluster_step_name = step_name
-    s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
-    file_name = f"{context.test_run_name}.csv"
-    adg_hive_export_bash_command = (
-        f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-        + f" &>> /var/log/adg/e2e.log"
-    )
-
-    context.adg_cluster_step_id = emr_step_generator.generate_bash_step(
-        context.adg_cluster_id,
-        adg_hive_export_bash_command,
-        context.adg_cluster_step_name,
-    )
-    context.adg_results_s3_file = os.path.join(s3_path, file_name)
-
-
-@then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
-def step_impl(context, timeout_mins):
-    timeout_secs = int(timeout_mins) * 60
-    execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.adg_cluster_step_id, context.adg_cluster_id, timeout_secs
-    )
-
-    if execution_state != "COMPLETED":
-        raise AssertionError(
-            f"'{context.adg_cluster_step_name}' step failed with final status of '{execution_state}'"
-        )
-
-
-@then(
-    "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
-)
-def step_(context, expected_result_file_name):
-    console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
-    actual = (
-        aws_helper.get_s3_object(
-            None, context.published_bucket, context.adg_results_s3_file
-        )
-        .decode("ascii")
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
-    )
-
-    expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "snapshot_data",
-        "expected",
-        expected_result_file_name,
-    )
-    expected = (
-        file_helper.get_contents_of_file(expected_file_name, False)
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
-    )
-
-    assert (
-        expected == actual
-    ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
 @then("read metadata of the analytical data sets from the path '{metadata_path}'")
@@ -206,10 +134,6 @@ def step_verify_analytical_datasets(context, snapshot_type):
     console_printer.print_info(f"Keys in data location : {keys}")
     assert len(keys) == len(ADG_TOPICS)
     for collection in ADG_COLLECTIONS:
-        if collection == "statement":
-            ADG_DB = "core"
-        else:
-            ADG_DB = "agent-core"
         part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
         assert part_file_key in keys
         tags = aws_helper.get_tags_of_file_in_s3(
@@ -289,12 +213,7 @@ def metadata_table_step_impl(context, snapshot_type):
     allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "send_notification"]
 
     if snapshot_type.lower() == "incremental":
-        allowed_steps = [
-            "create_pdm_trigger",
-            "flush-pushgateway",
-            "executeUpdateAll",
-            "bash",
-        ]
+        allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "executeUpdateAll"]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
