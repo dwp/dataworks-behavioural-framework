@@ -37,8 +37,9 @@ ADG_TOPICS = [
     "db.core.statement",
     "db.core.contract",
     "db.core.claimant",
-    "db.accepted-data.personDetails",
     "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
 ]
 
 ADG_DB_COLLECTION = {
