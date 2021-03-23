@@ -22,7 +22,7 @@ def dataGenSmallInt():
 
 
 def dataGenNumeric():
-    return float(rd.getrandbits(8))
+    return round(rd.uniform(10000.0000, 99999.9999), 4)
 
 
 def dataGenInteger():
@@ -56,6 +56,9 @@ def dataGenDate():
     current_date = datetime.today()
     return datetime.strftime(current_date, "%Y-%m-%d 00:00:00")
 
+def dataGenDouble():
+    return round(rd.random(),2)
+
 
 def dataTypeMapping(type):
     try:
@@ -70,6 +73,7 @@ def dataTypeMapping(type):
             "date": dataGenDate,
             "numeric": dataGenNumeric,
             "integer": dataGenInteger,
+            "double" : dataGenDouble,
         }
 
         return datatypes[type]
