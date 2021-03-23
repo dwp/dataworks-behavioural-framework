@@ -56,16 +56,18 @@ ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement", "contract", "claim
 def step_(context, template_name):
 
     for topic in ADG_TOPICS:
-        snapshot_local_file = snapshot_data_generator.generate_hbase_record_for_snapshot_file(
-            template_name,
-            TIMESTAMP,
-            uuid.uuid4(),
-            RUN_TYPE,
-            context.test_run_name,
-            topic,
-            context.fixture_path_local,
-            context.snapshot_files_hbase_records_temp_folder,
-            True,
+        snapshot_local_file = (
+            snapshot_data_generator.generate_hbase_record_for_snapshot_file(
+                template_name,
+                TIMESTAMP,
+                uuid.uuid4(),
+                RUN_TYPE,
+                context.test_run_name,
+                topic,
+                context.fixture_path_local,
+                context.snapshot_files_hbase_records_temp_folder,
+                True,
+            )
         )
         with open(snapshot_local_file, "r") as unencrypted_file:
             unencrypted_content = unencrypted_file.read()
@@ -74,8 +76,10 @@ def step_(context, template_name):
             iv_whole,
         ] = historic_data_load_generator.generate_initialisation_vector()
         iv = base64.b64encode(iv_int).decode()
-        compressed_encrypted_content = historic_data_load_generator.generate_encrypted_record(
-            iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+        compressed_encrypted_content = (
+            historic_data_load_generator.generate_encrypted_record(
+                iv_whole, unencrypted_content, context.encryption_plaintext_key, True
+            )
         )
         file_name = os.path.basename(snapshot_local_file)
         s3_prefix = os.path.join(context.mongo_snapshot_path, context.test_run_name)
