@@ -210,6 +210,100 @@ def before_tag(context, tag):
             "e2e_rbac_uc__auditlog_redacted_and_auditlog_secure",
             ["rbac_uc__auditlog_secure"],
         )
+    if (
+        tag
+        == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_mongo_latest__full_access",
+        )
+    if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access":
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest__full_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_mongo_latest__read_access",
+        )
+    if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__read_access":
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest__read_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_redacted__full_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__full_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_ucs_latest_redacted__full_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_redacted__read_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_redacted__ucs_latest_redacted__read_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user, context, "rbac_ucs_latest_redacted__read_access"
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__full_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_unredacted__full_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__full_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_ucs_latest_unredacted__full_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__read_access_and_role"
+    ):
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_ucs_latest_unredacted__read_access",
+        )
+    if (
+        tag
+        == "fixture.setup.rbac_ucs_latest_unredacted__ucs_latest_unredacted__read_access"
+    ):
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_ucs_latest_unredacted__read_access",
+        )
     if tag == "fixture.htme.start.full":
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
@@ -270,6 +364,10 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.k2hb_start, context)
     if tag == "fixture.k2hb.stop":
         use_fixture(before_fixtures.k2hb_stop, context)
+    if tag == "fixture.ingest.ecs.cluster.start":
+        use_fixture(before_fixtures.ingest_ecs_cluster_start, context)
+    if tag == "fixture.ingest.ecs.cluster.stop":
+        use_fixture(before_fixtures.ingest_ecs_cluster_stop, context)
     if tag == "fixture.analytical.setup":
         use_fixture(before_fixtures.analytical_env_setup, context)
     if tag == "fixture.dynamodb.clear.ingest.start.full":
@@ -377,6 +475,8 @@ def after_scenario(context, scenario):
 def after_tag(context, tag):
     if tag == "fixture.cleanup.role_and_s3":
         use_fixture(after_fixtures.clean_up_role_and_s3_objects, context)
+    if tag == "fixture.cleanup.s3":
+        use_fixture(after_fixtures.clean_up_s3_object, context)
     if tag == "fixture.terminate.adg.cluster":
         use_fixture(after_fixtures.terminate_adg_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":

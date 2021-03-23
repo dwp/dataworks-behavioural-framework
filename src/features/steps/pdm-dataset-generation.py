@@ -9,6 +9,7 @@ from helpers import (
     file_helper,
     invoke_lambda,
 )
+from datetime import datetime
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
@@ -26,9 +27,11 @@ def step_(context, input_json):
 
 @when("I start the PDM cluster")
 def step_(context):
+    context.pdm_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "s3_prefix": context.pdm_test_input_s3_prefix,
         "correlation_id": f"{context.test_run_name}",
+        "export_date": context.pdm_export_date,
     }
     payload_json = json.dumps(emr_launcher_config)
     cluster_response = invoke_lambda.invoke_pdm_emr_launcher_lambda(payload_json)
@@ -91,3 +94,59 @@ def step_(context, expected_result_file_name):
     assert (
         expected_comma_deliminated == actual_comma_deliminated
     ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
+
+
+@when("the PDM cluster tags have been created correctly")
+def step_pdm_cluster_tags_have_been_created_correctly(context):
+    cluster_id = context.pdm_cluster_id
+    console_printer.print_info(f"Cluster id : {cluster_id}")
+    cluster_tags = aws_helper.check_tags_of_cluster(cluster_id)
+    console_printer.print_info(f"Cluster tags : {cluster_tags}")
+    tags_to_check = {"Key": "Correlation_Id", "Value": context.test_run_name}
+    console_printer.print_info(f"Tags to check : {tags_to_check}")
+    assert tags_to_check in cluster_tags
+
+
+@then("the PDM metadata table is correct")
+def metadata_table_step_impl(context):
+    data_product = f"PDM"
+    table_name = "data_pipeline_metadata"
+
+    key_dict = {
+        "Correlation_Id": {"S": f"{context.test_run_name}"},
+        "DataProduct": {"S": f"{data_product}"},
+    }
+
+    console_printer.print_info(
+        f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
+    )
+
+    response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
+
+    console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
+
+    assert (
+        "Item" in response
+    ), f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
+
+    item = response["Item"]
+    console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
+
+    allowed_steps = ["flush-s3"]
+
+    assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
+    assert (
+        item["Run_Id"]["N"] == "1"
+    ), f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
+    assert (
+        item["Date"]["S"] == context.pdm_export_date
+    ), f"Date was '{item['Date']['S']}', expected '{context.pdm_export_date}'"
+    assert (
+        item["CurrentStep"]["S"] in allowed_steps
+    ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
+    assert (
+        item["Cluster_Id"]["S"] == context.pdm_cluster_id
+    ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.pdm_cluster_id}'"
+    assert (
+        item["S3_Prefix_Analytical_DataSet"]["S"] == context.pdm_test_input_s3_prefix
+    ), f"S3_Prefix_Analytical_DataSet was '{item['S3_Prefix_Analytical_DataSet']['S']}', expected '{context.pdm_test_input_s3_prefix}'"

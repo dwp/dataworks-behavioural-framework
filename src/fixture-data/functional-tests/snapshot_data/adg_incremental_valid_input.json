@@ -1,0 +1,93 @@
+{
+  "_id": {
+    "statementId": "500c7781-0f9d-49ca-8323-0de9cb4484a9"
+  },
+  "_version": 1,
+  "people": [
+    {
+      "type": "person",
+      "contractId": "b9cb4670-ee24-45b7-9de9-76580e3ff17b",
+      "citizenId": "e77ba99d-6627-4ed2-97ec-a6ce5de182dc",
+      "lastName": "Bloggs0",
+      "middleName": null,
+      "firstName": "Jo0",
+      "email": "jo0\\@example.com",
+      "mobileNumber": "070",
+      "dateOfBirth": {
+        "type": "PersonDateOfBirth",
+        "cryptoId": "4f525212-82b0-42f9-96f8-e006050843ec"
+      },
+      "contactPreference": "MOBILE",
+      "gender": "female",
+      "verifiedUsingBioQuestionsOrThirdParty": null,
+      "effectiveDate": {
+        "type": "FROM_START_OF_CLAIM"
+      },
+      "paymentEffectiveDate": {
+        "type": "FROM_START_OF_CLAIM"
+      },
+      "declaredDateTime": {
+        "d_date": "2026-05-10T12:11:19.019Z"
+      }
+    }
+  ],
+  "assessmentPeriod": {
+    "assessmentPeriodId": "56083a9c-c237-42b9-847a-3155f1beb231",
+    "contractId": "b9cb4670-ee24-45b7-9de9-76580e3ff17b",
+    "startDate": 20280201,
+    "endDate": 20280228,
+    "paymentDate": 20280223,
+    "processDate": null,
+    "createdDateTime": {
+      "d_date": "2028-01-01T00:00:00.000000Z"
+    }
+  },
+  "standardAllowanceElement": "317.82",
+  "housingElement": "0.00",
+  "housingElementRent": "0.00",
+  "housingElementServiceCharges": "0.00",
+  "childElement": "0.00",
+  "numberEligibleChildren": 0,
+  "disabledChildElement": "0.00",
+  "numberEligibleDisabledChildren": 0,
+  "childcareElement": "0.00",
+  "numberEligibleChildrenInChildCare": 0,
+  "carerElement": "0.00",
+  "numberPeopleCaredFor": 0,
+  "takeHomePay": "123.45",
+  "takeHomeBreakdown": {
+    "rte": "0.00",
+    "selfReported": "0.00",
+    "selfEmployed": "0.00",
+    "selfEmployedWithMif": "0.00"
+  },
+  "unaffectedPayElement": "0.00",
+  "totalReducedForHomePay": "0.00",
+  "otherIncomeAdjustment": "0.00",
+  "capitalAdjustment": "0.00",
+  "totalAdjustments": "0.00",
+  "fraudPenalties": "0.00",
+  "sanctions": "317.82",
+  "advances": "0.00",
+  "deductions": "0.00",
+  "totalPayment": "0.00",
+  "createdDateTime": {
+    "d_date": "2028-01-01T00:00:00.000000Z"
+  },
+  "earningsSource": null,
+  "otherBenefitAwards": [],
+  "overlappingBenefits": [],
+  "totalOtherBenefitsAdjustment": "0",
+  "capApplied": null,
+  "type": "CALCULATED",
+  "preAdjustmentTotal": "317.82",
+  "_entityVersion": 4,
+  "_lastModifiedDateTime": {
+    "d_date": "2028-01-01T00:00:00.000000Z"
+  },
+  "workCapabilityElement": null,
+  "benefitCapThreshold": null,
+  "benefitCapAdjustment": null,
+  "gracePeriodEndDate": null,
+  "landlordPayment": "0"
+}

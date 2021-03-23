@@ -133,6 +133,9 @@ def set_test_run_common_variables(context):
     context.send_snapshots_date_override = context.config.userdata.get(
         "SEND_SNAPSHOTS_DATE_OVERRIDE"
     )
+    context.generate_snapshots_export_date_override = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_EXPORT_DATE_OVERRIDE"
+    )
 
     send_snapshots_reprocess_filescontext_string = context.config.userdata.get(
         "SEND_SNAPSHOTS_REPROCESS_FILES_OVERRIDE"
@@ -160,6 +163,12 @@ def set_test_run_common_variables(context):
     )
     context.asg_max_count_k2hb_audit_london = context.config.userdata.get(
         "ASG_MAX_COUNT_K2HB_AUDIT_LONDON"
+    )
+    context.asg_prefix_ingestion_ecs_cluster = context.config.userdata.get(
+        "ASG_PREFIX_INGESTION_ECS_CLUSTER"
+    )
+    context.asg_max_count_ingestion_ecs_cluster = context.config.userdata.get(
+        "ASG_MAX_COUNT_INGESTION_ECS_CLUSTER"
     )
 
     context.asg_prefix_htme = context.config.userdata.get("ASG_PREFIX_HTME")

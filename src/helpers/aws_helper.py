@@ -6,6 +6,7 @@ import re
 import uuid
 import boto3
 from botocore.exceptions import ClientError
+from boto3.exceptions import S3UploadFailedError
 from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
 from exceptions import aws_exceptions
@@ -177,7 +178,7 @@ def get_item_from_dynamodb(table_name, key_dict):
         f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
     )
 
-    return dynamodb_client.get_item(TableName=f"{table_name}", Key=key_dict)
+    return dynamodb_client.get_item(TableName=table_name, Key=key_dict)
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
@@ -1530,8 +1531,15 @@ def test_s3_access_write(s3_bucket, key, local_file, timeout, s3_client=None):
             local_file, s3_bucket, timeout, key, s3_client
         )
         return True
+
+    #   Raises ClientError whilst s3 call is happening asynchronously then returns S3UploadFailedError from the api call
     except ClientError as e:
-        if e.response["Error"]["Code"] is "AccessDenied":
+        if "PutObject operation: Access Denied" in str(e):
+            return False
+        else:
+            raise e
+    except S3UploadFailedError as e:
+        if "PutObject operation: Access Denied" in str(e):
             return False
         else:
             raise e
@@ -1685,3 +1693,43 @@ def generate_arn(service, arn_suffix, region=None):
     region_qualified = region if region else ""
 
     return f"{arn_value}:{aws_value}:{service}:{region_qualified}:{arn_suffix}"
+
+
+def check_tags_of_cluster(cluster_id, emr_client=None):
+    """Adds additional tags to an EMR cluster and its instances.
+
+    Keyword arguments:
+    cluster_id -- the id of the cluster
+    dict_of_tags -- a dictionary of key value pairs. eg. {"Correlation_Id": "test"}
+    emr_client -- client to override the standard one
+    """
+    if emr_client is None:
+        emr_client = get_client(service_name="emr")
+
+    response = emr_client.describe_cluster(ClusterId=cluster_id)
+    cluster_tags = response["Cluster"]["Tags"]
+
+    return cluster_tags
+
+
+def check_if_s3_object_exists(bucket, key, s3_client=None):
+    """Returns True or False based on object existing in s3 location
+
+    Keyword arguments:
+       bucket -- the s3 bucket id
+       key -- the key/prefix for the location of the file
+       s3_client -- an established s3 client (optional)
+    """
+
+    if s3_client == None:
+        s3_client = get_client(service_name="s3")
+
+    response = s3_client.list_objects_v2(
+        Bucket=bucket,
+        Prefix=key,
+    )
+    for obj in response.get("Contents", []):
+        if obj["Key"] == key:
+            return True
+
+    return False
