@@ -46,8 +46,6 @@ ADG_DB_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment"],
     "accepted-data": ["personDetails"],
 }
-ADG_DB = "agent-core"
-ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement", "contract", "claimant"]
 
 
 @given(
