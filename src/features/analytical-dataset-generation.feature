@@ -18,7 +18,7 @@ Feature: Analytical data set generation end to end test
       Given the data of the format in the template file 'adg_incremental_valid_input.json' as an input to analytical data set generation emr
       Then start adg 'incremental' cluster and wait for the step 'courtesy-flush'
       And insert the 'hive-query' step onto the cluster
-      And wait a maximum of '120' minutes for the step to finish
+      And wait a maximum of '10' minutes for the step to finish
       Then the Mongo-Latest result matches the expected results of 'statement_fact_v_expected.csv'
       And read metadata of the analytical data sets from the path 'analytical-dataset/incremental/adg_output/adg_params.csv'
       And verify metadata, tags of the analytical data sets for 'incremental'
