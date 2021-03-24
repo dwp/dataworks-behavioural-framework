@@ -35,9 +35,18 @@ ADG_TOPICS = [
     "db.agent-core.agentToDo",
     "db.agent-core.team",
     "db.core.statement",
+    "db.core.contract",
+    "db.core.claimant",
+    "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
 ]
-ADG_DB = "agent-core"
-ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement"]
+
+ADG_DB_COLLECTION = {
+    "agent-core": ["agent", "agentToDo", "team"],
+    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
+    "accepted-data": ["personDetails"],
+}
 
 
 @given(
@@ -205,47 +214,46 @@ def step_verify_analytical_datasets(context, snapshot_type):
     )
     console_printer.print_info(f"Keys in data location : {keys}")
     assert len(keys) == len(ADG_TOPICS)
-    for collection in ADG_COLLECTIONS:
-        if collection == "statement":
-            ADG_DB = "core"
-        else:
-            ADG_DB = "agent-core"
-        part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
-        assert part_file_key in keys
-        tags = aws_helper.get_tags_of_file_in_s3(
-            context.published_bucket, part_file_key
-        )["TagSet"]
-        console_printer.print_info(f"Tags are : {tags}")
-        found_tag_count = 0
-        for tag in tags:
-            key = tag["Key"]
-            value = tag["Value"]
-            if key == "pii":
-                found_tag_count += 1
-                assert value == "true", f"PII tag value is '{value}' and not 'true'"
-            if key == "db":
-                found_tag_count += 1
-                assert value == ADG_DB, f"DB tag value is '{value}' and not '{ADG_DB}'"
-            if key == "table":
-                found_tag_count += 1
-                assert (
-                    value == collection
-                ), f"Table tag value is '{value}' and not '{collection}'"
-            if key == "snapshot_type":
-                found_tag_count += 1
-                assert (
-                    value == snapshot_type
-                ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
+    for ADG_DB, collections in ADG_DB_COLLECTION.items():
+        for collection in collections:
+            part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
+            assert part_file_key in keys
+            tags = aws_helper.get_tags_of_file_in_s3(
+                context.published_bucket, part_file_key
+            )["TagSet"]
+            console_printer.print_info(f"Tags are : {tags}")
+            found_tag_count = 0
+            for tag in tags:
+                key = tag["Key"]
+                value = tag["Value"]
+                if key == "pii":
+                    found_tag_count += 1
+                    assert value == "true", f"PII tag value is '{value}' and not 'true'"
+                if key == "db":
+                    found_tag_count += 1
+                    assert (
+                        value == ADG_DB
+                    ), f"DB tag value is '{value}' and not '{ADG_DB}'"
+                if key == "table":
+                    found_tag_count += 1
+                    assert (
+                        value == collection
+                    ), f"Table tag value is '{value}' and not '{collection}'"
+                if key == "snapshot_type":
+                    found_tag_count += 1
+                    assert (
+                        value == snapshot_type
+                    ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
 
-        assert found_tag_count == 4, f"One or more tags not found"
+            assert found_tag_count == 4, f"One or more tags not found"
 
-        metadata = aws_helper.get_s3_object_metadata(
-            context.published_bucket, part_file_key
-        )
-        console_printer.print_info(f"metadata : {metadata}")
-        assert "x-amz-iv" in metadata
-        assert "x-amz-key" in metadata
-        assert "x-amz-matdesc" in metadata
+            metadata = aws_helper.get_s3_object_metadata(
+                context.published_bucket, part_file_key
+            )
+            console_printer.print_info(f"metadata : {metadata}")
+            assert "x-amz-iv" in metadata
+            assert "x-amz-key" in metadata
+            assert "x-amz-matdesc" in metadata
 
 
 @then("the ADG cluster tags have been created correctly for '{snapshot_type}'")
