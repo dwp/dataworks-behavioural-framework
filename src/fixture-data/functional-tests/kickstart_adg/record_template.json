@@ -290,7 +290,7 @@
       }
     },
     "record_layout" : "JSON",
-    "output_file_pattern" : "run-date_collection_epoc-time.json"
+    "output_file_pattern" : "run-date_application-collection_epoc-time.json"
   },
   "payment" : {
     "schema" : {
@@ -562,6 +562,6 @@
       }
       },
     "record_layout" : "JSON",
-    "output_file_pattern" : "run-date_collection_epoc-time.json"
+    "output_file_pattern" : "run-date_payment-collection_epoc-time.json"
   }
 }
