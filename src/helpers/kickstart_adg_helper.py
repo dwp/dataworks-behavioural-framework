@@ -22,7 +22,7 @@ def dataGenSmallInt():
 
 
 def dataGenNumeric():
-    return float(rd.getrandbits(8))
+    return round(rd.uniform(10000.0000, 99999.9999), 4)
 
 
 def dataGenInteger():
@@ -43,7 +43,7 @@ def dataGenTimestamp():
 
 
 def dataGenUUID():
-    return uuid.uuid1()
+    return str(uuid.uuid1())
 
 
 def dataGenString():
@@ -55,6 +55,10 @@ def dataGenString():
 def dataGenDate():
     current_date = datetime.today()
     return datetime.strftime(current_date, "%Y-%m-%d 00:00:00")
+
+
+def dataGenDouble():
+    return round(rd.random(), 2)
 
 
 def dataTypeMapping(type):
@@ -70,6 +74,7 @@ def dataTypeMapping(type):
             "date": dataGenDate,
             "numeric": dataGenNumeric,
             "integer": dataGenInteger,
+            "double": dataGenDouble,
         }
 
         return datatypes[type]
@@ -152,6 +157,50 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                         )
                         writer.write(record_data + "\n")
                         num += 1
+
+        elif schema_config["record_layout"].lower() == "json":
+
+            for collection, collection_schema in schema_config["schema"].items():
+                run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+                epoc_time = str(date_helper.get_current_epoch_seconds())
+                output_file_name = (
+                    schema_config["output_file_pattern"]
+                    .replace("run-date", run_date)
+                    .replace("collection", collection)
+                    .replace("epoc-time", epoc_time)
+                )
+                output_file = os.path.join(local_output_folder, output_file_name)
+                num = 1
+                data = []
+                JSON_BLOB = {
+                    "extract": {
+                        "service": "application-service",
+                        "dataExtract": "application",
+                        "start": datetime.strftime(
+                            datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                        ),
+                        "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
+                    },
+                    "fields": [
+                        {"fieldName": column, "pii": column_property["pii_flg"]}
+                        for column, column_property in collection_schema.items()
+                    ],
+                }
+                with open(output_file, "w+") as writer:
+                    while num <= int(record_count):
+                        record = {}
+                        for column, column_property in collection_schema.items():
+                            record.update(
+                                {column: dataTypeMapping(column_property["value"])()}
+                            )
+                            if "default" in column_property:
+                                record.update(
+                                    {column: rd.choice(column_property["default"])}
+                                )
+                        data.append(record)
+                        num += 1
+                    JSON_BLOB.update({"data": data})
+                    writer.write(json.dumps(JSON_BLOB, indent=4))
 
         return [
             os.path.join(local_output_folder, x)

@@ -65,5 +65,503 @@
     "record_layout" : "CSV",
     "record_delimiter" : ",",
     "output_file_pattern": "run-date_collection_epoc-time.csv"
+  },
+  "application" : {
+    "schema" : {
+      "grant_applications" : {
+        "applicationId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "fullReferenceNumber": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "applicationType": {
+          "value"   : "string",
+          "pii_flg" : false,
+          "default" : ["Employer", "Gateway"]
+        },
+        "fullName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "email": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "telephoneNumber": {
+          "value"   : "bigint",
+          "pii_flg" : true
+        },
+        "organisationName": {
+          "value"   : "string",
+          "pii_flg" : false
+        },
+        "charityRegistrationNumber": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "companyHouseNumber": {
+          "value"   : "bigint",
+          "pii_flg" : true
+        },
+        "addressLine1": {
+          "value"   : "text",
+          "pii_flg" : true
+        },
+        "addressLine2": {
+          "value"   : "text",
+          "pii_flg" : true
+        },
+        "town": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "county": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "postcode": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "numberOfPaidEmployees": {
+          "value"   : "integer",
+          "pii_flg" : false
+        },
+        "numberOfJobPlacements": {
+          "value"   : "integer",
+          "pii_flg" : false
+        },
+        "totalAmountOfFundingAppliedFor": {
+          "value"   : "numeric",
+          "pii_flg" : false
+        },
+        "expectedDateOfDecision": {
+          "value"   : "date",
+          "pii_flg" : false
+        },
+        "linkedApplicationIds": {
+          "value" : "string",
+          "pii_flg" : false
+        },
+        "mainOrAdditionalApplication": {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Main Application", "Additional Application"]
+        },
+        "contactNotes" : {
+          "value" : "string",
+          "pii_flg" : true
+        },
+        "employersRepresented" : {
+          "value" : "string",
+          "pii_flg" : true
+        },
+        "rolesToBeCreated" : {
+          "value" : "string",
+          "pii_flg" : true
+        },
+        "informationThatTheVacancyIsJustForKickstart" : {
+          "value" : "string",
+          "pii_flg" : true
+        },
+        "employabilitySupportInformation" : {
+          "value" : "string",
+          "pii_flg" : true
+        },
+        "sentForSpotlightCheck" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No", "Not Applicable"]
+        },
+        "spotlightApproved" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
+        },
+        "reasonRejectedBySpotlight" : {
+          "value" : "string",
+          "pii_flg" : false
+        },
+        "dateWorkStartedOnApplication" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "contactedEmployer" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
+        },
+        "contactedEmployerDate" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "assessmentCriteriaApproved" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Yes", "No"]
+        },
+        "reasonForRejection" : {
+          "value" : "string",
+          "pii_flg" : false
+        },
+        "recommendedDecision" : {
+          "value" : "string",
+          "pii_flg" : false
+        },
+        "dateSentToDecisionBoardSecretariat" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateOfOriginalDecisionBoard" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "originalApprovalBoardDecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Partially approved", "Rejected", "Requires Higher DFA", "Additional info needed - external", "Additional info needed - internal", "Returned - Spotlight rework action", "Returned - multiple application", "Withdrawn"]
+        },
+        "numberOfJobPlacementApproved" : {
+          "value" : "integer",
+          "pii_flg" : false
+        },
+        "cummulativeNumberOfJobPlacements" : {
+          "value" : "integer",
+          "pii_flg" : false
+        },
+        "dateOfSecondApprovalBoard" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "secondApprovalBoardDecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Partially approved", "Rejected", "Requires Higher DFA", "Additional info needed - external", "Additional info needed - internal", "Returned - Spotlight rework action", "Returned - multiple application", "Withdrawn"]
+        },
+        "higherDFADecision" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Rejected"]
+        },
+        "numberOfApprovedJobPlacements" : {
+          "value" : "integer",
+          "pii_flg" : false
+        },
+        "mainReasonForDFARejection" : {
+          "value" : "string",
+          "pii_flg" : false,
+          "default" : ["Spotlight / Financial", "Fail", "Ratio Fail", "Additionality & Employment Support", "Incorrect Application", "Unable to Contact"]
+        },
+        "batchNumberIfPendingApproval" : {
+          "value" : "uuid",
+          "pii_flg" : false
+        },
+        "dateDecisionEmailSent" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateAwardLetterSent" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateGrantAgreementSent" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateVacancyTemplateSent" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateGrantAgreementReceived" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateCompletedTemplatesSentToAssessmentTeamVacancyTeam" : {
+          "value" : "date",
+          "pii_flg" : false
+        },
+        "dateScheduleSentToPaymentsTeam" : {
+          "value" : "date",
+          "pii_flg" : false
+        }
+      }
+    },
+    "record_layout" : "JSON",
+    "output_file_pattern" : "run-date_application-collection_epoc-time.json"
+  },
+  "payment" : {
+    "schema" : {
+      "payment" : {
+        "id": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "batchId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "applicationId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "supplierId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "introductionId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "supplierNumber": {
+          "value"   : "bigint",
+          "pii_flg" : false
+        },
+        "siteName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "status": {
+          "value"   : "string",
+          "pii_flg" : false,
+          "default" : ["Approved", "Not Approved"]
+        },
+        "paymentNumber": {
+          "value"   : "bigint",
+          "pii_flg" : false
+        },
+        "invoiceNumber": {
+          "value"   : "bigint",
+          "pii_flg" : false
+        },
+        "invoiceAmount": {
+          "value"   : "double",
+          "pii_flg" : false
+        },
+        "invoiceDate": {
+          "value"   : "timestamp",
+          "pii_flg" : false
+        },
+        "employerPayrollId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "dateOfBirth": {
+          "value"   : "timestamp",
+          "pii_flg" : true
+        },
+        "rtiCheck": {
+          "value"   : "boolean",
+          "pii_flg" : false
+        },
+        "gateway": {
+          "value" : "string",
+          "pii_flg" : false
+        },
+        "confirmedStartDate": {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "endDate" : {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "dueDate" : {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "sentDate" : {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "version": {
+          "value"   : "double",
+          "pii_flg" : false
+        },
+        "invoiceNumberText" : {
+          "value" : "string",
+          "pii_flg" : false
+        }
+    },
+      "note" : {
+        "id": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "entityId": {
+          "value"   : "integer",
+          "pii_flg" : false
+        },
+        "type": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "username": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "noteDate": {
+          "value"   : "timestamp",
+          "pii_flg" : false
+        }
+      },
+      "supplier" : {
+        "id": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "payeeName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "supplierNumber": {
+          "value"   : "bigint",
+          "pii_flg" : false
+        },
+        "invoiceNumber": {
+          "value"   : "bigint",
+          "pii_flg" : false
+        },
+        "siteName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "applicationId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "organisationName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "createdDate": {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "updatedDate": {
+          "value" : "timestamp",
+          "pii_flg" : false
+        },
+        "version": {
+          "value" : "double",
+          "pii_flg" : false
+        }
+      },
+      "employee" : {
+        "id": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "introductionId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "claimantId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "fullName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "dateOfBirth": {
+          "value"   : "timestamp",
+          "pii_flg" : true
+        },
+        "nino": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "nino_hash": {
+          "value"   : "bigint",
+          "pii_flg" : true
+        },
+        "applicationId": {
+          "value"   : "uuid",
+          "pii_flg" : false
+        },
+        "anticipatedStartDate": {
+          "value"   : "timestamp",
+          "pii_flg" : false
+        },
+        "actualStartDate": {
+          "value"   : "timestamp",
+          "pii_flg" : false
+        },
+        "gateway": {
+          "value"   : "string",
+          "pii_flg" : false
+        },
+        "gatewayIsEmployer": {
+          "value"   : "string",
+          "pii_flg" : false
+        },
+        "gatewayName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "gatewayContactName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "gatewayPhoneNumber": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "gatewayEmail": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "employer": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "employerName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "employerContactName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "employerPhoneNumber": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "employerEmail": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "vacancyHolderContactName": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "vacancyHolderPhoneNumber": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "vacancyHolderEmail": {
+          "value"   : "string",
+          "pii_flg" : true
+        },
+        "createdDate": {
+          "value"   : "timestamp",
+          "pii_flg" : false
+        },
+        "placementStatus": {
+          "value"   : "string",
+          "pii_flg" : false,
+          "default" : ["Hired", "Pending"]
+        },
+        "version": {
+          "value"   : "double",
+          "pii_flg" : false
+        }
+      }
+      },
+    "record_layout" : "JSON",
+    "output_file_pattern" : "run-date_payment-collection_epoc-time.json"
   }
 }
