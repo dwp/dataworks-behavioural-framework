@@ -19,6 +19,7 @@ AUDIT_TABLE_HASH_KEY = "Correlation_Id"
 AUDIT_TABLE_RANGE_KEY = "DataProduct"
 DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
 
+
 @given(
     "The template file '{template_name}' as an input, generate '{record_count}' records per table for '{module_name}'"
 )
@@ -45,9 +46,8 @@ def step_impl(context, template_name, record_count, module_name):
     )
     context.kickstart_current_run_input_files = list_of_local_files
 
-@then(
-    "upload the local files to s3 bucket in '{data_encryption}' format"
-)
+
+@then("upload the local files to s3 bucket in '{data_encryption}' format")
 def step_impl(context, data_encryption):
 
     for file in context.kickstart_current_run_input_files:
@@ -87,19 +87,21 @@ def step_impl(context, data_encryption):
             input_data = historic_data_load_generator.encrypt(
                 file_iv_whole, plaintext_key, data
             )
-            inputs_s3_key = os.path.join(S3_KEY_KICSKTART_TEST, file_name+'.enc')
+            inputs_s3_key = os.path.join(S3_KEY_KICSKTART_TEST, file_name + ".enc")
 
-            all_metadata=json.loads(historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
-                encrypted_key, master_key, plaintext_key, file_iv_int
-            ))
+            all_metadata = json.loads(
+                historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
+                    encrypted_key, master_key, plaintext_key, file_iv_int
+                )
+            )
 
             console_printer.print_info("Metadata of for encrypted file is \n")
             console_printer.print_info(f"{json.dumps(all_metadata)}")
 
             metadata = {
-                "iv" : all_metadata["initialisationVector"],
-                "ciphertext" : all_metadata["encryptedEncryptionKey"],
-                "datakeyencryptionkeyid" : all_metadata["keyEncryptionKeyId"]
+                "iv": all_metadata["initialisationVector"],
+                "ciphertext": all_metadata["encryptedEncryptionKey"],
+                "datakeyencryptionkeyid": all_metadata["keyEncryptionKeyId"],
             }
             console_printer.print_info(
                 f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key} and along with metadata"

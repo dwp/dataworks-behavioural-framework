@@ -56,8 +56,9 @@ def dataGenDate():
     current_date = datetime.today()
     return datetime.strftime(current_date, "%Y-%m-%d 00:00:00")
 
+
 def dataGenDouble():
-    return round(rd.random(),2)
+    return round(rd.random(), 2)
 
 
 def dataTypeMapping(type):
@@ -73,7 +74,7 @@ def dataTypeMapping(type):
             "date": dataGenDate,
             "numeric": dataGenNumeric,
             "integer": dataGenInteger,
-            "double" : dataGenDouble,
+            "double": dataGenDouble,
         }
 
         return datatypes[type]
@@ -164,29 +165,38 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                 epoc_time = str(date_helper.get_current_epoch_seconds())
                 output_file_name = (
                     schema_config["output_file_pattern"]
-                        .replace("run-date", run_date)
-                        .replace("collection", collection)
-                        .replace("epoc-time", epoc_time)
+                    .replace("run-date", run_date)
+                    .replace("collection", collection)
+                    .replace("epoc-time", epoc_time)
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 num = 1
                 data = []
                 JSON_BLOB = {
-                    "extract" : {
-                        "service" : "application-service",
-                        "dataExtract" : "application",
-                        "start" : datetime.strftime(datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"),
-                        "end" : datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+                    "extract": {
+                        "service": "application-service",
+                        "dataExtract": "application",
+                        "start": datetime.strftime(
+                            datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                        ),
+                        "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
                     },
-                    "fields" : [{"fieldName": column, "pii" : column_property["pii_flg"]} for column, column_property in collection_schema.items()]
+                    "fields": [
+                        {"fieldName": column, "pii": column_property["pii_flg"]}
+                        for column, column_property in collection_schema.items()
+                    ],
                 }
                 with open(output_file, "w+") as writer:
                     while num <= int(record_count):
-                        record={}
+                        record = {}
                         for column, column_property in collection_schema.items():
-                            record.update({column : dataTypeMapping(column_property["value"])()})
-                            if 'default' in column_property:
-                                record.update({column : rd.choice(column_property["default"])})
+                            record.update(
+                                {column: dataTypeMapping(column_property["value"])()}
+                            )
+                            if "default" in column_property:
+                                record.update(
+                                    {column: rd.choice(column_property["default"])}
+                                )
                         data.append(record)
                         num += 1
                     JSON_BLOB.update({"data": data})
