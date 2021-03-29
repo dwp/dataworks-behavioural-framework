@@ -6,7 +6,14 @@ import sys
 import re
 import random as rd
 from datetime import datetime, timedelta
-from helpers import console_printer, date_helper
+from helpers import (
+    emr_step_generator,
+    aws_helper,
+    invoke_lambda,
+    console_printer,
+    file_helper,
+    historic_data_load_generator,
+)
 
 
 def dataGenBigint():
@@ -217,21 +224,39 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
 def generate_hive_queries(schema_config, published_bucket, s3_path):
     try:
         hive_export_list = []
-        for collection, collections_schema in schema_config["schema"].items():
-            date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
-            file_name = f"e2e_{collection}.csv"
-            column_name = ",".join(
-                [
-                    re.sub("[^0-9a-zA-Z$]+", " ", col).strip().replace(" ", "_").lower()
-                    for col in collections_schema.keys()
-                ]
-            )
-            hive_export_bash_command = (
-                f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                + f" &>> /var/log/kickstart_adg/e2e.log"
-            )
-            hive_export_list.append(hive_export_bash_command)
+        if schema_config["record_layout"].lower() == "csv":
+            for collection, collections_schema in schema_config["schema"].items():
+                date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
+                file_name = f"e2e_{collection}.csv"
+                column_name = ",".join(
+                    [
+                        re.sub("[^0-9a-zA-Z$]+", " ", col).strip().replace(" ", "_").lower()
+                        for col in collections_schema.keys()
+                    ]
+                )
+                hive_export_bash_command = (
+                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                    + f" &>> /var/log/kickstart_adg/e2e.log"
+                )
+                hive_export_list.append(hive_export_bash_command)
+
+        elif schema_config["record_layout"].lower() == "json":
+            for collection, collections_schema in schema_config["schema"].items():
+                date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
+                file_name = f"e2e_{collection}.csv"
+                column_name = ",".join(
+                    [
+                        col[0].lower() + re.sub(r'(?!^)[A-Z]', lambda x: '_' + x.group(0).lower(), col[1:])
+                        for col in collections_schema.keys()
+                    ]
+                )
+                hive_export_bash_command = (
+                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                )
+                hive_export_list.append(hive_export_bash_command)
 
         return hive_export_list
 
@@ -240,3 +265,66 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
             f"Test run failed while generating the data because of error - {str(ex)}"
         )
         sys.exit(-1)
+
+def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
+
+    for file in local_file_list:
+        if upload_method.lower() == "unencrypted":
+            console_printer.print_info(
+                f"Data will be uploaded in {upload_method} format to s3 bucket"
+            )
+            console_printer.print_info(f"The file name is {file}")
+            file_name = os.path.basename(file)
+            input_file = file_helper.get_contents_of_file(file, False)
+            inputs_s3_key = os.path.join(folder_name, file_name)
+            console_printer.print_info(
+                f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key}"
+            )
+            aws_helper.put_object_in_s3(
+                input_file, context.published_bucket, inputs_s3_key
+            )
+        elif upload_method.lower() == "encrypted":
+            console_printer.print_info(
+                f"Data will be uploaded in {upload_method} format to s3 bucket"
+            )
+            console_printer.print_info(f"The input file name is {file}")
+
+            file_name = os.path.basename(file)
+            encrypted_key = context.encryption_encrypted_key
+            master_key = context.encryption_master_key_id
+            plaintext_key = context.encryption_plaintext_key
+            [
+                file_iv_int,
+                file_iv_whole,
+            ] = historic_data_load_generator.generate_initialisation_vector()
+
+            console_printer.print_info(f"Extracting the raw data from local directory")
+            data = file_helper.get_contents_of_file(file, False).encode("utf-8")
+
+            console_printer.print_info(f"Applying encryption to the raw data")
+            input_data = historic_data_load_generator.encrypt(
+                file_iv_whole, plaintext_key, data
+            )
+            inputs_s3_key = os.path.join(folder_name, file_name + ".enc")
+
+            all_metadata = json.loads(
+                historic_data_load_generator.generate_encryption_metadata_for_metadata_file(
+                    encrypted_key, master_key, plaintext_key, file_iv_int
+                )
+            )
+
+            console_printer.print_info("Metadata of for encrypted file is \n")
+            console_printer.print_info(f"{json.dumps(all_metadata)}")
+
+            metadata = {
+                "iv": all_metadata["initialisationVector"],
+                "ciphertext": all_metadata["encryptedEncryptionKey"],
+                "datakeyencryptionkeyid": all_metadata["keyEncryptionKeyId"],
+            }
+            console_printer.print_info(
+                f"Uploading the local file {file} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key} and along with metadata"
+            )
+
+            aws_helper.put_object_in_s3_with_metadata(
+                input_data, context.published_bucket, inputs_s3_key, metadata=metadata
+            )
