@@ -118,6 +118,7 @@ def step_impl(context):
     cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
     context.kickstart_adg_cluster_id = cluster_id
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
+    context.kickstart_step_ids=[]
     for step_name in additional_step_args:
         step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
         step_id = step["Id"]
