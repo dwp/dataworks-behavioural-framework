@@ -24,7 +24,7 @@ KICKSTART_MODULES = ["vacancy", "application", "payment"]
     "The template file '{template_name}' as an input"
 )
 def step_impl(context, template_name):
-
+    context.kickstart_current_run_input_files=[]
     console_printer.print_info(
         f"Extracting the file properties from {template_name}"
     )
