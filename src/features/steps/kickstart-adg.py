@@ -196,6 +196,13 @@ def step_impl(context, module_name):
             expected_file_name, False
             ).splitlines()[1:]
 
+            for input_line, output_line in zip(actual_content, expected_content):
+                console_printer.print_info(f"actual_content : {actual_content}")
+                console_printer.print_info(f"expected_content : {expected_content}")
+                assert (
+                        input_line.lower() == output_line.lower()
+                ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
+
     elif schema_config["record_layout"].lower() == "json":
         for collection in schema_config["schema"].keys():
             s3_result_key = os.path.join(
@@ -218,9 +225,9 @@ def step_impl(context, module_name):
             ))["data"]
             expected_content="\n".join(["\t".join([str(record[field]) for field in record]) for record in expected_json]).splitlines()
 
-    for input_line, output_line in zip(actual_content, expected_content):
-        console_printer.print_info(f"actual_content : {actual_content}")
-        console_printer.print_info(f"expected_content : {expected_content}")
-        assert (
-                input_line.lower() == output_line.lower()
-        ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
+            for input_line, output_line in zip(actual_content, expected_content):
+                console_printer.print_info(f"actual_content : {actual_content}")
+                console_printer.print_info(f"expected_content : {expected_content}")
+                assert (
+                        input_line.lower() == output_line.lower()
+                ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
