@@ -216,7 +216,7 @@ def step_impl(context, module_name):
             expected_json = json.loads(file_helper.get_contents_of_file(
                 expected_file_name, False
             ))["data"]
-            expected_content="\n".join(["\t".join([str(record[field]) for field in record]) for record in expected_json])
+            expected_content="\n".join(["\t".join([str(record[field]) for field in record]) for record in expected_json]).splitlines()
 
     for input_line, output_line in zip(actual_content, expected_content):
         console_printer.print_info(f"actual_content : {actual_content}")
