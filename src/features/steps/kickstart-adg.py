@@ -206,10 +206,11 @@ def step_impl(context, module_name):
                 None, context.published_bucket, s3_result_key
             ).decode("utf-8")
             actual_content = file_content.strip().splitlines()
+            console_printer.print_info(f"This the local file name in the list: {context.kickstart_current_run_input_files}")
             expected_file_name = [
                 file
                 for file in context.kickstart_current_run_input_files
-                if collection in file
+                if f"{module_name}-{collection}" in file
             ][0]
             console_printer.print_info(f"Expected File Name: {expected_file_name}")
             expected_json = json.loads(file_helper.get_contents_of_file(
