@@ -50,7 +50,7 @@ def step_impl(context, record_count, module_name, PII_Flag):
         f"{list_of_local_files}"
     )
     if context.kickstart_current_run_input_files:
-        context.kickstart_current_run_input_files.append(list_of_local_files)
+        context.kickstart_current_run_input_files.extend(list_of_local_files)
     else:
         context.kickstart_current_run_input_files = list_of_local_files
 
