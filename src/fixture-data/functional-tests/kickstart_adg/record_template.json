@@ -318,6 +318,7 @@
           "value" : "timestamp",
           "pii_flg" : false
         }
+    }
     },
     "record_layout" : "JSON",
     "output_file_pattern" : "run-date_application-collection_epoc-time.json"
