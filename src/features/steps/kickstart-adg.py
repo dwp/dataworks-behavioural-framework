@@ -67,7 +67,7 @@ def step_impl(context, record_count, module_name, PII_Flag):
 
 
 @when(
-    "Start kickstart adg emr process for modules '{modules}'and get step ids"
+    "Start kickstart adg emr process for modules '{modules}' and get step ids"
 )
 def step_impl(context, modules):
     emr_launcher_config={}
