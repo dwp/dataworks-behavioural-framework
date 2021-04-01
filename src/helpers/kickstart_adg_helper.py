@@ -18,23 +18,23 @@ from helpers import (
 
 
 def dataGenBigint():
-    return rd.getrandbits(32)
+    return rd.choice([rd.getrandbits(32),None])
 
 
 def dataGenBoolean():
-    return rd.choice([True, False])
+    return rd.choice([True, False, None])
 
 
 def dataGenSmallInt():
-    return rd.getrandbits(4)
+    return rd.choice([rd.getrandbits(4), None])
 
 
 def dataGenNumeric():
-    return round(rd.uniform(10000.0000, 99999.9999), 4)
+    return rd.choice([round(rd.uniform(10000.0000, 99999.9999), 4), None])
 
 
 def dataGenInteger():
-    return rd.getrandbits(8)
+    return rd.choice([rd.getrandbits(8), None])
 
 
 def dataGenText():
@@ -42,12 +42,12 @@ def dataGenText():
     str_2 = "".join(rd.choice(" "))
     str_3 = "".join(rd.choice(string.digits + string.ascii_letters) for i in range(20))
     result_str = " ".join([str_1, str_2, str_3])
-    return result_str
+    return rd.choice([result_str, None])
 
 
 def dataGenTimestamp():
     current_date = datetime.today()
-    return datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S")
+    return rd.choice([datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S"), None])
 
 
 def dataGenUUID():
@@ -57,16 +57,16 @@ def dataGenUUID():
 def dataGenString():
     letters = string.ascii_letters
     result_str = "".join(rd.choice(letters) for i in range(8))
-    return result_str
+    return rd.choice([result_str, None])
 
 
 def dataGenDate():
     current_date = datetime.today()
-    return datetime.strftime(current_date, "%Y-%m-%d 00:00:00")
+    return rd.choice([datetime.strftime(current_date, "%Y-%m-%d 00:00:00")])
 
 
 def dataGenDouble():
-    return round(rd.random(), 2)
+    return rd.choice([round(rd.random(), 2), None])
 
 
 def dataTypeMapping(type):
