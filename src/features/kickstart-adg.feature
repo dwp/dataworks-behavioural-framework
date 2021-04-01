@@ -9,7 +9,7 @@ Feature: Kickstart adg process, to source data and valid final tables for expect
     And Generate '10' records per table for 'vacancy' with PII flag as 'False' and upload to s3 bucket
 #    And Generate '10' records per table for 'application' with PII flag as 'True' and upload to s3 bucket
 #    And Generate '10' records per table for 'payment' with PII flag as 'True' and upload to s3 bucket
-    When Start kickstart adg emr process and get step ids
+    When Start kickstart adg emr process for modules 'vacancy' and get step ids
     And  Add validation steps 'hive-validation-queries' to kickstart adg emr cluster for 'vacancy' and add step Ids to the list
 #    And  Add validation steps 'hive-validation-queries' to kickstart adg emr cluster for 'application' and add step Ids to the list
 #    And  Add validation steps 'hive-validation-queries' to kickstart adg emr cluster for 'payment' and add step Ids to the list

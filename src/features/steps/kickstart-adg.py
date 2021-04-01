@@ -18,7 +18,6 @@ AUDIT_TABLE_HASH_KEY = "Correlation_Id"
 AUDIT_TABLE_RANGE_KEY = "DataProduct"
 DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
 RUNNING_STATUS = "RUNNING"
-KICKSTART_MODULES = ["vacancy", "application", "payment"]
 
 @given(
     "The template file '{template_name}' as an input"
@@ -68,11 +67,12 @@ def step_impl(context, record_count, module_name, PII_Flag):
 
 
 @when(
-    "Start kickstart adg emr process and get step ids"
+    "Start kickstart adg emr process for modules '{modules}'and get step ids"
 )
-def step_impl(context):
+def step_impl(context, modules):
     emr_launcher_config={}
     additional_step_args={}
+    KICKSTART_MODULES=modules.split(",")
     for module_name in KICKSTART_MODULES:
         correlation_id = f"kickstart_{module_name}_analytical_dataset_generation"
         data_product_name = "KICKSTART-ADG"
