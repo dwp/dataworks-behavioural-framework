@@ -185,7 +185,7 @@ def step_impl(context, module_name):
             file_content = aws_helper.get_s3_object(
                 None, context.published_bucket, s3_result_key
             ).decode("utf-8")
-            actual_content = file_content.replace("\t", ",").strip().splitlines()
+            actual_content = file_content.replace("\t", ",").replace("NULL", "None").strip().splitlines()
             expected_file_name = [
                 file
                 for file in context.kickstart_current_run_input_files
@@ -210,7 +210,7 @@ def step_impl(context, module_name):
             file_content = aws_helper.get_s3_object(
                 None, context.published_bucket, s3_result_key
             ).decode("utf-8")
-            actual_content = file_content.strip().splitlines()
+            actual_content = file_content.replace("NULL", "None").strip().splitlines()
             console_printer.print_info(f"This the local file name in the list: {context.kickstart_current_run_input_files}")
             expected_file_name = [
                 file
