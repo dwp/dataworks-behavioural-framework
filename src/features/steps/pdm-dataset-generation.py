@@ -132,7 +132,7 @@ def metadata_table_step_impl(context):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["flush-s3"]
+    allowed_steps = ["create-views-tables"]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (

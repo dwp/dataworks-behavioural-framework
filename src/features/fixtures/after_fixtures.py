@@ -59,10 +59,16 @@ def terminate_adg_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_adg_cluster' fixture")
 
     if "adg_cluster_id" in context and context.adg_cluster_id is not None:
-        aws_helper.terminate_emr_cluster(context.adg_cluster_id)
+        try:
+            aws_helper.terminate_emr_cluster(context.adg_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning(
+                f"Error occured when terminating ADG cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
+            )
+
     else:
         console_printer.print_info(
-            f"No cluster id found for ADG so not terminating any cluster"
+            "No cluster id found for ADG so not terminating any cluster"
         )
 
 
@@ -71,10 +77,15 @@ def terminate_pdm_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_pdm_cluster' fixture")
 
     if "pdm_cluster_id" in context and context.pdm_cluster_id is not None:
-        aws_helper.terminate_emr_cluster(context.pdm_cluster_id)
+        try:
+            aws_helper.terminate_emr_cluster(context.pdm_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning(
+                f"Error occured when terminating PDM cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
+            )
     else:
         console_printer.print_info(
-            f"No cluster id found for PDM so not terminating any cluster"
+            "No cluster id found for PDM so not terminating any cluster"
         )
 
 
@@ -86,7 +97,12 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
         "kickstart_adg_cluster_id" in context
         and context.kickstart_adg_cluster_id is not None
     ):
-        aws_helper.terminate_emr_cluster(context.kickstart_adg_cluster_id)
+        try:
+            aws_helper.terminate_emr_cluster(context.kickstart_adg_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning(
+                f"Error occured when terminating kickstart cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
+            )
     else:
         console_printer.print_info(
             f"No cluster id found for PDM so not terminating any cluster"
