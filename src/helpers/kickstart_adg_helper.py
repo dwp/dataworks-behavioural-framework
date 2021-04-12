@@ -18,7 +18,7 @@ from helpers import (
 
 
 def dataGenBigint():
-    return rd.choice([rd.getrandbits(32),None])
+    return rd.choice([rd.getrandbits(32), None])
 
 
 def dataGenBoolean():
@@ -231,7 +231,10 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                 file_name = f"e2e_{collection}.csv"
                 column_name = ",".join(
                     [
-                        re.sub("[^0-9a-zA-Z$]+", " ", col).strip().replace(" ", "_").lower()
+                        re.sub("[^0-9a-zA-Z$]+", " ", col)
+                        .strip()
+                        .replace(" ", "_")
+                        .lower()
                         for col in collections_schema.keys()
                     ]
                 )
@@ -248,14 +251,17 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                 file_name = f"e2e_{collection}.csv"
                 column_name = ",".join(
                     [
-                        col[0].lower() + re.sub(r'(?!^)[A-Z]', lambda x: '_' + x.group(0).lower(), col[1:])
+                        col[0].lower()
+                        + re.sub(
+                            r"(?!^)[A-Z]", lambda x: "_" + x.group(0).lower(), col[1:]
+                        )
                         for col in collections_schema.keys()
                     ]
                 )
                 hive_export_bash_command = (
-                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                    + f" &>> /var/log/kickstart_adg/e2e.log"
                 )
                 hive_export_list.append(hive_export_bash_command)
 
@@ -266,6 +272,7 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
             f"Test run failed while generating the data because of error - {str(ex)}"
         )
         sys.exit(-1)
+
 
 def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
 
