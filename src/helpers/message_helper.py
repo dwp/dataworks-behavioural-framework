@@ -87,6 +87,7 @@ def send_start_export_message(
     snapshot_type,
     correlation_id,
     trigger_adg_string,
+    export_date_override,
     mongo_snapshot_full_s3_location=None,
 ):
     """Sends the relevant SNS message for starting the exporter.
@@ -101,8 +102,9 @@ def send_start_export_message(
     run_ss_after_export -- True to run snapshot sender when export finished
     ss_reprocess_files -- True to tell snapshot sender to reprocess files if they already exist
     snapshot_type -- either "full" or "incremental"
+    correlation_id -- Correlation Id override or None for a uuid
     trigger_adg_string -- True for HTME to trigger ADG when finished (defaults to False)
-    correlation_id -- Correlation Id override or none for a uuid
+    export_date_override -- Correlation Id override or None for not sending, which means using today's date
     mongo_snapshot_full_s3_location -- full location for the snapshots (or None if not needed)
     """
     reprocess_files = "true" if ss_reprocess_files else "false"
@@ -139,6 +141,9 @@ def send_start_export_message(
 
     if trigger_adg_string is not None:
         message["trigger-adg"] = trigger_adg_string.lower()
+
+    if export_date_override is not None:
+        message["export-date"] = export_date_override
 
     return aws_helper.publish_message_to_sns(
         message, uc_export_to_crown_controller_messages_sns_arn
