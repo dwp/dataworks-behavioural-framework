@@ -142,7 +142,7 @@ def send_start_export_message(
     if trigger_adg_string is not None:
         message["trigger-adg"] = trigger_adg_string.lower()
 
-    if export_date_override is not None:
+    if export_date_override:
         message["export-date"] = export_date_override
 
     return aws_helper.publish_message_to_sns(
