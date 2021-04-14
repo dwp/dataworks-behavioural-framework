@@ -660,7 +660,9 @@ def claimant_api_setup(context):
     context.execute_steps(
         f"given The claimant API 'business' region is set to 'Ireland'"
     )
-    context.execute_steps(f"given The claimant API 'storage' region is set to 'Ireland'")
+    context.execute_steps(
+        f"given The claimant API 'storage' region is set to 'Ireland'"
+    )
     context.execute_steps(f"given The nino salt has been retrieved")
 
 
