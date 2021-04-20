@@ -31,11 +31,13 @@ def step_(context):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
-        "s3_prefix": "test"
+        "s3_prefix": "test",
     }
     payload_json = json.dumps(emr_launcher_config)
+    console_printer.print_info(payload_json)
     cluster_response = invoke_lambda.invoke_clive_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
+    console_printer.print_info(cluster_response)
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
