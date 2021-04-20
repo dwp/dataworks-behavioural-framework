@@ -44,58 +44,55 @@ def step_(context):
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
 
 
-@when("insert the '{step_name}' step onto the cluster")
-def step_impl(context, step_name):
-    pass
-    # context.clive_cluster_step_name = step_name
-    # s3_path = f"{context.pdm_test_output_s3_prefix}/{context.test_run_name}"
-    # file_name = f"{context.test_run_name}.csv"
-    # pdm_hive_export_bash_command = (
-    #     f"hive -e 'SELECT * FROM uc.youth_obligation_details_fact_v;' >> ~/{file_name} && "
-    #     + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-    #     + f" &>> /var/log/pdm/e2e.log"
-    # )
-    #
-    # context.pdm_cluster_step_id = emr_step_generator.generate_bash_step(
-    #     context.pdm_cluster_id,
-    #     pdm_hive_export_bash_command,
-    #     context.pdm_cluster_step_name,
-    # )
-    # context.pdm_results_s3_file = os.path.join(s3_path, file_name)
+# @when("insert the '{step_name}' step onto the cluster")
+# def step_impl(context, step_name):
+# context.clive_cluster_step_name = step_name
+# s3_path = f"{context.pdm_test_output_s3_prefix}/{context.test_run_name}"
+# file_name = f"{context.test_run_name}.csv"
+# pdm_hive_export_bash_command = (
+#     f"hive -e 'SELECT * FROM uc.youth_obligation_details_fact_v;' >> ~/{file_name} && "
+#     + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+#     + f" &>> /var/log/pdm/e2e.log"
+# )
+#
+# context.pdm_cluster_step_id = emr_step_generator.generate_bash_step(
+#     context.pdm_cluster_id,
+#     pdm_hive_export_bash_command,
+#     context.pdm_cluster_step_name,
+# )
+# context.pdm_results_s3_file = os.path.join(s3_path, file_name)
+
+#
+# @when("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+# def step_impl(context, timeout_mins):
+# timeout_secs = int(timeout_mins) * 60
+# execution_state = aws_helper.poll_emr_cluster_step_status(
+#     context.pdm_cluster_step_id, context.pdm_cluster_id, timeout_secs
+# )
+#
+# if execution_state != "COMPLETED":
+#     raise AssertionError(
+#         f"'{context.pdm_cluster_step_name}' step failed with final status of '{execution_state}'"
+#     )
 
 
-@when("wait a maximum of '{timeout_mins}' minutes for the step to finish")
-def step_impl(context, timeout_mins):
-    pass
-    # timeout_secs = int(timeout_mins) * 60
-    # execution_state = aws_helper.poll_emr_cluster_step_status(
-    #     context.pdm_cluster_step_id, context.pdm_cluster_id, timeout_secs
-    # )
-    #
-    # if execution_state != "COMPLETED":
-    #     raise AssertionError(
-    #         f"'{context.pdm_cluster_step_name}' step failed with final status of '{execution_state}'"
-    #     )
-
-
-@then("the CLIVE result matches the expected results of '{expected_result_file_name}'")
-def step_(context, expected_result_file_name):
-    pass
-    # console_printer.print_info(f"S3 Request Location: {context.pdm_results_s3_file}")
-    # actual = aws_helper.get_s3_object(
-    #     None, context.published_bucket, context.pdm_results_s3_file
-    # ).decode("ascii")
-    # actual_comma_deliminated = actual.replace("\t", ",").strip()
-    #
-    # expected_file_name = os.path.join(
-    #     context.fixture_path_local, "pdm_data", "expected", expected_result_file_name
-    # )
-    # expected = file_helper.get_contents_of_file(expected_file_name, False)
-    # expected_comma_deliminated = expected.replace("\t", ",").strip()
-    #
-    # assert (
-    #     expected_comma_deliminated == actual_comma_deliminated
-    # ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
+# @then("the CLIVE result matches the expected results of '{expected_result_file_name}'")
+# def step_(context, expected_result_file_name):
+# console_printer.print_info(f"S3 Request Location: {context.pdm_results_s3_file}")
+# actual = aws_helper.get_s3_object(
+#     None, context.published_bucket, context.pdm_results_s3_file
+# ).decode("ascii")
+# actual_comma_deliminated = actual.replace("\t", ",").strip()
+#
+# expected_file_name = os.path.join(
+#     context.fixture_path_local, "pdm_data", "expected", expected_result_file_name
+# )
+# expected = file_helper.get_contents_of_file(expected_file_name, False)
+# expected_comma_deliminated = expected.replace("\t", ",").strip()
+#
+# assert (
+#     expected_comma_deliminated == actual_comma_deliminated
+# ), f"Expected result of '{expected_comma_deliminated}', does not match '{actual_comma_deliminated}'"
 
 
 @when("the CLIVE cluster tags have been created correctly")
