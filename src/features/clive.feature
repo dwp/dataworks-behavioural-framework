@@ -2,7 +2,6 @@
 @test
 Feature: Clive tests, to run clive and validate its output
 
-  @fixture.s3.clear.clive.start
   @fixture.terminate.clive.cluster
   @fixture.s3.clear.published.bucket.clive.test.input
   @fixture.s3.clear.published.bucket.clive.test.output
