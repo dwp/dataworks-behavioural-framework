@@ -73,6 +73,24 @@ def terminate_adg_cluster(context, timeout=30, **kwargs):
 
 
 @fixture
+def terminate_clive_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'terminate_clive_cluster' fixture")
+
+    if "clive_cluster_id" in context and context.clive_cluster_id is not None:
+        try:
+            aws_helper.terminate_emr_cluster(context.clive_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning(
+                f"Error occured when terminating clive cluster with id of '{context.clive_cluster_id}' as the following error occurred: '{error}'"
+            )
+
+    else:
+        console_printer.print_info(
+            "No cluster id found for clive so not terminating any cluster"
+        )
+
+
+@fixture
 def terminate_pdm_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_pdm_cluster' fixture")
 

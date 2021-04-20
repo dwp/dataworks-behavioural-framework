@@ -479,6 +479,8 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.clean_up_s3_object, context)
     if tag == "fixture.terminate.adg.cluster":
         use_fixture(after_fixtures.terminate_adg_cluster, context)
+    if tag == "fixture.terminate.clive.cluster":
+        use_fixture(after_fixtures.terminate_clive_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":
         use_fixture(after_fixtures.terminate_pdm_cluster, context)
     if tag == "fixture.terminate.kickstart.cluster":
