@@ -6,7 +6,7 @@ Feature: Analytical data set generation end to end test
     @fixture.terminate.adg.cluster
     Scenario: Analytical data set generation end to end test for full 
       Given the data of the format in the template file 'adg_full_valid_input.json' as an input to analytical data set generation emr
-      Then start adg 'full' cluster and wait for the step 'flush-pushgateway'
+      Then start adg 'full' cluster and wait for the step 'send_notification'
       And read metadata of the analytical data sets from the path 'analytical-dataset/full/adg_output/adg_params.csv'
       And verify metadata, tags of the analytical data sets for 'full'
       And the ADG cluster tags have been created correctly for 'full'
