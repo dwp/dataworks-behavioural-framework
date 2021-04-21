@@ -10,6 +10,7 @@ from helpers import (
     invoke_lambda,
 )
 from datetime import datetime
+import operator
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
@@ -40,7 +41,11 @@ def step_(context, table_name, data_product):
 
     response = aws_helper.scan_dynamodb_with_filters(table_name, filters)
 
-    console_printer.print_info(f"This is the response from the DynamoDB: {response}")
+    response.sort(key=operator.itemgetter("Date"))
+    latest_successfull_adg = response[0]
+    console_printer.print_info(
+        f"This is the response from the DynamoDB: {latest_successfull_adg}"
+    )
 
 
 @when("I start the CLIVE cluster and wait for the step '{step_name}'")
