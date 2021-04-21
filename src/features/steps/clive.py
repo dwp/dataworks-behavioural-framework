@@ -50,9 +50,10 @@ def step_(context, table_name, data_product):
 
     latest_successfull_adg = ""
     for item in response:
-        if "Date" and "S3_Prefix_Analytical_DataSet" in item:
+        if "Date" and "S3_Prefix_Analytical_DataSet" and "Correlation_Id" in item:
             latest_successfull_adg = item
             break
+    console_printer.print_info()
     console_printer.print_info(
         f"This is the response from the DynamoDB: {latest_successfull_adg}"
     )
