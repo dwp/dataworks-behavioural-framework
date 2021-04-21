@@ -188,7 +188,7 @@ def scan_dynamodb(table_name):
     Keyword arguments:
     table_name -- the name for the table in dynamodb
     """
-    dynamodb = get_resource(service_name="dynamodb")
+    dynamodb = get_resource(resource_name="dynamodb")
 
     console_printer.print_debug(
         f"Getting DynamoDb data from table named '{table_name}'"
