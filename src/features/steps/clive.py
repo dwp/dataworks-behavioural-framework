@@ -26,6 +26,21 @@ COMPLETED_STATUS = "COMPLETED"
 # aws_helper.put_object_in_s3(input_file, context.published_bucket, inputs_s3_key)
 
 
+@given("the results of the dynamodb table '{table_name}' for '{data_product}'")
+def step_(context, table_name, data_product):
+    key_dict = {
+        "Correlation_Id": {"S": f"{context.test_run_name}"},
+        "DataProduct": {"S": f"{data_product}"},
+    }
+    console_printer.print_info(
+        f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
+    )
+
+    response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
+
+    console_printer.print_info(f"This is the response from the DynamoDB: {response}")
+
+
 @when("I start the CLIVE cluster and wait for the step '{step_name}'")
 def step_(context, step_name):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
