@@ -53,10 +53,12 @@ def step_(context, table_name, data_product):
         if "Date" and "S3_Prefix_Analytical_DataSet" and "Correlation_Id" in item:
             latest_successfull_adg = item
             break
-    console_printer.print_info("   ------------   ")
     console_printer.print_info(
         f"This is the response from the DynamoDB: {latest_successfull_adg}"
     )
+    context.clive_test_input_s3_prefix = latest_successfull_adg[
+        "S3_Prefix_Analytical_DataSet"
+    ]
 
 
 @when("I start the CLIVE cluster and wait for the step '{step_name}'")
@@ -64,9 +66,11 @@ def step_(context, step_name):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
-        "s3_prefix": "test",
+        "s3_prefix": f"{context.clive_test_input_s3_prefix}",
     }
+
     payload_json = json.dumps(emr_launcher_config)
+    console_printer.print_info(payload_json)
     cluster_response = invoke_lambda.invoke_clive_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
