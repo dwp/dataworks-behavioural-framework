@@ -211,13 +211,13 @@ def scan_dynamodb_with_filters(table_name, filters):
         FilterExpression=reduce(And, ([Key(k).eq(v) for k, v in filters.items()]))
     )
 
-    clean_response = json.dumps((response), indent=4, cls=DecimalEncoder)
+    clean_response = json.dumps((response["Items"]), indent=4, cls=DecimalEncoder)
 
     # clean_dict = []
     # Dynamo returns integers with the word Decimal around them. The below sorts this out
     # for item in response["Items"]:
     #     clean_dict = ast.literal_eval((json.dumps(item, cls=DecimalEncoder)))
-    return json.loads(clean_response["Items"])
+    return json.loads(clean_response)
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
