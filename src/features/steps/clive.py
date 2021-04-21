@@ -47,7 +47,11 @@ def step_(context, table_name, data_product):
     console_printer.print_info(f"this is the full response {response}")
 
     response.sort(key=operator.itemgetter("Date"))
-    latest_successfull_adg = response[0]
+
+    for item in response:
+        if "Date" and "s3_prefix" in item:
+            latest_successfull_adg = item
+            break
     console_printer.print_info(
         f"This is the response from the DynamoDB: {latest_successfull_adg}"
     )
