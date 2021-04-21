@@ -181,6 +181,21 @@ def get_item_from_dynamodb(table_name, key_dict):
     return dynamodb_client.get_item(TableName=table_name, Key=key_dict)
 
 
+def scan_dynamodb(table_name):
+    """Returns the ga scan of the dynamodb table.
+
+    Keyword arguments:
+    table_name -- the name for the table in dynamodb
+    """
+    dynamodb_client = get_client(service_name="dynamodb")
+
+    console_printer.print_debug(
+        f"Getting DynamoDb data from table named '{table_name}'"
+    )
+
+    return dynamodb_client.scan(TableName=table_name)
+
+
 def delete_item_from_dynamodb(table_name, key_dict):
     """Deletes the given item from dynamodb.
 
