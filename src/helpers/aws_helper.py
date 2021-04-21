@@ -188,12 +188,12 @@ def scan_dynamodb(table_name):
     Keyword arguments:
     table_name -- the name for the table in dynamodb
     """
-    dynamodb_client = get_client(service_name="dynamodb")
+    dynamodb = get_resource(service_name="dynamodb")
 
     console_printer.print_debug(
         f"Getting DynamoDb data from table named '{table_name}'"
     )
-    table = dynamodb_client.Table(table_name)
+    table = dynamodb.Table(table_name)
     response = table.scan(FilterExpression=Attr("DataProduct").eq("ADG-full"))
     return response["Items"]
 
