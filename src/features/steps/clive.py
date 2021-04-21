@@ -26,18 +26,16 @@ COMPLETED_STATUS = "COMPLETED"
 # aws_helper.put_object_in_s3(input_file, context.published_bucket, inputs_s3_key)
 
 
-@when("I start the CLIVE cluster")
-def step_(context):
+@when("I start the CLIVE cluster and wait for the step '{step_name}'")
+def step_(context, step_name):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
         "s3_prefix": "test",
     }
     payload_json = json.dumps(emr_launcher_config)
-    console_printer.print_info(payload_json)
     cluster_response = invoke_lambda.invoke_clive_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
-    console_printer.print_info(cluster_response)
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
@@ -45,6 +43,17 @@ def step_(context):
     context.clive_cluster_id = cluster_id
 
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
+    step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
+    step_id = step["Id"]
+    console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
+    if step is not None:
+        execution_state = aws_helper.poll_emr_cluster_step_status(
+            step_id, cluster_id, 2500
+        )
+    if execution_state != COMPLETED_STATUS:
+        raise AssertionError(
+            f"'{step_name}' step failed with final status of '{execution_state}'"
+        )
 
 
 # @when("insert the '{step_name}' step onto the cluster")
