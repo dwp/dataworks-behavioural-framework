@@ -50,7 +50,7 @@ def step_(context, table_name, data_product):
 
     latest_successfull_adg = ""
     for item in response:
-        if "Date" and "s3_prefix" in item:
+        if "Date" and "S3_Prefix_Analytical_DataSet" in item:
             latest_successfull_adg = item
             break
     console_printer.print_info(
