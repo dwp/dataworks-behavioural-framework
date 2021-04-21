@@ -7,10 +7,11 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 from boto3.exceptions import S3UploadFailedError
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key, And
 from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
 from exceptions import aws_exceptions
+from functools import reduce
 from pprint import pprint
 from botocore.config import Config
 from helpers import invoke_lambda, template_helper, file_helper, console_printer
@@ -182,11 +183,12 @@ def get_item_from_dynamodb(table_name, key_dict):
     return dynamodb_client.get_item(TableName=table_name, Key=key_dict)
 
 
-def scan_dynamodb(table_name):
+def scan_dynamodb_with_filters(table_name, filters):
     """Returns the ga scan of the dynamodb table.
 
     Keyword arguments:
     table_name -- the name for the table in dynamodb
+    filters -- a dictionary of keys and their values to filter the table by
     """
     dynamodb = get_resource(resource_name="dynamodb")
 
@@ -194,7 +196,9 @@ def scan_dynamodb(table_name):
         f"Getting DynamoDb data from table named '{table_name}'"
     )
     table = dynamodb.Table(table_name)
-    response = table.scan(FilterExpression=Attr("DataProduct").eq("ADG-full"))
+    response = table.scan(
+        FilterExpression=reduce(And, ([Key(k).eq(v) for k, v in filters.items()]))
+    )
     return response["Items"]
 
 
