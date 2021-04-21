@@ -7,6 +7,7 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 from boto3.exceptions import S3UploadFailedError
+from boto3.dynamodb.conditions import Key, Attr
 from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
 from exceptions import aws_exceptions
@@ -192,10 +193,9 @@ def scan_dynamodb(table_name):
     console_printer.print_debug(
         f"Getting DynamoDb data from table named '{table_name}'"
     )
-
-    return dynamodb_client.scan(
-        TableName=table_name, FilterExpression=Attr("DataProduct").eq("ADG-full")
-    )
+    table = dynamodb_client.Table(table_name)
+    response = table.scan(FilterExpression=Attr("DataProduct").eq("ADG-full"))
+    return response["Items"]
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
