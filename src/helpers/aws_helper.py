@@ -23,6 +23,15 @@ aws_profile = None
 aws_session_timeout_seconds = None
 boto3_session = None
 
+# Helper class to convert a DynamoDB item to JSON.
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return str(o)
+        if isinstance(o, set):  # <---resolving sets as lists
+            return list(o)
+        return super(DecimalEncoder, self).default(o)
+
 
 def set_details_for_role_assumption(role, session_timeout_seconds):
     """Sets the global aws details for role assumption to use for boto3 sessions.
