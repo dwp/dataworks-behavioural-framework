@@ -193,7 +193,9 @@ def scan_dynamodb(table_name):
         f"Getting DynamoDb data from table named '{table_name}'"
     )
 
-    return dynamodb_client.scan(TableName=table_name)
+    return dynamodb_client.scan(
+        TableName=table_name, FilterExpression=Attr("DataProduct").eq("ADG-full")
+    )
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
