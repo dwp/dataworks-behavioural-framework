@@ -48,6 +48,7 @@ def step_(context, table_name, data_product):
 
     response.sort(key=operator.itemgetter("Date"))
 
+    latest_successfull_adg = ""
     for item in response:
         if "Date" and "s3_prefix" in item:
             latest_successfull_adg = item
