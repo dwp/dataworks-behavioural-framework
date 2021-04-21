@@ -1,3 +1,4 @@
+import ast
 import json
 import base64
 import time
@@ -199,7 +200,11 @@ def scan_dynamodb_with_filters(table_name, filters):
     response = table.scan(
         FilterExpression=reduce(And, ([Key(k).eq(v) for k, v in filters.items()]))
     )
-    return response["Items"]
+
+    # Dynamo returns integers with the word Decimal around them. The below sorts this out
+    for item in response["Items"]:
+        clean_dict = ast.literal_eval((json.dumps(i, cls=DecimalEncoder)))
+    return clean_dict
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
