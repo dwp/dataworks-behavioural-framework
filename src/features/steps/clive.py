@@ -33,13 +33,18 @@ def step_(context, table_name, data_product):
         "Correlation_Id": {"S": f"{context.test_run_name}"},
         "DataProduct": {"S": f"{data_product}"},
     }
-    console_printer.print_info(
-        f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
-    )
 
     filters = {"DataProduct": f"{data_product}", "Status": "Completed"}
 
+    console_printer.print_info(
+        f"Getting DynamoDb data with filters '{filters}' from table named '{table_name}'"
+    )
+
     response = aws_helper.scan_dynamodb_with_filters(table_name, filters)
+
+    console_printer.print_info(f"this is the type of it {type(response)}")
+
+    console_printer.print_info(f"this is the full response {response}")
 
     response.sort(key=operator.itemgetter("Date"))
     latest_successfull_adg = response[0]
