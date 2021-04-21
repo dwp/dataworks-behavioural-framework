@@ -217,7 +217,7 @@ def scan_dynamodb_with_filters(table_name, filters):
     # Dynamo returns integers with the word Decimal around them. The below sorts this out
     # for item in response["Items"]:
     #     clean_dict = ast.literal_eval((json.dumps(item, cls=DecimalEncoder)))
-    return clean_response
+    return json.loads(clean_response)
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
