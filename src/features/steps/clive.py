@@ -36,7 +36,7 @@ def step_(context, table_name, data_product):
         f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
     )
 
-    response = aws_helper.scan_dynamodb(table_name, key_dict)
+    response = aws_helper.scan_dynamodb(table_name)
 
     console_printer.print_info(f"This is the response from the DynamoDB: {response}")
 
