@@ -49,11 +49,8 @@ def step_(context, table_name, data_product):
     ]
 
 
-@then(
-    "start the CLIVE cluster and wait for the step '{step_name}' for a maximum of '{timeout_mins}' minutes"
-)
-def step_(context, step_name, timeout_mins):
-    timeout_secs = int(timeout_mins) * 60
+@then("start the CLIVE cluster and wait for the step '{step_name}'")
+def step_(context, step_name):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
@@ -76,7 +73,7 @@ def step_(context, step_name, timeout_mins):
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, timeout_secs
+            step_id, cluster_id, 2500
         )
     if execution_state != COMPLETED_STATUS:
         raise AssertionError(
