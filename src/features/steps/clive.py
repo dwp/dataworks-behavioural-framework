@@ -34,7 +34,7 @@ def step_(context, table_name, data_product):
         "DataProduct": {"S": f"{data_product}"},
     }
 
-    filters = {"DataProduct": f"{data_product}", "Status": "Completed"}
+    filters = {"DataProduct": f"{data_product}", "Status": "COMPLETED"}
 
     console_printer.print_info(
         f"Getting DynamoDb data with filters '{filters}' from table named '{table_name}'"
