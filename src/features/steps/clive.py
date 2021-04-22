@@ -103,7 +103,7 @@ def step_impl(context, step_name):
     context.clive_results_s3_file = os.path.join(s3_path, file_name)
 
 
-@then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+@then("wait '{timeout_mins}' minutes for the step to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
@@ -130,10 +130,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
