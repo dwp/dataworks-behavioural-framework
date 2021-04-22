@@ -294,7 +294,12 @@ def metadata_table_step_impl(context, snapshot_type):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "send_notification"]
+    allowed_steps = [
+        "spark-submit",
+        "create_pdm_trigger",
+        "flush-pushgateway",
+        "send_notification",
+    ]
 
     if snapshot_type.lower() == "incremental":
         allowed_steps = [
