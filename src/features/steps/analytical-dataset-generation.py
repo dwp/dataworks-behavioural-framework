@@ -303,7 +303,6 @@ def metadata_table_step_impl(context, snapshot_type):
 
     if snapshot_type.lower() == "incremental":
         allowed_steps = [
-            "spark-submit",
             "create_pdm_trigger",
             "flush-pushgateway",
             "executeUpdateAll",
