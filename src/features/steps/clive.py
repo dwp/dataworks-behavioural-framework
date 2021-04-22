@@ -84,7 +84,7 @@ def step_(context, step_name, timeout_mins):
         )
 
 
-@then("insert the '{step_name}' step onto the cluster")
+@then("insert the '{step_name}' step onto the CLIVE cluster")
 def step_impl(context, step_name):
     context.clive_cluster_step_name = step_name
     s3_path = f"{context.clive_test_input_s3_prefix}/{context.test_run_name}"
@@ -130,10 +130,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
