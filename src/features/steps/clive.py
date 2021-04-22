@@ -70,7 +70,7 @@ def step_(context, step_name):
     }
 
     payload_json = json.dumps(emr_launcher_config)
-    console_printer.print_info(payload_json)
+    console_printer.print_info(f"this is the payload: {payload_json}")
     cluster_response = invoke_lambda.invoke_clive_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
