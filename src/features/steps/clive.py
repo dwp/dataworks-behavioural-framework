@@ -46,7 +46,7 @@ def step_(context, table_name, data_product):
 
     console_printer.print_info(f"this is the full response {response}")
 
-    response.sort(key=operator.itemgetter("Date"), reverse=True)
+    response.sort(key=operator.itemgetter("Date"), reverse=False)
 
     latest_successfull_adg = {}
     for item in response:
