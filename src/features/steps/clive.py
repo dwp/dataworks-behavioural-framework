@@ -21,7 +21,10 @@ def step_(context, input_data):
     adg_folder = os.path.join(context.fixture_path_local, "clive", "input", input_data)
     # put the ADG output files into S3 for Clive to find
     aws_helper.upload_directory_to_s3(
-        adg_folder, context.published_bucket, 600, context.clive_test_input_s3_prefix
+        adg_folder,
+        context.published_bucket,
+        600,
+        f"{context.clive_test_input_s3_prefix}/",
     )
 
 
@@ -139,10 +142,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
