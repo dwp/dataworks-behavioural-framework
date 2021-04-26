@@ -62,14 +62,12 @@ def s3_clear_incremental_snapshot_output(context, timeout=30, **kwargs):
 
 def s3_clear_snapshot_output(context, snapshot_type):
     for topic in context.topics:
-        snapshot_s3_full_output_path = (
-            snapshots_helper.generate_snapshot_output_s3_path(
-                context.snapshot_s3_output_path,
-                topic,
-                context.db_name,
-                context.formatted_date,
-                snapshot_type,
-            )
+        snapshot_s3_full_output_path = snapshots_helper.generate_snapshot_output_s3_path(
+            context.snapshot_s3_output_path,
+            topic,
+            context.db_name,
+            context.formatted_date,
+            snapshot_type,
         )
         aws_helper.clear_s3_prefix(
             context.snapshot_s3_output_bucket, snapshot_s3_full_output_path, True
@@ -438,15 +436,13 @@ def setup_user_and_role(
     # Set up role with trust policy
     try:
         role_name = aws_helper.create_role_and_wait_for_it_to_exist(
-            context.analytical_test_e2e_role,
-            json.dumps(assume_role_document_json),
+            context.analytical_test_e2e_role, json.dumps(assume_role_document_json),
         )
     except ClientError as e:
         if e.response["Error"]["Code"] == "EntityAlreadyExists":
             time.sleep(10)
             role_name = aws_helper.create_role_and_wait_for_it_to_exist(
-                context.analytical_test_e2e_role,
-                json.dumps(assume_role_document_json),
+                context.analytical_test_e2e_role, json.dumps(assume_role_document_json),
             )
         else:
             raise e
@@ -467,8 +463,7 @@ def setup_user_and_role(
         context.analytical_test_e2e_policies.append(arn_value)
 
     aws_helper.attach_policies_to_role(
-        context.analytical_test_e2e_policies,
-        role_name,
+        context.analytical_test_e2e_policies, role_name,
     )
 
 
@@ -701,16 +696,6 @@ def s3_clear_published_bucket_clive_test_input(context, timeout=30, **kwargs):
     )
     aws_helper.clear_s3_prefix(
         context.published_bucket, context.clive_test_input_s3_prefix, False
-    )
-
-
-@fixture
-def s3_clear_published_bucket_clive_test_output(context, timeout=30, **kwargs):
-    console_printer.print_info(
-        "Executing 's3_clear_published_bucket_clive_test_output' fixture"
-    )
-    aws_helper.clear_s3_prefix(
-        context.published_bucket, context.clive_test_output_s3_prefix, False
     )
 
 
