@@ -24,42 +24,38 @@ def step_(context, input_data):
         adg_folder, context.published_bucket, 600, context.clive_test_input_s3_prefix
     )
 
-    # upload_file_to_s3_and_wait_for_consistency_threaded(
-    #     input_folder, s3_bucket, seconds_timeout, s3_prefix
-    # ):
 
+@given("the results of the dynamodb table '{table_name}' for '{data_product}'")
+def step_(context, table_name, data_product):
+    key_dict = {
+        "Correlation_Id": {"S": f"{context.test_run_name}"},
+        "DataProduct": {"S": f"{data_product}"},
+    }
 
-# @given("the results of the dynamodb table '{table_name}' for '{data_product}'")
-# def step_(context, table_name, data_product):
-#     key_dict = {
-#         "Correlation_Id": {"S": f"{context.test_run_name}"},
-#         "DataProduct": {"S": f"{data_product}"},
-#     }
-#
-#     filters = {"DataProduct": f"{data_product}", "Status": "COMPLETED"}
-#
-#     console_printer.print_info(
-#         f"Getting DynamoDb data with filters '{filters}' from table named '{table_name}'"
-#     )
-#
-#     # get items from the dynamo that are completed for adg-full
-#     response = aws_helper.scan_dynamodb_with_filters(table_name, filters)
-#
-#     # sort the items in the response by date
-#     response.sort(key=operator.itemgetter("Date"), reverse=True)
-#
-#     latest_successfull_adg = {}
-#     # get the first item from the sorted list. So the latest date
-#     for item in response:
-#         if "Date" in item and "S3_Prefix_Analytical_DataSet" in item:
-#             latest_successfull_adg = item
-#             break
-#     console_printer.print_info(
-#         f"This is the response from the DynamoDB: {latest_successfull_adg}"
-#     )
-#     context.clive_test_input_s3_prefix = latest_successfull_adg[
-#         "S3_Prefix_Analytical_DataSet"
-#     ]
+    filters = {"DataProduct": f"{data_product}", "Status": "COMPLETED"}
+
+    console_printer.print_info(
+        f"Getting DynamoDb data with filters '{filters}' from table named '{table_name}'"
+    )
+
+    # get items from the dynamo that are completed for adg-full
+    response = aws_helper.scan_dynamodb_with_filters(table_name, filters)
+
+    # sort the items in the response by date
+    response.sort(key=operator.itemgetter("Date"), reverse=True)
+
+    latest_successfull_adg = {}
+    # get the first item from the sorted list. So the latest date
+    for item in response:
+        if "Date" in item and "S3_Prefix_Analytical_DataSet" in item:
+            latest_successfull_adg = item
+            break
+    console_printer.print_info(
+        f"This is the response from the DynamoDB: {latest_successfull_adg}"
+    )
+    context.clive_test_input_s3_prefix = latest_successfull_adg[
+        "S3_Prefix_Analytical_DataSet"
+    ]
 
 
 @then(
@@ -143,10 +139,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)

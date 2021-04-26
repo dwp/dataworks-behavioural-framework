@@ -6,7 +6,7 @@ Feature: Clive tests, to run clive and validate its output
   @fixture.terminate.clive.cluster
   @fixture.s3.clear.published.bucket.clive.test.input
   Scenario: CLIVE dataset E2E given latest ADG output
-    Given ADG output files 'adg_output' as an input data source on S3
+    Given ADG output 'adg_output' as an input data source on S3
     Then start the CLIVE cluster and wait for the step 'run-clive' for '120'
     And insert the 'hive-query' step onto the CLIVE cluster
     And wait '120' minutes for the step to finish
