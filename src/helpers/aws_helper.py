@@ -701,7 +701,7 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
             print(
                 f"full_dir: {full_dir}. s3_bucket: {s3_bucket}. seconds_timeout: {seconds_timeout}. full_s3_prefix: {full_s3_prefix}/"
             )
-            os.listdir(full_dir)
+            print(os.listdir(full_dir))
             upload_file_to_s3_and_wait_for_consistency_threaded(
                 full_dir, s3_bucket, seconds_timeout, f"{full_s3_prefix}/"
             )
