@@ -2,7 +2,6 @@
 @test
 Feature: Clive tests, to run clive and validate its output
 
-  @fixture.terminate.clive.cluster
   Scenario: Using ADG output data, the Clive process creates Hive tables on this data, that is queryable and contains the data of the ADG output files.
     Given the results of the dynamodb table 'data_pipeline_metadata' for 'ADG-full'
     Then start the CLIVE cluster and wait for the step 'create-clive-databases'
