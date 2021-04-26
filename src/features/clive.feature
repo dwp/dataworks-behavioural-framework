@@ -1,4 +1,4 @@
-@aws-clive
+@clive
 @test
 Feature: Clive tests, to run clive and validate its output
 
