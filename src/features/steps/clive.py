@@ -24,7 +24,7 @@ def step_(context, input_data):
         adg_folder,
         context.published_bucket,
         600,
-        f"{context.clive_test_input_s3_prefix}/",
+        context.clive_test_input_s3_prefix,
     )
 
 
