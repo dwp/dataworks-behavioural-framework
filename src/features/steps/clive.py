@@ -20,7 +20,7 @@ COMPLETED_STATUS = "COMPLETED"
 def step_(context, input_data):
     adg_folder = os.path.join(context.fixture_path_local, "clive", "input", input_data)
     # put the ADG output files into S3 for Clive to find
-    aws_helper.upload_file_to_s3_and_wait_for_consistency_threaded(
+    aws_helper.upload_directory_to_s3(
         adg_folder, context.published_bucket, 600, context.clive_test_input_s3_prefix
     )
 
