@@ -49,7 +49,9 @@ def step_(context, table_name, data_product):
     ]
 
 
-@then("start the CLIVE cluster and wait for the step '{step_name}' for {timeout_mins}")
+@then(
+    "start the CLIVE cluster and wait for the step '{step_name}' for '{timeout_mins}'"
+)
 def step_(context, step_name, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
