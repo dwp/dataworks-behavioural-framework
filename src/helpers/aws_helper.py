@@ -658,6 +658,8 @@ def upload_file_to_s3_and_wait_for_consistency_threaded(
     with ThreadPoolExecutor() as executor:
         future_results = []
 
+        print("-------current dir:", os.getcwd())
+
         for output_file in os.listdir(input_folder):
             print("---------", output_file, "----------")
             future_results.append(
