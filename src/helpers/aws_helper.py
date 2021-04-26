@@ -689,7 +689,7 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
     """
     s3_client = get_client(service_name="s3")
 
-    for root, dirs, files in os.walk(directory):
+    for root, dirs, files in os.walk(input_folder):
         for dir in dirs:
             full_dir = os.path.join(root, dir)
             relative_dir = full_dir.split(input_folder)[-1]
