@@ -390,6 +390,12 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_input, context)
     if tag == "fixture.s3.clear.published.bucket.pdm.test.output":
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_output, context)
+    if tag == "fixture.s3.clear.published.bucket.clive.test.input":
+        use_fixture(before_fixtures.s3_clear_published_bucket_clive_test_input, context)
+    if tag == "fixture.s3.clear.published.bucket.clive.test.output":
+        use_fixture(
+            before_fixtures.s3_clear_published_bucket_clive_test_output, context
+        )
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
 
