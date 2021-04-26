@@ -699,7 +699,7 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
                 if not os.path.isdir(full_local_file):
                     full_s3_file = os.path.join(full_s3_prefix, output_file)
                     upload_file_to_s3_and_wait_for_consistency(
-                        full_file, s3_bucket, seconds_timeout, full_s3_file
+                        full_local_file, s3_bucket, seconds_timeout, full_s3_file
                     )
 
 
