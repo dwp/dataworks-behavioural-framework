@@ -683,7 +683,6 @@ def upload_file_to_s3_and_wait_for_consistency_threaded(
 
 
 def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
-
     """Uploads the given file to s3 and waits for the file to be written, will error if not consistent after 6 minutes using threads.
 
     Keyword arguments:
@@ -700,10 +699,11 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
             relative_dir = full_dir.split(input_folder)[-1].lstrip("/")
             full_s3_prefix = os.path.join(s3_prefix, relative_dir)
             print(
-                f"full_dir: {full_dir}/. s3_bucket: {s3_bucket}. seconds_timeout: {seconds_timeout}. full_s3_prefix: {full_s3_prefix}/"
+                f"full_dir: {full_dir}. s3_bucket: {s3_bucket}. seconds_timeout: {seconds_timeout}. full_s3_prefix: {full_s3_prefix}/"
             )
+            os.listdir(full_dir)
             upload_file_to_s3_and_wait_for_consistency_threaded(
-                f"{full_dir}/", s3_bucket, seconds_timeout, f"{full_s3_prefix}/"
+                full_dir, s3_bucket, seconds_timeout, f"{full_s3_prefix}/"
             )
 
 
