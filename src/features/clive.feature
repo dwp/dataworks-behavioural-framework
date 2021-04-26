@@ -6,7 +6,7 @@ Feature: Clive tests, to run clive and validate its output
     Given the results of the dynamodb table 'data_pipeline_metadata' for 'ADG-full'
     Then start the CLIVE cluster and wait for the step 'create-clive-databases'
     And insert the 'hive-query' step onto the CLIVE cluster
-    And wait '10' minutes for the step to finish
+    And wait '40' minutes for the step to finish
     Then the CLIVE result matches the expected results of 'core_contract_expected.csv'
 
 

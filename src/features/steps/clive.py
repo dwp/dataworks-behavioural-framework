@@ -89,7 +89,7 @@ def step_impl(context, step_name):
     clive_hive_export_bash_command = (
         f"hive -e 'SELECT * FROM uc_clive.contract;' >> ~/{file_name} && "
         + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-        + f" &>> /var/log/clive/e2e.log"
+        + f" &>> /var/log/aws-clive/e2e.log"
     )
 
     context.clive_cluster_step_id = emr_step_generator.generate_bash_step(
