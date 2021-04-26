@@ -694,7 +694,7 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
             full_dir = os.path.join(root, dir_name)
             relative_dir = full_dir.split(input_folder)[-1]
             full_s3_prefix = os.path.join(s3_prefix, relative_dir)
-            print(full_dir, full_s3_prefix, relative_dir)
+            print(input_folder, full_dir, full_s3_prefix, relative_dir)
             upload_file_to_s3_and_wait_for_consistency_threaded(
                 full_dir, s3_bucket, seconds_timeout, full_s3_prefix
             )
