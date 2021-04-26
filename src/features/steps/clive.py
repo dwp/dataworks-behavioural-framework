@@ -18,7 +18,6 @@ COMPLETED_STATUS = "COMPLETED"
 
 @given("ADG output '{input_data}' as an input data source on S3")
 def step_(context, input_data):
-    context.clive_test_input_s3_prefix = "e2e-test-clive-dataset"
     adg_folder = os.path.join(context.fixture_path_local, "clive", "input", input_data)
     # put the ADG output files into S3 for Clive to find
     aws_helper.upload_file_to_s3_and_wait_for_consistency_threaded(
@@ -144,10 +143,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)

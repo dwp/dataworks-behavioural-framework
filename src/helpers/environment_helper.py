@@ -223,8 +223,8 @@ def set_test_run_common_variables(context):
     collection_list_full = (
         "'" + default_topic_list_full_delimited_with_space.replace("db.", "") + "'"
     )
-    context.distinct_default_database_collection_list_full = (
-        collection_list_full.replace(", ''", "")
+    context.distinct_default_database_collection_list_full = collection_list_full.replace(
+        ", ''", ""
     )
     context.distinct_default_database_list_full = re.compile(r"\.[\w-]+").sub(
         "", context.distinct_default_database_collection_list_full
@@ -239,10 +239,8 @@ def set_test_run_common_variables(context):
         "GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE"
     )
 
-    context.generate_snapshots_trigger_snapshot_sender_override = (
-        context.config.userdata.get(
-            "GENERATE_SNAPSHOTS_TRIGGER_SNAPSHOT_SENDER_OVERRIDE"
-        )
+    context.generate_snapshots_trigger_snapshot_sender_override = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_TRIGGER_SNAPSHOT_SENDER_OVERRIDE"
     )
 
     context.snapshot_s3_output_path = context.config.userdata.get(
@@ -261,37 +259,27 @@ def set_test_run_common_variables(context):
     context.historic_importer_use_one_message_per_path = (
         historic_importer_use_one_message_per_path_string == "true"
     )
-    context.historic_data_ingestion_skip_earlier_than_override = (
-        context.config.userdata.get(
-            "HISTORIC_DATA_INGESTION_SKIP_EARLIER_THAN_OVERRIDE"
-        )
+    context.historic_data_ingestion_skip_earlier_than_override = context.config.userdata.get(
+        "HISTORIC_DATA_INGESTION_SKIP_EARLIER_THAN_OVERRIDE"
     )
-    context.historic_data_ingestion_skip_later_than_override = (
-        context.config.userdata.get("HISTORIC_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE")
+    context.historic_data_ingestion_skip_later_than_override = context.config.userdata.get(
+        "HISTORIC_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE"
     )
-    context.historic_data_ingestion_skip_existing_records_override = (
-        context.config.userdata.get(
-            "HISTORIC_DATA_INGESTION_SKIP_EXISTING_RECORDS_OVERRIDE"
-        )
+    context.historic_data_ingestion_skip_existing_records_override = context.config.userdata.get(
+        "HISTORIC_DATA_INGESTION_SKIP_EXISTING_RECORDS_OVERRIDE"
     )
-    context.corporate_data_ingestion_skip_earlier_than_override = (
-        context.config.userdata.get(
-            "CORPORATE_DATA_INGESTION_SKIP_EARLIER_THAN_OVERRIDE"
-        )
+    context.corporate_data_ingestion_skip_earlier_than_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_SKIP_EARLIER_THAN_OVERRIDE"
     )
-    context.corporate_data_prefix_per_execution_count_override = (
-        context.config.userdata.get(
-            "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
-        )
+    context.corporate_data_prefix_per_execution_count_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
     )
 
-    context.corporate_data_ingestion_partitions_count_override = (
-        context.config.userdata.get(
-            "CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE"
-        )
+    context.corporate_data_ingestion_partitions_count_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE"
     )
-    context.corporate_data_ingestion_skip_later_than_override = (
-        context.config.userdata.get("CORPORATE_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE")
+    context.corporate_data_ingestion_skip_later_than_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE"
     )
     context.historic_importer_correlation_id_override = context.config.userdata.get(
         "HISTORIC_IMPORTER_CORRELATION_ID_OVERRIDE"
@@ -307,8 +295,8 @@ def set_test_run_common_variables(context):
     context.ingest_hbase_emr_cluster_root_s3_bucket_id = context.config.userdata.get(
         "INGEST_HBASE_EMR_CLUSTER_ROOT_S3_BUCKET_ID"
     )
-    context.ingest_hbase_emr_cluster_root_s3_root_directory = (
-        context.config.userdata.get("INGEST_HBASE_EMR_CLUSTER_ROOT_S3_ROOT_DIRECTORY")
+    context.ingest_hbase_emr_cluster_root_s3_root_directory = context.config.userdata.get(
+        "INGEST_HBASE_EMR_CLUSTER_ROOT_S3_ROOT_DIRECTORY"
     )
     context.ingest_hbase_snapshot_tables_override = context.config.userdata.get(
         "INGEST_HBASE_EMR_CLUSTER_SNAPSHOT_TABLES_OVERRIDE"
@@ -379,30 +367,26 @@ def set_test_run_common_variables(context):
     context.data_load_metadata_store_table = context.config.userdata.get(
         "DATA_LOAD_METADATA_STORE_TABLE"
     )
-    context.historic_data_load_run_script_arguments = (
-        data_load_helper.generate_arguments_for_historic_data_load(
-            context.test_run_name,
-            context.data_load_topics,
-            context.ucfs_historic_data_prefix,
-            context.data_load_s3_suffix,
-            context.default_topic_list_full_delimited,
-            context.historic_data_ingestion_skip_earlier_than_override,
-            context.historic_data_ingestion_skip_later_than_override,
-        )
+    context.historic_data_load_run_script_arguments = data_load_helper.generate_arguments_for_historic_data_load(
+        context.test_run_name,
+        context.data_load_topics,
+        context.ucfs_historic_data_prefix,
+        context.data_load_s3_suffix,
+        context.default_topic_list_full_delimited,
+        context.historic_data_ingestion_skip_earlier_than_override,
+        context.historic_data_ingestion_skip_later_than_override,
     )
-    context.corporate_data_load_run_script_arguments = (
-        data_load_helper.generate_arguments_for_corporate_data_load(
-            context.test_run_name,
-            context.data_load_topics,
-            context.config.userdata.get("DATA_LOAD_S3_BASE_PREFIX"),
-            context.data_load_metadata_store_table,
-            context.default_topic_list_full_delimited,
-            context.config.userdata.get("DATA_LOAD_S3_FILE_PATTERN"),
-            context.corporate_data_ingestion_skip_earlier_than_override,
-            context.corporate_data_ingestion_skip_later_than_override,
-            context.corporate_data_ingestion_partitions_count_override,
-            context.corporate_data_prefix_per_execution_count_override,
-        )
+    context.corporate_data_load_run_script_arguments = data_load_helper.generate_arguments_for_corporate_data_load(
+        context.test_run_name,
+        context.data_load_topics,
+        context.config.userdata.get("DATA_LOAD_S3_BASE_PREFIX"),
+        context.data_load_metadata_store_table,
+        context.default_topic_list_full_delimited,
+        context.config.userdata.get("DATA_LOAD_S3_FILE_PATTERN"),
+        context.corporate_data_ingestion_skip_earlier_than_override,
+        context.corporate_data_ingestion_skip_later_than_override,
+        context.corporate_data_ingestion_partitions_count_override,
+        context.corporate_data_prefix_per_execution_count_override,
     )
 
     context.cdl_data_load_s3_base_prefix_tests = os.path.join(
@@ -437,10 +421,8 @@ def set_test_run_common_variables(context):
     context.ucfs_claimant_api_kafka_consumer_service_name = context.config.userdata.get(
         "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME"
     )
-    context.ucfs_claimant_api_kafka_consumer_service_desired_task_count = (
-        context.config.userdata.get(
-            "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT"
-        )
+    context.ucfs_claimant_api_kafka_consumer_service_desired_task_count = context.config.userdata.get(
+        "UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT"
     )
 
     context.monitoring_sns_topic_arn = context.config.userdata.get(
@@ -455,6 +437,8 @@ def set_test_run_common_variables(context):
     context.pdm_test_input_s3_prefix = "e2e-test-pdm-dataset"
 
     context.pdm_test_output_s3_prefix = "e2e-test-pdm-output"
+
+    context.clive_test_input_s3_prefix = "e2e-test-clive-dataset"
 
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
@@ -499,19 +483,15 @@ def set_manifest_variables(context):
             "MANIFEST_S3_INPUT_LOCATION_IMPORT_HISTORIC"
         )
 
-    context.manifest_s3_input_location_export_prefix = (
-        manifest_comparison_helper.generate_s3_prefix_for_manifest_input_files(
-            context.config.userdata.get("MANIFEST_S3_INPUT_LOCATION_EXPORT"),
-            context.manifest_snapshot_type,
-        )
+    context.manifest_s3_input_location_export_prefix = manifest_comparison_helper.generate_s3_prefix_for_manifest_input_files(
+        context.config.userdata.get("MANIFEST_S3_INPUT_LOCATION_EXPORT"),
+        context.manifest_snapshot_type,
     )
 
-    context.manifest_s3_output_parquet_location = (
-        manifest_comparison_helper.generate_s3_prefix_for_manifest_output_files(
-            context.config.userdata.get("MANIFEST_S3_INPUT_PARQUET_LOCATION"),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_s3_output_parquet_location = manifest_comparison_helper.generate_s3_prefix_for_manifest_output_files(
+        context.config.userdata.get("MANIFEST_S3_INPUT_PARQUET_LOCATION"),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
     context.manifest_s3_input_parquet_location_combined = "s3://" + os.path.join(
         context.manifest_s3_bucket,
@@ -541,12 +521,10 @@ def set_manifest_variables(context):
             "mismatched_timestamps",
         )
     )
-    context.manifest_s3_output_prefix = (
-        manifest_comparison_helper.generate_s3_prefix_for_manifest_output_files(
-            context.config.userdata.get("MANIFEST_S3_OUTPUT_LOCATION"),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_s3_output_prefix = manifest_comparison_helper.generate_s3_prefix_for_manifest_output_files(
+        context.config.userdata.get("MANIFEST_S3_OUTPUT_LOCATION"),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
     context.manifest_s3_output_prefix_queries = os.path.join(
         context.manifest_s3_output_prefix, "queries"
@@ -572,20 +550,12 @@ def set_manifest_variables(context):
         if not manifest_start_raw
         else date_helper.generate_milliseconds_epoch_from_timestamp(manifest_start_raw)
     )
-    context.manifest_cut_off_date_end_epoch = (
-        date_helper.generate_milliseconds_epoch_from_timestamp(
-            context.config.userdata.get("MANIFEST_COMPARISON_CUT_OFF_DATE_END")
-        )
+    context.manifest_cut_off_date_end_epoch = date_helper.generate_milliseconds_epoch_from_timestamp(
+        context.config.userdata.get("MANIFEST_COMPARISON_CUT_OFF_DATE_END")
     )
-    context.manifest_margin_of_error_epoch = (
-        date_helper.generate_milliseconds_epoch_from_timestamp(
-            context.config.userdata.get("MANIFEST_COMPARISON_CUT_OFF_DATE_END"),
-            int(
-                context.config.userdata.get(
-                    "MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES"
-                )
-            ),
-        )
+    context.manifest_margin_of_error_epoch = date_helper.generate_milliseconds_epoch_from_timestamp(
+        context.config.userdata.get("MANIFEST_COMPARISON_CUT_OFF_DATE_END"),
+        int(context.config.userdata.get("MANIFEST_COMPARISON_MARGIN_OF_ERROR_MINUTES")),
     )
 
     context.manifest_verify_results = context.config.userdata.get(
@@ -602,45 +572,35 @@ def set_manifest_variables(context):
     context.manifest_database_name = context.config.userdata.get(
         "MANIFEST_COMPARISON_DATABASE_NAME"
     )
-    context.manifest_missing_imports_table_name = (
-        manifest_comparison_helper.generate_manifest_table_name(
-            context.manifest_database_name,
-            context.config.userdata.get(
-                "MANIFEST_COMPARISON_TABLE_NAME_MISSING_IMPORTS_PARQUET"
-            ),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_missing_imports_table_name = manifest_comparison_helper.generate_manifest_table_name(
+        context.manifest_database_name,
+        context.config.userdata.get(
+            "MANIFEST_COMPARISON_TABLE_NAME_MISSING_IMPORTS_PARQUET"
+        ),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
-    context.manifest_missing_exports_table_name = (
-        manifest_comparison_helper.generate_manifest_table_name(
-            context.manifest_database_name,
-            context.config.userdata.get(
-                "MANIFEST_COMPARISON_TABLE_NAME_MISSING_EXPORTS_PARQUET"
-            ),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_missing_exports_table_name = manifest_comparison_helper.generate_manifest_table_name(
+        context.manifest_database_name,
+        context.config.userdata.get(
+            "MANIFEST_COMPARISON_TABLE_NAME_MISSING_EXPORTS_PARQUET"
+        ),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
-    context.manifest_counts_table_name = (
-        manifest_comparison_helper.generate_manifest_table_name(
-            context.manifest_database_name,
-            context.config.userdata.get(
-                "MANIFEST_COMPARISON_TABLE_NAME_COUNTS_PARQUET"
-            ),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_counts_table_name = manifest_comparison_helper.generate_manifest_table_name(
+        context.manifest_database_name,
+        context.config.userdata.get("MANIFEST_COMPARISON_TABLE_NAME_COUNTS_PARQUET"),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
-    context.manifest_mismatched_timestamps_table_name = (
-        manifest_comparison_helper.generate_manifest_table_name(
-            context.manifest_database_name,
-            context.config.userdata.get(
-                "MANIFEST_COMPARISON_TABLE_NAME_MISMATCHED_TIMESTAMPS_PARQUET"
-            ),
-            context.manifest_import_type,
-            context.manifest_snapshot_type,
-        )
+    context.manifest_mismatched_timestamps_table_name = manifest_comparison_helper.generate_manifest_table_name(
+        context.manifest_database_name,
+        context.config.userdata.get(
+            "MANIFEST_COMPARISON_TABLE_NAME_MISMATCHED_TIMESTAMPS_PARQUET"
+        ),
+        context.manifest_import_type,
+        context.manifest_snapshot_type,
     )
 
 
