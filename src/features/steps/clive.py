@@ -144,7 +144,10 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local, "clive", "expected", expected_result_file_name,
+        context.fixture_path_local,
+        "clive",
+        "expected",
+        expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
