@@ -152,8 +152,7 @@ def get_client(service_name, profile=None, region=None, read_timeout_seconds=120
     max_connections = 25 if service_name.lower() == "s3" else 10
 
     client_config = Config(
-        read_timeout=read_timeout_seconds,
-        max_pool_connections=max_connections,
+        read_timeout=read_timeout_seconds, max_pool_connections=max_connections,
     )
 
     if region is None:
@@ -691,10 +690,11 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
     s3_client = get_client(service_name="s3")
 
     for root, dirs, files in os.walk(input_folder):
-        for dir in dirs:
-            full_dir = os.path.join(root, dir)
+        for dir_name in dirs:
+            full_dir = os.path.join(root, dir_name)
             relative_dir = full_dir.split(input_folder)[-1]
             full_s3_prefix = os.path.join(s3_prefix, relative_dir)
+            print(full_dir, full_s3_prefix, relative_dir)
             upload_file_to_s3_and_wait_for_consistency_threaded(
                 full_dir, s3_bucket, seconds_timeout, full_s3_prefix
             )
@@ -791,11 +791,7 @@ def add_tags_to_file_in_s3(s3_bucket, s3_key, tagging_object_array, s3_client=No
         s3_client = get_client(service_name="s3")
 
     s3_client.put_object_tagging(
-        Bucket=s3_bucket,
-        Key=s3_key,
-        Tagging={
-            "TagSet": tagging_object_array,
-        },
+        Bucket=s3_bucket, Key=s3_key, Tagging={"TagSet": tagging_object_array,},
     )
 
 
@@ -854,8 +850,7 @@ def send_message_to_sqs(queue_url, message_body):
     )
     sqs_client = get_client(service_name="sqs")
     sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=message_body,
+        QueueUrl=queue_url, MessageBody=message_body,
     )
 
 
@@ -966,10 +961,7 @@ def publish_message_to_sns(message, sns_topic_arn):
     sns_client = get_client(service_name="sns")
     json_message = json.dumps(message)
 
-    sns_response = sns_client.publish(
-        TopicArn=sns_topic_arn,
-        Message=json_message,
-    )
+    sns_response = sns_client.publish(TopicArn=sns_topic_arn, Message=json_message,)
 
     return sns_response["MessageId"]
 
@@ -1715,9 +1707,7 @@ def list_policy_arns_for_role(role_name, account_id, iam_client=None):
     if iam_client is None:
         iam_client = get_client("iam")
 
-    response = iam_client.list_attached_role_policies(
-        RoleName=role_name,
-    )
+    response = iam_client.list_attached_role_policies(RoleName=role_name,)
 
     return [policy.get("PolicyArn") for policy in response.get("AttachedPolicies")]
 
@@ -1781,10 +1771,7 @@ def check_if_s3_object_exists(bucket, key, s3_client=None):
     if s3_client == None:
         s3_client = get_client(service_name="s3")
 
-    response = s3_client.list_objects_v2(
-        Bucket=bucket,
-        Prefix=key,
-    )
+    response = s3_client.list_objects_v2(Bucket=bucket, Prefix=key,)
     for obj in response.get("Contents", []):
         if obj["Key"] == key:
             return True
