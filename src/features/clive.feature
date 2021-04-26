@@ -2,6 +2,7 @@
 @test
 Feature: Clive tests, to run clive and validate its output
 
+  @fixture.terminate.clive.cluster
   Scenario: CLIVE dataset E2E given latest ADG output
     Given the results of the dynamodb table 'data_pipeline_metadata' for 'ADG-full'
     Then start the CLIVE cluster and wait for the step 'create-clive-databases'
