@@ -653,6 +653,7 @@ def upload_file_to_s3_and_wait_for_consistency_threaded(
     seconds_timeout -- the number of seconds to wait for
     s3_prefix -- the prefix of where to put the files
     """
+    print("**********IN THE FUNCTION")
     s3_client = get_client(service_name="s3")
 
     with ThreadPoolExecutor() as executor:
