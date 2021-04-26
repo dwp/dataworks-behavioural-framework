@@ -49,8 +49,9 @@ def step_(context, table_name, data_product):
     ]
 
 
-@then("start the CLIVE cluster and wait for the step '{step_name}'")
-def step_(context, step_name):
+@then("start the CLIVE cluster and wait for the step '{step_name}' for {timeout_mins}")
+def step_(context, step_name, timeout_mins):
+    timeout_secs = int(timeout_mins) * 60
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
@@ -73,7 +74,7 @@ def step_(context, step_name):
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
         execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, 2500
+            step_id, cluster_id, timeout_secs
         )
     if execution_state != COMPLETED_STATUS:
         raise AssertionError(
@@ -127,10 +128,7 @@ def step_(context, expected_result_file_name):
     )
 
     expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "clive",
-        "expected",
-        expected_result_file_name,
+        context.fixture_path_local, "clive", "expected", expected_result_file_name,
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
