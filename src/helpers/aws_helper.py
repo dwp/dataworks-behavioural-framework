@@ -653,26 +653,24 @@ def upload_file_to_s3_and_wait_for_consistency_threaded(
     seconds_timeout -- the number of seconds to wait for
     s3_prefix -- the prefix of where to put the files
     """
-    print("**********IN THE FUNCTION")
     s3_client = get_client(service_name="s3")
 
     with ThreadPoolExecutor() as executor:
         future_results = []
 
-        print("-------current dir:", os.getcwd())
-
         for output_file in os.listdir(input_folder):
-            print("---------", output_file, "----------")
-            future_results.append(
-                executor.submit(
-                    upload_file_to_s3_and_wait_for_consistency,
-                    os.path.join(input_folder, output_file),
-                    s3_bucket,
-                    seconds_timeout,
-                    os.path.join(s3_prefix, output_file),
-                    s3_client,
+            if not os.path.isdir(output_file):
+                console_printer.print_info(output_file)
+                future_results.append(
+                    executor.submit(
+                        upload_file_to_s3_and_wait_for_consistency,
+                        os.path.join(input_folder, output_file),
+                        s3_bucket,
+                        seconds_timeout,
+                        os.path.join(s3_prefix, output_file),
+                        s3_client,
+                    )
                 )
-            )
 
         wait(future_results)
         for future in future_results:
@@ -698,12 +696,11 @@ def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
             full_dir = os.path.join(root, dir_name)
             relative_dir = full_dir.split(input_folder)[-1].lstrip("/")
             full_s3_prefix = os.path.join(s3_prefix, relative_dir)
-            print(
-                f"full_dir: {full_dir}. s3_bucket: {s3_bucket}. seconds_timeout: {seconds_timeout}. full_s3_prefix: {full_s3_prefix}/"
-            )
-            print(os.listdir(full_dir))
             upload_file_to_s3_and_wait_for_consistency_threaded(
                 full_dir, s3_bucket, seconds_timeout, f"{full_s3_prefix}/"
+            )
+            print(
+                f"full_dir: {full_dir}. s3_bucket: {s3_bucket}. seconds_timeout: {seconds_timeout}. full_s3_prefix: {full_s3_prefix}/"
             )
 
 
