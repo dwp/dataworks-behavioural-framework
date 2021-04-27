@@ -141,6 +141,7 @@ def get_client(service_name, profile=None, region=None, read_timeout_seconds=120
     client_config = Config(
         read_timeout=read_timeout_seconds,
         max_pool_connections=max_connections,
+        retries={"max_attempts": 10, "mode": "standard"},
     )
 
     if region is None:
