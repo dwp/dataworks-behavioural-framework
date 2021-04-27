@@ -9,6 +9,3 @@ Feature: Clive tests, to run clive and validate its output
     And I wait '120' minutes for the step to finish
     Then the CLIVE result matches the expected results of 'core_contract_expected.csv'
     And I check that the CLIVE cluster tags have been created correctly
-
-
-
