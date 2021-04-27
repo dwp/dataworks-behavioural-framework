@@ -456,6 +456,10 @@ def set_test_run_common_variables(context):
 
     context.pdm_test_output_s3_prefix = "e2e-test-pdm-output"
 
+    context.clive_test_input_s3_prefix = "e2e-test-clive-dataset"
+
+    context.clive_output_s3_prefix = "data/uc_clive"
+
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"

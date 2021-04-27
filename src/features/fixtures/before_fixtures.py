@@ -680,7 +680,15 @@ def s3_clear_published_bucket_pdm_test_output(context, timeout=30, **kwargs):
         "Executing 's3_clear_published_bucket_pdm_test_output' fixture"
     )
     aws_helper.clear_s3_prefix(
-        context.published_bucket, context.pdm_test_output_s3_prefix, False
+        context.published_bucket, context.clive_output_s3_prefix, False
+    )
+
+
+@fixture
+def s3_clear_clive_output(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_clive_output' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.clive_output_s3_prefix, False
     )
 
 

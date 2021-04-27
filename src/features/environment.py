@@ -414,6 +414,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_input, context)
     if tag == "fixture.s3.clear.published.bucket.pdm.test.output":
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_output, context)
+    if tag == "fixture.s3.clear.clive.output":
+        use_fixture(before_fixtures.s3_clear_clive_output, context)
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
 
@@ -503,6 +505,8 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.clean_up_s3_object, context)
     if tag == "fixture.terminate.adg.cluster":
         use_fixture(after_fixtures.terminate_adg_cluster, context)
+    if tag == "fixture.terminate.clive.cluster":
+        use_fixture(after_fixtures.terminate_clive_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":
         use_fixture(after_fixtures.terminate_pdm_cluster, context)
     if tag == "fixture.terminate.kickstart.cluster":
