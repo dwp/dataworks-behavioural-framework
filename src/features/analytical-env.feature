@@ -434,3 +434,113 @@ Feature: Creating Analytical Environment for End Users
     When The user attempts to write to the published S3 bucket location
     Then The user is unable to write to the location
 
+  @fixture.setup.rbac_uc_clive__non_pii_user_and_role
+  Scenario: A Non SC Clive user attempts to access non PII clive DB data in the published S3 bucket
+    Given A user is cleared to read non PII clive DB data in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:false tag from the Clive database in the published S3 bucket
+    Then The user is able to read the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access PII clive DB data in the published S3 bucket
+    Given A user is not cleared to read PII clive DB data in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:true tag from the Clive database in the published S3 bucket
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access PII data from the UC DB in the published S3 bucket
+    Given A user is not cleared to access PII data from the UC database in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:true tag in the published S3 bucket
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access Non PII data from the UC DB in the published S3 bucket
+    Given A user is not cleared to access non PII data from the UC database in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:false tag in the published S3 bucket
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access data from the team directories in the published S3 bucket
+    Given A user is not cleared to access any data in any team databases in the published S3 bucket
+    When The user attempts to read data from each of the team directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access non PII data from the team directories in the published S3 bucket
+    Given A user is not cleared to access any non PII data in any team databases in the published S3 bucket
+    When The user attempts to read data from each of the team directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access data in the restricted directories in the published S3 bucket
+    Given A user is not cleared to access data in the restricted directories in the published S3 bucket
+    When The user Attempts to read data from each of the restricted directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  Scenario: A Non SC Clive user attempts to access data in the uc_mongo_latest DB in the published S3 bucket
+    Given A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__non_pii_user
+  @fixture.cleanup.role_and_s3
+  Scenario: A Non SC Clive user attempts to access data in the uc_lab DB in the published S3 bucket
+    Given A user is not cleared to read uc_lab DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__pii_user_and_role
+  Scenario: An SC Clive user attempts to access non PII clive DB data in the published S3 bucket
+    Given A user is cleared to read non PII clive DB data in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:false tag from the Clive database in the published S3 bucket
+    Then The user is able to read the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access PII clive DB data in the published S3 bucket
+    Given A user is cleared to read PII clive DB data in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:true tag from the Clive database in the published S3 bucket
+    Then The user is able to read the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access PII data from the UC DB in the published S3 bucket
+    Given A user is not cleared to access PII data from the UC database in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:true tag in the published S3 bucket
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access Non PII data from the UC DB in the published S3 bucket
+    Given A user is not cleared to access non PII data from the UC database in the published S3 bucket
+    When The user Attempts to read data tagged with the pii:false tag in the published S3 bucket
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access data from the team directories in the published S3 bucket
+    Given A user is not cleared to access any data in any team databases in the published S3 bucket
+    When The user attempts to read data from each of the team directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access non PII data from the team directories in the published S3 bucket
+    Given A user is not cleared to access any non PII data in any team databases in the published S3 bucket
+    When The user attempts to read data from each of the team directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access data in the restricted directories in the published S3 bucket
+    Given A user is not cleared to access data in the restricted directories in the published S3 bucket
+    When The user Attempts to read data from each of the restricted directories in the published S3 bucket
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  Scenario: An SC Clive user attempts to access data in the uc_mongo_latest DB in the published S3 bucket
+    Given A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read any of the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  @fixture.cleanup.role_and_s3
+  Scenario: An SC Clive user attempts to access data in the uc_lab DB in the published S3 bucket
+    Given A user is not cleared to read uc_lab DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read any of the data
+

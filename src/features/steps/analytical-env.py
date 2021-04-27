@@ -99,6 +99,12 @@ def step_non_sc_role_assumed(context):
 @when(
     "The user Attempts to read data tagged with the pii:true tag in the published S3 bucket"
 )
+@when(
+    "The user Attempts to read data tagged with the pii:false tag from the Clive database in the published S3 bucket"
+)
+@when(
+    "The user Attempts to read data tagged with the pii:true tag from the Clive database in the published S3 bucket"
+)
 def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.published_bucket,
@@ -458,10 +464,29 @@ def step_ucs_latest_redacted_assumed(context):
 
 
 @given("A user is cleared to read uc_mongo_latest DB data in the published S3 bucket")
+@given("A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket")
 def step_uc_mongo_latest_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
 
     tag_map = {"pii": "true", "db": "uc_mongo_latest", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+@given("A user is not cleared to read uc_lab DB data in the published S3 bucket")
+def step_uc_lab_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_lab/"
+
+    tag_map = {"pii": "true", "db": "uc_lab", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
         context.analytical_test_data_s3_location["file_name"],
         context.analytical_test_data_s3_location["path"],
@@ -594,3 +619,46 @@ def step_user_has_write_access(context):
 @then("The user is unable to write to the location")
 def step_user_has_write_access(context):
     assert context.write_access == False
+
+@given(
+    "A user is cleared to read non PII clive DB data in the published S3 bucket"
+)
+def step_clive_non_pii_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_clive/"
+
+    tag_map = {"pii": "false", "db": "uc_clive", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+@given(
+    "A user is not cleared to read PII clive DB data in the published S3 bucket"
+)
+@given(
+    "A user is cleared to read PII clive DB data in the published S3 bucket"
+)
+def step_clive_pii_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_clive/"
+
+    tag_map = {"pii": "true", "db": "uc_clive", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
