@@ -16,9 +16,7 @@ CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
 
 
-@given(
-    "I start the CLIVE cluster"
-)
+@given("I start the CLIVE cluster")
 def step_(context, step_name, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
