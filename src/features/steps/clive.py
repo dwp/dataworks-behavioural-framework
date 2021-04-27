@@ -16,16 +16,10 @@ CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
 
 
-<<<<<<< Updated upstream
-@given("I start the CLIVE cluster")
-def step_(context, step_name, timeout_mins):
-    timeout_secs = int(timeout_mins) * 60
-=======
 @given(
     "I start the CLIVE cluster"
 )
 def step_(context):
->>>>>>> Stashed changes
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
