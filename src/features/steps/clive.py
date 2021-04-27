@@ -17,7 +17,7 @@ COMPLETED_STATUS = "COMPLETED"
 
 
 @given(
-    "I start the CLIVE cluster and wait for the step '{step_name}' for '{timeout_mins}' minutes"
+    "I start the CLIVE cluster"
 )
 def step_(context, step_name, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
@@ -38,17 +38,6 @@ def step_(context, step_name, timeout_mins):
     context.clive_cluster_id = cluster_id
 
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
-    step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
-    step_id = step["Id"]
-    console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
-    if step is not None:
-        execution_state = aws_helper.poll_emr_cluster_step_status(
-            step_id, cluster_id, timeout_secs
-        )
-    if execution_state != COMPLETED_STATUS:
-        raise AssertionError(
-            f"'{step_name}' step failed with final status of '{execution_state}'"
-        )
 
 
 @then("I insert the '{step_name}' step onto the CLIVE cluster")
@@ -70,7 +59,7 @@ def step_impl(context, step_name):
     context.clive_results_s3_file = os.path.join(s3_path, file_name)
 
 
-@then("I wait '{timeout_mins}' minutes for the step to finish")
+@then("I wait '{timeout_mins}' minutes for hive-query to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
