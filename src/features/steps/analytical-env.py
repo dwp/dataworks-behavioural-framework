@@ -464,7 +464,9 @@ def step_ucs_latest_redacted_assumed(context):
 
 
 @given("A user is cleared to read uc_mongo_latest DB data in the published S3 bucket")
-@given("A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket")
+@given(
+    "A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket"
+)
 def step_uc_mongo_latest_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_mongo_latest/"
 
@@ -481,6 +483,7 @@ def step_uc_mongo_latest_assumed(context):
         context.analytical_test_e2e_role,
         context.aws_session_timeout_seconds,
     )
+
 
 @given("A user is not cleared to read uc_lab DB data in the published S3 bucket")
 def step_uc_lab_assumed(context):
@@ -620,9 +623,8 @@ def step_user_has_write_access(context):
 def step_user_has_write_access(context):
     assert context.write_access == False
 
-@given(
-    "A user is cleared to read non PII clive DB data in the published S3 bucket"
-)
+
+@given("A user is cleared to read non PII clive DB data in the published S3 bucket")
 def step_clive_non_pii_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_clive/"
 
@@ -640,12 +642,9 @@ def step_clive_non_pii_assumed(context):
         context.aws_session_timeout_seconds,
     )
 
-@given(
-    "A user is not cleared to read PII clive DB data in the published S3 bucket"
-)
-@given(
-    "A user is cleared to read PII clive DB data in the published S3 bucket"
-)
+
+@given("A user is not cleared to read PII clive DB data in the published S3 bucket")
+@given("A user is cleared to read PII clive DB data in the published S3 bucket")
 def step_clive_pii_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_clive/"
 

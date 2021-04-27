@@ -304,37 +304,25 @@ def before_tag(context, tag):
             context,
             "rbac_ucs_latest_unredacted__read_access",
         )
-    if (
-        tag
-        == "fixture.setup.rbac_uc_clive__non_pii_user_and_role"
-    ):
+    if tag == "fixture.setup.rbac_uc_clive__non_pii_user_and_role":
         use_fixture(
             before_fixtures.setup_user_and_role,
             context,
             "rbac_uc_clive__non_pii",
         )
-    if (
-        tag
-        == "fixture.setup.rbac_uc_clive__non_pii_user"
-    ):
+    if tag == "fixture.setup.rbac_uc_clive__non_pii_user":
         use_fixture(
             before_fixtures.setup_user,
             context,
             "rbac_uc_clive__non_pii",
         )
-    if (
-        tag
-        == "fixture.setup.rbac_uc_clive__pii_user_and_role"
-    ):
+    if tag == "fixture.setup.rbac_uc_clive__pii_user_and_role":
         use_fixture(
             before_fixtures.setup_user_and_role,
             context,
             "rbac_uc_clive__pii",
         )
-    if (
-        tag
-        == "fixture.setup.rbac_uc_clive__pii_user"
-    ):
+    if tag == "fixture.setup.rbac_uc_clive__pii_user":
         use_fixture(
             before_fixtures.setup_user,
             context,
