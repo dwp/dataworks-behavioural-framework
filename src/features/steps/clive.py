@@ -16,53 +16,8 @@ CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
 
 
-@given("ADG output '{input_data}' as an input data source on S3")
-def step_(context, input_data):
-    adg_folder = os.path.join(context.fixture_path_local, "clive", "input", input_data)
-    # put the ADG output files into S3 for Clive to find
-    aws_helper.upload_directory_to_s3(
-        adg_folder,
-        context.published_bucket,
-        600,
-        context.clive_test_input_s3_prefix,
-    )
-
-
-@given("the results of the dynamodb table '{table_name}' for '{data_product}'")
-def step_(context, table_name, data_product):
-    key_dict = {
-        "Correlation_Id": {"S": f"{context.test_run_name}"},
-        "DataProduct": {"S": f"{data_product}"},
-    }
-
-    filters = {"DataProduct": f"{data_product}", "Status": "COMPLETED"}
-
-    console_printer.print_info(
-        f"Getting DynamoDb data with filters '{filters}' from table named '{table_name}'"
-    )
-
-    # get items from the dynamo that are completed for adg-full
-    response = aws_helper.scan_dynamodb_with_filters(table_name, filters)
-
-    # sort the items in the response by date
-    response.sort(key=operator.itemgetter("Date"), reverse=True)
-
-    latest_successfull_adg = {}
-    # get the first item from the sorted list. So the latest date
-    for item in response:
-        if "Date" in item and "S3_Prefix_Analytical_DataSet" in item:
-            latest_successfull_adg = item
-            break
-    console_printer.print_info(
-        f"This is the response from the DynamoDB: {latest_successfull_adg}"
-    )
-    context.clive_test_input_s3_prefix = latest_successfull_adg[
-        "S3_Prefix_Analytical_DataSet"
-    ]
-
-
-@then(
-    "start the CLIVE cluster and wait for the step '{step_name}' for '{timeout_mins}'"
+@given(
+    "I start the CLIVE cluster and wait for the step '{step_name}' for '{timeout_mins}' minutes"
 )
 def step_(context, step_name, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
@@ -96,7 +51,7 @@ def step_(context, step_name, timeout_mins):
         )
 
 
-@then("insert the '{step_name}' step onto the CLIVE cluster")
+@then("I insert the '{step_name}' step onto the CLIVE cluster")
 def step_impl(context, step_name):
     context.clive_cluster_step_name = step_name
     s3_path = f"{context.clive_test_input_s3_prefix}/{context.test_run_name}"
@@ -115,7 +70,7 @@ def step_impl(context, step_name):
     context.clive_results_s3_file = os.path.join(s3_path, file_name)
 
 
-@then("wait '{timeout_mins}' minutes for the step to finish")
+@then("I wait '{timeout_mins}' minutes for the step to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
@@ -159,7 +114,7 @@ def step_(context, expected_result_file_name):
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
-@when("the CLIVE cluster tags have been created correctly")
+@then("I check that the CLIVE cluster tags have been created correctly")
 def step_clive_cluster_tags_have_been_created_correctly(context):
     cluster_id = context.clive_cluster_id
     console_printer.print_info(f"Cluster id : {cluster_id}")
