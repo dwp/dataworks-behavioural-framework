@@ -21,6 +21,7 @@ COMPLETED_STATUS = "COMPLETED"
 )
 def step_(context, step_name, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
+    aws_helper.set_details_for_role_assumption(context.aws_role, timeout_secs)
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
