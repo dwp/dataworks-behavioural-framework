@@ -1,7 +1,7 @@
 @clive
 @test
 Feature: Clive tests, to run clive and validate its output
-  @fixture.clear.clive.output
+  @fixture.s3.clear.clive.output
   @fixture.terminate.clive.cluster
   Scenario: CLIVE dataset E2E given latest ADG output
     Given I start the CLIVE cluster and wait for the step 'run-clive' for '180' minutes
