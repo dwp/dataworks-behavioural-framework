@@ -1541,6 +1541,7 @@ def ssm_get_parameter_value(parameter_name, decrypt=False):
 
     return parameter["Parameter"]["Value"]
 
+
 def attempt_assume_role(s3_client, max_tries):
     tries = 0
     while tries <= max_tries:
@@ -1555,6 +1556,7 @@ def attempt_assume_role(s3_client, max_tries):
             else:
                 raise e
     return s3_client
+
 
 def test_s3_access_read(s3_bucket, key, s3_client=None):
     """Attempts to read a given file at the given s3 location
