@@ -225,7 +225,7 @@ Feature: Creating Analytical Environment for End Users
     When The user attempts to read data tagged with the pii:true tag in the published S3 bucket
     Then The user is unable to read the data
 
-  @fixture.setup.rbac_uc__auditlog_redacted_and_auditlog_secure
+  @fixture.setup.rbac_uc__auditlog_redacted_and_auditlog_secure_and_role
   Scenario: A user with auditlog redacted and auditlog secure access data in the auditlog_sec_v table in the published S3 bucket
     Given A user is cleared to access data in the auditlog_sec_v table in the published S3 bucket
     When The user attempts to read data from the auditlog_sec_v table in the published S3 bucket
