@@ -16,9 +16,7 @@ CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
 
 
-@given(
-    "I start the CLIVE cluster"
-)
+@given("I start the CLIVE cluster")
 def step_(context):
     context.clive_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
