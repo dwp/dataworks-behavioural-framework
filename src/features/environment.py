@@ -308,13 +308,13 @@ def before_tag(context, tag):
         use_fixture(
             before_fixtures.setup_user_and_role,
             context,
-            "rbac_uc_clive__non_pii",
+            "rbac_uc_clive__nonpii",
         )
     if tag == "fixture.setup.rbac_uc_clive__non_pii_user":
         use_fixture(
             before_fixtures.setup_user,
             context,
-            "rbac_uc_clive__non_pii",
+            "rbac_uc_clive__nonpii",
         )
     if tag == "fixture.setup.rbac_uc_clive__pii_user_and_role":
         use_fixture(

@@ -1541,6 +1541,20 @@ def ssm_get_parameter_value(parameter_name, decrypt=False):
 
     return parameter["Parameter"]["Value"]
 
+def attempt_assume_role(s3_client, max_tries):
+    tries = 0
+    while tries <= max_tries:
+        try:
+            time.sleep(10)
+            s3_client = get_client("s3")
+            break
+        except ClientError as e:
+            if e.response["Error"]["Code"] is "AccessDenied":
+                tries += 1
+                console_printer.print_warning_text(f"Try Number {tries}")
+            else:
+                raise e
+    return s3_client
 
 def test_s3_access_read(s3_bucket, key, s3_client=None):
     """Attempts to read a given file at the given s3 location
@@ -1552,18 +1566,7 @@ def test_s3_access_read(s3_bucket, key, s3_client=None):
     """
 
     if s3_client is None:
-        tries = 0
-        while tries <= 5:
-            try:
-                time.sleep(10)
-                s3_client = get_client("s3")
-                break
-            except ClientError as e:
-                if e.response["Error"]["Code"] is "AccessDenied":
-                    tries += 1
-                    console_printer.print_warning_text(f"Try Number {tries}")
-                else:
-                    raise e
+        s3_client = attempt_assume_role(s3_client, 5)
 
     try:
         get_s3_object(s3_client, s3_bucket, key)
@@ -1585,7 +1588,7 @@ def test_s3_access_write(s3_bucket, key, local_file, timeout, s3_client=None):
     """
 
     if s3_client is None:
-        s3_client = get_client("s3")
+        s3_client = attempt_assume_role(s3_client, 5)
 
     try:
         upload_file_to_s3_and_wait_for_consistency(
