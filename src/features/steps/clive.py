@@ -133,7 +133,7 @@ def metadata_table_step_impl(context):
     console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
 
     assert (
-            "Item" in response
+        "Item" in response
     ), f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
 
     item = response["Item"]
@@ -146,20 +146,20 @@ def metadata_table_step_impl(context):
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
-            item["Run_Id"]["N"] == "1"
+        item["Run_Id"]["N"] == "1"
     ), f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
     assert (
-            item["Date"]["S"] == context.clive_export_date
+        item["Date"]["S"] == context.clive_export_date
     ), f"Date was '{item['Date']['S']}', expected '{context.clive_export_date}'"
     assert (
-            item["CurrentStep"]["S"] in allowed_steps
+        item["CurrentStep"]["S"] in allowed_steps
     ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
     assert (
-            item["Cluster_Id"]["S"] == context.clive_cluster_id
+        item["Cluster_Id"]["S"] == context.clive_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.clive_cluster_id}'"
     assert (
-            item["S3_Prefix_Snapshots"]["S"] == context.clive_test_input_s3_prefix
+        item["S3_Prefix_Snapshots"]["S"] == context.clive_test_input_s3_prefix
     ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.clive_test_input_s3_prefix}'"
     assert (
-            item["Snapshot_Type"]["S"] == snapshot_type
+        item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
