@@ -155,10 +155,10 @@ def metadata_table_step_impl(context):
             item["CurrentStep"]["S"] in allowed_steps
     ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
     assert (
-            item["Cluster_Id"]["S"] == context.adg_cluster_id
+            item["Cluster_Id"]["S"] == context.clive_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.clive_cluster_id}'"
     assert (
-            item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
+            item["S3_Prefix_Snapshots"]["S"] == context.clive_test_input_s3_prefix
     ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.clive_test_input_s3_prefix}'"
     assert (
             item["Snapshot_Type"]["S"] == snapshot_type
