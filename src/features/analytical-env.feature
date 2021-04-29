@@ -409,12 +409,12 @@ Feature: Creating Analytical Environment for End Users
   Scenario: An SC Clive user attempts to access data in the uc_mongo_latest DB in the published S3 bucket
     Given A user is not cleared to read uc_mongo_latest DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
-    Then The user is unable to read any of the data
+    Then The user is unable to read the data
 
   @fixture.setup.rbac_uc_clive__pii_user
   @fixture.cleanup.role_and_s3
   Scenario: An SC Clive user attempts to access data in the uc_lab DB in the published S3 bucket
     Given A user is not cleared to read uc_lab DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
-    Then The user is unable to read any of the data
+    Then The user is unable to read the data
 

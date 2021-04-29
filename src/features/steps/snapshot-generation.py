@@ -99,6 +99,7 @@ def step_impl(context, snapshot_type):
         snapshot_type,
         correlation_id,
         context.export_process_trigger_adg_override,
+        context.export_process_trigger_pdm_override,
         context.generate_snapshots_export_date_override,
         mongo_snapshot_full_s3_location,
     )
@@ -122,6 +123,7 @@ def step_impl(context, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
+        context.export_process_trigger_pdm_override,
         context.generate_snapshots_export_date_override,
     )
 
@@ -143,6 +145,7 @@ def step_impl(context, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
+        context.export_process_trigger_pdm_override,
         context.generate_snapshots_export_date_override,
     )
 
@@ -165,6 +168,7 @@ def step_impl(context, start_timestamp, end_timestamp, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
+        context.export_process_trigger_pdm_override,
         context.generate_snapshots_export_date_override,
     )
 
