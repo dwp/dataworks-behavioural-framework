@@ -87,6 +87,7 @@ def send_start_export_message(
     snapshot_type,
     correlation_id,
     trigger_adg_string,
+    trigger_pdm_string,
     export_date_override,
     mongo_snapshot_full_s3_location=None,
 ):
@@ -104,6 +105,7 @@ def send_start_export_message(
     snapshot_type -- either "full" or "incremental"
     correlation_id -- Correlation Id override or None for a uuid
     trigger_adg_string -- True for HTME to trigger ADG when finished (defaults to False)
+    trigger_pdm_string -- True for ADG to trigger PDM when finished (defaults to False)
     export_date_override -- Correlation Id override or None for not sending, which means using today's date
     mongo_snapshot_full_s3_location -- full location for the snapshots (or None if not needed)
     """
@@ -141,6 +143,9 @@ def send_start_export_message(
 
     if trigger_adg_string is not None:
         message["trigger-adg"] = trigger_adg_string.lower()
+
+    if trigger_pdm_string:
+        message["trigger-pdm"] = trigger_pdm_string.lower()
 
     if export_date_override:
         message["export-date"] = export_date_override
