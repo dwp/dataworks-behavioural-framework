@@ -22,6 +22,8 @@ def step_(context):
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
         "s3_prefix": f"{context.clive_test_input_s3_prefix}",
+        "snapshot_type": "full",
+        "export_date": f"{context.clive_export_date}",
     }
 
     payload_json = json.dumps(emr_launcher_config)
@@ -111,10 +113,11 @@ def step_clive_cluster_tags_have_been_created_correctly(context):
     assert tags_to_check in cluster_tags
 
 
-@then("the CLIVE metadata table is correct")
+@then("I check the CLIVE metadata table is correct")
 def metadata_table_step_impl(context):
-    data_product = f"CLIVE"
+    data_product = "CLIVE"
     table_name = "data_pipeline_metadata"
+    snapshot_type = "full"
 
     key_dict = {
         "Correlation_Id": {"S": f"{context.test_run_name}"},
@@ -136,7 +139,10 @@ def metadata_table_step_impl(context):
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["create-views-tables"]
+    allowed_steps = [
+        "run-clive",
+        "hive-query",
+    ]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
@@ -151,3 +157,9 @@ def metadata_table_step_impl(context):
     assert (
         item["Cluster_Id"]["S"] == context.clive_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.clive_cluster_id}'"
+    assert (
+        item["S3_Prefix_Analytical_DataSet"]["S"] == context.clive_test_input_s3_prefix
+    ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.clive_test_input_s3_prefix}'"
+    assert (
+        item["Snapshot_Type"]["S"] == snapshot_type
+    ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
