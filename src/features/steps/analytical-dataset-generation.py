@@ -136,9 +136,9 @@ def step_impl(context, step_name):
     s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     adg_hive_export_bash_command = (
-            f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-            + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-            + f" &>> /var/log/adg/e2e.log"
+        f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+        + f" &>> /var/log/adg/e2e.log"
     )
 
     context.adg_cluster_step_id = emr_step_generator.generate_bash_step(
@@ -171,10 +171,10 @@ def step_(context, expected_result_file_name):
         aws_helper.get_s3_object(
             None, context.published_bucket, context.adg_results_s3_file
         )
-            .decode("ascii")
-            .replace("\t", "")
-            .replace(" ", "")
-            .strip()
+        .decode("ascii")
+        .replace("\t", "")
+        .replace(" ", "")
+        .strip()
     )
 
     expected_file_name = os.path.join(
@@ -185,13 +185,13 @@ def step_(context, expected_result_file_name):
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
-            .replace("\t", "")
-            .replace(" ", "")
-            .strip()
+        .replace("\t", "")
+        .replace(" ", "")
+        .strip()
     )
 
     assert (
-            expected == actual
+        expected == actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
@@ -232,17 +232,17 @@ def step_verify_analytical_datasets(context, snapshot_type):
                 if key == "db":
                     found_tag_count += 1
                     assert (
-                            value == ADG_DB
+                        value == ADG_DB
                     ), f"DB tag value is '{value}' and not '{ADG_DB}'"
                 if key == "table":
                     found_tag_count += 1
                     assert (
-                            value == collection
+                        value == collection
                     ), f"Table tag value is '{value}' and not '{collection}'"
                 if key == "snapshot_type":
                     found_tag_count += 1
                     assert (
-                            value == snapshot_type
+                        value == snapshot_type
                     ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
 
             assert found_tag_count == 4, f"One or more tags not found"
@@ -288,7 +288,7 @@ def metadata_table_step_impl(context, snapshot_type):
     console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
 
     assert (
-            "Item" in response
+        "Item" in response
     ), f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
 
     item = response["Item"]
@@ -311,20 +311,20 @@ def metadata_table_step_impl(context, snapshot_type):
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
-            item["Run_Id"]["N"] == "1"
+        item["Run_Id"]["N"] == "1"
     ), f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
     assert (
-            item["Date"]["S"] == context.adg_export_date
+        item["Date"]["S"] == context.adg_export_date
     ), f"Date was '{item['Date']['S']}', expected '{context.adg_export_date}'"
     assert (
-            item["CurrentStep"]["S"] in allowed_steps
+        item["CurrentStep"]["S"] in allowed_steps
     ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
     assert (
-            item["Cluster_Id"]["S"] == context.adg_cluster_id
+        item["Cluster_Id"]["S"] == context.adg_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.adg_cluster_id}'"
     assert (
-            item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
+        item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
     ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.adg_s3_prefix}'"
     assert (
-            item["Snapshot_Type"]["S"] == snapshot_type
+        item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
