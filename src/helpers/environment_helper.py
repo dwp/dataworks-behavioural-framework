@@ -238,6 +238,9 @@ def set_test_run_common_variables(context):
     context.export_process_trigger_adg_override = context.config.userdata.get(
         "GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE"
     )
+    context.export_process_trigger_pdm_override = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_TRIGGER_PDM_OVERRIDE"
+    )
 
     context.generate_snapshots_trigger_snapshot_sender_override = (
         context.config.userdata.get(
@@ -455,6 +458,10 @@ def set_test_run_common_variables(context):
     context.pdm_test_input_s3_prefix = "e2e-test-pdm-dataset"
 
     context.pdm_test_output_s3_prefix = "e2e-test-pdm-output"
+
+    context.clive_test_input_s3_prefix = "e2e-test-clive-dataset"
+
+    context.clive_output_s3_prefix = "data/uc_clive"
 
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(

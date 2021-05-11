@@ -232,17 +232,17 @@ def step_verify_analytical_datasets(context, snapshot_type):
                 if key == "db":
                     found_tag_count += 1
                     assert (
-                            value == ADG_DB
+                        value == ADG_DB
                     ), f"DB tag value is '{value}' and not '{ADG_DB}'"
                 if key == "table":
                     found_tag_count += 1
                     assert (
-                            value == collection
+                        value == collection
                     ), f"Table tag value is '{value}' and not '{collection}'"
                 if key == "snapshot_type":
                     found_tag_count += 1
                     assert (
-                            value == snapshot_type
+                        value == snapshot_type
                     ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
 
             assert found_tag_count == 4, f"One or more tags not found"

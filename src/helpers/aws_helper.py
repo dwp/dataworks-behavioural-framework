@@ -1,3 +1,5 @@
+import ast
+import decimal
 import json
 import base64
 import time
@@ -7,9 +9,11 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 from boto3.exceptions import S3UploadFailedError
+from boto3.dynamodb.conditions import Key, And
 from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
 from exceptions import aws_exceptions
+from functools import reduce
 from pprint import pprint
 from botocore.config import Config
 from helpers import invoke_lambda, template_helper, file_helper, console_printer
@@ -19,6 +23,15 @@ aws_role_arn = None
 aws_profile = None
 aws_session_timeout_seconds = None
 boto3_session = None
+
+# Helper class to convert a DynamoDB item to JSON.
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return str(o)
+        if isinstance(o, set):  # <---resolving sets as lists
+            return list(o)
+        return super(DecimalEncoder, self).default(o)
 
 
 def set_details_for_role_assumption(role, session_timeout_seconds):
@@ -141,6 +154,7 @@ def get_client(service_name, profile=None, region=None, read_timeout_seconds=120
     client_config = Config(
         read_timeout=read_timeout_seconds,
         max_pool_connections=max_connections,
+        retries={"max_attempts": 10, "mode": "standard"},
     )
 
     if region is None:
@@ -179,6 +193,28 @@ def get_item_from_dynamodb(table_name, key_dict):
     )
 
     return dynamodb_client.get_item(TableName=table_name, Key=key_dict)
+
+
+def scan_dynamodb_with_filters(table_name, filters):
+    """Returns the ga scan of the dynamodb table.
+
+    Keyword arguments:
+    table_name -- the name for the table in dynamodb
+    filters -- a dictionary of keys and their values to filter the table by
+    """
+    dynamodb = get_resource(resource_name="dynamodb")
+
+    console_printer.print_debug(
+        f"Getting DynamoDb data from table named '{table_name}'"
+    )
+    table = dynamodb.Table(table_name)
+    response = table.scan(
+        FilterExpression=reduce(And, ([Key(k).eq(v) for k, v in filters.items()]))
+    )
+    # Dynamo returns integers with the word Decimal around them. The below sorts this out
+    clean_response = json.dumps((response["Items"]), indent=4, cls=DecimalEncoder)
+
+    return json.loads(clean_response)
 
 
 def delete_item_from_dynamodb(table_name, key_dict):
@@ -641,6 +677,31 @@ def upload_file_to_s3_and_wait_for_consistency_threaded(
                 yield future.result()
             except Exception as ex:
                 raise AssertionError(ex)
+
+
+def upload_directory_to_s3(input_folder, s3_bucket, seconds_timeout, s3_prefix):
+    """Uploads the given file to s3 and waits for the file to be written, will error if not consistent after 6 minutes using threads.
+
+    Keyword arguments:
+    input_folder -- the folder with the files to upload in
+    s3_bucket -- the bucket to upload to in s3
+    seconds_timeout -- the number of seconds to wait for
+    s3_prefix -- the prefix of where to put the files
+    """
+    s3_client = get_client(service_name="s3")
+
+    for root, dirs, files in os.walk(input_folder):
+        for dir_name in dirs:
+            full_dir = os.path.join(root, dir_name)
+            relative_dir = full_dir.split(input_folder)[-1].lstrip("/")
+            full_s3_prefix = os.path.join(s3_prefix, relative_dir)
+            for output_file in os.listdir(full_dir):
+                full_local_file = os.path.join(full_dir, output_file)
+                if not os.path.isdir(full_local_file):
+                    full_s3_file = os.path.join(full_s3_prefix, output_file)
+                    upload_file_to_s3_and_wait_for_consistency(
+                        full_local_file, s3_bucket, seconds_timeout, full_s3_file
+                    )
 
 
 def upload_file_to_s3_and_wait_for_consistency(
@@ -1481,6 +1542,22 @@ def ssm_get_parameter_value(parameter_name, decrypt=False):
     return parameter["Parameter"]["Value"]
 
 
+def attempt_assume_role(s3_client, max_tries):
+    tries = 0
+    while tries <= max_tries:
+        try:
+            time.sleep(10)
+            s3_client = get_client("s3")
+            break
+        except ClientError as e:
+            if e.response["Error"]["Code"] is "AccessDenied":
+                tries += 1
+                console_printer.print_warning_text(f"Try Number {tries}")
+            else:
+                raise e
+    return s3_client
+
+
 def test_s3_access_read(s3_bucket, key, s3_client=None):
     """Attempts to read a given file at the given s3 location
 
@@ -1491,18 +1568,7 @@ def test_s3_access_read(s3_bucket, key, s3_client=None):
     """
 
     if s3_client is None:
-        tries = 0
-        while tries <= 5:
-            try:
-                time.sleep(10)
-                s3_client = get_client("s3")
-                break
-            except ClientError as e:
-                if e.response["Error"]["Code"] is "AccessDenied":
-                    tries += 1
-                    console_printer.print_warning_text(f"Try Number {tries}")
-                else:
-                    raise e
+        s3_client = attempt_assume_role(s3_client, 5)
 
     try:
         get_s3_object(s3_client, s3_bucket, key)
@@ -1524,7 +1590,7 @@ def test_s3_access_write(s3_bucket, key, local_file, timeout, s3_client=None):
     """
 
     if s3_client is None:
-        s3_client = get_client("s3")
+        s3_client = attempt_assume_role(s3_client, 5)
 
     try:
         upload_file_to_s3_and_wait_for_consistency(
