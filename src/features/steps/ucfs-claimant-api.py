@@ -148,12 +148,12 @@ def step_impl(context, expected_value):
     # This step is used by other scenarios which can have multiple values in the expected_value
     if "," not in expected_value:
         assert (
-                take_home_pay == expected_value
+            take_home_pay == expected_value
         ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value}"
     else:
         expected_value = expected_value.split(",")
         assert (
-                take_home_pay == expected_value[0]
+            take_home_pay == expected_value[0]
         ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value[0]}"
 
 
