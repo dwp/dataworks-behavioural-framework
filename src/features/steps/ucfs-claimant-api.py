@@ -19,7 +19,10 @@ from helpers import (
 
 message_type = "claimant_api"
 
-@given("I create a data file of '{data_file_name}' for a claimant with a take home pay of '{take_home_pay}' with a recently ended assessment period")
+
+@given(
+    "I create a data file of '{data_file_name}' for a claimant with a take home pay of '{take_home_pay}' with a recently ended assessment period"
+)
 def step_impl(context, data_file_name, take_home_pay):
 
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
@@ -40,6 +43,7 @@ def step_impl(context, data_file_name, take_home_pay):
           amount: "{take_home_pay}"'''
 
     file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", template_yml)
+
 
 @given("The claimant API '{region_type}' region is set to '{region}'")
 def step_impl(context, region_type, region):
@@ -601,11 +605,15 @@ def step_impl(context):
 
     raise AssertionError("Could not find DLQ files within timeout")
 
-@when("UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'")
+
+@when(
+    "UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'"
+)
 def step_impl(context, input_file_name, data_file_name):
     context.execute_steps(
         f"given UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'"
     )
+
 
 @when("The new claimants can be found from claimant API '{api_version}'")
 def step_impl(context, api_version):
