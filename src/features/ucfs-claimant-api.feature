@@ -47,3 +47,10 @@ Feature: UCFS Claimant API
     And The query succeeds and returns that the claimant has been found
     And UCFS send a kafka delete for first existing claimant with input file of 'valid_delete.json'
     Then I query the first claimant again from claimant API 'v2' and it is not found
+
+  Scenario: A claimant with a single assessment period which ended in the last month is created
+    Given I create a data file of 'single_new_claimant_with_given_thp.yml' for a claimant with a take home pay of '542.89' with a recently ended assessment period
+    When UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of 'single_new_claimant_with_given_thp.yml'
+    And The new claimants can be found from claimant API 'v2'
+    And I query for the first new claimant from claimant API 'v2'
+    And The query succeeds and returns that the claimant has been found
