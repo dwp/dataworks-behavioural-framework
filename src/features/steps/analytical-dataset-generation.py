@@ -35,9 +35,18 @@ ADG_TOPICS = [
     "db.agent-core.agentToDo",
     "db.agent-core.team",
     "db.core.statement",
+    "db.core.contract",
+    "db.core.claimant",
+    "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
 ]
-ADG_DB = "agent-core"
-ADG_COLLECTIONS = ["agent", "agentToDo", "team", "statement"]
+
+ADG_DB_COLLECTION = {
+    "agent-core": ["agent", "agentToDo", "team"],
+    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
+    "accepted-data": ["personDetails"],
+}
 
 
 @given(
@@ -99,19 +108,16 @@ def step_(context, snapshot_type, step_name):
         SNAPSHOT_TYPE: snapshot_type,
         EXPORT_DATE: context.adg_export_date,
     }
-
-    payload_json = json.dumps(emr_launcher_config)
-    cluster_response = invoke_lambda.invoke_pdm_emr_launcher_lambda(payload_json)
+    payload_json = json.dumps(payload)
+    cluster_response = invoke_lambda.invoke_adg_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
     cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
-    context.adg_cluster_id = cluster_id
-
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
-
     step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
+    context.adg_cluster_id = cluster_id
     step_id = step["Id"]
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:
@@ -130,9 +136,9 @@ def step_impl(context, step_name):
     s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     adg_hive_export_bash_command = (
-        f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-        + f" &>> /var/log/adg/e2e.log"
+            f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
+            + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+            + f" &>> /var/log/adg/e2e.log"
     )
 
     context.adg_cluster_step_id = emr_step_generator.generate_bash_step(
@@ -165,10 +171,10 @@ def step_(context, expected_result_file_name):
         aws_helper.get_s3_object(
             None, context.published_bucket, context.adg_results_s3_file
         )
-        .decode("ascii")
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
+            .decode("ascii")
+            .replace("\t", "")
+            .replace(" ", "")
+            .strip()
     )
 
     expected_file_name = os.path.join(
@@ -179,13 +185,13 @@ def step_(context, expected_result_file_name):
     )
     expected = (
         file_helper.get_contents_of_file(expected_file_name, False)
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
+            .replace("\t", "")
+            .replace(" ", "")
+            .strip()
     )
 
     assert (
-        expected == actual
+            expected == actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
@@ -208,47 +214,46 @@ def step_verify_analytical_datasets(context, snapshot_type):
     )
     console_printer.print_info(f"Keys in data location : {keys}")
     assert len(keys) == len(ADG_TOPICS)
-    for collection in ADG_COLLECTIONS:
-        if collection == "statement":
-            ADG_DB = "core"
-        else:
-            ADG_DB = "agent-core"
-        part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
-        assert part_file_key in keys
-        tags = aws_helper.get_tags_of_file_in_s3(
-            context.published_bucket, part_file_key
-        )["TagSet"]
-        console_printer.print_info(f"Tags are : {tags}")
-        found_tag_count = 0
-        for tag in tags:
-            key = tag["Key"]
-            value = tag["Value"]
-            if key == "pii":
-                found_tag_count += 1
-                assert value == "true", f"PII tag value is '{value}' and not 'true'"
-            if key == "db":
-                found_tag_count += 1
-                assert value == ADG_DB, f"DB tag value is '{value}' and not '{ADG_DB}'"
-            if key == "table":
-                found_tag_count += 1
-                assert (
-                    value == collection
-                ), f"Table tag value is '{value}' and not '{collection}'"
-            if key == "snapshot_type":
-                found_tag_count += 1
-                assert (
-                    value == snapshot_type
-                ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
+    for ADG_DB, collections in ADG_DB_COLLECTION.items():
+        for collection in collections:
+            part_file_key = f"{context.data_path}/{ADG_DB}/{collection}/part-00000.lzo"
+            assert part_file_key in keys
+            tags = aws_helper.get_tags_of_file_in_s3(
+                context.published_bucket, part_file_key
+            )["TagSet"]
+            console_printer.print_info(f"Tags are : {tags}")
+            found_tag_count = 0
+            for tag in tags:
+                key = tag["Key"]
+                value = tag["Value"]
+                if key == "pii":
+                    found_tag_count += 1
+                    assert value == "true", f"PII tag value is '{value}' and not 'true'"
+                if key == "db":
+                    found_tag_count += 1
+                    assert (
+                            value == ADG_DB
+                    ), f"DB tag value is '{value}' and not '{ADG_DB}'"
+                if key == "table":
+                    found_tag_count += 1
+                    assert (
+                            value == collection
+                    ), f"Table tag value is '{value}' and not '{collection}'"
+                if key == "snapshot_type":
+                    found_tag_count += 1
+                    assert (
+                            value == snapshot_type
+                    ), f"Snapshot type tag value is '{value}' and not '{snapshot_type}'"
 
-        assert found_tag_count == 4, f"One or more tags not found"
+            assert found_tag_count == 4, f"One or more tags not found"
 
-        metadata = aws_helper.get_s3_object_metadata(
-            context.published_bucket, part_file_key
-        )
-        console_printer.print_info(f"metadata : {metadata}")
-        assert "x-amz-iv" in metadata
-        assert "x-amz-key" in metadata
-        assert "x-amz-matdesc" in metadata
+            metadata = aws_helper.get_s3_object_metadata(
+                context.published_bucket, part_file_key
+            )
+            console_printer.print_info(f"metadata : {metadata}")
+            assert "x-amz-iv" in metadata
+            assert "x-amz-key" in metadata
+            assert "x-amz-matdesc" in metadata
 
 
 @then("the ADG cluster tags have been created correctly for '{snapshot_type}'")
@@ -283,13 +288,18 @@ def metadata_table_step_impl(context, snapshot_type):
     console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
 
     assert (
-        "Item" in response
+            "Item" in response
     ), f"Could not find metadata table row with correlation id of '{context.test_run_name}' and data product  of '{data_product}'"
 
     item = response["Item"]
     console_printer.print_info(f"Item retrieved from dynamodb table : '{item}'")
 
-    allowed_steps = ["create_pdm_trigger", "flush-pushgateway", "send_notification"]
+    allowed_steps = [
+        "spark-submit",
+        "create_pdm_trigger",
+        "flush-pushgateway",
+        "send_notification",
+    ]
 
     if snapshot_type.lower() == "incremental":
         allowed_steps = [
@@ -301,20 +311,20 @@ def metadata_table_step_impl(context, snapshot_type):
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (
-        item["Run_Id"]["N"] == "1"
+            item["Run_Id"]["N"] == "1"
     ), f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
     assert (
-        item["Date"]["S"] == context.adg_export_date
+            item["Date"]["S"] == context.adg_export_date
     ), f"Date was '{item['Date']['S']}', expected '{context.adg_export_date}'"
     assert (
-        item["CurrentStep"]["S"] in allowed_steps
+            item["CurrentStep"]["S"] in allowed_steps
     ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
     assert (
-        item["Cluster_Id"]["S"] == context.adg_cluster_id
+            item["Cluster_Id"]["S"] == context.adg_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.adg_cluster_id}'"
     assert (
-        item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
+            item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
     ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.adg_s3_prefix}'"
     assert (
-        item["Snapshot_Type"]["S"] == snapshot_type
+            item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
