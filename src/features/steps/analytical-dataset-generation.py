@@ -99,16 +99,19 @@ def step_(context, snapshot_type, step_name):
         SNAPSHOT_TYPE: snapshot_type,
         EXPORT_DATE: context.adg_export_date,
     }
-    payload_json = json.dumps(payload)
-    cluster_response = invoke_lambda.invoke_adg_emr_launcher_lambda(payload_json)
+
+    payload_json = json.dumps(emr_launcher_config)
+    cluster_response = invoke_lambda.invoke_pdm_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
     cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
-    console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
-    step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
     context.adg_cluster_id = cluster_id
+
+    console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
+
+    step = aws_helper.get_emr_cluster_step(step_name, cluster_id)
     step_id = step["Id"]
     console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
     if step is not None:

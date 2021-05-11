@@ -57,7 +57,8 @@ Feature: UCFS Claimant API
     And The new claimants can be found from claimant API 'v2'
     And I query for the first new claimant from claimant API 'v2'
     And The query succeeds and returns that the claimant has been found
-    Then I print out the NINO for manual regression testing usage
+    Then I clean up the 'single_new_claimant_with_given_thp.yml' temporary files
+    And I print out the NINO for manual regression testing usage
     Examples:
     | take-home-pay |
     | 542.89        |
