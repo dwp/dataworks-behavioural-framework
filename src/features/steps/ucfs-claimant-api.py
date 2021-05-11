@@ -611,6 +611,14 @@ def step_impl(context):
     console_printer.print_info(f"NINO: '{context.generated_ninos}'")
 
 
+@then("I clean up the '{temp_file_name}' temporary files")
+def step_impl(context, temp_file_name):
+    folder = streaming_data_helper.generate_fixture_data_folder(message_type)
+    fixture_data_path = os.path.join(context.fixture_path_local, folder)
+    temporary_file_full_path = os.path.join(fixture_data_path, temp_file_name)
+    file_helper.delete_local_file(temporary_file_full_path)
+
+
 @when(
     "UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'"
 )
