@@ -69,7 +69,10 @@ def step_impl(context, data_file_name, take_home_pays):
 
     file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", template_yml)
 
-@given("Create a data file of '{data_file_name}' for a claimant with a completed assessment period with a take home pay of '{take_home_pay}' and a suspension date of '{suspension_date_offset}' from end date")
+
+@given(
+    "Create a data file of '{data_file_name}' for a claimant with a completed assessment period with a take home pay of '{take_home_pay}' and a suspension date of '{suspension_date_offset}' from end date"
+)
 def step_impl(context, data_file_name, take_home_pay, suspension_date_offset):
     context.execute_steps(
         f"given I create a data file of '{data_file_name}' for a claimant with multiple assessment periods, with take home pay values of '{take_home_pay}'"
@@ -85,6 +88,7 @@ def step_impl(context, data_file_name, take_home_pay, suspension_date_offset):
         f"Adding a suspension date for claimant."
         + f"Take home pay: '{take_home_pay}', suspension date: '{suspension_date}'"
     )
+
 
 @given("The claimant API '{region_type}' region is set to '{region}'")
 def step_impl(context, region_type, region):
