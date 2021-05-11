@@ -601,6 +601,12 @@ def step_impl(context):
 
     raise AssertionError("Could not find DLQ files within timeout")
 
+@then("I print out the NINO for manual regression testing usage")
+def step_impl(context):
+    console_printer.print_info(
+        f"NINO: '{context.generated_ninos}'"
+    )
+
 @when("UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'")
 def step_impl(context, input_file_name, data_file_name):
     context.execute_steps(
