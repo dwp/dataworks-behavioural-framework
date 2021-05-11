@@ -19,28 +19,40 @@ from helpers import (
 
 message_type = "claimant_api"
 
-
 @given(
-    "I create a data file of '{data_file_name}' for a claimant with a take home pay of '{take_home_pay}' with a recently ended assessment period"
+    "I create a data file of '{data_file_name}' for a claimant with multiple assessment periods, with take home pay values of '{take_home_pays}'"
 )
-def step_impl(context, data_file_name, take_home_pay):
+def step_impl(context, data_file_name, take_home_pays):
 
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
     fixture_data_path = os.path.join(context.fixture_path_local, folder)
 
-    start_date = datetime.strftime(datetime.now() - timedelta(days=31), "%Y%m%d")
-    end_date = datetime.strftime(datetime.now() - timedelta(days=1), "%Y%m%d")
+    ap_thp = take_home_pays.split(",")
+    ap_thp_clean = [amount.strip(' ') for amount in ap_thp]
+
+    assessment_periods = []
+    for index, amount in enumerate(ap_thp_clean):
+        if index == 0:
+            start_date = datetime.strftime(claimant_api_data_generator._month_delta(datetime.today(), -1), "%Y%m%d")
+            end_date = datetime.strftime(datetime.now() - timedelta(days=1), "%Y%m%d")
+        else:
+            start_date = datetime.strftime(claimant_api_data_generator._month_delta(datetime.today(), (index + 1) * -1), "%Y%m%d")
+            end_date = datetime.strftime(claimant_api_data_generator._month_delta(datetime.today(), index * -1), "%Y%m%d")
+        assessment_periods.append({"start_date": start_date, "end_date": end_date, "amount": amount})
 
     console_printer.print_info(
         f"Generating UCFS claimant API data file "
-        + f"with an assessment period starting '{start_date}', ending '{end_date}', "
-        + f"in the data file called '{data_file_name}', located '{fixture_data_path}'"
+        + f"with multiple assessment periods, '{assessment_periods}'"
     )
 
-    template_yml = f'''- assessment_periods:
-        - start_date: "{start_date}"
-          end_date: "{end_date}"
-          amount: "{take_home_pay}"'''
+    template_yml = "- assessment_periods:"
+
+    for assessment_period in assessment_periods:
+        yml = f'''
+    - start_date: "{assessment_period['start_date']}"
+      end_date: "{assessment_period['end_date']}"
+      amount: "{assessment_period['amount']}"'''
+        template_yml = template_yml + yml
 
     file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", template_yml)
 
@@ -605,7 +617,7 @@ def step_impl(context):
 
     raise AssertionError("Could not find DLQ files within timeout")
 
-
+@when("I print out the NINO for manual regression testing usage")
 @then("I print out the NINO for manual regression testing usage")
 def step_impl(context):
     console_printer.print_info(f"NINO: '{context.generated_ninos}'")
