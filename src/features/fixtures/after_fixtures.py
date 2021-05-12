@@ -125,3 +125,21 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
         console_printer.print_info(
             f"No cluster id found for PDM so not terminating any cluster"
         )
+
+
+@fixture
+def terminate_mongo_latest_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'terminate_mongo_latest_cluster' fixture")
+
+    if "mongo_latest_cluster_id" in context and context.mongo_latest_cluster_id is not None:
+        try:
+            aws_helper.terminate_emr_cluster(context.mongo_latest_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning(
+                f"Error occured when terminating mongo latest cluster with id of '{context.mongo_latest_cluster_id}' as the following error occurred: '{error}'"
+            )
+
+    else:
+        console_printer.print_info(
+            "No cluster id found for mongo latest so not terminating any cluster"
+        )

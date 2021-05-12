@@ -179,7 +179,7 @@ def step_(context, expected_result_file_name):
 
     expected_file_name = os.path.join(
         context.fixture_path_local,
-        "snapshot_data",
+        "mongo_latest",
         "expected",
         expected_result_file_name,
     )
