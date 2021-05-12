@@ -29,14 +29,14 @@ Features can be tagged with `@` tags. This is used to categorise whole features 
 These are the features that are currently active:
 
 1. `administrative-processes-and-workflows` -> this contains a set of features that are used for admin environment tasks, rather than run as assurance activities
-2. `end-to-end` -> this is the main full end to end set of features for the whole AWS DataWorks product
-3. `historic-data-import` -> this contains features which assure the data import functionality
-4. `load-test` -> features which create data loads and insert these in to the system
-5. `manifest-comparison` -> see [Data Reconciliation Manifest Comparisons](docs/data-reconciliation.md)
-6. `ucfs-ingestion` -> this contains features which assure the kafka ingestion functionality see [Testing Kafka Ingestion](docs/testing_kafka_ingestion.md) for more details
-7. `hbase-data-loading` -> this contains scenarios which are used to kick off data loads in to HBase - either using historic or corporate data
-8. `data-generation` -> used to generate datasets
-9. `data-export` -> tests for exporting data to snapshots
+1. `end-to-end` -> this is the main full end to end set of features for the whole AWS DataWorks product
+1. `historic-data-import` -> this contains features which assure the data import functionality
+1. `load-test` -> features which create data loads and insert these in to the system
+1. `manifest-comparison` -> see [Data Reconciliation Manifest Comparisons](docs/data-reconciliation.md)
+1. `ucfs-ingestion` -> this contains features which assure the kafka ingestion functionality see [Testing Kafka Ingestion](docs/testing_kafka_ingestion.md) for more details
+1. `hbase-data-loading` -> this contains scenarios which are used to kick off data loads in to HBase - either using historic or corporate data
+1. `data-generation` -> used to generate datasets
+1. `data-export` -> tests for exporting data to snapshots
 
 ## Steps
 
