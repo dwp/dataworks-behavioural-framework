@@ -433,10 +433,10 @@ def _generate_contract_and_statement_db_objects(
     payment_day_of_month = 23
 
     if "contract_closed_date" in item:
-        closed_date = int(item["contract_closed_date"])
+        closed_date = item["contract_closed_date"]
     elif "contract_closed_date_offset" in item:
-        closed_date = int((datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
-        ).strftime("%Y%m%d"))
+        closed_date = (datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
+        ).strftime("%Y%m%d")
     else:
         closed_date = None
 

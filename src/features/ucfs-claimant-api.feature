@@ -2,7 +2,6 @@
 @fixture.claimant.api.setup
 @fixture.ucfs.claimant.kafka.consumer.start
 @test
-@work-in-progress
 Feature: UCFS Claimant API
 
   Scenario: Querying API for non existing claimant
