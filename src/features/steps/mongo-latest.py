@@ -24,7 +24,9 @@ def step_(context):
 
     payload_json = json.dumps(emr_launcher_config)
     console_printer.print_info(f"this is the payload: {payload_json}")
-    cluster_response = invoke_lambda.invoke_mongo_latest_emr_launcher_lambda(payload_json)
+    cluster_response = invoke_lambda.invoke_mongo_latest_emr_launcher_lambda(
+        payload_json
+    )
     cluster_arn = cluster_response["ClusterArn"]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
@@ -58,7 +60,9 @@ def step_impl(context, step_name):
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.mongo_latest_cluster_step_id, context.mongo_latest_cluster_id, timeout_secs
+        context.mongo_latest_cluster_step_id,
+        context.mongo_latest_cluster_id,
+        timeout_secs,
     )
 
     if execution_state != "COMPLETED":
@@ -71,7 +75,9 @@ def step_impl(context, timeout_mins):
     "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
 )
 def step_(context, expected_result_file_name):
-    console_printer.print_info(f"S3 Request Location: {context.mongo_latest_results_s3_file}")
+    console_printer.print_info(
+        f"S3 Request Location: {context.mongo_latest_results_s3_file}"
+    )
     actual = (
         aws_helper.get_s3_object(
             None, context.published_bucket, context.mongo_latest_results_s3_file
