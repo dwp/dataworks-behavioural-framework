@@ -72,7 +72,7 @@ def step_impl(context, timeout_mins):
 
 
 @then(
-    "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
+    "the mongo latest result matches the expected results of '{expected_result_file_name}'"
 )
 def step_(context, expected_result_file_name):
     console_printer.print_info(
