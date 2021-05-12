@@ -56,7 +56,24 @@ Feature: UCFS Claimant API
     Then Take home pay can be successfully decoded as '<take-home-pay>'
     Examples:
     | data-file                                      | take-home-pay |
+    | passported_benefits_regression_scenario_1.yml  | 542.89        |
+    | passported_benefits_regression_scenario_2.yml  | 542.87        |
+    | passported_benefits_regression_scenario_3.yml  | 542.88        |
+    | passported_benefits_regression_scenario_4.yml  | 0.0           |
+    | passported_benefits_regression_scenario_11.yml | 123.45        |
+
+  @work-in-progress
+  Scenario Outline: Passported benefits regression scenarios (multi-assessment periods)
+    Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
+    And The new claimants can be found from claimant API 'v2'
+    When I query for the first new claimant from claimant API 'v2'
+    Then The assessment periods are correctly returned using data file of '<data-file>'
+    Examples:
+    | data-file                                      | take-home-pay |
     | passported_benefits_regression_scenario_7.yml  | 433.32        |
+    | passported_benefits_regression_scenario_8.yml  | 742.89        |
+    | passported_benefits_regression_scenario_9.yml  | 123.45        |
+    | passported_benefits_regression_scenario_10.yml | 0.0           |
 
   @work-in-progress
   Scenario Outline: Passported benefits regression scenarios (suspended)
@@ -68,3 +85,4 @@ Feature: UCFS Claimant API
     Examples:
     | data-file                                      | take-home-pay |
     | passported_benefits_regression_scenario_5.yml  | 783.99        |
+    | passported_benefits_regression_scenario_6.yml  | 699.99        |

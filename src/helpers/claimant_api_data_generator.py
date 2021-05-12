@@ -492,7 +492,7 @@ def _generate_contract_and_statement_db_objects(
             if "start_date" in assessment_period:
                 start_date = datetime.strptime(assessment_period["start_date"], "%Y%m%d")
             elif "start_date_offset" in assessment_period:
-                datetime.today() - timedelta(days=int(item["start_date_offset"]))
+                start_date = datetime.today() - timedelta(days=int(assessment_period["start_date_offset"]))
 
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
