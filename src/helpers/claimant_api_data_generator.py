@@ -432,6 +432,15 @@ def _generate_contract_and_statement_db_objects(
 
     payment_day_of_month = 23
 
+    if "contract_closed_date" in item:
+        closed_date = item["contract_closed_date"]
+    elif "contract_closed_date_offset" in item:
+        closed_date = (
+            datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
+        ).strftime("%Y%m%d")
+    else:
+        closed_date = None
+
     # Note: Date offsets are simply to make data more natural, nothing known to depend on them
     contract = {
         "_id": {"contractId": str(contract_id)},
@@ -444,9 +453,7 @@ def _generate_contract_and_statement_db_objects(
             (_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")
         ),
         "entitlementDate": int(_month_delta(datetime.today(), -2).strftime("%Y%m%d")),
-        "closedDate": int(item["contract_closed_date"])
-        if "contract_closed_date" in item
-        else None,
+        "closedDate": closed_date,
         "annualVerificationEligibilityDate": None,
         "annualVerificationCompletionDate": None,
         "paymentDayOfMonth": payment_day_of_month,
@@ -488,11 +495,16 @@ def _generate_contract_and_statement_db_objects(
                 else datetime.today()
                 - timedelta(days=int(assessment_period["end_date_offset"]))
             )
-            start_date = (
-                datetime.strptime(assessment_period["start_date"], "%Y%m%d")
-                if "start_date" in assessment_period
-                else _month_delta(end_date, -1) - timedelta(days=1)
-            )
+            start_date = _month_delta(end_date, -1) - timedelta(days=1)
+            if "start_date" in assessment_period:
+                start_date = datetime.strptime(
+                    assessment_period["start_date"], "%Y%m%d"
+                )
+            elif "start_date_offset" in assessment_period:
+                start_date = datetime.today() - timedelta(
+                    days=int(assessment_period["start_date_offset"])
+                )
+
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
                 "contractId": str(contract_id),
