@@ -17,9 +17,9 @@ def step_(context):
     context.mongo_latest_export_date = datetime.now().strftime("%Y-%m-%d")
     emr_launcher_config = {
         "correlation_id": f"{context.test_run_name}",
-        "s3_prefix": f"{context.clive_test_input_s3_prefix}",
         "snapshot_type": "incremental",
-        "export_date": f"{context.clive_export_date}",
+        "s3_prefix": "NOT_SET",
+        "export_date": f"{context.mongo_latest_export_date}",
     }
 
     payload_json = json.dumps(emr_launcher_config)
@@ -39,8 +39,11 @@ def step_(context):
 
 @when("I insert the '{step_name}' step onto the mongo latest cluster")
 def step_impl(context, step_name):
+    context.mongo_latest_s3_prefix = os.path.join(
+        context.mongo_snapshot_path, context.test_run_name
+    )
     context.mongo_latest_cluster_step_name = step_name
-    s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
+    s3_path = f"{context.mongo_latest_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     hive_export_bash_command = (
         f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
@@ -164,8 +167,8 @@ def metadata_table_step_impl(context):
         item["Cluster_Id"]["S"] == context.mongo_latest_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.mongo_latest_cluster_id}'"
     assert (
-        item["S3_Prefix_Snapshots"]["S"] == context.adg_s3_prefix
-    ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.adg_s3_prefix}'"
+        item["S3_Prefix_Snapshots"]["S"] == context.mongo_latest_s3_prefix
+    ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.mongo_latest_s3_prefix}'"
     assert (
         item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
