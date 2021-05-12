@@ -104,6 +104,6 @@ def invoke_mongo_latest_emr_launcher_lambda(payload):
     payload -- the input for the lambda invocation
     """
     response = aws_helper.invoke_lambda_function(
-        "aws_mongo_latest_emr_launcher", payload
+        "mongo_latest_emr_launcher", payload
     )
     return json.loads(response.decode())
