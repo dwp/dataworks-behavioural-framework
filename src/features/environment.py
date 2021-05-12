@@ -454,13 +454,13 @@ def after_all(context):
             severity = "High"
             notification_type = "Error"
 
-        # monitoring_helper.send_monitoring_alert(
-        #     context.monitoring_sns_topic_arn,
-        #     status,
-        #     severity,
-        #     notification_type,
-        #     custom_elements,
-        # )
+        monitoring_helper.send_monitoring_alert(
+            context.monitoring_sns_topic_arn,
+            status,
+            severity,
+            notification_type,
+            custom_elements,
+        )
 
     console_printer.print_info(
         ""
