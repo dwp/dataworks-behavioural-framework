@@ -2,6 +2,7 @@
 @fixture.claimant.api.setup
 @fixture.ucfs.claimant.kafka.consumer.start
 @test
+@work-in-progress
 Feature: UCFS Claimant API
 
   Scenario: Querying API for non existing claimant
@@ -48,7 +49,6 @@ Feature: UCFS Claimant API
     And UCFS send a kafka delete for first existing claimant with input file of 'valid_delete.json'
     Then I query the first claimant again from claimant API 'v2' and it is not found
 
-  @work-in-progress
   Scenario Outline: Passported benefits regression scenarios (not suspended)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
@@ -62,20 +62,18 @@ Feature: UCFS Claimant API
     | passported_benefits_regression_scenario_4.yml  | 0.0           |
     | passported_benefits_regression_scenario_11.yml | 123.45        |
 
-  @work-in-progress
   Scenario Outline: Passported benefits regression scenarios (multi-assessment periods)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
     When I query for the first new claimant from claimant API 'v2'
     Then The assessment periods are correctly returned using data file of '<data-file>'
     Examples:
-    | data-file                                      | take-home-pay |
-    | passported_benefits_regression_scenario_7.yml  | 433.32        |
-    | passported_benefits_regression_scenario_8.yml  | 742.89        |
-    | passported_benefits_regression_scenario_9.yml  | 123.45        |
-    | passported_benefits_regression_scenario_10.yml | 0.0           |
+    | data-file                                      |
+    | passported_benefits_regression_scenario_7.yml  |
+    | passported_benefits_regression_scenario_8.yml  |
+    | passported_benefits_regression_scenario_9.yml  |
+    | passported_benefits_regression_scenario_10.yml |
 
-  @work-in-progress
   Scenario Outline: Passported benefits regression scenarios (suspended)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
@@ -86,3 +84,12 @@ Feature: UCFS Claimant API
     | data-file                                      | take-home-pay |
     | passported_benefits_regression_scenario_5.yml  | 783.99        |
     | passported_benefits_regression_scenario_6.yml  | 699.99        |
+
+  Scenario Outline: Passported benefits regression scenarios (claim closed)
+    Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
+    And The new claimants can be found from claimant API 'v2'
+    When I query for the first new claimant from claimant API 'v2'
+    Then Take home pay can be successfully decoded as '<take-home-pay>'
+    Examples:
+      | data-file                                       | take-home-pay |
+      | passported_benefits_regression_scenario_12.yml  | 123.45        |
