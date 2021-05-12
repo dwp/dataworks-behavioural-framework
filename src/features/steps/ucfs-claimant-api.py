@@ -3,8 +3,6 @@ import uuid
 import base64
 import time
 import json
-import yaml
-from datetime import datetime, timedelta
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from behave import given, when, then
 from helpers import (
@@ -19,80 +17,6 @@ from helpers import (
 
 
 message_type = "claimant_api"
-
-
-@given(
-    "I create a data file of '{data_file_name}' for a claimant with multiple assessment periods, with take home pay values of '{take_home_pays}'"
-)
-def step_impl(context, data_file_name, take_home_pays):
-
-    folder = streaming_data_helper.generate_fixture_data_folder(message_type)
-    fixture_data_path = os.path.join(context.fixture_path_local, folder)
-
-    ap_thp = take_home_pays.split(",")
-    ap_thp_clean = [amount.strip(" ") for amount in ap_thp]
-
-    assessment_periods = []
-    for index, amount in enumerate(ap_thp_clean):
-        if index == 0:
-            start_date = datetime.strftime(
-                claimant_api_data_generator._month_delta(datetime.today(), -1), "%Y%m%d"
-            )
-            end_date = datetime.strftime(datetime.now() - timedelta(days=1), "%Y%m%d")
-        else:
-            start_date = datetime.strftime(
-                claimant_api_data_generator._month_delta(
-                    datetime.today(), (index + 1) * -1
-                ),
-                "%Y%m%d",
-            )
-            end_date = datetime.strftime(
-                claimant_api_data_generator._month_delta(datetime.today(), index * -1),
-                "%Y%m%d",
-            )
-        assessment_periods.append(
-            {"start_date": start_date, "end_date": end_date, "amount": amount}
-        )
-
-    console_printer.print_info(
-        f"Generating UCFS claimant API data file "
-        + f"with assessment periods, '{assessment_periods}'"
-    )
-
-    template_yml = "- assessment_periods:"
-
-    for assessment_period in assessment_periods:
-        yml = f'''
-    - start_date: "{assessment_period['start_date']}"
-      end_date: "{assessment_period['end_date']}"
-      amount: "{assessment_period['amount']}"'''
-        template_yml = template_yml + yml
-
-    file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", template_yml)
-
-@given("Create a data file of '{data_file_name}' for a claimant with a completed assessment period with a take home pay of '{take_home_pay}' and a suspension date of '{suspension_date_offset}' from end date")
-def step_impl(context, data_file_name, take_home_pay, suspension_date_offset):
-    context.execute_steps(
-        f"given I create a data file of '{data_file_name}' for a claimant with multiple assessment periods, with take home pay values of '{take_home_pay}'"
-    )
-    folder = streaming_data_helper.generate_fixture_data_folder(message_type)
-    fixture_data_path = os.path.join(context.fixture_path_local, folder)
-
-    file_path = os.path.join(fixture_data_path, data_file_name)
-    file_contents = file_helper.get_contents_of_file(file_path, False)
-
-    assessment_periods = yaml.safe_load(file_contents)
-
-    end_date = datetime.strptime(assessment_periods[0]['assessment_periods'][0]['end_date'], "%Y%m%d")
-    suspension_date = datetime.strftime(end_date - timedelta(days=int(suspension_date_offset)), "%Y%m%d")
-
-    console_printer.print_info(
-        f"Adding a suspension date for claimant."
-        + f"Take home pay: '{take_home_pay}', suspension date: '{suspension_date}'"
-    )
-
-    assessment_periods[0]["suspension_date"] = suspension_date
-    file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", yaml.dump(assessment_periods))
 
 
 @given("The claimant API '{region_type}' region is set to '{region}'")
@@ -170,16 +94,9 @@ def step_impl(context, expected_value):
         f"Successfully decoded take home pay of '{take_home_pay}'"
     )
 
-    # This step is used by other scenarios which can have multiple values in the expected_value
-    if "," not in expected_value:
-        assert (
-            take_home_pay == expected_value
-        ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value}"
-    else:
-        expected_value = expected_value.split(",")
-        assert (
-            take_home_pay == expected_value[0]
-        ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value[0]}"
+    assert (
+        take_home_pay == expected_value
+    ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_value}"
 
 
 @given(
@@ -661,33 +578,3 @@ def step_impl(context):
         time_taken += 1
 
     raise AssertionError("Could not find DLQ files within timeout")
-
-
-@when("I print out the NINO for manual regression testing usage")
-@then("I print out the NINO for manual regression testing usage")
-def step_impl(context):
-    console_printer.print_info(f"NINO: '{context.generated_ninos}'")
-
-
-@then("I clean up the '{temp_file_name}' temporary files")
-def step_impl(context, temp_file_name):
-    folder = streaming_data_helper.generate_fixture_data_folder(message_type)
-    fixture_data_path = os.path.join(context.fixture_path_local, folder)
-    temporary_file_full_path = os.path.join(fixture_data_path, temp_file_name)
-    file_helper.delete_local_file(temporary_file_full_path)
-
-
-@when(
-    "UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'"
-)
-def step_impl(context, input_file_name, data_file_name):
-    context.execute_steps(
-        f"given UCFS send claimant API kafka messages with input file of '{input_file_name}' and data file of '{data_file_name}'"
-    )
-
-
-@when("The new claimants can be found from claimant API '{api_version}'")
-def step_impl(context, api_version):
-    context.execute_steps(
-        f"given The new claimants can be found from claimant API '{api_version}'"
-    )

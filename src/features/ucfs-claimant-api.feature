@@ -2,7 +2,6 @@
 @fixture.claimant.api.setup
 @fixture.ucfs.claimant.kafka.consumer.start
 @test
-@work-in-progress
 Feature: UCFS Claimant API
 
   Scenario: Querying API for non existing claimant
@@ -49,36 +48,23 @@ Feature: UCFS Claimant API
     And UCFS send a kafka delete for first existing claimant with input file of 'valid_delete.json'
     Then I query the first claimant again from claimant API 'v2' and it is not found
 
-##  UC Test Scenarios - Any change of the particular values must be first agreed with them.
-##  The output of these tests is provided to UC for testing in the integration environment.
-  Scenario Outline: A claimant with assessment period(s), with the latest having ended in the last month, is created with given take home pay
-    Given I create a data file of 'claimant_given_thp.yml' for a claimant with multiple assessment periods, with take home pay values of '<take-home-pay>'
-    When UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of 'claimant_given_thp.yml'
+  @work-in-progress
+  Scenario Outline: Passported benefits regression scenarios (not suspended)
+    Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
-    And I query for the first new claimant from claimant API 'v2'
+    When I query for the first new claimant from claimant API 'v2'
     Then Take home pay can be successfully decoded as '<take-home-pay>'
-    And I print out the NINO for manual regression testing usage
-    And I clean up the 'claimant_given_thp.yml' temporary files
     Examples:
-    | take-home-pay            |
-    | 542.89                   |
-    | 542.87                   |
-    | 542.88                   |
-    | 0.0                      |
-    | 601.88, 433.32           |
-    | 601.88, 433.32, 742.89   |
-    | 123.45, 123.45, 123.45   |
-    | 0, 0, 0                  |
+    | data-file                                      | take-home-pay |
+    | passported_benefits_regression_scenario_7.yml  | 433.32        |
 
-  Scenario Outline: A claimant with a complete assessment period and is suspended with a specific date
-    Given Create a data file of 'claimant_given_thp.yml' for a claimant with a completed assessment period with a take home pay of '<take-home-pay>' and a suspension date of '<suspension-date-offset>' from end date
-    When UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of 'claimant_given_thp.yml'
+  @work-in-progress
+  Scenario Outline: Passported benefits regression scenarios (suspended)
+    Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
-    And I query for the first new claimant from claimant API 'v2'
+    When I query for the first new claimant from claimant API 'v2'
     Then Take home pay can be successfully decoded as '<take-home-pay>'
-    And I print out the NINO for manual regression testing usage
-    And I clean up the 'claimant_given_thp.yml' temporary files
+    And I query the first claimant again from claimant API 'v2' and it is suspended
     Examples:
-      | take-home-pay            | suspension-date-offset |
-      | 783.99                   | -3                     |
-      | 699.99                   | +1                     |
+    | data-file                                      | take-home-pay |
+    | passported_benefits_regression_scenario_5.yml  | 783.99        |
