@@ -1,0 +1,7 @@
+# DataWorks test data
+# -------------------
+# Active Claimant on Universal Credit
+- assessment_periods:
+    - start_date_offset: "-20"
+      end_date_offset: "-10"
+      amount: "542.89"
