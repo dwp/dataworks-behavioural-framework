@@ -2,7 +2,6 @@
 @test
 Feature: Mongo latest end to end test
 
-    @fixture.s3.clear.snapshot.start
     @fixture.terminate.mongo_latest.cluster
     Scenario: Mongo latest end to end test
       Given I start the mongo latest cluster
