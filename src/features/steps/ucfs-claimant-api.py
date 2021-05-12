@@ -3,6 +3,7 @@ import uuid
 import base64
 import time
 import json
+import yaml
 from datetime import datetime, timedelta
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from behave import given, when, then
@@ -79,12 +80,20 @@ def step_impl(context, data_file_name, take_home_pay, suspension_date_offset):
 
     file_path = os.path.join(fixture_data_path, data_file_name)
     file_contents = file_helper.get_contents_of_file(file_path, False)
-    print(file_contents)
+
+    assessment_periods = yaml.safe_load(file_contents)
+
+    end_date = datetime.strptime(assessment_periods[0]['assessment_periods'][0]['end_date'], "%Y%m%d")
+    suspension_date = datetime.strftime(end_date - timedelta(days=int(suspension_date_offset)), "%Y%m%d")
 
     console_printer.print_info(
         f"Adding a suspension date for claimant."
         + f"Take home pay: '{take_home_pay}', suspension date: '{suspension_date}'"
     )
+
+    assessment_periods[0]["suspension_date"] = suspension_date
+    file_helper.create_local_file(data_file_name, f"{fixture_data_path}/", yaml.dump(assessment_periods))
+
 
 @given("The claimant API '{region_type}' region is set to '{region}'")
 def step_impl(context, region_type, region):
