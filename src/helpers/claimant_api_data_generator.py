@@ -435,7 +435,8 @@ def _generate_contract_and_statement_db_objects(
     if "contract_closed_date" in item:
         closed_date = item["contract_closed_date"]
     elif "contract_closed_date_offset" in item:
-        closed_date = (datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
+        closed_date = (
+            datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
         ).strftime("%Y%m%d")
     else:
         closed_date = None
@@ -496,9 +497,13 @@ def _generate_contract_and_statement_db_objects(
             )
             start_date = _month_delta(end_date, -1) - timedelta(days=1)
             if "start_date" in assessment_period:
-                start_date = datetime.strptime(assessment_period["start_date"], "%Y%m%d")
+                start_date = datetime.strptime(
+                    assessment_period["start_date"], "%Y%m%d"
+                )
             elif "start_date_offset" in assessment_period:
-                start_date = datetime.today() - timedelta(days=int(assessment_period["start_date_offset"]))
+                start_date = datetime.today() - timedelta(
+                    days=int(assessment_period["start_date_offset"])
+                )
 
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
