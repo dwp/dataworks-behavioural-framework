@@ -131,7 +131,10 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
 def terminate_mongo_latest_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_mongo_latest_cluster' fixture")
 
-    if "mongo_latest_cluster_id" in context and context.mongo_latest_cluster_id is not None:
+    if (
+        "mongo_latest_cluster_id" in context
+        and context.mongo_latest_cluster_id is not None
+    ):
         try:
             aws_helper.terminate_emr_cluster(context.mongo_latest_cluster_id)
         except ClientError as error:
