@@ -437,10 +437,10 @@ def _generate_contract_and_statement_db_objects(
     if "contract_closed_date" in item:
         closed_date = item["contract_closed_date"]
     elif "contract_closed_date_offset" in item:
-            closed_date = (
-                datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
-            ).strftime("%Y%m%d")
-            console_printer.print_info(f"closed_date: '{closed_date}'")
+        closed_date = (
+            datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
+        ).strftime("%Y%m%d")
+        console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
 
@@ -639,10 +639,13 @@ def _generate_statement_db_object(
 
 
 def generate_national_insurance_number():
-    """Generates a new national insurance number from given id.
-    """
-    p="ABCEGHJKLMNPRSTWXYZ"
-    return "".join([random.choice(p),random.choice(p)]+[random.choice(string.digits) for i in range(6)]+[random.choice("ABCD")])
+    """Generates a new national insurance number from given id."""
+    p = "ABCEGHJKLMNPRSTWXYZ"
+    return "".join(
+        [random.choice(p), random.choice(p)]
+        + [random.choice(string.digits) for i in range(6)]
+        + [random.choice("ABCD")]
+    )
 
 
 def generate_updated_contract_and_statement_files_for_existing_claimant(
