@@ -32,6 +32,9 @@ def set_test_run_common_variables(context):
     context.s3_ingest_bucket = context.config.userdata.get("AWS_S3_INPUT_BUCKET")
     context.mongo_snapshot_bucket = context.config.userdata.get("MONGO_SNAPSHOT_BUCKET")
     context.mongo_snapshot_path = context.config.userdata.get("MONGO_SNAPSHOT_PATH")
+    context.mongo_latest_input_s3_prefix = os.path.join(
+        "analytical-dataset", "mongo_latest"
+    )
     context.mongo_latest_test_query_output_folder = os.path.join(
         context.mongo_snapshot_path, context.test_run_name, "output"
     )

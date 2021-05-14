@@ -350,6 +350,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_snapshot_start, context)
     if tag == "fixture.s3.clear.hive.query.output.start":
         use_fixture(before_fixtures.s3_clear_hive_query_output_start, context)
+    if tag == "fixture.s3.clear.mongo.latest.input.start":
+        use_fixture(before_fixtures.s3_clear_mongo_latest_input_start, context)
     if tag == "fixture.s3.clear.k2hb.manifests.main.start":
         use_fixture(before_fixtures.s3_clear_k2hb_manifests_main, context)
     if tag == "fixture.s3.clear.k2hb.manifests.equalities.start":
