@@ -39,15 +39,11 @@ def step_(context):
 
 @when("I insert the '{step_name}' step onto the mongo latest cluster")
 def step_impl(context, step_name):
-    context.mongo_latest_s3_prefix = os.path.join(
-        context.mongo_snapshot_path, context.test_run_name
-    )
     context.mongo_latest_cluster_step_name = step_name
-    s3_path = f"{context.mongo_latest_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     hive_export_bash_command = (
         f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
         + f" &>> /var/log/mongo_latest/e2e.log"
     )
 
@@ -56,7 +52,9 @@ def step_impl(context, step_name):
         hive_export_bash_command,
         context.mongo_latest_cluster_step_name,
     )
-    context.mongo_latest_results_s3_file = os.path.join(s3_path, file_name)
+    context.mongo_latest_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
 
 
 @when("wait a maximum of '{timeout_mins}' minutes for the mongo latest step to finish")
@@ -166,9 +164,6 @@ def metadata_table_step_impl(context):
     assert (
         item["Cluster_Id"]["S"] == context.mongo_latest_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.mongo_latest_cluster_id}'"
-    assert (
-        item["S3_Prefix_Snapshots"]["S"] == "NOT_SET"
-    ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected 'NOT_SET'"
     assert (
         item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"

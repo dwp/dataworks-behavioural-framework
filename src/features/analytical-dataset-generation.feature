@@ -13,6 +13,7 @@ Feature: Analytical data set generation end to end test
       And the ADG metadata table is correct for 'full'
 
     @fixture.s3.clear.snapshot.start
+    @fixture.s3.clear.hive.query.output.start
     @fixture.terminate.adg.cluster
     Scenario: Analytical data set generation end to end test for incremental
       Given the data of the format in the template file 'adg_incremental_valid_input.json' as an input to analytical data set generation emr
