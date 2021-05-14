@@ -19,6 +19,10 @@ def set_test_run_common_variables(context):
     """
     console_printer.print_info(f"Setting test run variables common to all test runs")
 
+    context.test_run_name = (
+        context.config.userdata.get("TEST_RUN_NAME").replace("-", "_").replace(".", "_")
+    )
+
     context.suppress_monitoring = (
         context.config.userdata.get("SUPPRESS_MONITORING_ALERTS") == "true"
     )
@@ -28,6 +32,9 @@ def set_test_run_common_variables(context):
     context.s3_ingest_bucket = context.config.userdata.get("AWS_S3_INPUT_BUCKET")
     context.mongo_snapshot_bucket = context.config.userdata.get("MONGO_SNAPSHOT_BUCKET")
     context.mongo_snapshot_path = context.config.userdata.get("MONGO_SNAPSHOT_PATH")
+    context.mongo_latest_test_query_output_folder = os.path.join(
+        context.mongo_snapshot_path, context.test_run_name, "output"
+    )
     context.mongo_data_load_prefixes_comma_delimited = context.config.userdata.get(
         "MONGO_DATA_LOAD_PREFIXES"
     )
@@ -63,10 +70,6 @@ def set_test_run_common_variables(context):
         "ENCRYPTED_ENCRYPTION_KEY"
     )
     context.encryption_master_key_id = context.config.userdata.get("MASTER_KEY_ID")
-
-    context.test_run_name = (
-        context.config.userdata.get("TEST_RUN_NAME").replace("-", "_").replace(".", "_")
-    )
 
     context.load_tests_file_count = context.config.userdata.get("LOAD_TESTS_FILE_COUNT")
     context.load_tests_record_count = context.config.userdata.get(

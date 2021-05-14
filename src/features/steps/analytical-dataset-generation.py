@@ -133,11 +133,10 @@ def step_(context, snapshot_type, step_name):
 @then("insert the '{step_name}' step onto the cluster")
 def step_impl(context, step_name):
     context.adg_cluster_step_name = step_name
-    s3_path = f"{context.adg_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     adg_hive_export_bash_command = (
         f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
         + f" &>> /var/log/adg/e2e.log"
     )
 
@@ -146,7 +145,7 @@ def step_impl(context, step_name):
         adg_hive_export_bash_command,
         context.adg_cluster_step_name,
     )
-    context.adg_results_s3_file = os.path.join(s3_path, file_name)
+    context.adg_results_s3_file = os.path.join(context.mongo_latest_test_query_output_folder, file_name)
 
 
 @then("wait a maximum of '{timeout_mins}' minutes for the step to finish")

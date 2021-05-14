@@ -47,6 +47,16 @@ def s3_clear_snapshot_start(context, timeout=30, **kwargs):
 
 
 @fixture
+def s3_clear_hive_query_output_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_hive_query_output_start' fixture")
+    aws_helper.clear_s3_prefix(
+        context.mongo_snapshot_bucket,
+        context.mongo_latest_test_query_output_folder,
+        True,
+    )
+
+
+@fixture
 def s3_clear_full_snapshot_output(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_full_snapshot_output' fixture")
     s3_clear_snapshot_output(context, "full")
