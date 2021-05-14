@@ -2,12 +2,12 @@
 # -------------------
 # Active Claimant on Universal Credit
 - assessment_periods:
-    - start_date_offset: "-70"
-      end_date_offset: "-50"
+    - start_date_offset: "-95"
+      end_date_offset: "-65"
       amount: "601.88"
-    - start_date_offset: "-40"
-      end_date_offset: "-30"
+    - start_date_offset: "-64"
+      end_date_offset: "-34"
       amount: "433.32"
-    - start_date_offset: "-20"
-      end_date_offset: "-10"
+    - start_date_offset: "-33"
+      end_date_offset: "-3"
       amount: "742.89"
