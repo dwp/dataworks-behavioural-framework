@@ -2,6 +2,8 @@ import os
 import uuid
 import yaml
 import json
+import random
+import string
 from uuid import UUID
 from datetime import datetime, timedelta
 from helpers import (
@@ -77,7 +79,7 @@ def generate_claimant_api_kafka_files(
         if "count" in item:
             count = 0
             while count < item["count"]:
-                nino = generate_national_insurance_number(citizen_id)
+                nino = generate_national_insurance_number()
                 unique_suffix = f"{increment}{count}"
                 claimant_db_object = _generate_claimant_db_object(
                     citizen_id, person_id, nino, unique_suffix
@@ -119,7 +121,7 @@ def generate_claimant_api_kafka_files(
 
                 count += 1
         else:
-            nino = generate_national_insurance_number(citizen_id)
+            nino = generate_national_insurance_number()
             claimant_db_objects_array = [
                 (
                     citizen_id,
@@ -132,7 +134,7 @@ def generate_claimant_api_kafka_files(
             if "partner_nino" in item:
                 citizen_id = new_uuid if new_uuid is not None else uuid.uuid4()
                 person_id = new_uuid if new_uuid is not None else uuid.uuid4()
-                partner_nino = generate_national_insurance_number(citizen_id)
+                partner_nino = generate_national_insurance_number()
                 increment += 1
                 claimant_db_objects_array.append(
                     (
@@ -438,6 +440,7 @@ def _generate_contract_and_statement_db_objects(
         closed_date = (
             datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
         ).strftime("%Y%m%d")
+        console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
 
@@ -481,6 +484,8 @@ def _generate_contract_and_statement_db_objects(
                 ).strftime("%Y%m%d")
             )
         }
+        suspension_date = contract["claimSuspension"]
+        console_printer.print_info(f"suspension_date: '{suspension_date}'")
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
 
@@ -495,6 +500,7 @@ def _generate_contract_and_statement_db_objects(
                 else datetime.today()
                 - timedelta(days=int(assessment_period["end_date_offset"]))
             )
+            console_printer.print_info(f"end_date: '{end_date}'")
             start_date = _month_delta(end_date, -1) - timedelta(days=1)
             if "start_date" in assessment_period:
                 start_date = datetime.strptime(
@@ -504,6 +510,7 @@ def _generate_contract_and_statement_db_objects(
                 start_date = datetime.today() - timedelta(
                     days=int(assessment_period["start_date_offset"])
                 )
+                console_printer.print_info(f"start_date: '{start_date}'")
 
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
@@ -631,13 +638,14 @@ def _generate_statement_db_object(
     return (statement_id, statement)
 
 
-def generate_national_insurance_number(citizen_id):
-    """Generates a new national insurance number from given id.
-
-    Keyword arguments:
-    citizen_id - the id to use
-    """
-    return str(citizen_id).replace("-", "").upper()[:9]
+def generate_national_insurance_number():
+    """Generates a new national insurance number from given id."""
+    p = "ABCEGHJKLMNPRSTWXYZ"
+    return "".join(
+        [random.choice(p), random.choice(p)]
+        + [random.choice(string.digits) for i in range(6)]
+        + [random.choice("ABCD")]
+    )
 
 
 def generate_updated_contract_and_statement_files_for_existing_claimant(
@@ -783,7 +791,7 @@ def generate_updated_claimant_file_for_existing_claimant(
         _base_datetime_timestamp, increment, True
     )
 
-    nino = generate_national_insurance_number(citizen_id)
+    nino = generate_national_insurance_number()
     claimant_db_object = _generate_claimant_db_object(
         citizen_id, person_id, nino, increment
     )
