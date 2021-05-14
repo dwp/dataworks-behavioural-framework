@@ -52,7 +52,9 @@ def step_impl(context, step_name):
         hive_export_bash_command,
         context.mongo_latest_cluster_step_name,
     )
-    context.mongo_latest_results_s3_file = os.path.join(context.mongo_latest_test_query_output_folder, file_name)
+    context.mongo_latest_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
 
 
 @when("wait a maximum of '{timeout_mins}' minutes for the mongo latest step to finish")

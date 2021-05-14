@@ -145,7 +145,9 @@ def step_impl(context, step_name):
         adg_hive_export_bash_command,
         context.adg_cluster_step_name,
     )
-    context.adg_results_s3_file = os.path.join(context.mongo_latest_test_query_output_folder, file_name)
+    context.adg_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
 
 
 @then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
