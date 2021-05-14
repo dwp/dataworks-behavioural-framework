@@ -5,7 +5,7 @@ jobs:
       - in_parallel:
           - put: meta
             resource: meta-prod
-          - get: utc-9am
+          - get: utc-midday
             trigger: true
           - get: aws-internal-compute
             trigger: false
