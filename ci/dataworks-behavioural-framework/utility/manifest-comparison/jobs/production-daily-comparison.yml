@@ -16,8 +16,6 @@ jobs:
           - get: aws-snapshot-sender
             trigger: false
           - get: dataworks-behavioural-framework-manifest-comparison
-            passed:
-              - qa
             trigger: false
       - in_parallel:
           - .: (( inject meta.plan.terraform-output-ingest ))
