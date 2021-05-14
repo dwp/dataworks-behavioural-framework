@@ -5,7 +5,7 @@ jobs:
       - in_parallel:
           - put: meta
             resource: meta-prod
-          - get: utc-9am
+          - get: utc-midday
             trigger: true
           - get: aws-internal-compute
             trigger: false
@@ -16,8 +16,6 @@ jobs:
           - get: aws-snapshot-sender
             trigger: false
           - get: dataworks-behavioural-framework-manifest-comparison
-            passed:
-              - qa
             trigger: false
       - in_parallel:
           - .: (( inject meta.plan.terraform-output-ingest ))
@@ -45,6 +43,7 @@ jobs:
             STATUS: "Disabled"
       - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
         task: generate-manifest-comparison-incremental-snapshots
+        attempts: 10
         config:
           params:
             AWS_ACC: ((aws_account.production))
