@@ -45,6 +45,7 @@ jobs:
             STATUS: "Disabled"
       - .: (( inject meta-manifest-comparison.plan.generate-manifest-comparison ))
         task: generate-manifest-comparison-incremental-snapshots
+        attempts: 10
         config:
           params:
             AWS_ACC: ((aws_account.production))

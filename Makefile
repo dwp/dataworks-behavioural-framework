@@ -31,11 +31,11 @@ git-hooks: ## Set up hooks in .githooks
 
 .PHONY: concourse-login
 concourse-login: ## Login to concourse using Fly
-	fly -t aws-concourse login -c https://ci.dataworks.dwp.gov.uk/ -n dataworks
+	fly -t aws-concourse login -c https://ci.dataworks.dwp.gov.uk/ -n -k dataworks
 
 .PHONY: utility-login
 utility-login: ## Login to utility team using Fly
-	fly -t utility login -c https://ci.dataworks.dwp.gov.uk/ -n utility
+	fly -t utility login -c https://ci.dataworks.dwp.gov.uk/ -n -k utility
 
 .PHONY: update-pipeline
 update-pipeline: ## Update the main pipeline
