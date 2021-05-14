@@ -20,4 +20,4 @@ terraform.tf
 **/__pycache__/
 **/.venv/**
 
-src/tmp/
+#src/tmp/
