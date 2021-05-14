@@ -5,4 +5,4 @@
     - start_date_offset: "-33"
       end_date_offset: "-3"
       amount: "699.99"
-  suspension_date_offset: "+1"
+  suspension_date_offset: "1"
