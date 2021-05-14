@@ -57,6 +57,16 @@ def s3_clear_hive_query_output_start(context, timeout=30, **kwargs):
 
 
 @fixture
+def s3_clear_mongo_latest_input_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_mongo_latest_input_start' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket,
+        context.mongo_latest_input_s3_prefix,
+        False,
+    )
+
+
+@fixture
 def s3_clear_full_snapshot_output(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_full_snapshot_output' fixture")
     s3_clear_snapshot_output(context, "full")

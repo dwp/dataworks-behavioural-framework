@@ -3,6 +3,7 @@
 Feature: Mongo latest end to end test
 
     @fixture.s3.clear.hive.query.output.start
+    @fixture.s3.clear.mongo.latest.input.start
     @fixture.terminate.mongo_latest.cluster
     Scenario: Mongo latest end to end test
       Given I start the mongo latest cluster

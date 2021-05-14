@@ -14,6 +14,7 @@ Feature: Analytical data set generation end to end test
 
     @fixture.s3.clear.snapshot.start
     @fixture.s3.clear.hive.query.output.start
+    @fixture.s3.clear.mongo.latest.input.start
     @fixture.terminate.adg.cluster
     Scenario: Analytical data set generation end to end test for incremental
       Given the data of the format in the template file 'adg_incremental_valid_input.json' as an input to analytical data set generation emr
