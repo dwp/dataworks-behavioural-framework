@@ -2,7 +2,8 @@
 # -------------------
 # Active Claimant on Universal Credit
 - assessment_periods:
-    - start_date_days_offset: "-33"
-      end_date_days_offset: "-3"
+    - start_date_days_offset: "-3"
+      start_date_months_offset: "-1"
+      end_date_days_offset: "-4"
       amount: "783.99"
   suspension_date_days_offset: "-15"
