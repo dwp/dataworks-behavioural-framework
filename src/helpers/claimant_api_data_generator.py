@@ -438,7 +438,7 @@ def _generate_contract_and_statement_db_objects(
         closed_date = item["contract_closed_date"]
     elif "contract_closed_date_offset" in item:
         closed_date = (
-            datetime.today() - timedelta(days=int(item["contract_closed_date_offset"]))
+            datetime.today() + timedelta(days=int(item["contract_closed_date_offset"]))
         ).strftime("%Y%m%d")
         console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
@@ -480,7 +480,7 @@ def _generate_contract_and_statement_db_objects(
             "suspensionDate": int(
                 (
                     datetime.today()
-                    - timedelta(days=int(item["suspension_date_offset"]))
+                    + timedelta(days=int(item["suspension_date_offset"]))
                 ).strftime("%Y%m%d")
             )
         }
@@ -498,7 +498,7 @@ def _generate_contract_and_statement_db_objects(
                 datetime.strptime(assessment_period["end_date"], "%Y%m%d")
                 if "end_date" in assessment_period
                 else datetime.today()
-                - timedelta(days=int(assessment_period["end_date_offset"]))
+                + timedelta(days=int(assessment_period["end_date_offset"]))
             )
             console_printer.print_info(f"end_date: '{end_date}'")
             start_date = _month_delta(end_date, -1) - timedelta(days=1)
@@ -507,7 +507,7 @@ def _generate_contract_and_statement_db_objects(
                     assessment_period["start_date"], "%Y%m%d"
                 )
             elif "start_date_offset" in assessment_period:
-                start_date = datetime.today() - timedelta(
+                start_date = datetime.today() + timedelta(
                     days=int(assessment_period["start_date_offset"])
                 )
                 console_printer.print_info(f"start_date: '{start_date}'")
