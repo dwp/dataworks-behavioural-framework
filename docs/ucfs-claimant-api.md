@@ -12,14 +12,14 @@ When creating a new scenario, you can take advantage of the following options in
 
 `end_date` - a string date value in YYYYMMDD format to be used as is, in the data.
 
-`start_date_offset` - a string integer value, either positive or negative. The data generator will create the start date based on today +/- value. ie: start_date_offset of -1 if the date when the tests were ran was `20210512`, would result in `20210511`.
+`start_date_days_offset` - a string integer value, either positive or negative. The data generator will create the start date based on today +/- value. ie: start_date_days_offset of -1 if the date when the tests were ran was `20210512`, would result in `20210511`.
 
-`end_date_offset` - a string integer value, either positive or negative. See `start_date_offset`.
+`end_date_days_offset` - a string integer value, either positive or negative. See `start_date_days_offset`.
 
 `suspended_date` - a string date value in YYYYMMDD format to be used as is, in the data.
 
-`suspension_date_offset` - a string integer value, either positive or negative. See `start_date_offset`.
+`suspension_date_days_offset` - a string integer value, either positive or negative. See `start_date_days_offset`.
 
 `contract_closed_date` - a string date value in YYYYMMDD format to be used as is, in the data.
 
-`contract_closed_date_offset` -  a string integer value, either positive or negative. See `start_date_offset`.
+`contract_closed_date_days_offset` -  a string integer value, either positive or negative. See `start_date_days_offset`.
