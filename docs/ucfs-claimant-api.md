@@ -16,6 +16,10 @@ When creating a new scenario, you can take advantage of the following options in
 
 `end_date_days_offset` - a string integer value, either positive or negative. See `start_date_days_offset`.
 
+`start_date_months_offset` - a string integer value, either positive or negative. Can be used in conjuction with `start_date_days_offset`. See `start_date_days_offset`.
+
+`end_date_months_offset` - a string integer value, either positive or negative. Can be used in conjuction with `end_date_days_offset`. See `start_date_days_offset`.
+
 `suspended_date` - a string date value in YYYYMMDD format to be used as is, in the data.
 
 `suspension_date_days_offset` - a string integer value, either positive or negative. See `start_date_days_offset`.
