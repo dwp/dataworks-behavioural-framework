@@ -5,7 +5,8 @@ import json
 import random
 import string
 from uuid import UUID
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, \
+from dateutil import relativedelta
 from helpers import (
     console_printer,
     date_helper,
@@ -494,23 +495,31 @@ def _generate_contract_and_statement_db_objects(
     if "assessment_periods" in item:
         for assessment_period in item["assessment_periods"]:
             assessment_period_id = f"{uuid.uuid4()}"
-            end_date = (
-                datetime.strptime(assessment_period["end_date"], "%Y%m%d")
-                if "end_date" in assessment_period
-                else datetime.today()
-                + timedelta(days=int(assessment_period["end_date_offset"]))
-            )
-            console_printer.print_info(f"end_date: '{end_date}'")
-            start_date = _month_delta(end_date, -1) - timedelta(days=1)
+
             if "start_date" in assessment_period:
                 start_date = datetime.strptime(
                     assessment_period["start_date"], "%Y%m%d"
                 )
             elif "start_date_offset" in assessment_period:
-                start_date = datetime.today() + timedelta(
-                    days=int(assessment_period["start_date_offset"])
-                )
+                start_date = datetime.today() + timedelta(days=int(assessment_period["start_date_offset"]))
                 console_printer.print_info(f"start_date: '{start_date}'")
+            elif "start_date_month_offset" in assessment_period:
+                start_date = datetime.today() + relativedelta.relativedelta(months=int(assessment_period["start_date_offset"]))
+                console_printer.print_info(f"start_date: '{start_date}'")
+            else:
+                start_date = _month_delta(end_date, -1) - timedelta(days=1)
+
+            if "end_date" in assessment_period:
+                end_date = datetime.strptime(assessment_period["end_date"], "%Y%m%d")
+            elif "end_date_offset" in assessment_period:
+                end_date = datetime.today() + timedelta(days=int(assessment_period["end_date_offset"]))
+            elif "end_date_month_offset" in assessment_period:
+                end_date = datetime.today() + relativedelta.relativedelta(months=int(assessment_period["end_date_month_offset"]))
+                console_printer.print_info(f"end_date: '{end_date}'")
+            else:
+                end_date = datetime.strptime(assessment_period["end_date"], "%Y%m%d")
+
+            console_printer.print_info(f"end_date: '{end_date}'")
 
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
