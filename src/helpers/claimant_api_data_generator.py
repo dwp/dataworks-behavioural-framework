@@ -6,6 +6,7 @@ import random
 import string
 from uuid import UUID
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from helpers import (
     console_printer,
     date_helper,
@@ -436,12 +437,12 @@ def _generate_contract_and_statement_db_objects(
 
     if "contract_closed_date" in item:
         closed_date = item["contract_closed_date"]
-    elif "contract_closed_date_days_offset" in assessment_period or "contract_closed_date_months_offset" in assessment_period:
+    elif "contract_closed_date_days_offset" in item or "contract_closed_date_months_offset" in item:
         closed_date = datetime.today()
-        if "contract_closed_date_days_offset" in assessment_period:
-            closed_date = closed_date + timedelta(days=int(assessment_period["contract_closed_date_days_offset"]))
-        if "contract_closed_date_months_offset" in assessment_period:
-            closed_date = closed_date + timedelta(months=int(assessment_period["contract_closed_date_months_offset"]))
+        if "contract_closed_date_days_offset" in item:
+            closed_date = closed_date + timedelta(days=int(item["contract_closed_date_days_offset"]))
+        if "contract_closed_date_months_offset" in item:
+            closed_date = closed_date + relativedelta(months=int(item["contract_closed_date_months_offset"]))
         
         closed_date = closed_date.strftime("%Y%m%d")
         console_printer.print_info(f"closed_date: '{closed_date}'")
@@ -479,13 +480,13 @@ def _generate_contract_and_statement_db_objects(
 
     if "suspension_date" in item:
         contract["claimSuspension"] = {"suspensionDate": int(item["suspension_date"])}
-    elif "suspension_date_days_offset" in assessment_period or "suspension_date_months_offset" in assessment_period:
+    elif "suspension_date_days_offset" in item or "suspension_date_months_offset" in item:
         suspension_date = datetime.today()
-        if "suspension_date_days_offset" in assessment_period:
-            suspension_date = suspension_date + timedelta(days=int(assessment_period["suspension_date_days_offset"]))
-        if "suspension_date_months_offset" in assessment_period:
-            suspension_date = suspension_date + timedelta(months=int(assessment_period["suspension_date_months_offset"]))
-        contract["claimSuspension"] = suspension_date.strftime("%Y%m%d")
+        if "suspension_date_days_offset" in item:
+            suspension_date = suspension_date + timedelta(days=int(item["suspension_date_days_offset"]))
+        if "suspension_date_months_offset" in item:
+            suspension_date = suspension_date + relativedelta(months=int(item["suspension_date_months_offset"]))
+        contract["claimSuspension"] = {"suspensionDate": suspension_date.strftime("%Y%m%d")}
         console_printer.print_info(f"suspension_date: '{suspension_date}'")
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
@@ -505,7 +506,7 @@ def _generate_contract_and_statement_db_objects(
                 if "start_date_days_offset" in assessment_period:
                     start_date = start_date + timedelta(days=int(assessment_period["start_date_days_offset"]))
                 if "start_date_month_offset" in assessment_period:
-                    start_date = start_date + timedelta(months=int(assessment_period["start_date_month_offset"]))
+                    start_date = start_date + relativedelta(months=int(assessment_period["start_date_month_offset"]))
                 console_printer.print_info(f"start_date: '{start_date}'")
             else:
                 start_date = _month_delta(end_date, -1) - timedelta(days=1)
@@ -517,7 +518,7 @@ def _generate_contract_and_statement_db_objects(
                 if "end_date_days_offset" in assessment_period:
                     end_date = end_date + timedelta(days=int(assessment_period["end_date_days_offset"]))
                 if "end_date_month_offset" in assessment_period:
-                    end_date = end_date + timedelta(months=int(assessment_period["end_date_month_offset"]))
+                    end_date = end_date + relativedelta(months=int(assessment_period["end_date_month_offset"]))
             else:
                 end_date = datetime.strptime(assessment_period["end_date"], "%Y%m%d")
 
