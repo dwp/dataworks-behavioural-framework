@@ -593,7 +593,9 @@ def step_impl(context, data_file_name):
     )
 
     for assessment_period in expected_assessment_periods:
-        assessment_period["start_date"] = claimant_api_data_generator.generate_dynamic_date(
+        assessment_period[
+            "start_date"
+        ] = claimant_api_data_generator.generate_dynamic_date(
             context.todays_date,
             (
                 assessment_period["start_date_days_offset"]
@@ -605,9 +607,13 @@ def step_impl(context, data_file_name):
                 if "start_date_month_offset" in assessment_period
                 else None
             ),
-        ).strftime("%Y%m%d")
+        ).strftime(
+            "%Y%m%d"
+        )
 
-        assessment_period["end_date"] = claimant_api_data_generator.generate_dynamic_date(
+        assessment_period[
+            "end_date"
+        ] = claimant_api_data_generator.generate_dynamic_date(
             context.todays_date,
             (
                 assessment_period["end_date_days_offset"]
@@ -619,7 +625,9 @@ def step_impl(context, data_file_name):
                 if "end_date_month_offset" in assessment_period
                 else None
             ),
-        ).strftime("%Y%m%d")
+        ).strftime(
+            "%Y%m%d"
+        )
 
     try:
         actual_assessment_periods = response["assessmentPeriod"]
@@ -663,12 +671,19 @@ def step_impl(context, data_file_name):
 
     for index, assessment_period in enumerate(actual_assessment_periods):
         if assessment_period["fromDate"] in expected_assessment_periods:
-            assert assessment_period["fromDate"] == expected_assessment_periods[index]["start_date"], f"Expected assessment period start_date '{expected_assessment_periods[index]['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
-            assert assessment_period["toDate"] == expected_assessment_periods[index]["end_date"], f"Expected assessment period start_date '{expected_assessment_periods[0]['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
+            assert (
+                assessment_period["fromDate"]
+                == expected_assessment_periods[index]["startDate"]
+            ), f"Expected assessment period start_date '{expected_assessment_periods[index]['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
+            assert (
+                assessment_period["toDate"]
+                == expected_assessment_periods[index]["end_date"]
+            ), f"Expected assessment period start_date '{expected_assessment_periods[0]['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
 
     assert (
-            take_home_pay == expected_assessment_periods[0]["amount"]
+        take_home_pay == expected_assessment_periods[0]["amount"]
     ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_assessment_periods[0]['amount']}"
+
 
 @then("The messages are sent to the DLQ")
 def step_impl(context):
