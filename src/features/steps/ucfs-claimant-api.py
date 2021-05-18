@@ -663,7 +663,7 @@ def step_impl(context, data_file_name):
 
     for index, assessment_period in enumerate(actual_assessment_periods):
         if assessment_period["fromDate"] in expected_assessment_periods:
-            assert assessment_period["fromDate"] == expected_assessment_periods[index]["startDate"], f"Expected assessment period start_date '{expected_assessment_periods[index]['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
+            assert assessment_period["fromDate"] == expected_assessment_periods[index]["start_date"], f"Expected assessment period start_date '{expected_assessment_periods[index]['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
             assert assessment_period["toDate"] == expected_assessment_periods[index]["end_date"], f"Expected assessment period start_date '{expected_assessment_periods[0]['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
 
     assert (
