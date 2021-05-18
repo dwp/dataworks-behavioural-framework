@@ -71,7 +71,15 @@ Feature: UCFS Claimant API
     | passported_benefits_regression_scenario_7.yml  |
     | passported_benefits_regression_scenario_8.yml  |
     | passported_benefits_regression_scenario_9.yml  |
-    | passported_benefits_regression_scenario_10.yml |
+
+  Scenario Outline: Passported benefits regression scenarios when querying with dates (multi-assessment periods)
+    Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
+    And The new claimants can be found from claimant API 'v2'
+    When I query for the first claimant from claimant API 'v2' with the parameters file of '<parameters-file>'
+    Then The assessment periods are correctly returned using data file of '<output-file>'
+    Examples:
+    | data-file                                      |  parameters-file                                 |  output-file                                                |
+    | passported_benefits_regression_scenario_10.yml |  passported_benefits_regression_scenario_10.yml  |  passported_benefits_regression_scenario_10_last_month.yml  |
 
   Scenario Outline: Passported benefits regression scenarios (suspended)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'

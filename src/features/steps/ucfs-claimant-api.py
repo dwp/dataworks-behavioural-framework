@@ -2,6 +2,7 @@ import os
 import uuid
 import base64
 import time
+import yaml
 import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from behave import given, when, then
@@ -127,6 +128,7 @@ def step_impl(
         s3_output_prefix=context.s3_temp_output_path,
         seconds_timeout=context.timeout,
         fixture_data_folder=folder,
+        todays_date=context.todays_date,
     )
 
     context.local_generated_claimant_api_kafka_files = []
@@ -187,6 +189,7 @@ def step_impl(
         local_files_temp_folder=os.path.join(context.temp_folder, str(uuid.uuid4())),
         s3_output_prefix=context.s3_temp_output_path,
         seconds_timeout=context.timeout,
+        todays_date=context.todays_date,
     )
 
     context.local_generated_claimant_api_kafka_files = []
@@ -314,6 +317,73 @@ def step_impl(context, version):
         api_path,
         "test_unhashed_fake_nino",
         context.test_run_name,
+    )
+
+    console_printer.print_info(
+        f"Query status code is '{context.claimant_api_status_code}' and response is '{context.claimant_api_response}'"
+    )
+
+
+@when(
+    "I query for the first claimant from claimant API '{version}' with the parameters file of '{parameters_file}'"
+)
+def step_impl(context, version, parameters_file):
+    api_path = context.ucfs_claimant_api_path_v2_get_award_details
+
+    local_folder = streaming_data_helper.generate_fixture_data_folder(message_type)
+    query_parameters_full_file_name = os.path.join(
+        context.fixture_path_local, local_folder, "query_parameters", parameters_file
+    )
+
+    console_printer.print_info(
+        f"Using parameters file of '{query_parameters_full_file_name}'"
+    )
+    query_parameters = yaml.safe_load(open(query_parameters_full_file_name))
+
+    from_date = claimant_api_data_generator.generate_dynamic_date(
+        context.todays_date,
+        (
+            query_parameters["from_date_days_offset"]
+            if "from_date_days_offset" in query_parameters
+            else None
+        ),
+        (
+            query_parameters["from_date_months_offset"]
+            if "from_date_months_offset" in query_parameters
+            else None
+        ),
+    ).strftime("%Y%m%d")
+
+    to_date = claimant_api_data_generator.generate_dynamic_date(
+        context.todays_date,
+        (
+            query_parameters["to_date_days_offset"]
+            if "to_date_days_offset" in query_parameters
+            else None
+        ),
+        (
+            query_parameters["to_date_months_offset"]
+            if "to_date_months_offset" in query_parameters
+            else None
+        ),
+    ).strftime("%Y%m%d")
+
+    if version.lower() == "v1":
+        api_path = context.ucfs_claimant_api_path_v1_get_award_details
+
+    (
+        context.claimant_api_status_code,
+        context.claimant_api_response,
+    ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+        aws_host_name=context.ucfs_claimant_domain_name,
+        claimant_api_region=context.claimant_api_business_region,
+        award_details_api_path=api_path,
+        hashed_nino=ucfs_claimant_api_helper.hash_nino(
+            context.generated_ninos[0], context.nino_salt
+        ),
+        transaction_id=context.test_run_name,
+        from_date=from_date,
+        to_date=to_date,
     )
 
     console_printer.print_info(
@@ -522,8 +592,53 @@ def step_impl(context, data_file_name):
         )
     )
 
+    for assessment_period in expected_assessment_periods:
+        if "start_date" not in assessment_period:
+            assessment_period[
+                "start_date"
+            ] = claimant_api_data_generator.generate_dynamic_date(
+                context.todays_date,
+                (
+                    assessment_period["start_date_days_offset"]
+                    if "start_date_days_offset" in assessment_period
+                    else None
+                ),
+                (
+                    assessment_period["start_date_month_offset"]
+                    if "start_date_month_offset" in assessment_period
+                    else None
+                ),
+            ).strftime(
+                "%Y%m%d"
+            )
+
+            assessment_period[
+                "end_date"
+            ] = claimant_api_data_generator.generate_dynamic_date(
+                context.todays_date,
+                (
+                    assessment_period["end_date_days_offset"]
+                    if "end_date_days_offset" in assessment_period
+                    else None
+                ),
+                (
+                    assessment_period["end_date_month_offset"]
+                    if "end_date_month_offset" in assessment_period
+                    else None
+                ),
+            ).strftime(
+                "%Y%m%d"
+            )
+
     try:
         actual_assessment_periods = response["assessmentPeriod"]
+        console_printer.print_info(f"assessment period {response['assessmentPeriod']}")
+        take_home_pay_enc = base64.urlsafe_b64decode(
+            response["assessmentPeriod"][0]["amount"]["takeHomePay"]
+        )
+        cipher_text_blob = base64.urlsafe_b64decode(
+            response["assessmentPeriod"][0]["amount"]["cipherTextBlob"]
+        )
     except Exception as ex:
         console_printer.print_error_text(
             f"Could not retrieve assessment periods from claimant API response of '{response}' and error of '{ex}'"
@@ -531,13 +646,61 @@ def step_impl(context, data_file_name):
         raise ex
 
     console_printer.print_info(
+        f"Successfully retrieved cipher text of '{cipher_text_blob}' and take home pay of '{take_home_pay_enc}'"
+    )
+    nonce_size = 12
+    console_printer.print_info(
         f"Successfully retrieved '{len(actual_assessment_periods)}' actual assessment periods"
     )
 
-    console_printer.print_info(f"Actual assessment period: {actual_assessment_periods}")
     assert len(actual_assessment_periods) == len(
         expected_assessment_periods
     ), f"Expected assessment period count does not match actual count"
+
+    for expected_assessment_period in expected_assessment_periods:
+        assessment_period_found = False
+        for actual_assessment_period in actual_assessment_periods:
+            if (
+                actual_assessment_period["fromDate"]
+                == expected_assessment_period["start_date"]
+            ):
+                assessment_period_found = True
+                assert (
+                    actual_assessment_period["fromDate"]
+                    == expected_assessment_period["start_date"]
+                ), f"Expected assessment period start_date '{expected_assessment_period['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
+                assert (
+                    actual_assessment_period["toDate"]
+                    == expected_assessment_period["end_date"]
+                ), f"Expected assessment period end_date '{expected_assessment_period['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
+
+                cipher_text_blob = base64.urlsafe_b64decode(
+                    actual_assessment_period["amount"]["cipherTextBlob"]
+                )
+                data_key = aws_helper.kms_decrypt_cipher_text(
+                    cipher_text_blob, context.claimant_api_storage_region
+                )
+                console_printer.print_info(
+                    f"Successfully decoded data key of '{data_key}'"
+                )
+                aesgcm = AESGCM(data_key)
+                take_home_pay_enc = base64.urlsafe_b64decode(
+                    actual_assessment_period["amount"]["takeHomePay"]
+                )
+                nonce = take_home_pay_enc[:nonce_size]
+                take_home_pay_data = take_home_pay_enc[nonce_size:]
+                actual_take_home_pay = aesgcm.decrypt(
+                    nonce, take_home_pay_data, None
+                ).decode("utf-8")
+                console_printer.print_info(
+                    f"Successfully decoded take home pay of '{actual_take_home_pay}'"
+                )
+                assert (
+                    actual_take_home_pay == expected_assessment_period["amount"]
+                ), f"Take home pay was {actual_take_home_pay} which does not match expected value of {expected_assessment_period['amount']}"
+        assert (
+            assessment_period_found == True
+        ), f"Expected assessment period with start_date of '{expected_assessment_period['start_date']}' not found in actual assessment periods"
 
 
 @then("The messages are sent to the DLQ")

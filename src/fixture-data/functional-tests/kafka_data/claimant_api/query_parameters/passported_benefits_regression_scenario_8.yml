@@ -1,0 +1,7 @@
+# DataWorks test data
+# -------------------
+# Active Claimant on Universal Credit
+from_date_days_offset: "-3"
+from_date_months_offset: "-2"
+to_date_days_offset: "-5"
+to_date_month_offset: "-1"
