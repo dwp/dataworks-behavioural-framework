@@ -63,7 +63,6 @@ def step_impl(context, expected_value):
     response = context.claimant_api_response
 
     try:
-        key_id = response["assessmentPeriod"][0]["amount"]["keyId"]
         take_home_pay_enc = base64.urlsafe_b64decode(
             response["assessmentPeriod"][0]["amount"]["takeHomePay"]
         )
@@ -535,9 +534,10 @@ def step_impl(context, data_file_name):
         f"Successfully retrieved '{len(actual_assessment_periods)}' actual assessment periods"
     )
 
+    console_printer.print_info(f"Actual assessment period: {actual_assessment_periods}")
     assert len(actual_assessment_periods) == len(
         expected_assessment_periods
-    ), f"Expected ssessment period count does not match actual count"
+    ), f"Expected assessment period count does not match actual count"
 
 
 @then("The messages are sent to the DLQ")
