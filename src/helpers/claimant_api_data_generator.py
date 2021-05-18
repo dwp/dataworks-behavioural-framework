@@ -92,7 +92,12 @@ def generate_claimant_api_kafka_files(
                     contract_db_object,
                     statement_db_objects_array,
                 ) = _generate_contract_and_statement_db_objects(
-                    contract_id, item, [citizen_id], unique_suffix, timestamp_string, todays_date
+                    contract_id,
+                    item,
+                    [citizen_id],
+                    unique_suffix,
+                    timestamp_string,
+                    todays_date,
                 )
 
                 claimant_file_data.append(
@@ -157,7 +162,12 @@ def generate_claimant_api_kafka_files(
                 contract_db_object,
                 statement_db_objects_array,
             ) = _generate_contract_and_statement_db_objects(
-                contract_id, item, citizen_ids_array, increment, timestamp_string, todays_date
+                contract_id,
+                item,
+                citizen_ids_array,
+                increment,
+                timestamp_string,
+                todays_date,
             )
 
             claimant_file_data.extend(
@@ -454,7 +464,9 @@ def _generate_contract_and_statement_db_objects(
             if "contract_closed_date_months_offset" in item
             else None
         )
-        closed_date = generate_dynamic_date(todays_date, date_offset, month_offset).strftime("%Y%m%d")
+        closed_date = generate_dynamic_date(
+            todays_date, date_offset, month_offset
+        ).strftime("%Y%m%d")
         console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
@@ -503,10 +515,10 @@ def _generate_contract_and_statement_db_objects(
             if "suspension_date_months_offset" in item
             else None
         )
-        suspension_date = generate_dynamic_date(todays_date, date_offset, month_offset).strftime("%Y%m%d")
-        contract["claimSuspension"] = {
-            "suspensionDate": suspension_date
-        }
+        suspension_date = generate_dynamic_date(
+            todays_date, date_offset, month_offset
+        ).strftime("%Y%m%d")
+        contract["claimSuspension"] = {"suspensionDate": suspension_date}
         console_printer.print_info(f"suspension_date: '{suspension_date}'")
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
@@ -535,14 +547,20 @@ def _generate_contract_and_statement_db_objects(
                     if "start_date_month_offset" in assessment_period
                     else None
                 )
-                start_date = generate_dynamic_date(todays_date, date_offset, month_offset).strftime("%Y%m%d")
+                start_date = generate_dynamic_date(
+                    todays_date, date_offset, month_offset
+                ).strftime("%Y%m%d")
             else:
-                start_date = (_month_delta(end_date, -1) - timedelta(days=1)).strftime("%Y%m%d")
-            
+                start_date = (_month_delta(end_date, -1) - timedelta(days=1)).strftime(
+                    "%Y%m%d"
+                )
+
             console_printer.print_info(f"start_date: '{start_date}'")
 
             if "end_date" in assessment_period:
-                end_date = datetime.strptime(assessment_period["end_date"], "%Y%m%d").strftime("%Y%m%d")
+                end_date = datetime.strptime(
+                    assessment_period["end_date"], "%Y%m%d"
+                ).strftime("%Y%m%d")
             elif (
                 "end_date_days_offset" in assessment_period
                 or "end_date_month_offset" in assessment_period
@@ -557,9 +575,13 @@ def _generate_contract_and_statement_db_objects(
                     if "end_date_month_offset" in assessment_period
                     else None
                 )
-                end_date = generate_dynamic_date(todays_date, date_offset, month_offset).strftime("%Y%m%d")
+                end_date = generate_dynamic_date(
+                    todays_date, date_offset, month_offset
+                ).strftime("%Y%m%d")
             else:
-                end_date = datetime.strptime(assessment_period["end_date"], "%Y%m%d").strftime("%Y%m%d")
+                end_date = datetime.strptime(
+                    assessment_period["end_date"], "%Y%m%d"
+                ).strftime("%Y%m%d")
 
             console_printer.print_info(f"end_date: '{end_date}'")
 
@@ -568,9 +590,7 @@ def _generate_contract_and_statement_db_objects(
                 "contractId": str(contract_id),
                 "startDate": int(start_date),
                 "endDate": int(end_date),
-                "paymentDate": int(
-                    end_date + str(payment_day_of_month)
-                ),
+                "paymentDate": int(end_date + str(payment_day_of_month)),
                 "processDate": None,
                 "createdDateTime": timestamp_string,
             }
@@ -751,7 +771,12 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
                     contract_db_object,
                     statement_db_objects_array,
                 ) = _generate_contract_and_statement_db_objects(
-                    contract_id, item, [citizen_id], unique_suffix, timestamp_string, todays_date
+                    contract_id,
+                    item,
+                    [citizen_id],
+                    unique_suffix,
+                    timestamp_string,
+                    todays_date,
                 )
                 count += 1
 
@@ -772,7 +797,12 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
                 contract_db_object,
                 statement_db_objects_array,
             ) = _generate_contract_and_statement_db_objects(
-                contract_id, item, [citizen_id], increment, timestamp_string, todays_date
+                contract_id,
+                item,
+                [citizen_id],
+                increment,
+                timestamp_string,
+                todays_date,
             )
 
             contract_file_data.append(

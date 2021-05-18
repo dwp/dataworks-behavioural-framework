@@ -324,12 +324,16 @@ def step_impl(context, version):
     )
 
 
-@when("I query for the first claimant from claimant API '{version}' with the parameters file of '{parameters_file}'")
+@when(
+    "I query for the first claimant from claimant API '{version}' with the parameters file of '{parameters_file}'"
+)
 def step_impl(context, version, parameters_file):
     api_path = context.ucfs_claimant_api_path_v2_get_award_details
 
     local_folder = streaming_data_helper.generate_fixture_data_folder(message_type)
-    query_parameters_full_file_name = os.path.join(context.fixture_path_local, local_folder, "query_parameters", parameters_file)
+    query_parameters_full_file_name = os.path.join(
+        context.fixture_path_local, local_folder, "query_parameters", parameters_file
+    )
 
     console_printer.print_info(
         f"Using parameters file of '{query_parameters_full_file_name}'"
@@ -338,14 +342,30 @@ def step_impl(context, version, parameters_file):
 
     from_date = claimant_api_data_generator.generate_dynamic_date(
         context.todays_date,
-        (query_parameters["from_date_days_offset"] if "from_date_days_offset" in query_parameters else None),
-        (query_parameters["from_date_months_offset"] if "from_date_months_offset" in query_parameters else None),
+        (
+            query_parameters["from_date_days_offset"]
+            if "from_date_days_offset" in query_parameters
+            else None
+        ),
+        (
+            query_parameters["from_date_months_offset"]
+            if "from_date_months_offset" in query_parameters
+            else None
+        ),
     ).strftime("%Y%m%d")
 
     to_date = claimant_api_data_generator.generate_dynamic_date(
         context.todays_date,
-        (query_parameters["to_date_days_offset"] if "to_date_days_offset" in query_parameters else None),
-        (query_parameters["to_date_months_offset"] if "to_date_months_offset" in query_parameters else None),
+        (
+            query_parameters["to_date_days_offset"]
+            if "to_date_days_offset" in query_parameters
+            else None
+        ),
+        (
+            query_parameters["to_date_months_offset"]
+            if "to_date_months_offset" in query_parameters
+            else None
+        ),
     ).strftime("%Y%m%d")
 
     if version.lower() == "v1":
