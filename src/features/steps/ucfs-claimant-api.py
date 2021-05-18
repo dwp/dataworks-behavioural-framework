@@ -593,7 +593,7 @@ def step_impl(context, data_file_name):
     )
 
     for assessment_period in expected_assessment_periods:
-        if "start_date" not in assessment_period: 
+        if "start_date" not in assessment_period:
             assessment_period[
                 "start_date"
             ] = claimant_api_data_generator.generate_dynamic_date(
@@ -660,7 +660,10 @@ def step_impl(context, data_file_name):
     for expected_assessment_period in expected_assessment_periods:
         assessment_period_found = False
         for actual_assessment_period in actual_assessment_periods:
-            if actual_assessment_period["fromDate"] == expected_assessment_period["start_date"]:
+            if (
+                actual_assessment_period["fromDate"]
+                == expected_assessment_period["start_date"]
+            ):
                 assessment_period_found = True
                 assert (
                     actual_assessment_period["fromDate"]
@@ -677,14 +680,18 @@ def step_impl(context, data_file_name):
                 data_key = aws_helper.kms_decrypt_cipher_text(
                     cipher_text_blob, context.claimant_api_storage_region
                 )
-                console_printer.print_info(f"Successfully decoded data key of '{data_key}'")
+                console_printer.print_info(
+                    f"Successfully decoded data key of '{data_key}'"
+                )
                 aesgcm = AESGCM(data_key)
                 take_home_pay_enc = base64.urlsafe_b64decode(
                     actual_assessment_period["amount"]["takeHomePay"]
                 )
                 nonce = take_home_pay_enc[:nonce_size]
                 take_home_pay_data = take_home_pay_enc[nonce_size:]
-                actual_take_home_pay = aesgcm.decrypt(nonce, take_home_pay_data, None).decode("utf-8")
+                actual_take_home_pay = aesgcm.decrypt(
+                    nonce, take_home_pay_data, None
+                ).decode("utf-8")
                 console_printer.print_info(
                     f"Successfully decoded take home pay of '{actual_take_home_pay}'"
                 )
