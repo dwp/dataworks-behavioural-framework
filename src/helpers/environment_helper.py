@@ -96,6 +96,7 @@ def set_test_run_common_variables(context):
     context.db_name = "automatedtests"
 
     context.fixture_path_local = "fixture-data/functional-tests"
+    context.todays_date = datetime.date.today()
     context.formatted_date = str(datetime.date.today())
     context.root_temp_folder = "tmp"
 

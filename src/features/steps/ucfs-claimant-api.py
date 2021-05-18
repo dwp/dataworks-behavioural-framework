@@ -2,6 +2,7 @@ import os
 import uuid
 import base64
 import time
+import yaml
 import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from behave import given, when, then
@@ -127,6 +128,7 @@ def step_impl(
         s3_output_prefix=context.s3_temp_output_path,
         seconds_timeout=context.timeout,
         fixture_data_folder=folder,
+        todays_date=context.todays_date,
     )
 
     context.local_generated_claimant_api_kafka_files = []
@@ -187,6 +189,7 @@ def step_impl(
         local_files_temp_folder=os.path.join(context.temp_folder, str(uuid.uuid4())),
         s3_output_prefix=context.s3_temp_output_path,
         seconds_timeout=context.timeout,
+        todays_date=context.todays_date,
     )
 
     context.local_generated_claimant_api_kafka_files = []
@@ -314,6 +317,53 @@ def step_impl(context, version):
         api_path,
         "test_unhashed_fake_nino",
         context.test_run_name,
+    )
+
+    console_printer.print_info(
+        f"Query status code is '{context.claimant_api_status_code}' and response is '{context.claimant_api_response}'"
+    )
+
+
+@when("I query for the first claimant from claimant API '{version}' with the parameters file of '{parameters_file}'")
+def step_impl(context, version, parameters_file):
+    api_path = context.ucfs_claimant_api_path_v2_get_award_details
+
+    local_folder = streaming_data_helper.generate_fixture_data_folder(message_type)
+    query_parameters_full_file_name = os.path.join(context.fixture_path_local, local_folder, "query_parameters", parameters_file)
+
+    console_printer.print_info(
+        f"Using parameters file of '{query_parameters_full_file_name}'"
+    )
+    query_parameters = yaml.safe_load(open(query_parameters_full_file_name))
+
+    from_date = claimant_api_data_generator.generate_dynamic_date(
+        context.todays_date,
+        (query_parameters["from_date_days_offset"] if "from_date_days_offset" in query_parameters else None),
+        (query_parameters["from_date_months_offset"] if "from_date_months_offset" in query_parameters else None),
+    ).strftime("%Y%m%d")
+
+    to_date = claimant_api_data_generator.generate_dynamic_date(
+        context.todays_date,
+        (query_parameters["to_date_days_offset"] if "to_date_days_offset" in query_parameters else None),
+        (query_parameters["to_date_months_offset"] if "to_date_months_offset" in query_parameters else None),
+    ).strftime("%Y%m%d")
+
+    if version.lower() == "v1":
+        api_path = context.ucfs_claimant_api_path_v1_get_award_details
+
+    (
+        context.claimant_api_status_code,
+        context.claimant_api_response,
+    ) = ucfs_claimant_api_helper.query_for_claimant_from_claimant_api(
+        aws_host_name=context.ucfs_claimant_domain_name,
+        claimant_api_region=context.claimant_api_business_region,
+        award_details_api_path=api_path,
+        hashed_nino=ucfs_claimant_api_helper.hash_nino(
+            context.generated_ninos[0], context.nino_salt
+        ),
+        transaction_id=context.test_run_name,
+        from_date=from_date,
+        to_date=to_date,
     )
 
     console_printer.print_info(
