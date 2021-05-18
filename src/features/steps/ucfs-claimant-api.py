@@ -593,41 +593,42 @@ def step_impl(context, data_file_name):
     )
 
     for assessment_period in expected_assessment_periods:
-        assessment_period[
-            "start_date"
-        ] = claimant_api_data_generator.generate_dynamic_date(
-            context.todays_date,
-            (
-                assessment_period["start_date_days_offset"]
-                if "start_date_days_offset" in assessment_period
-                else None
-            ),
-            (
-                assessment_period["start_date_month_offset"]
-                if "start_date_month_offset" in assessment_period
-                else None
-            ),
-        ).strftime(
-            "%Y%m%d"
-        )
+        if "start_date" not in assessment_period: 
+            assessment_period[
+                "start_date"
+            ] = claimant_api_data_generator.generate_dynamic_date(
+                context.todays_date,
+                (
+                    assessment_period["start_date_days_offset"]
+                    if "start_date_days_offset" in assessment_period
+                    else None
+                ),
+                (
+                    assessment_period["start_date_month_offset"]
+                    if "start_date_month_offset" in assessment_period
+                    else None
+                ),
+            ).strftime(
+                "%Y%m%d"
+            )
 
-        assessment_period[
-            "end_date"
-        ] = claimant_api_data_generator.generate_dynamic_date(
-            context.todays_date,
-            (
-                assessment_period["end_date_days_offset"]
-                if "end_date_days_offset" in assessment_period
-                else None
-            ),
-            (
-                assessment_period["end_date_month_offset"]
-                if "end_date_month_offset" in assessment_period
-                else None
-            ),
-        ).strftime(
-            "%Y%m%d"
-        )
+            assessment_period[
+                "end_date"
+            ] = claimant_api_data_generator.generate_dynamic_date(
+                context.todays_date,
+                (
+                    assessment_period["end_date_days_offset"]
+                    if "end_date_days_offset" in assessment_period
+                    else None
+                ),
+                (
+                    assessment_period["end_date_month_offset"]
+                    if "end_date_month_offset" in assessment_period
+                    else None
+                ),
+            ).strftime(
+                "%Y%m%d"
+            )
 
     try:
         actual_assessment_periods = response["assessmentPeriod"]
@@ -647,20 +648,7 @@ def step_impl(context, data_file_name):
     console_printer.print_info(
         f"Successfully retrieved cipher text of '{cipher_text_blob}' and take home pay of '{take_home_pay_enc}'"
     )
-    data_key = aws_helper.kms_decrypt_cipher_text(
-        cipher_text_blob, context.claimant_api_storage_region
-    )
-    console_printer.print_info(f"Successfully decoded data key of '{data_key}'")
-
     nonce_size = 12
-    nonce = take_home_pay_enc[:nonce_size]
-    take_home_pay_data = take_home_pay_enc[nonce_size:]
-    aesgcm = AESGCM(data_key)
-    take_home_pay = aesgcm.decrypt(nonce, take_home_pay_data, None).decode("utf-8")
-
-    console_printer.print_info(
-        f"Successfully decoded take home pay of '{take_home_pay}'"
-    )
     console_printer.print_info(
         f"Successfully retrieved '{len(actual_assessment_periods)}' actual assessment periods"
     )
@@ -669,20 +657,43 @@ def step_impl(context, data_file_name):
         expected_assessment_periods
     ), f"Expected assessment period count does not match actual count"
 
-    for index, assessment_period in enumerate(actual_assessment_periods):
-        if assessment_period["fromDate"] in expected_assessment_periods:
-            assert (
-                assessment_period["fromDate"]
-                == expected_assessment_periods[index]["startDate"]
-            ), f"Expected assessment period start_date '{expected_assessment_periods[index]['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
-            assert (
-                assessment_period["toDate"]
-                == expected_assessment_periods[index]["end_date"]
-            ), f"Expected assessment period start_date '{expected_assessment_periods[0]['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
+    for expected_assessment_period in expected_assessment_periods:
+        assessment_period_found = False
+        for actual_assessment_period in actual_assessment_periods:
+            if actual_assessment_period["fromDate"] == expected_assessment_period["start_date"]:
+                assessment_period_found = True
+                assert (
+                    actual_assessment_period["fromDate"]
+                    == expected_assessment_period["start_date"]
+                ), f"Expected assessment period start_date '{expected_assessment_period['start_date']}' does not match actual fromDate {actual_assessment_periods[index]['fromDate']}"
+                assert (
+                    actual_assessment_period["toDate"]
+                    == expected_assessment_period["end_date"]
+                ), f"Expected assessment period end_date '{expected_assessment_period['end_date']}' does not match actual toDate {actual_assessment_periods[index]['toDate']}"
 
-    assert (
-        take_home_pay == expected_assessment_periods[0]["amount"]
-    ), f"Take home pay was {take_home_pay} which does not match expected value of {expected_assessment_periods[0]['amount']}"
+                cipher_text_blob = base64.urlsafe_b64decode(
+                    actual_assessment_period["amount"]["cipherTextBlob"]
+                )
+                data_key = aws_helper.kms_decrypt_cipher_text(
+                    cipher_text_blob, context.claimant_api_storage_region
+                )
+                console_printer.print_info(f"Successfully decoded data key of '{data_key}'")
+                aesgcm = AESGCM(data_key)
+                take_home_pay_enc = base64.urlsafe_b64decode(
+                    actual_assessment_period["amount"]["takeHomePay"]
+                )
+                nonce = take_home_pay_enc[:nonce_size]
+                take_home_pay_data = take_home_pay_enc[nonce_size:]
+                actual_take_home_pay = aesgcm.decrypt(nonce, take_home_pay_data, None).decode("utf-8")
+                console_printer.print_info(
+                    f"Successfully decoded take home pay of '{actual_take_home_pay}'"
+                )
+                assert (
+                    actual_take_home_pay == expected_assessment_period["amount"]
+                ), f"Take home pay was {actual_take_home_pay} which does not match expected value of {expected_assessment_period['amount']}"
+        assert (
+            assessment_period_found == True
+        ), f"Expected assessment period with start_date of '{expected_assessment_period['start_date']}' not found in actual assessment periods"
 
 
 @then("The messages are sent to the DLQ")
