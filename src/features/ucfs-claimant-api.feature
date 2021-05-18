@@ -1,4 +1,4 @@
-#@ucfs-claimant-api
+@ucfs-claimant-api
 @fixture.claimant.api.setup
 @fixture.ucfs.claimant.kafka.consumer.start
 @test
@@ -72,7 +72,6 @@ Feature: UCFS Claimant API
     | passported_benefits_regression_scenario_8.yml  |
     | passported_benefits_regression_scenario_9.yml  |
 
-  @ucfs-claimant-api
   Scenario Outline: Passported benefits regression scenarios when querying with dates (multi-assessment periods)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
     And The new claimants can be found from claimant API 'v2'
