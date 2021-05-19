@@ -40,12 +40,14 @@ ADG_TOPICS = [
     "db.core.claimantCommitment",
     "db.core.toDo",
     "db.accepted-data.personDetails",
+    "db.appointments.appointment",
 ]
 
 ADG_DB_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
+    "appointments": ["appointment"],
 }
 
 
