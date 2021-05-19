@@ -174,7 +174,7 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                     .replace("run-date", run_date)
                     .replace("collection", collection)
                     .replace("epoc-time", epoc_time)
-                    .replace("seq-num", "1")
+                    .replace("seq-num", str(1))
                 )
 
                 output_file = os.path.join(local_output_folder, output_file_name)
