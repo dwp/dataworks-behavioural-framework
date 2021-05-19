@@ -520,7 +520,7 @@ def _generate_contract_and_statement_db_objects(
         suspension_date = generate_dynamic_date(
             todays_date, date_offset, month_offset
         ).strftime("%Y%m%d")
-        contract["claimSuspension"] = {"suspensionDate": suspension_date}
+        contract["claimSuspension"] = {"suspensionDate": int(suspension_date)}
         console_printer.print_info(f"suspension_date: '{suspension_date}'")
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
