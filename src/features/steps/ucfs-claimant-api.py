@@ -62,7 +62,9 @@ def step_impl(context, expected_value):
     assert context.claimant_api_response is not None, f"Response body was empty"
 
     response = context.claimant_api_response
-
+    console_printer.print_info(
+        f"Claimant API Response: {context.claimant_api_response}"
+    )
     try:
         take_home_pay_enc = base64.urlsafe_b64decode(
             response["assessmentPeriod"][0]["amount"]["takeHomePay"]
@@ -633,21 +635,12 @@ def step_impl(context, data_file_name):
     try:
         actual_assessment_periods = response["assessmentPeriod"]
         console_printer.print_info(f"assessment period {response['assessmentPeriod']}")
-        take_home_pay_enc = base64.urlsafe_b64decode(
-            response["assessmentPeriod"][0]["amount"]["takeHomePay"]
-        )
-        cipher_text_blob = base64.urlsafe_b64decode(
-            response["assessmentPeriod"][0]["amount"]["cipherTextBlob"]
-        )
     except Exception as ex:
         console_printer.print_error_text(
             f"Could not retrieve assessment periods from claimant API response of '{response}' and error of '{ex}'"
         )
         raise ex
 
-    console_printer.print_info(
-        f"Successfully retrieved cipher text of '{cipher_text_blob}' and take home pay of '{take_home_pay_enc}'"
-    )
     nonce_size = 12
     console_printer.print_info(
         f"Successfully retrieved '{len(actual_assessment_periods)}' actual assessment periods"
