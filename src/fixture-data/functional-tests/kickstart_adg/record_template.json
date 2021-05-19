@@ -37,7 +37,7 @@
         "Bid Id": "uuid",
         "Closing Date": "date",
         "End Date": "date",
-        "Employability Support": "text",
+        "Employability Support": "user-input",
         "Employer Job Reference": "text",
         "Employer Name": "string",
         "Hours per Week": "numeric",
@@ -64,7 +64,7 @@
     },
     "record_layout" : "CSV",
     "record_delimiter" : ",",
-    "output_file_pattern": "run-date_collection_epoc-time.csv"
+    "output_file_pattern": "run-date_collection_epoc-time_delta_seq-num.csv"
   },
   "application" : {
     "schema" : {
