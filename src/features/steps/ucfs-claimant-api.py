@@ -62,7 +62,9 @@ def step_impl(context, expected_value):
     assert context.claimant_api_response is not None, f"Response body was empty"
 
     response = context.claimant_api_response
-    console_printer.print_info(f"Claimant API Response: {context.claimant_api_response}")
+    console_printer.print_info(
+        f"Claimant API Response: {context.claimant_api_response}"
+    )
     try:
         take_home_pay_enc = base64.urlsafe_b64decode(
             response["assessmentPeriod"][0]["amount"]["takeHomePay"]
