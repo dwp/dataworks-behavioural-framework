@@ -169,7 +169,7 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
             for collection, collection_schema in schema_config["schema"].items():
                 run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
                 epoc_time = str(date_helper.get_current_epoch_seconds())
-                seq_num = str(1)
+                seq_num = "abc"
                 output_file_name = (
                     schema_config["output_file_pattern"]
                     .replace("run-date", run_date)
