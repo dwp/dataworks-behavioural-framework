@@ -448,11 +448,12 @@ def _generate_contract_and_statement_db_objects(
 
     payment_day_of_month = 23
 
+    closed_date = None
     if "contract_closed_date" in item:
         closed_date = item["contract_closed_date"]
+        console_printer.print_info(f"closed_date: '{closed_date}'")
     elif (
-        "contract_closed_date_days_offset" in item
-        or "contract_closed_date_months_offset" in item
+            "contract_closed_date_days_offset" in item or "contract_closed_date_month_offset" in item
     ):
         date_offset = (
             item["contract_closed_date_days_offset"]
@@ -460,8 +461,8 @@ def _generate_contract_and_statement_db_objects(
             else None
         )
         month_offset = (
-            item["contract_closed_date_months_offset"]
-            if "contract_closed_date_months_offset" in item
+            item["contract_closed_date_month_offset"]
+            if "contract_closed_date_month_offset" in item
             else None
         )
         closed_date = generate_dynamic_date(
@@ -470,6 +471,7 @@ def _generate_contract_and_statement_db_objects(
         console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
+
 
     # Note: Date offsets are simply to make data more natural, nothing known to depend on them
     contract = {
