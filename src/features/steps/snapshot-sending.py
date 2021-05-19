@@ -82,6 +82,7 @@ def step_impl(context, snapshot_type):
             generated_snapshots_count,
             0,
             0,
+            formatted_date,
         )
 
         for generated_snapshot_key in generated_snapshot_keys:
