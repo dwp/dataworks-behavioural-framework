@@ -450,7 +450,7 @@ def _generate_contract_and_statement_db_objects(
 
     closed_date = None
     if "contract_closed_date" in item:
-        closed_date = item["contract_closed_date"]
+        closed_date = int(item["contract_closed_date"])
         console_printer.print_info(f"closed_date: '{closed_date}'")
     elif (
         "contract_closed_date_days_offset" in item
@@ -469,6 +469,7 @@ def _generate_contract_and_statement_db_objects(
         closed_date = generate_dynamic_date(
             todays_date, date_offset, month_offset
         ).strftime("%Y%m%d")
+        closed_date = int(closed_date)
         console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
