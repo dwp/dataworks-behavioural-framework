@@ -352,7 +352,7 @@ def step_impl(context, expected):
             "ADGStatus" in item
         ), f"Could not retrieve status dynamodb from item '{item}'"
 
-        actual = item["ADGStatus"]
+        actual = item["ADGStatus"]["S"]
         assert (
             expected == actual
         ), f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"
