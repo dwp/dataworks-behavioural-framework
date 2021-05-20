@@ -68,7 +68,7 @@
   },
   "application" : {
     "schema" : {
-      "grant_applications" : {
+      "kick-mksas-applications" : {
         "id": {
           "value"   : "uuid",
           "pii_flg" : false
@@ -321,7 +321,7 @@
     }
     },
     "record_layout" : "JSON",
-    "output_file_pattern" : "run-date_application-collection_epoc-time.json"
+    "output_file_pattern" : "run-date-collection-epoc-time.json"
   },
   "payment" : {
     "schema" : {
