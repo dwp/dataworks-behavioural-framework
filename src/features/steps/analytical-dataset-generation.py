@@ -335,7 +335,6 @@ def metadata_table_step_impl(context, snapshot_type):
 def step_impl(context, expected):
     for topic in ADG_TOPICS:
         response = export_status_helper.get_item_from_export_status_table(
-            context.timeout,
             context.dynamo_db_export_status_table_name,
             topic,
             context.test_run_name,
