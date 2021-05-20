@@ -526,7 +526,6 @@ def _generate_contract_and_statement_db_objects(
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
 
-    console_printer.print_info(contract)
     statement_db_objects = []
 
     if "assessment_periods" in item:
