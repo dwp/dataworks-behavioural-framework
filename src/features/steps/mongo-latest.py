@@ -124,6 +124,7 @@ def step_check_cluster_tags(context):
 def metadata_table_step_impl(context):
     data_product = f"MONGO_LATEST"
     table_name = "data_pipeline_metadata"
+    snapshot_type = "incremental"
 
     key_dict = {
         "Correlation_Id": {"S": f"{context.test_run_name}"},

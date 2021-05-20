@@ -1,4 +1,6 @@
+import json
 from behave import given, when, then
+from datetime import datetime
 from helpers import (
     template_helper,
     aws_helper,
@@ -10,10 +12,9 @@ from helpers import (
     message_helper,
     kafka_data_generator,
     snapshots_helper,
+    data_pipeline_metadata_helper,
+    manifest_comparison_helper,
 )
-from datetime import datetime
-import json
-from helpers import manifest_comparison_helper
 
 
 @given(
@@ -207,3 +208,44 @@ def step_impl(context, statuses, snapshot_type):
         status_list,
     ):
         raise AssertionError("Statuses have not been set to sent")
+
+
+@when(
+    "The dynamodb status for '{product}' is set to '{expected}' with snapshot type of '{snapshot_type}'"
+)
+@then(
+    "The dynamodb status for '{product}' is set to '{expected}' with snapshot type of '{snapshot_type}'"
+)
+def step_impl(context, product, expected, snapshot_type):
+    correlation_id_override = None
+    if context.send_snapshots_correlation_id_override:
+        correlation_id_override = context.send_snapshots_correlation_id_override
+    elif context.generate_snapshots_correlation_id_override:
+        correlation_id_override = context.generate_snapshots_correlation_id_override
+
+    correlation_id = (
+        snapshots_helper.get_snapshot_run_correlation_id(
+            context.test_run_name, snapshot_type
+        )
+        if correlation_id_override is None
+        else correlation_id_override
+    )
+
+    console_printer.print_debug(
+        f"Getting DynamoDb data from product status table for correlation id of '{correlation_id}', product of '{product}' and table name of '{context.dynamo_db_product_status_table_name}'"
+    )
+
+    response = data_pipeline_metadata_helper.get_item_from_product_status_table(
+        context.dynamo_db_product_status_table_name,
+        product,
+        correlation_id,
+    )
+
+    assert response is not None, f"Could not retrieve status row for product '{product}' and correlation id '{correlation_id}'"
+    assert "Item" in response, f"Could not retrieve status row item for product '{product}' and correlation id '{correlation_id}'"
+    
+    item = response["Item"]
+    assert "Status" in item, f"Could not retrieve status dynamodb from item '{item}'"
+
+    actual = item["Status"]["S"]
+    assert expected == actual, f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"
