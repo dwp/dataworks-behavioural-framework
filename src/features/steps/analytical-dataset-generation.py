@@ -286,7 +286,9 @@ def metadata_table_step_impl(context, snapshot_type):
 
     response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
 
-    console_printer.print_info(f"Data retrieved from product status table : '{response}'")
+    console_printer.print_info(
+        f"Data retrieved from product status table : '{response}'"
+    )
 
     assert (
         "Item" in response
@@ -331,9 +333,7 @@ def metadata_table_step_impl(context, snapshot_type):
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
 
 
-@then(
-    "The dynamodb status for each collection is set to '{expected}'"
-)
+@then("The dynamodb status for each collection is set to '{expected}'")
 def step_impl(context, expected):
     for topic in ADG_TOPICS:
         response = export_status_helper.get_item_from_export_status_table(
@@ -343,11 +343,19 @@ def step_impl(context, expected):
             context.test_run_name,
         )
 
-        assert response is not None, f"Could not retrieve status row for topic '{topic}' and correlation id '{context.test_run_name}'"
-        assert "Item" in response, f"Could not retrieve status row item for topic '{topic}' and correlation id '{context.test_run_name}'"
-        
+        assert (
+            response is not None
+        ), f"Could not retrieve status row for topic '{topic}' and correlation id '{context.test_run_name}'"
+        assert (
+            "Item" in response
+        ), f"Could not retrieve status row item for topic '{topic}' and correlation id '{context.test_run_name}'"
+
         item = response["Item"]
-        assert "ADGStatus" in item, f"Could not retrieve status dynamodb from item '{item}'"
+        assert (
+            "ADGStatus" in item
+        ), f"Could not retrieve status dynamodb from item '{item}'"
 
         actual = item["ADGStatus"]
-        assert expected == actual, f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"
+        assert (
+            expected == actual
+        ), f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"

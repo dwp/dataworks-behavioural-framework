@@ -241,11 +241,17 @@ def step_impl(context, product, expected, snapshot_type):
         correlation_id,
     )
 
-    assert response is not None, f"Could not retrieve status row for product '{product}' and correlation id '{correlation_id}'"
-    assert "Item" in response, f"Could not retrieve status row item for product '{product}' and correlation id '{correlation_id}'"
-    
+    assert (
+        response is not None
+    ), f"Could not retrieve status row for product '{product}' and correlation id '{correlation_id}'"
+    assert (
+        "Item" in response
+    ), f"Could not retrieve status row item for product '{product}' and correlation id '{correlation_id}'"
+
     item = response["Item"]
     assert "Status" in item, f"Could not retrieve status dynamodb from item '{item}'"
 
     actual = item["Status"]["S"]
-    assert expected == actual, f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"
+    assert (
+        expected == actual
+    ), f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"
