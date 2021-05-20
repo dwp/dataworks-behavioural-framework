@@ -284,7 +284,9 @@ def metadata_table_step_impl(context, snapshot_type):
         context.test_run_name,
     )
 
-    response = aws_helper.get_item_from_dynamodb(context.dynamo_db_product_status_table_name, key_dict)
+    response = aws_helper.get_item_from_dynamodb(
+        context.dynamo_db_product_status_table_name, key_dict
+    )
 
     console_printer.print_info(
         f"Data retrieved from product status table : '{response}'"
