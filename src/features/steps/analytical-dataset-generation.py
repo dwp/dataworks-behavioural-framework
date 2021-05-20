@@ -13,6 +13,8 @@ from helpers import (
     console_printer,
     emr_step_generator,
     file_helper,
+    export_status_helper,
+    data_pipeline_metadata_helper,
 )
 from datetime import datetime
 
@@ -275,20 +277,16 @@ def step_check_adg_cluster_tags(context, snapshot_type):
 @then("the ADG metadata table is correct for '{snapshot_type}'")
 def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"
-    table_name = "data_pipeline_metadata"
 
-    key_dict = {
-        "Correlation_Id": {"S": f"{context.test_run_name}"},
-        "DataProduct": {"S": f"{data_product}"},
-    }
-
-    console_printer.print_info(
-        f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
+    response = data_pipeline_metadata_helper.get_item_from_product_status_table(
+        context.dynamo_db_product_status_table_name,
+        data_product,
+        context.test_run_name,
     )
 
-    response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
-
-    console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
+    console_printer.print_info(
+        f"Data retrieved from product status table : '{response}'"
+    )
 
     assert (
         "Item" in response
@@ -331,3 +329,30 @@ def metadata_table_step_impl(context, snapshot_type):
     assert (
         item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
+
+
+@then("The dynamodb status for each collection is set to '{expected}'")
+def step_impl(context, expected):
+    for topic in ADG_TOPICS:
+        response = export_status_helper.get_item_from_export_status_table(
+            context.dynamo_db_export_status_table_name,
+            topic,
+            context.test_run_name,
+        )
+
+        assert (
+            response is not None
+        ), f"Could not retrieve status row for topic '{topic}' and correlation id '{context.test_run_name}'"
+        assert (
+            "Item" in response
+        ), f"Could not retrieve status row item for topic '{topic}' and correlation id '{context.test_run_name}'"
+
+        item = response["Item"]
+        assert (
+            "ADGStatus" in item
+        ), f"Could not retrieve status dynamodb from item '{item}'"
+
+        actual = item["ADGStatus"]["S"]
+        assert (
+            expected == actual
+        ), f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"

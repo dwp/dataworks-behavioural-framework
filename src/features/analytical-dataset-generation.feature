@@ -11,6 +11,7 @@ Feature: Analytical data set generation end to end test
       And verify metadata, tags of the analytical data sets for 'full'
       And the ADG cluster tags have been created correctly for 'full'
       And the ADG metadata table is correct for 'full'
+      And The dynamodb status for each collection is set to 'Completed'
 
     @fixture.s3.clear.snapshot.start
     @fixture.s3.clear.hive.query.output.start
@@ -26,3 +27,4 @@ Feature: Analytical data set generation end to end test
       And verify metadata, tags of the analytical data sets for 'incremental'
       And the ADG cluster tags have been created correctly for 'incremental'
       And the ADG metadata table is correct for 'incremental'
+      And The dynamodb status for each collection is set to 'Completed'

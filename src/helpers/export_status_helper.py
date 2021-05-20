@@ -1,5 +1,10 @@
 import time
-from helpers import aws_helper, date_helper, console_printer, template_helper
+from helpers import (
+    aws_helper,
+    date_helper,
+    console_printer,
+    template_helper,
+)
 
 
 def delete_item_in_export_status_table(
@@ -18,6 +23,28 @@ def delete_item_in_export_status_table(
     }
 
     aws_helper.delete_item_from_dynamodb(export_status_table_name, key_dict)
+
+
+def get_item_from_export_status_table(
+    export_status_table_name, topic_name, correlation_id
+):
+    """Deletes an product status from dynamodb.
+
+    Keyword arguments:
+    export_status_table_name -- the export status table name
+    topic_name -- the topic name
+    correlation_id -- the correlation id
+    """
+    key_dict = {
+        "CorrelationId": {"S": f"{correlation_id}"},
+        "CollectionName": {"S": f"{topic_name}"},
+    }
+
+    console_printer.print_debug(
+        f"Getting DynamoDb data from export status table with key_dict of '{key_dict}' and table name of '{export_status_table_name}'"
+    )
+
+    return aws_helper.get_item_from_dynamodb(export_status_table_name, key_dict)
 
 
 def update_item_in_export_status_table(

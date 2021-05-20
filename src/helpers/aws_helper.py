@@ -217,6 +217,18 @@ def scan_dynamodb_with_filters(table_name, filters):
     return json.loads(clean_response)
 
 
+def get_item_from_dynamodb(table_name, key_dict):
+    """Gets the given item from dynamodb.
+
+    Keyword arguments:
+    table_name -- the name for the table in dynamodb
+    key_dict -- dictionary of key/value pairs for the item key
+    """
+    dynamodb_client = get_client(service_name="dynamodb")
+
+    return dynamodb_client.get_item(TableName=f"{table_name}", Key=key_dict)
+
+
 def delete_item_from_dynamodb(table_name, key_dict):
     """Deletes the given item from dynamodb.
 

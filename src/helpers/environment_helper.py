@@ -213,6 +213,9 @@ def set_test_run_common_variables(context):
     context.dynamo_db_export_status_table_name = context.config.userdata.get(
         "DYNAMO_DB_EXPORT_STATUS_TABLE_NAME"
     )
+    context.dynamo_db_product_status_table_name = context.config.userdata.get(
+        "DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME"
+    )
 
     context.kafka_message_volume = context.config.userdata.get("KAFKA_MESSAGE_VOLUME")
     context.kafka_random_key = context.config.userdata.get("KAFKA_RANDOM_KEY")

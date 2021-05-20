@@ -187,6 +187,7 @@ function execute_behave() {
         ASG_PREFIX_HDI="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.hdi // empty')"
 
         DYNAMO_DB_EXPORT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.uc_export_crown_dynamodb_table.value.name')"
+        DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.data_pipeline_metadata_dynamo.value.name')"
         HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.full.content')"
         HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.incrementals.content')"
 
@@ -429,6 +430,7 @@ function execute_behave() {
     -D GENERATE_SNAPSHOTS_START_TIME_OVERRIDE="${GENERATE_SNAPSHOTS_START_TIME_OVERRIDE}" \
     -D GENERATE_SNAPSHOTS_END_TIME_OVERRIDE="${GENERATE_SNAPSHOTS_END_TIME_OVERRIDE}" \
     -D DYNAMO_DB_EXPORT_STATUS_TABLE_NAME="${DYNAMO_DB_EXPORT_STATUS_TABLE_NAME}" \
+    -D DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="${DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME}" \
     -D KAFKA_MESSAGE_VOLUME="${LOAD_TESTS_KAFKA_MESSAGE_VOLUME}" \
     -D KAFKA_RANDOM_KEY="${LOAD_TESTS_KAFKA_RANDOM_KEY}" \
     -D KAFKA_RECORD_COUNT="${LOAD_TESTS_KAFKA_RECORD_COUNT}" \
