@@ -95,9 +95,7 @@ Feature: UCFS Claimant API
 
   Scenario Outline: Passported benefits regression scenarios (claim closed)
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of '<data-file>'
-    And The new claimants can be found from claimant API 'v2'
-    When I query for the first new claimant from claimant API 'v2'
-    Then Take home pay can be successfully decoded as '<take-home-pay>'
+    Then I query the first claimant again from claimant API 'v2' and it is not found
     Examples:
       | data-file                                       | take-home-pay |
       | passported_benefits_regression_scenario_12.yml  | 123.45        |
