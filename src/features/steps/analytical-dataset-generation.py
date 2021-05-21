@@ -198,9 +198,7 @@ def step_(context, expected_result_file_name, step_name):
     )
     console_printer.print_info(f"S3 Request Location: {remote_file}")
     actual = (
-        aws_helper.get_s3_object(
-            None, context.published_bucket, remote_file
-        )
+        aws_helper.get_s3_object(None, context.published_bucket, remote_file)
         .decode("ascii")
         .replace("\t", "")
         .replace(" ", "")
