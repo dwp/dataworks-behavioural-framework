@@ -157,7 +157,7 @@ def step_impl(context, step_name):
 @then("insert the dynamodb check query step onto the cluster")
 def step_impl(context):
     context.adg_ddb_cluster_step_name = "dynamodb_check_query"
-    file_name = f"{context.test_run_name}-ddb.csv"
+    file_name = f"{context.test_run_name}_ddb.csv"
     adg_hive_export_bash_command = (
         f"""hive -e "USE AUDIT; SHOW TABLES LIKE 'data_pipeline_metadata_hive';" >> ~/{file_name} && """
         + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
