@@ -1,4 +1,4 @@
-#@analytical-dataset-generation
+@analytical-dataset-generation
 @test
 Feature: Analytical data set generation end to end test
 
@@ -13,7 +13,6 @@ Feature: Analytical data set generation end to end test
       And the ADG metadata table is correct for 'full'
       And The dynamodb status for each collection is set to 'Completed'
 
-    @analytical-dataset-generation
     @fixture.s3.clear.snapshot.start
     @fixture.s3.clear.hive.query.output.start
     @fixture.s3.clear.mongo.latest.input.start
