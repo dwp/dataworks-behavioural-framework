@@ -57,11 +57,33 @@ def step_impl(context, step_name):
     )
 
 
-@when("wait a maximum of '{timeout_mins}' minutes for the mongo latest step to finish")
+@then("insert the dynamodb check query step onto the mongo latest cluster")
+def step_impl(context):
+    context.mongo_latest_ddb_cluster_step_name = "dynamodb_check_query"
+    file_name = f"{context.test_run_name}_ddb.csv"
+    hive_export_bash_command = (
+        f"""hive -e "USE AUDIT; SHOW TABLES LIKE 'data_pipeline_metadata_hive';" >> ~/{file_name} && """
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
+        + f" &>> /var/log/mongo_latest/e2e.log"
+    )
+
+    context.mongo_latest_ddb_cluster_step_id = emr_step_generator.generate_bash_step(
+        context.mongo_latest_cluster_id,
+        hive_export_bash_command,
+        context.mongo_latest_ddb_cluster_step_name,
+    )
+    context.mongo_latest_ddb_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
+
+
+@when(
+    "wait a maximum of '{timeout_mins}' minutes for the last mongo latest step to finish"
+)
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.mongo_latest_cluster_step_id,
+        context.mongo_latest_ddb_cluster_step_id,
         context.mongo_latest_cluster_id,
         timeout_secs,
     )
@@ -73,16 +95,17 @@ def step_impl(context, timeout_mins):
 
 
 @then(
-    "the mongo latest result matches the expected results of '{expected_result_file_name}'"
+    "the mongo latest result for step '{step_name}' matches the expected results of '{expected_result_file_name}'"
 )
-def step_(context, expected_result_file_name):
-    console_printer.print_info(
-        f"S3 Request Location: {context.mongo_latest_results_s3_file}"
+def step_(context, expected_result_file_name, step_name):
+    remote_file = (
+        context.mongo_latest_results_s3_file
+        if step_name == "hive-query"
+        else context.mongo_latest_ddb_results_s3_file
     )
+    console_printer.print_info(f"S3 Request Location: {remote_file}")
     actual = (
-        aws_helper.get_s3_object(
-            None, context.published_bucket, context.mongo_latest_results_s3_file
-        )
+        aws_helper.get_s3_object(None, context.published_bucket, remote_file)
         .decode("ascii")
         .replace("\t", "")
         .replace(" ", "")
@@ -91,7 +114,7 @@ def step_(context, expected_result_file_name):
 
     expected_file_name = os.path.join(
         context.fixture_path_local,
-        "snapshot_data",
+        "mongo_latest",
         "expected",
         expected_result_file_name,
     )

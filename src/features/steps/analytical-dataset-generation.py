@@ -154,11 +154,31 @@ def step_impl(context, step_name):
     )
 
 
-@then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+@then("insert the dynamodb check query step onto the cluster")
+def step_impl(context):
+    context.adg_ddb_cluster_step_name = "dynamodb_check_query"
+    file_name = f"{context.test_run_name}_ddb.csv"
+    adg_hive_export_bash_command = (
+        f"""hive -e "USE AUDIT; SHOW TABLES LIKE 'data_pipeline_metadata_hive';" >> ~/{file_name} && """
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
+        + f" &>> /var/log/adg/e2e.log"
+    )
+
+    context.adg_ddb_cluster_step_id = emr_step_generator.generate_bash_step(
+        context.adg_cluster_id,
+        adg_hive_export_bash_command,
+        context.adg_ddb_cluster_step_name,
+    )
+    context.adg_ddb_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
+
+
+@then("wait a maximum of '{timeout_mins}' minutes for the last step to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.adg_cluster_step_id, context.adg_cluster_id, timeout_secs
+        context.adg_ddb_cluster_step_id, context.adg_cluster_id, timeout_secs
     )
 
     if execution_state != "COMPLETED":
@@ -168,14 +188,17 @@ def step_impl(context, timeout_mins):
 
 
 @then(
-    "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
+    "the Mongo-Latest result for step '{step_name}' matches the expected results of '{expected_result_file_name}'"
 )
-def step_(context, expected_result_file_name):
-    console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
+def step_(context, expected_result_file_name, step_name):
+    remote_file = (
+        context.adg_results_s3_file
+        if step_name == "hive-query"
+        else context.adg_ddb_results_s3_file
+    )
+    console_printer.print_info(f"S3 Request Location: {remote_file}")
     actual = (
-        aws_helper.get_s3_object(
-            None, context.published_bucket, context.adg_results_s3_file
-        )
+        aws_helper.get_s3_object(None, context.published_bucket, remote_file)
         .decode("ascii")
         .replace("\t", "")
         .replace(" ", "")
