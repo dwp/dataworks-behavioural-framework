@@ -185,19 +185,15 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                     f"opening the file {output_file} to write test data"
                 )
                 with open(output_file, "w+", newline='') as csvfile:
-                    writer = csv.writer(csvfile, delimiter=",")
-                    header_record = f"{schema_config['record_delimiter']}".join(
-                        collection_schema.keys()
-                    )
+                    writer = csv.writer(csvfile, delimiter=schema_config['record_delimiter'])
+                    header_record = collection_schema.keys()
                     writer.writerow(header_record)
                     num = 1
                     while num <= int(record_count):
-                        record_data = f"{schema_config['record_delimiter']}".join(
-                            [
+                        record_data = [
                                 str(dataTypeMapping(type)())
                                 for key, type in collection_schema.items()
                             ]
-                        )
                         writer.writerow(record_data)
                         num += 1
 
