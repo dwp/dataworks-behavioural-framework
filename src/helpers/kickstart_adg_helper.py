@@ -1,4 +1,5 @@
 import json
+import csv
 import os
 import string
 import uuid
@@ -183,11 +184,12 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                 console_printer.print_info(
                     f"opening the file {output_file} to write test data"
                 )
-                with open(output_file, "w+") as writer:
+                with open(output_file, "w+", newline='') as csvfile:
+                    writer = csv.writer(csvfile, delimiter=",")
                     header_record = f"{schema_config['record_delimiter']}".join(
                         collection_schema.keys()
                     )
-                    writer.write(header_record + "\n")
+                    writer.writerow(header_record)
                     num = 1
                     while num <= int(record_count):
                         record_data = f"{schema_config['record_delimiter']}".join(
@@ -196,7 +198,7 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
                                 for key, type in collection_schema.items()
                             ]
                         )
-                        writer.write(record_data + "\n")
+                        writer.writerow(record_data)
                         num += 1
 
         elif schema_config["record_layout"].lower() == "json":
