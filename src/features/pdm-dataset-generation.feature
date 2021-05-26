@@ -11,6 +11,6 @@ Feature: PDM data set generation tests, to source data and valid final tables fo
     When I start the PDM cluster
     And insert the 'hive-query' step onto the cluster
     And the PDM cluster tags have been created correctly
-    And wait a maximum of '120' minutes for the step to finish
+    And wait a maximum of '120' minutes for the last step to finish
     Then the PDM result matches the expected results of 'youth_obligation_model_results.csv'
     And the PDM metadata table is correct

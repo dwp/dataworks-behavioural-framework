@@ -64,7 +64,7 @@ def step_impl(context, step_name):
     context.pdm_results_s3_file = os.path.join(s3_path, file_name)
 
 
-@when("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+@when("wait a maximum of '{timeout_mins}' minutes for the last step to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(

@@ -83,8 +83,6 @@ function execute_behave() {
     echo "Using ${TF_INGEST_OUTPUT_FILE} ..."
     DLQ_S3_PATH_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_s3_dlq_prefix.value.prefix')"
     AWS_S3_INPUT_BUCKET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.s3_buckets.value.input_bucket')"
-    MONGO_SNAPSHOT_BUCKET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.s3_buckets.value.htme_bucket')"
-    MONGO_SNAPSHOT_PATH="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.s3_buckets.value.htme_prefix')"
     MONGO_DATA_LOAD_PREFIXES="NOT_SET"
     DYNAMODB_TABLE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_job_status_table.value.name')"
     AWS_SNS_TOPIC_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_sns_topic_arn.value.name[0]')"
@@ -97,33 +95,13 @@ function execute_behave() {
     MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_MAIN="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
     MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_EQUALITY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
     MANIFEST_S3_INPUT_LOCATION_EXPORT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.export_folder')"
-    MANIFEST_S3_INPUT_PARQUET_LOCATION="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.parquet_folder')"
-    MANIFEST_ETL_GLUE_JOB_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.job_name_combined')"
 
     ASG_MAX_COUNT_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.max_counts.stub_ucfs_kafka_broker // empty')"
     ASG_PREFIX_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.stub_ucfs_kafka_broker // empty')"
 
-    RECONCILER_MAIN_CLUSTER_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.ucfs_reconciliation // empty')"
-    RECONCILER_EQUALITIES_CLUSTER_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.equality_reconciliation // empty')"
-    RECONCILER_AUDIT_CLUSTER_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.audit_reconciliation // empty')"
-    RECONCILER_MAIN_SERVICE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.service_names.ucfs_reconciliation // empty')"
-    RECONCILER_EQUALITIES_SERVICE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.service_names.equality_reconciliation // empty')"
-    RECONCILER_EQUALITIES_SERVICE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.service_names.audit_reconciliation // empty')"
-    RECONCILER_AUDIT_SERVICE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.service_names.audit_reconciliation // empty')"
-    RECONCILER_MAIN_DESIRED_TASK_COUNT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.ucfs_reconciliation // empty')"
-    RECONCILER_EQUALITIES_DESIRED_TASK_COUNT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.equality_reconciliation // empty')"
-    RECONCILER_AUDIT_DESIRED_TASK_COUNT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.audit_reconciliation // empty')"
-
-    K2HB_MANIFEST_WRITE_S3_BUCKET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.manifest_bucket // empty')"
     K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.main_prefix // empty')"
     K2HB_EQUALITY_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.equality_prefix // empty')"
     K2HB_AUDIT_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.audit_prefix // empty')"
-
-    MANIFEST_COMPARISON_DATABASE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.database_name')"
-    MANIFEST_COMPARISON_TABLE_NAME_MISSING_IMPORTS_PARQUET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.table_name_missing_imports_parquet')"
-    MANIFEST_COMPARISON_TABLE_NAME_MISSING_EXPORTS_PARQUET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.table_name_missing_exports_parquet')"
-    MANIFEST_COMPARISON_TABLE_NAME_COUNTS_PARQUET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.table_name_counts_parquet')"
-    MANIFEST_COMPARISON_TABLE_NAME_MISMATCHED_TIMESTAMPS_PARQUET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_etl.value.table_name_mismatched_timestamps_parquet')"
 
     METADATA_STORE_TABLE_NAME_UCFS="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.ucfs')"
     METADATA_STORE_TABLE_NAME_EQUALITIES="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.equality')"
@@ -144,6 +122,22 @@ function execute_behave() {
 
     if [[ ! -z "${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE}" && "${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE}" != "${NOT_SET_FLAG}" ]]; then
         echo "Using ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} ..."
+        MANIFEST_ETL_GLUE_JOB_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.job_name_combined')"
+        MANIFEST_COMPARISON_DATABASE_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.database_name')"
+        MANIFEST_COMPARISON_TABLE_NAME_MISSING_IMPORTS_PARQUET="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.table_name_missing_imports_parquet')"
+        MANIFEST_COMPARISON_TABLE_NAME_MISSING_EXPORTS_PARQUET="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.table_name_missing_exports_parquet')"
+        MANIFEST_COMPARISON_TABLE_NAME_COUNTS_PARQUET="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.table_name_counts_parquet')"
+        MANIFEST_COMPARISON_TABLE_NAME_MISMATCHED_TIMESTAMPS_PARQUET="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.manifest_etl.value.table_name_mismatched_timestamps_parquet')"
+        RECONCILER_MAIN_CLUSTER_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.ucfs_reconciliation // empty')"
+        RECONCILER_EQUALITIES_CLUSTER_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.equality_reconciliation // empty')"
+        RECONCILER_AUDIT_CLUSTER_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.cluster_names.audit_reconciliation // empty')"
+        RECONCILER_MAIN_SERVICE_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.service_names.ucfs_reconciliation // empty')"
+        RECONCILER_EQUALITIES_SERVICE_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.service_names.equality_reconciliation // empty')"
+        RECONCILER_EQUALITIES_SERVICE_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.service_names.audit_reconciliation // empty')"
+        RECONCILER_AUDIT_SERVICE_NAME="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.service_names.audit_reconciliation // empty')"
+        RECONCILER_MAIN_DESIRED_TASK_COUNT="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.ucfs_reconciliation // empty')"
+        RECONCILER_EQUALITIES_DESIRED_TASK_COUNT="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.equality_reconciliation // empty')"
+        RECONCILER_AUDIT_DESIRED_TASK_COUNT="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.k2hb_reconciliation.value.task_counts.audit_reconciliation // empty')"
         ASG_MAX_COUNT_K2HB_MAIN_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.max_counts.k2hb_main_london // empty')"
         ASG_MAX_COUNT_K2HB_MAIN_DEDICATED_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.max_counts.k2hb_main_dedicated_london // empty')"
         ASG_MAX_COUNT_K2HB_EQUALITY_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.max_counts.k2hb_equality_london // empty')"
@@ -152,14 +146,6 @@ function execute_behave() {
         ASG_PREFIX_K2HB_MAIN_DEDICATED_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.prefixes.k2hb_main_dedicated_london // empty')"
         ASG_PREFIX_K2HB_EQUALITY_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.prefixes.k2hb_equality_london // empty')"
         ASG_PREFIX_K2HB_AUDIT_LONDON="$(cat ${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE} | jq -r '.asg_properties.value.prefixes.k2hb_audit_london // empty')"
-        echo "ASG_MAX_COUNT_K2HB_MAIN_LONDON=${ASG_MAX_COUNT_K2HB_MAIN_LONDON}"
-        echo "ASG_MAX_COUNT_K2HB_MAIN_DEDICATED_LONDON=${ASG_MAX_COUNT_K2HB_MAIN_DEDICATED_LONDON}"
-        echo "ASG_MAX_COUNT_K2HB_EQUALITY_LONDON=${ASG_MAX_COUNT_K2HB_EQUALITY_LONDON}"
-        echo "ASG_MAX_COUNT_K2HB_AUDIT_LONDON=${ASG_MAX_COUNT_K2HB_AUDIT_LONDON}"
-        echo "ASG_PREFIX_K2HB_MAIN_LONDON=${ASG_PREFIX_K2HB_MAIN_LONDON}"
-        echo "ASG_PREFIX_K2HB_MAIN_DEDICATED_LONDON=${ASG_PREFIX_K2HB_MAIN_DEDICATED_LONDON}"
-        echo "ASG_PREFIX_K2HB_EQUALITY_LONDON=${ASG_PREFIX_K2HB_EQUALITY_LONDON}"
-        echo "ASG_PREFIX_K2HB_AUDIT_LONDON=${ASG_PREFIX_K2HB_AUDIT_LONDON}"
     else
         echo "Skipping TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE=${TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE}"
     fi
@@ -187,6 +173,7 @@ function execute_behave() {
         ASG_PREFIX_HDI="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.hdi // empty')"
 
         DYNAMO_DB_EXPORT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.uc_export_crown_dynamodb_table.value.name')"
+        DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.data_pipeline_metadata_dynamo.value.name')"
         HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.full.content')"
         HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.incrementals.content')"
 
@@ -197,6 +184,10 @@ function execute_behave() {
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_ROOT_DIRECTORY="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_directory')"
         
         MONITORING_SNS_TOPIC_ARN="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.sns_topics.value.london_monitoring.arn')"
+        MONGO_SNAPSHOT_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_bucket.value.id')"
+        MONGO_SNAPSHOT_PATH="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_folder.value.id')"
+
+        MANIFEST_S3_INPUT_PARQUET_LOCATION="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_s3_prefixes.value.parquet')"
     else
         echo "Skipping TF_INTERNAL_COMPUTE_OUTPUT_FILE=${TF_INTERNAL_COMPUTE_OUTPUT_FILE}"
     fi
@@ -429,6 +420,7 @@ function execute_behave() {
     -D GENERATE_SNAPSHOTS_START_TIME_OVERRIDE="${GENERATE_SNAPSHOTS_START_TIME_OVERRIDE}" \
     -D GENERATE_SNAPSHOTS_END_TIME_OVERRIDE="${GENERATE_SNAPSHOTS_END_TIME_OVERRIDE}" \
     -D DYNAMO_DB_EXPORT_STATUS_TABLE_NAME="${DYNAMO_DB_EXPORT_STATUS_TABLE_NAME}" \
+    -D DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="${DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME}" \
     -D KAFKA_MESSAGE_VOLUME="${LOAD_TESTS_KAFKA_MESSAGE_VOLUME}" \
     -D KAFKA_RANDOM_KEY="${LOAD_TESTS_KAFKA_RANDOM_KEY}" \
     -D KAFKA_RECORD_COUNT="${LOAD_TESTS_KAFKA_RECORD_COUNT}" \
@@ -466,7 +458,6 @@ function execute_behave() {
     -D MONITORING_SNS_TOPIC_ARN="${MONITORING_SNS_TOPIC_ARN}" \
     -D AWS_ROLE_ARN="${AWS_ROLE_ARN}" \
     -D AWS_SESSION_TIMEOUT_SECONDS="${AWS_SESSION_TIMEOUT_SECONDS}" \
-    -D K2HB_MANIFEST_WRITE_S3_BUCKET="${K2HB_MANIFEST_WRITE_S3_BUCKET}" \
     -D K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX="${K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX}" \
     -D K2HB_EQUALITY_MANIFEST_WRITE_S3_PREFIX="${K2HB_EQUALITY_MANIFEST_WRITE_S3_PREFIX}" \
     -D K2HB_AUDIT_MANIFEST_WRITE_S3_PREFIX="${K2HB_AUDIT_MANIFEST_WRITE_S3_PREFIX}" \

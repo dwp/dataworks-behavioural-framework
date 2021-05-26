@@ -13,6 +13,8 @@ from helpers import (
     console_printer,
     emr_step_generator,
     file_helper,
+    export_status_helper,
+    data_pipeline_metadata_helper,
 )
 from datetime import datetime
 
@@ -40,12 +42,14 @@ ADG_TOPICS = [
     "db.core.claimantCommitment",
     "db.core.toDo",
     "db.accepted-data.personDetails",
+    "db.appointments.appointment",
 ]
 
 ADG_DB_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
+    "appointments": ["appointment"],
 }
 
 
@@ -150,11 +154,31 @@ def step_impl(context, step_name):
     )
 
 
-@then("wait a maximum of '{timeout_mins}' minutes for the step to finish")
+@then("insert the dynamodb check query step onto the cluster")
+def step_impl(context):
+    context.adg_ddb_cluster_step_name = "dynamodb_check_query"
+    file_name = f"{context.test_run_name}_ddb.csv"
+    adg_hive_export_bash_command = (
+        f"""hive -e "USE AUDIT; SHOW TABLES LIKE 'data_pipeline_metadata_hive';" >> ~/{file_name} && """
+        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
+        + f" &>> /var/log/adg/e2e.log"
+    )
+
+    context.adg_ddb_cluster_step_id = emr_step_generator.generate_bash_step(
+        context.adg_cluster_id,
+        adg_hive_export_bash_command,
+        context.adg_ddb_cluster_step_name,
+    )
+    context.adg_ddb_results_s3_file = os.path.join(
+        context.mongo_latest_test_query_output_folder, file_name
+    )
+
+
+@then("wait a maximum of '{timeout_mins}' minutes for the last step to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.adg_cluster_step_id, context.adg_cluster_id, timeout_secs
+        context.adg_ddb_cluster_step_id, context.adg_cluster_id, timeout_secs
     )
 
     if execution_state != "COMPLETED":
@@ -164,14 +188,17 @@ def step_impl(context, timeout_mins):
 
 
 @then(
-    "the Mongo-Latest result matches the expected results of '{expected_result_file_name}'"
+    "the Mongo-Latest result for step '{step_name}' matches the expected results of '{expected_result_file_name}'"
 )
-def step_(context, expected_result_file_name):
-    console_printer.print_info(f"S3 Request Location: {context.adg_results_s3_file}")
+def step_(context, expected_result_file_name, step_name):
+    remote_file = (
+        context.adg_results_s3_file
+        if step_name == "hive-query"
+        else context.adg_ddb_results_s3_file
+    )
+    console_printer.print_info(f"S3 Request Location: {remote_file}")
     actual = (
-        aws_helper.get_s3_object(
-            None, context.published_bucket, context.adg_results_s3_file
-        )
+        aws_helper.get_s3_object(None, context.published_bucket, remote_file)
         .decode("ascii")
         .replace("\t", "")
         .replace(" ", "")
@@ -273,20 +300,16 @@ def step_check_adg_cluster_tags(context, snapshot_type):
 @then("the ADG metadata table is correct for '{snapshot_type}'")
 def metadata_table_step_impl(context, snapshot_type):
     data_product = f"ADG-{snapshot_type.lower()}"
-    table_name = "data_pipeline_metadata"
 
-    key_dict = {
-        "Correlation_Id": {"S": f"{context.test_run_name}"},
-        "DataProduct": {"S": f"{data_product}"},
-    }
-
-    console_printer.print_info(
-        f"Getting DynamoDb data from item with key_dict of '{key_dict}' from table named '{table_name}'"
+    response = data_pipeline_metadata_helper.get_item_from_product_status_table(
+        context.dynamo_db_product_status_table_name,
+        data_product,
+        context.test_run_name,
     )
 
-    response = aws_helper.get_item_from_dynamodb(table_name, key_dict)
-
-    console_printer.print_info(f"Data retrieved from dynamodb table : '{response}'")
+    console_printer.print_info(
+        f"Data retrieved from product status table : '{response}'"
+    )
 
     assert (
         "Item" in response
@@ -329,3 +352,30 @@ def metadata_table_step_impl(context, snapshot_type):
     assert (
         item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
+
+
+@then("The dynamodb status for each collection is set to '{expected}'")
+def step_impl(context, expected):
+    for topic in ADG_TOPICS:
+        response = export_status_helper.get_item_from_export_status_table(
+            context.dynamo_db_export_status_table_name,
+            topic,
+            context.test_run_name,
+        )
+
+        assert (
+            response is not None
+        ), f"Could not retrieve status row for topic '{topic}' and correlation id '{context.test_run_name}'"
+        assert (
+            "Item" in response
+        ), f"Could not retrieve status row item for topic '{topic}' and correlation id '{context.test_run_name}'"
+
+        item = response["Item"]
+        assert (
+            "ADGStatus" in item
+        ), f"Could not retrieve status dynamodb from item '{item}'"
+
+        actual = item["ADGStatus"]["S"]
+        assert (
+            expected == actual
+        ), f"Actual status of '{actual}' is not the same as the expected status of '{expected}'"

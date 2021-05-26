@@ -1,27 +1,10 @@
 import time
-from helpers import aws_helper, date_helper, console_printer, template_helper
-
-
-def add_item_to_export_status_table(
-    export_status_table_name, topic_name, correlation_id
-):
-    """Puts an export status in to dynamodb.
-
-    Keyword arguments:
-    export_status_table_name -- the export table name
-    topic_name -- the topic name
-    correlation_id -- the correlation id
-    """
-    time_to_live = str(date_helper.get_current_epoch_seconds)
-
-    item_dict = {
-        "CorrelationId": {"S": f"{test_run_name}"},
-        "CollectionName": {"S": f"{topic_name}"},
-        "CollectionStatus": {"S": "Exported"},
-        "TimeToExist": {"N": f"{time_to_live}"},
-    }
-
-    aws_helper.insert_item_to_dynamo_db(export_status_table_name, item_dict)
+from helpers import (
+    aws_helper,
+    date_helper,
+    console_printer,
+    template_helper,
+)
 
 
 def delete_item_in_export_status_table(
@@ -42,6 +25,28 @@ def delete_item_in_export_status_table(
     aws_helper.delete_item_from_dynamodb(export_status_table_name, key_dict)
 
 
+def get_item_from_export_status_table(
+    export_status_table_name, topic_name, correlation_id
+):
+    """Deletes an product status from dynamodb.
+
+    Keyword arguments:
+    export_status_table_name -- the export status table name
+    topic_name -- the topic name
+    correlation_id -- the correlation id
+    """
+    key_dict = {
+        "CorrelationId": {"S": f"{correlation_id}"},
+        "CollectionName": {"S": f"{topic_name}"},
+    }
+
+    console_printer.print_debug(
+        f"Getting DynamoDb data from export status table with key_dict of '{key_dict}' and table name of '{export_status_table_name}'"
+    )
+
+    return aws_helper.get_item_from_dynamodb(export_status_table_name, key_dict)
+
+
 def update_item_in_export_status_table(
     export_status_table_name,
     topic_name,
@@ -50,6 +55,7 @@ def update_item_in_export_status_table(
     files_exported_count,
     files_sent_count,
     files_received_count,
+    export_date,
 ):
     """Updates an export status in dynamodb.
 
@@ -57,6 +63,7 @@ def update_item_in_export_status_table(
     export_status_table_name -- the export table name
     topic_name -- the topic name
     correlation_id -- the correlation id
+    export_date -- the export date
     """
     time_to_live = str(date_helper.get_current_epoch_seconds)
 
@@ -65,13 +72,14 @@ def update_item_in_export_status_table(
         "CollectionName": {"S": f"{topic_name}"},
     }
 
-    update_expression = "SET CollectionStatus = :s, FilesExported = :e, FilesSent = :f, FilesReceived = :g"
+    update_expression = "SET CollectionStatus = :s, FilesExported = :e, FilesSent = :f, FilesReceived = :g, ExportDate = :h"
 
     expression_attribute_values_dict = {
         ":s": {"S": f"{status}"},
         ":e": {"N": f"{files_exported_count}"},
         ":f": {"N": f"{files_sent_count}"},
         ":g": {"N": f"{files_received_count}"},
+        ":h": {"S": f"{export_date}"},
     }
 
     aws_helper.update_item_in_dynamo_db(

@@ -96,6 +96,7 @@ def set_test_run_common_variables(context):
     context.db_name = "automatedtests"
 
     context.fixture_path_local = "fixture-data/functional-tests"
+    context.todays_date = datetime.date.today()
     context.formatted_date = str(datetime.date.today())
     context.root_temp_folder = "tmp"
 
@@ -111,9 +112,6 @@ def set_test_run_common_variables(context):
         f"{context.ucfs_historic_data_prefix}/{context.test_run_name}"
     )
 
-    context.k2hb_manifest_write_s3_bucket = context.config.userdata.get(
-        "K2HB_MANIFEST_WRITE_S3_BUCKET"
-    )
     context.k2hb_main_manifest_write_s3_prefix = context.config.userdata.get(
         "K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX"
     )
@@ -211,6 +209,9 @@ def set_test_run_common_variables(context):
     )
     context.dynamo_db_export_status_table_name = context.config.userdata.get(
         "DYNAMO_DB_EXPORT_STATUS_TABLE_NAME"
+    )
+    context.dynamo_db_product_status_table_name = context.config.userdata.get(
+        "DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME"
     )
 
     context.kafka_message_volume = context.config.userdata.get("KAFKA_MESSAGE_VOLUME")

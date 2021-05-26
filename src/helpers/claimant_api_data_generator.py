@@ -6,6 +6,7 @@ import random
 import string
 from uuid import UUID
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from helpers import (
     console_printer,
     date_helper,
@@ -32,6 +33,7 @@ def generate_claimant_api_kafka_files(
     s3_output_prefix,
     seconds_timeout,
     fixture_data_folder,
+    todays_date,
 ):
     """Returns array of generated kafka data as tuples of (input s3 location, output local file).
 
@@ -45,6 +47,7 @@ def generate_claimant_api_kafka_files(
     s3_output_prefix -- the output path for the edited file in s3
     seconds_timeout -- the timeout in seconds for the test
     fixture_data_folder -- the folder from the root of the fixture data
+    todays_date -- the datetime object to represent today
     """
     global _base_datetime_timestamp
 
@@ -89,7 +92,12 @@ def generate_claimant_api_kafka_files(
                     contract_db_object,
                     statement_db_objects_array,
                 ) = _generate_contract_and_statement_db_objects(
-                    contract_id, item, [citizen_id], unique_suffix, timestamp_string
+                    contract_id,
+                    item,
+                    [citizen_id],
+                    unique_suffix,
+                    timestamp_string,
+                    todays_date,
                 )
 
                 claimant_file_data.append(
@@ -154,7 +162,12 @@ def generate_claimant_api_kafka_files(
                 contract_db_object,
                 statement_db_objects_array,
             ) = _generate_contract_and_statement_db_objects(
-                contract_id, item, citizen_ids_array, increment, timestamp_string
+                contract_id,
+                item,
+                citizen_ids_array,
+                increment,
+                timestamp_string,
+                todays_date,
             )
 
             claimant_file_data.extend(
@@ -419,7 +432,7 @@ def _generate_claimant_db_object(citizen_id, person_id, nino, unique_suffix):
 
 
 def _generate_contract_and_statement_db_objects(
-    contract_id, item, citizen_ids_array, unique_suffix, timestamp_string
+    contract_id, item, citizen_ids_array, unique_suffix, timestamp_string, todays_date
 ):
     """Generates contract and statement db objects and returns it them as a tuple of dict and array(dict).
 
@@ -429,17 +442,34 @@ def _generate_contract_and_statement_db_objects(
     citizen_ids_array -- the citizen ids as an array
     unique_suffix -- a unique suffix for the first and last names
     timestamp_string -- the timestamp for created and modified times
+    todays_date -- the datetime object to represent today
     """
     global time_stamp_format
 
     payment_day_of_month = 23
 
+    closed_date = None
     if "contract_closed_date" in item:
-        closed_date = item["contract_closed_date"]
-    elif "contract_closed_date_offset" in item:
-        closed_date = (
-            datetime.today() + timedelta(days=int(item["contract_closed_date_offset"]))
+        closed_date = int(item["contract_closed_date"])
+        console_printer.print_info(f"closed_date: '{closed_date}'")
+    elif (
+        "contract_closed_date_days_offset" in item
+        or "contract_closed_date_month_offset" in item
+    ):
+        date_offset = (
+            item["contract_closed_date_days_offset"]
+            if "contract_closed_date_days_offset" in item
+            else None
+        )
+        month_offset = (
+            item["contract_closed_date_month_offset"]
+            if "contract_closed_date_month_offset" in item
+            else None
+        )
+        closed_date = generate_dynamic_date(
+            todays_date, date_offset, month_offset
         ).strftime("%Y%m%d")
+        closed_date = int(closed_date)
         console_printer.print_info(f"closed_date: '{closed_date}'")
     else:
         closed_date = None
@@ -450,12 +480,12 @@ def _generate_contract_and_statement_db_objects(
         "assessmentPeriods": [],
         "people": [str(citizen_id) for citizen_id in citizen_ids_array],
         "declaredDate": int(
-            (_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")
+            (_month_delta(todays_date, -2) - timedelta(days=7)).strftime("%Y%m%d")
         ),
         "startDate": int(
-            (_month_delta(datetime.today(), -2) - timedelta(days=7)).strftime("%Y%m%d")
+            (_month_delta(todays_date, -2) - timedelta(days=7)).strftime("%Y%m%d")
         ),
-        "entitlementDate": int(_month_delta(datetime.today(), -2).strftime("%Y%m%d")),
+        "entitlementDate": int(_month_delta(todays_date, -2).strftime("%Y%m%d")),
         "closedDate": closed_date,
         "annualVerificationEligibilityDate": None,
         "annualVerificationCompletionDate": None,
@@ -475,16 +505,23 @@ def _generate_contract_and_statement_db_objects(
 
     if "suspension_date" in item:
         contract["claimSuspension"] = {"suspensionDate": int(item["suspension_date"])}
-    elif "suspension_date_offset" in item:
-        contract["claimSuspension"] = {
-            "suspensionDate": int(
-                (
-                    datetime.today()
-                    + timedelta(days=int(item["suspension_date_offset"]))
-                ).strftime("%Y%m%d")
-            )
-        }
-        suspension_date = contract["claimSuspension"]
+    elif (
+        "suspension_date_days_offset" in item or "suspension_date_months_offset" in item
+    ):
+        date_offset = (
+            item["suspension_date_days_offset"]
+            if "suspension_date_days_offset" in item
+            else None
+        )
+        month_offset = (
+            item["suspension_date_months_offset"]
+            if "suspension_date_months_offset" in item
+            else None
+        )
+        suspension_date = generate_dynamic_date(
+            todays_date, date_offset, month_offset
+        ).strftime("%Y%m%d")
+        contract["claimSuspension"] = {"suspensionDate": int(suspension_date)}
         console_printer.print_info(f"suspension_date: '{suspension_date}'")
     elif unique_suffix % 10 == 0:
         contract["claimSuspension"] = {"suspensionDate": None}
@@ -494,32 +531,69 @@ def _generate_contract_and_statement_db_objects(
     if "assessment_periods" in item:
         for assessment_period in item["assessment_periods"]:
             assessment_period_id = f"{uuid.uuid4()}"
-            end_date = (
-                datetime.strptime(assessment_period["end_date"], "%Y%m%d")
-                if "end_date" in assessment_period
-                else datetime.today()
-                + timedelta(days=int(assessment_period["end_date_offset"]))
-            )
-            console_printer.print_info(f"end_date: '{end_date}'")
-            start_date = _month_delta(end_date, -1) - timedelta(days=1)
+
             if "start_date" in assessment_period:
                 start_date = datetime.strptime(
                     assessment_period["start_date"], "%Y%m%d"
+                ).strftime("%Y%m%d")
+            elif (
+                "start_date_days_offset" in assessment_period
+                or "start_date_month_offset" in assessment_period
+            ):
+                date_offset = (
+                    assessment_period["start_date_days_offset"]
+                    if "start_date_days_offset" in assessment_period
+                    else None
                 )
-            elif "start_date_offset" in assessment_period:
-                start_date = datetime.today() + timedelta(
-                    days=int(assessment_period["start_date_offset"])
+                month_offset = (
+                    assessment_period["start_date_month_offset"]
+                    if "start_date_month_offset" in assessment_period
+                    else None
                 )
-                console_printer.print_info(f"start_date: '{start_date}'")
+                start_date = generate_dynamic_date(
+                    todays_date, date_offset, month_offset
+                ).strftime("%Y%m%d")
+            else:
+                start_date = (_month_delta(end_date, -1) - timedelta(days=1)).strftime(
+                    "%Y%m%d"
+                )
+
+            console_printer.print_info(f"start_date: '{start_date}'")
+
+            if "end_date" in assessment_period:
+                end_date = datetime.strptime(
+                    assessment_period["end_date"], "%Y%m%d"
+                ).strftime("%Y%m%d")
+            elif (
+                "end_date_days_offset" in assessment_period
+                or "end_date_month_offset" in assessment_period
+            ):
+                date_offset = (
+                    assessment_period["end_date_days_offset"]
+                    if "end_date_days_offset" in assessment_period
+                    else None
+                )
+                month_offset = (
+                    assessment_period["end_date_month_offset"]
+                    if "end_date_month_offset" in assessment_period
+                    else None
+                )
+                end_date = generate_dynamic_date(
+                    todays_date, date_offset, month_offset
+                ).strftime("%Y%m%d")
+            else:
+                end_date = datetime.strptime(
+                    assessment_period["end_date"], "%Y%m%d"
+                ).strftime("%Y%m%d")
+
+            console_printer.print_info(f"end_date: '{end_date}'")
 
             ap_to_append = {
                 "assessmentPeriodId": assessment_period_id,
                 "contractId": str(contract_id),
-                "startDate": int(start_date.strftime("%Y%m%d")),
-                "endDate": int(end_date.strftime("%Y%m%d")),
-                "paymentDate": int(
-                    end_date.strftime("%Y%m") + str(payment_day_of_month)
-                ),
+                "startDate": int(start_date),
+                "endDate": int(end_date),
+                "paymentDate": int(end_date + str(payment_day_of_month)),
                 "processDate": None,
                 "createdDateTime": timestamp_string,
             }
@@ -659,6 +733,7 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
     local_files_temp_folder,
     s3_output_prefix,
     seconds_timeout,
+    todays_date,
 ):
     """Returns an updated contract and statement files according to incoming data for existing claimant.
 
@@ -673,6 +748,7 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
     local_files_temp_folder -- the root folder for the temporary files to sit in
     s3_output_prefix -- the output path for the edited file in s3
     seconds_timeout -- the timeout in seconds for the test
+    todays_date -- the datetime object to represent today
     """
     global _base_datetime_timestamp
 
@@ -698,7 +774,12 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
                     contract_db_object,
                     statement_db_objects_array,
                 ) = _generate_contract_and_statement_db_objects(
-                    contract_id, item, [citizen_id], unique_suffix, timestamp_string
+                    contract_id,
+                    item,
+                    [citizen_id],
+                    unique_suffix,
+                    timestamp_string,
+                    todays_date,
                 )
                 count += 1
 
@@ -719,7 +800,12 @@ def generate_updated_contract_and_statement_files_for_existing_claimant(
                 contract_db_object,
                 statement_db_objects_array,
             ) = _generate_contract_and_statement_db_objects(
-                contract_id, item, [citizen_id], increment, timestamp_string
+                contract_id,
+                item,
+                [citizen_id],
+                increment,
+                timestamp_string,
+                todays_date,
             )
 
             contract_file_data.append(
@@ -811,6 +897,22 @@ def generate_updated_claimant_file_for_existing_claimant(
     )
 
     return return_data
+
+
+def generate_dynamic_date(baseline_date, date_offset, month_offset):
+    """Generates a dynamic date based on day and month offsets.
+
+    Keyword arguments:
+    baseline_date - baseline datetime to start from
+    date_offset -- the offset as a positive or negative number for the days
+    month_offset -- the offset as a positive or negative number for the months
+    """
+    dynamic_date = baseline_date
+    if date_offset:
+        dynamic_date = dynamic_date + timedelta(days=int(date_offset))
+    if month_offset:
+        dynamic_date = dynamic_date + relativedelta(months=int(month_offset))
+    return dynamic_date
 
 
 class UUIDEncoder(json.JSONEncoder):
