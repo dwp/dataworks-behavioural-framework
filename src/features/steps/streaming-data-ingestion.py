@@ -388,7 +388,7 @@ def step_impl(context, id_format, message_type):
 def step_impl(context, streaming_type, id_format, message_type):
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
 
-    manifest_bucket = context.k2hb_manifest_write_s3_bucket
+    manifest_bucket = context.manifest_s3_bucket
 
     valid_prefixes = {
         "main": context.k2hb_main_manifest_write_s3_prefix,

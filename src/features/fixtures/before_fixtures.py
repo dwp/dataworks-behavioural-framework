@@ -109,10 +109,10 @@ def s3_clear_snapshot_output(context, snapshot_type):
 def s3_clear_k2hb_manifests_main(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_k2hb_manifests_main' fixture")
     console_printer.print_info(
-        f"Clearing manifests from '{context.k2hb_manifest_write_s3_bucket}/{context.k2hb_main_manifest_write_s3_prefix}'"
+        f"Clearing manifests from '{context.manifest_s3_bucket}/{context.k2hb_main_manifest_write_s3_prefix}'"
     )
     aws_helper.clear_s3_prefix(
-        context.k2hb_manifest_write_s3_bucket,
+        context.manifest_s3_bucket,
         context.k2hb_main_manifest_write_s3_prefix,
         True,
         False,
@@ -123,10 +123,10 @@ def s3_clear_k2hb_manifests_main(context, timeout=30, **kwargs):
 def s3_clear_k2hb_manifests_equalities(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_k2hb_manifests_equalities' fixture")
     console_printer.print_info(
-        f"Clearing manifests from '{context.k2hb_manifest_write_s3_bucket}/{context.k2hb_equality_manifest_write_s3_prefix}'"
+        f"Clearing manifests from '{context.manifest_s3_bucket}/{context.k2hb_equality_manifest_write_s3_prefix}'"
     )
     aws_helper.clear_s3_prefix(
-        context.k2hb_manifest_write_s3_bucket,
+        context.manifest_s3_bucket,
         context.k2hb_equality_manifest_write_s3_prefix,
         True,
         False,
@@ -137,10 +137,10 @@ def s3_clear_k2hb_manifests_equalities(context, timeout=30, **kwargs):
 def s3_clear_k2hb_manifests_audit(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_k2hb_manifests_audit' fixture")
     console_printer.print_info(
-        f"Clearing manifests from '{context.k2hb_manifest_write_s3_bucket}/{context.k2hb_audit_manifest_write_s3_prefix}'"
+        f"Clearing manifests from '{context.manifest_s3_bucket}/{context.k2hb_audit_manifest_write_s3_prefix}'"
     )
     aws_helper.clear_s3_prefix(
-        context.k2hb_manifest_write_s3_bucket,
+        context.manifest_s3_bucket,
         context.k2hb_audit_manifest_write_s3_prefix,
         True,
         False,
