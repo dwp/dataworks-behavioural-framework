@@ -112,9 +112,6 @@ def set_test_run_common_variables(context):
         f"{context.ucfs_historic_data_prefix}/{context.test_run_name}"
     )
 
-    context.k2hb_manifest_write_s3_bucket = context.config.userdata.get(
-        "K2HB_MANIFEST_WRITE_S3_BUCKET"
-    )
     context.k2hb_main_manifest_write_s3_prefix = context.config.userdata.get(
         "K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX"
     )
