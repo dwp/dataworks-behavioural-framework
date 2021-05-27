@@ -43,6 +43,7 @@ ADG_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
+    "data.audit"
 ]
 
 ADG_DB_COLLECTION = {
@@ -50,6 +51,7 @@ ADG_DB_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
+    "data": ["audit"]
 }
 
 
