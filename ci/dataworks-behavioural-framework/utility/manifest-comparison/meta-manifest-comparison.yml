@@ -28,7 +28,7 @@ meta-manifest-comparison:
               elif [[ "$MANIFEST_COMPARISON_IMPORT_TYPE" == "streaming_equality" ]]; then
                 export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
               else
-                export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-ingest/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+                export AWS_S3_MANIFEST_IMPORT="$(cat terraform-output-internal-compute/outputs.json | jq -r '.manifest_comparison_parameters.value.historic_folder')"
               fi
 
               aws s3 sync dataworks-behavioural-framework/src/manifest-comparison/fixture-data/import/ s3://${AWS_S3_MANIFEST_BUCKET}/${AWS_S3_MANIFEST_IMPORT}/
