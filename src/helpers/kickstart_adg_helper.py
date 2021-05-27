@@ -90,7 +90,7 @@ def dataTypeMapping(type):
             "numeric": dataGenNumeric,
             "integer": dataGenInteger,
             "double": dataGenDouble,
-            "user-input": dataGenUserInput
+            "user-input": dataGenText
         }
 
         return datatypes[type]
