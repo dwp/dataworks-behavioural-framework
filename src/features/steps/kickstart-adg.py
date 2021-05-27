@@ -207,11 +207,12 @@ def step_impl(context, module_name):
                 if collection in file
             ][0]
             console_printer.print_info(f"Expected File Name: {expected_file_name}")
-            expected_content = file_helper.get_contents_of_file(
+            expected_contents = []
+            expected_contents.append(file_helper.get_contents_of_file(
                 expected_file_name, False
-            ).splitlines()[1:]
+            ).splitlines()[1:])
 
-            for input_line, output_line in zip(actual_content, expected_content):
+            for input_line, output_line in zip(actual_content, expected_contents):
                 assert (
                     input_line.lower() == output_line.lower()
                 ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"

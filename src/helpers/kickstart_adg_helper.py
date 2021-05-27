@@ -115,6 +115,80 @@ def get_schema_config(template_root_path, template_name):
         )
 
 
+def generate_csv_files(schema_config, local_output_folder, record_count):
+    for collection, collection_schema in schema_config["schema"].items():
+        run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        epoc_time = str(date_helper.get_current_epoch_seconds())
+        for seq_num in range(1, schema_config["total_num_files"] + 1):
+            output_file_name = (
+                schema_config["output_file_pattern"]
+                    .replace("run-date", run_date)
+                    .replace("collection", collection)
+                    .replace("epoc-time", epoc_time)
+                    .replace("seq-num", seq_num)
+            )
+
+            output_file = os.path.join(local_output_folder, output_file_name)
+
+            console_printer.print_info(
+                f"opening the file {output_file} to write test data"
+            )
+            with open(output_file, "w+", newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter=schema_config['record_delimiter'])
+                header_record = collection_schema.keys()
+                writer.writerow(header_record)
+                num = 1
+                while num <= int(record_count):
+                    record_data = [
+                        str(dataTypeMapping(type)())
+                        for key, type in collection_schema.items()
+                    ]
+                    writer.writerow(record_data)
+                    num += 1
+
+def generate_json_files(schema_config, local_output_folder, record_count):
+    for collection, collection_schema in schema_config["schema"].items():
+        run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        epoc_time = str(date_helper.get_current_epoch_seconds())
+        output_file_name = (
+            schema_config["output_file_pattern"]
+                .replace("run-date", run_date)
+                .replace("collection", collection)
+                .replace("epoc-time", epoc_time)
+        )
+        output_file = os.path.join(local_output_folder, output_file_name)
+        num = 1
+        data = []
+        JSON_BLOB = {
+            "extract": {
+                "service": "application-service",
+                "dataExtract": "application",
+                "start": datetime.strftime(
+                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                ),
+                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
+            },
+            "fields": [
+                {"fieldName": column, "pii": column_property["pii_flg"]}
+                for column, column_property in collection_schema.items()
+            ],
+        }
+        with open(output_file, "w+") as writer:
+            while num <= int(record_count):
+                record = {}
+                for column, column_property in collection_schema.items():
+                    record.update(
+                        {column: dataTypeMapping(column_property["value"])()}
+                    )
+                    if "default" in column_property:
+                        record.update(
+                            {column: rd.choice(column_property["default"])}
+                        )
+                data.append(record)
+                num += 1
+            JSON_BLOB.update({"data": data})
+            writer.write(json.dumps(JSON_BLOB, indent=4))
+
 def generate_data(module_name, record_count, schema_config, temp_folder):
 
     console_printer.print_info(
@@ -143,79 +217,10 @@ def generate_data(module_name, record_count, schema_config, temp_folder):
         )
 
         if schema_config["record_layout"].lower() == "csv":
-            for collection, collection_schema in schema_config["schema"].items():
-                run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
-                epoc_time = str(date_helper.get_current_epoch_seconds())
-                seq_num = "1"
-                output_file_name = (
-                    schema_config["output_file_pattern"]
-                    .replace("run-date", run_date)
-                    .replace("collection", collection)
-                    .replace("epoc-time", epoc_time)
-                    .replace("seq-num", seq_num)
-                )
-
-                output_file = os.path.join(local_output_folder, output_file_name)
-
-                console_printer.print_info(
-                    f"opening the file {output_file} to write test data"
-                )
-                with open(output_file, "w+", newline='') as csvfile:
-                    writer = csv.writer(csvfile, delimiter=schema_config['record_delimiter'])
-                    header_record = collection_schema.keys()
-                    writer.writerow(header_record)
-                    num = 1
-                    while num <= int(record_count):
-                        record_data = [
-                                str(dataTypeMapping(type)())
-                                for key, type in collection_schema.items()
-                            ]
-                        writer.writerow(record_data)
-                        num += 1
+            generate_csv_files(schema_config, local_output_folder, record_count)
 
         elif schema_config["record_layout"].lower() == "json":
-
-            for collection, collection_schema in schema_config["schema"].items():
-                run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
-                epoc_time = str(date_helper.get_current_epoch_seconds())
-                output_file_name = (
-                    schema_config["output_file_pattern"]
-                    .replace("run-date", run_date)
-                    .replace("collection", collection)
-                    .replace("epoc-time", epoc_time)
-                )
-                output_file = os.path.join(local_output_folder, output_file_name)
-                num = 1
-                data = []
-                JSON_BLOB = {
-                    "extract": {
-                        "service": "application-service",
-                        "dataExtract": "application",
-                        "start": datetime.strftime(
-                            datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
-                        ),
-                        "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
-                    },
-                    "fields": [
-                        {"fieldName": column, "pii": column_property["pii_flg"]}
-                        for column, column_property in collection_schema.items()
-                    ],
-                }
-                with open(output_file, "w+") as writer:
-                    while num <= int(record_count):
-                        record = {}
-                        for column, column_property in collection_schema.items():
-                            record.update(
-                                {column: dataTypeMapping(column_property["value"])()}
-                            )
-                            if "default" in column_property:
-                                record.update(
-                                    {column: rd.choice(column_property["default"])}
-                                )
-                        data.append(record)
-                        num += 1
-                    JSON_BLOB.update({"data": data})
-                    writer.write(json.dumps(JSON_BLOB, indent=4))
+            generate_json_files(schema_config, local_output_folder, record_count)
 
         return [
             os.path.join(local_output_folder, x)
