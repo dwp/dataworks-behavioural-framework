@@ -195,7 +195,6 @@ function execute_behave() {
 
     if [[ ! -z "${TF_SNAPSHOT_SENDER_OUTPUT_FILE}" && "${TF_SNAPSHOT_SENDER_OUTPUT_FILE}" != "${NOT_SET_FLAG}" ]]; then
         echo "Using ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} ..."
-        ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.asg_properties.value.max_counts.snapshot_sender // empty')"
         ASG_PREFIX_SNAPSHOT_SENDER="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.snapshot_sender // empty')"
 
         SNAPSHOT_S3_OUTPUT_PATH="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.stub_hdfs.value.path_prefix')"
@@ -215,6 +214,7 @@ function execute_behave() {
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
+        ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
