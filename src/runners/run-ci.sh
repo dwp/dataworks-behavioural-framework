@@ -91,7 +91,6 @@ function execute_behave() {
     ENCRYPTED_ENCRYPTION_KEY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.encrypted')"
     MASTER_KEY_ID="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.master')"
     MANIFEST_S3_OUTPUT_LOCATION="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.query_output_s3_prefix')"
-    MANIFEST_S3_INPUT_LOCATION_IMPORT_HISTORIC="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.historic_folder')"
     MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_MAIN="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
     MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_EQUALITY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
     MANIFEST_S3_INPUT_LOCATION_EXPORT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.export_folder')"
@@ -178,6 +177,7 @@ function execute_behave() {
         HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.incrementals.content')"
 
         MANIFEST_S3_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_bucket.value.id')"
+        MANIFEST_S3_INPUT_LOCATION_IMPORT_HISTORIC="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.historic_folder')"
 
         INGEST_HBASE_EMR_CLUSTER_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.cluster_id')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_BUCKET_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_bucket')"
