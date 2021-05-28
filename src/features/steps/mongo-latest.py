@@ -57,7 +57,7 @@ def step_impl(context, step_name):
     )
 
 
-@then("insert the dynamodb check query step onto the mongo latest cluster")
+@when("insert the dynamodb check query step onto the mongo latest cluster")
 def step_impl(context):
     context.mongo_latest_ddb_cluster_step_name = "dynamodb_check_query"
     file_name = f"{context.test_run_name}_ddb.csv"

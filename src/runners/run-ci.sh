@@ -108,7 +108,6 @@ function execute_behave() {
 
     CDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.run_cdl_s3_url')"
     HDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.historic_data_loader.value.run_hdl_s3_url')"
-    CREATE_HBASE_TABLES_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.emr_ingest_hbase_files.value.create_hbase_tables_script')"
 
     CDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.s3_base_prefix')"
     HDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.ucfs_historic_data_prefix.value')"
@@ -188,13 +187,14 @@ function execute_behave() {
         MONGO_SNAPSHOT_PATH="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_folder.value.id')"
 
         MANIFEST_S3_INPUT_PARQUET_LOCATION="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_s3_prefixes.value.parquet')"
+
+        CREATE_HBASE_TABLES_SCRIPT_S3_URL="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.emr_ingest_hbase_files.value.create_hbase_tables_script')"
     else
         echo "Skipping TF_INTERNAL_COMPUTE_OUTPUT_FILE=${TF_INTERNAL_COMPUTE_OUTPUT_FILE}"
     fi
 
     if [[ ! -z "${TF_SNAPSHOT_SENDER_OUTPUT_FILE}" && "${TF_SNAPSHOT_SENDER_OUTPUT_FILE}" != "${NOT_SET_FLAG}" ]]; then
         echo "Using ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} ..."
-        ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.asg_properties.value.max_counts.snapshot_sender // empty')"
         ASG_PREFIX_SNAPSHOT_SENDER="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.snapshot_sender // empty')"
 
         SNAPSHOT_S3_OUTPUT_PATH="$(cat ${TF_SNAPSHOT_SENDER_OUTPUT_FILE} | jq -r '.stub_hdfs.value.path_prefix')"
@@ -214,6 +214,7 @@ function execute_behave() {
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
+        ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
