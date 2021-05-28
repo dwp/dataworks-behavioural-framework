@@ -201,16 +201,14 @@ def step_impl(context, module_name):
                 .strip()
                 .splitlines()
             )
-            expected_file_name = [
+            expected_file_names = [
                 file
                 for file in context.kickstart_current_run_input_files
                 if collection in file
-            ][0]
-            console_printer.print_info(f"Expected File Name: {expected_file_name}")
-            expected_contents = []
-            expected_contents.append(file_helper.get_contents_of_file(
-                expected_file_name, False
-            ).splitlines()[1:])
+            ]
+            console_printer.print_info(f"Expected File Name: {expected_file_names}")
+
+            expected_contents = [file_helper.get_contents_of_file(file, False).splitlines()[1:] for file in expected_file_names]
 
             for input_line, output_line in zip(actual_content, expected_contents):
                 assert (
