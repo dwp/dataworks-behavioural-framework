@@ -212,10 +212,15 @@ def step_impl(context, module_name):
             expected_contents = [file_helper.get_contents_of_file(file, False).splitlines()[1:] for file in expected_file_names]
             final_expected_contents = [row.lower() for items in expected_contents for row in items]
 
-            for expected_line in final_expected_contents:
+            console_printer.print_info(f"Check the total items in actual and expected list")
+            assert (
+                    len(actual_content) == len(final_expected_contents)
+            ), f"Total actual items {len(actual_content)} does not match Expected count {len(final_expected_contents)}  for collection {collection}"
+
+            for actual_line in actual_content:
                 assert (
-                        expected_line in final_expected_contents == True
-                ), f"Expected result of '{expected_line}' in not present in actual content for collection {collection}"
+                        actual_line in final_expected_contents
+                ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
 
     elif schema_config["record_layout"].lower() == "json":
         for collection in schema_config["schema"].keys():
