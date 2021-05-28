@@ -199,6 +199,7 @@ def step_impl(context, module_name):
                 file_content.replace("\t", ",")
                 .replace("NULL", "None")
                 .strip()
+                .lower()
                 .splitlines()
             )
             expected_file_names = [
@@ -209,12 +210,12 @@ def step_impl(context, module_name):
             console_printer.print_info(f"Expected File Name: {expected_file_names}")
 
             expected_contents = [file_helper.get_contents_of_file(file, False).splitlines()[1:] for file in expected_file_names]
-            final_contents = [row for items in expected_contents for row in items]
+            final_expected_contents = [row.lower() for items in expected_contents for row in items]
 
-            for input_line, output_line in zip(actual_content, final_contents):
+            for expected_line in final_expected_contents:
                 assert (
-                    input_line.lower() == output_line.lower()
-                ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
+                        expected_line in final_expected_contents == True
+                ), f"Expected result of '{expected_line}' in not present in actual content for collection {collection}"
 
     elif schema_config["record_layout"].lower() == "json":
         for collection in schema_config["schema"].keys():
