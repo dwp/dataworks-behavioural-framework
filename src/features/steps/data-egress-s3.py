@@ -7,6 +7,7 @@ from helpers import (
     historic_data_load_generator,
     aws_helper,
     console_printer,
+    snapshots_helper,
 )
 
 OUTPUT_FILE_REGEX = r".*.txt"
@@ -80,3 +81,15 @@ def step_verify_data_egress_content(context):
     assert (
         output_file_content == "This is just sample data to test data egress service."
     )
+
+@then("verify content of the SFT output file")
+def step_verify_stf_content(context):
+    if not snapshots_helper.wait_for_snapshots_to_be_sent_to_s3(
+        context.timeout,
+        1,
+        context.snapshot_s3_output_bucket,
+        "",
+    ):
+        raise AssertionError(
+            f"Snapshots found at '{'snapshot_s3_full_output_path'}' was not above or matching expected minimum of '{'generated_snapshots_count'}'"
+        )
