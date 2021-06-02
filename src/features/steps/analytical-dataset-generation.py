@@ -76,7 +76,7 @@ ADG_DB_INCREMENTAL_COLLECTION = {
 
 
 @given(
-    "the data of the format in the template file '{template_name}' as an input to analytical data set generation emr"
+    "the data of the format in the template file '{template_name}' for 'snapshot_type' as an input to analytical data set generation emr"
 )
 def step_(context, template_name, snapshot_type):
 
