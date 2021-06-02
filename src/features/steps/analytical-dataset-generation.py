@@ -56,7 +56,7 @@ ADG_INCREMENTAL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
-    "data.audit",
+    "data.businessAudit",
 ]
 
 ADG_DB_FULL_COLLECTION = {
@@ -71,7 +71,7 @@ ADG_DB_INCREMENTAL_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
-    "data": ["audit"],
+    "data": ["businessAudit"],
 }
 
 
