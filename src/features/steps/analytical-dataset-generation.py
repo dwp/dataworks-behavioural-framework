@@ -78,7 +78,12 @@ ADG_DB_INCREMENTAL_COLLECTION = {
 @given(
     "the data of the format in the template file '{template_name}' as an input to analytical data set generation emr"
 )
-def step_(context, template_name):
+def step_(context, template_name, snapshot_type):
+
+    if snapshot_type == "full":
+        ADG_TOPICS = ADG_FULL_TOPICS
+    else:
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS
 
     for topic in ADG_TOPICS:
         snapshot_local_file = (
