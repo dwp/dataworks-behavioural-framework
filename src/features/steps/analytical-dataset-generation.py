@@ -42,7 +42,7 @@ ADG_FULL_TOPICS = [
     "db.core.claimantCommitment",
     "db.core.toDo",
     "db.accepted-data.personDetails",
-    "db.appointments.appointment"
+    "db.appointments.appointment",
 ]
 
 ADG_INCREMENTAL_TOPICS = [
@@ -56,14 +56,14 @@ ADG_INCREMENTAL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
-    "data.audit"
+    "data.audit",
 ]
 
 ADG_DB_FULL_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"]
+    "appointments": ["appointment"],
 }
 
 ADG_DB_INCREMENTAL_COLLECTION = {
@@ -71,7 +71,7 @@ ADG_DB_INCREMENTAL_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
-    "data": ["audit"]
+    "data": ["audit"],
 }
 
 
@@ -387,7 +387,9 @@ def metadata_table_step_impl(context, snapshot_type):
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
 
 
-@then("The dynamodb status for each collection for '{snapshot_type}' is set to '{expected}'")
+@then(
+    "The dynamodb status for each collection for '{snapshot_type}' is set to '{expected}'"
+)
 def step_impl(context, snapshot_type, expected):
     if snapshot_type == "full":
         ADG_TOPICS = ADG_FULL_TOPICS
