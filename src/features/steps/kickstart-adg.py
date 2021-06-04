@@ -82,7 +82,11 @@ def step_impl(context, modules):
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
         for keys, item in schema_config["output_file_pattern"].items():
-            correlation_id = f"kickstart_{module_name}_analytical_dataset_generation" if keys == "full" else f"kickstart_{module_name}_analytical_dataset_generation_delta"
+            correlation_id = (
+                f"kickstart_{module_name}_analytical_dataset_generation"
+                if keys == "full"
+                else f"kickstart_{module_name}_analytical_dataset_generation_delta"
+            )
             data_product_name = "KICKSTART-ADG"
             processing_dt = datetime.strftime(
                 datetime.now() - timedelta(days=1), "%Y-%m-%d"
@@ -118,10 +122,10 @@ def step_impl(context, modules):
                         "--e2e_test_flg",
                         "True",
                         "--load_type",
-                        f"{keys}"
+                        f"{keys}",
                     ]
                 }
-        )
+            )
 
     emr_launcher_config.update({"additional_step_args": additional_step_args})
 
@@ -193,10 +197,16 @@ def step_impl(context, module_name):
     if schema_config["record_layout"].lower() == "csv":
         for collection in schema_config["schema"].keys():
             for load_type in ["full", "delta"]:
-                file_name = f"e2e_{collection}.csv" if load_type == "full" else f"e2e_{collection}_delta.csv"
-                collection_name = collection if load_type == "full" else f"{collection}_delta"
+                file_name = (
+                    f"e2e_{collection}.csv"
+                    if load_type == "full"
+                    else f"e2e_{collection}_delta.csv"
+                )
+                collection_name = (
+                    collection if load_type == "full" else f"{collection}_delta"
+                )
                 s3_result_key = os.path.join(
-                context.kickstart_hive_result_path, f"{file_name}"
+                    context.kickstart_hive_result_path, f"{file_name}"
                 )
                 console_printer.print_info(f"S3 Request Location: {s3_result_key}")
                 file_content = aws_helper.get_s3_object(
