@@ -119,32 +119,34 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
-        for seq_num in range(1, schema_config["total_num_files"] + 1):
-            output_file_name = (
-                schema_config["output_file_pattern"]
+
+        for keys,item in schema_config["output_file_pattern"].items():
+            for num in range(1, item["total_files"]):
+                output_file_name = (
+                    item["file_pattern"]
                     .replace("run-date", run_date)
                     .replace("collection", collection)
                     .replace("epoc-time", epoc_time)
                     .replace("seq-num", str(seq_num))
-            )
+                )
 
-            output_file = os.path.join(local_output_folder, output_file_name)
+                output_file = os.path.join(local_output_folder, output_file_name)
 
-            console_printer.print_info(
-                f"opening the file {output_file} to write test data"
-            )
-            with open(output_file, "w+", newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=schema_config['record_delimiter'])
-                header_record = collection_schema.keys()
-                writer.writerow(header_record)
-                num = 1
-                while num <= int(record_count):
-                    record_data = [
-                        str(dataTypeMapping(type)())
-                        for key, type in collection_schema.items()
-                    ]
-                    writer.writerow(record_data)
-                    num += 1
+                console_printer.print_info(
+                    f"opening the file {output_file} to write test data"
+                )
+                with open(output_file, "w+", newline='') as csvfile:
+                    writer = csv.writer(csvfile, delimiter=schema_config['record_delimiter'])
+                    header_record = collection_schema.keys()
+                    writer.writerow(header_record)
+                    num = 1
+                    while num <= int(record_count):
+                        record_data = [
+                            str(dataTypeMapping(type)())
+                            for key, type in collection_schema.items()
+                        ]
+                        writer.writerow(record_data)
+                        num += 1
 
 def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():

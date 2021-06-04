@@ -64,8 +64,16 @@
     },
     "record_layout" : "CSV",
     "record_delimiter" : ",",
-    "output_file_pattern": "run-date_collection_epoc-time_delta_seq-num.csv",
-    "total_num_files" : 10
+    "output_file_pattern": {
+        "full" : {
+          "file_pattern" : "run-date_collection_epoc-time.csv",
+          "total_files"  : 1
+        },
+        "delta" : {
+          "file_pattern" : "run-date_collection_epoc-time_delta_seq-num.csv",
+          "total_files"  : 10
+        }
+    }
   },
   "application" : {
     "schema" : {
