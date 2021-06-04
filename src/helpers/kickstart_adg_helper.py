@@ -125,7 +125,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
         epoc_time = str(date_helper.get_current_epoch_seconds())
 
         for keys, item in schema_config["output_file_pattern"].items():
-            for num in range(1, item["total_files"]):
+            for num in range(1, item["total_files"] + 1):
                 output_file_name = (
                     item["file_pattern"]
                     .replace("run-date", run_date)
