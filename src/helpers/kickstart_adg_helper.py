@@ -255,7 +255,7 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                             for col in collections_schema.keys()
                         ]
                     )
-                    table_name = collection if keys == "full" else f"collection_delta"
+                    table_name = collection if keys == "full" else f"{collection}_delta"
                     hive_export_bash_command = (
                         f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
                         + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
