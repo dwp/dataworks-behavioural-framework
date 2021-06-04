@@ -244,22 +244,24 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
         if schema_config["record_layout"].lower() == "csv":
             for collection, collections_schema in schema_config["schema"].items():
                 date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
-                file_name = f"e2e_{collection}.csv"
-                column_name = ",".join(
-                    [
-                        re.sub("[^0-9a-zA-Z$]+", " ", col)
-                        .strip()
-                        .replace(" ", "_")
-                        .lower()
-                        for col in collections_schema.keys()
-                    ]
-                )
-                hive_export_bash_command = (
-                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                    + f" &>> /var/log/kickstart_adg/e2e.log"
-                )
-                hive_export_list.append(hive_export_bash_command)
+                for keys, item in schema_config["output_file_pattern"].items():
+                    file_name = f"e2e_{collection}.csv" if keys == "full" else f"e2e_{collection}_delta.csv"
+                    column_name = ",".join(
+                        [
+                            re.sub("[^0-9a-zA-Z$]+", " ", col)
+                            .strip()
+                            .replace(" ", "_")
+                            .lower()
+                            for col in collections_schema.keys()
+                        ]
+                    )
+                    table_name = collection if keys == "full" else f"collection_delta"
+                    hive_export_bash_command = (
+                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                    )
+                    hive_export_list.append(hive_export_bash_command)
 
         elif schema_config["record_layout"].lower() == "json":
             for collection, collections_schema in schema_config["schema"].items():
