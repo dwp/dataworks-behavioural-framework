@@ -203,7 +203,11 @@ def step_impl(context, module_name):
                     if load_type == "full"
                     else f"e2e_{collection}_delta.csv"
                 )
-                file_regex_pattern=rf'.*{collection}_[0-9]*.csv' if load_type == "full" else rf'.*{collection}_[0-9]*_delta_[0-9]*.csv'
+                file_regex_pattern = (
+                    rf".*{collection}_[0-9]*.csv"
+                    if load_type == "full"
+                    else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
+                )
                 s3_result_key = os.path.join(
                     context.kickstart_hive_result_path, f"{file_name}"
                 )
@@ -213,15 +217,15 @@ def step_impl(context, module_name):
                 ).decode("utf-8")
                 actual_content = (
                     file_content.replace("\t", ",")
-                        .replace("NULL", "None")
-                        .strip()
-                        .lower()
-                        .splitlines()
+                    .replace("NULL", "None")
+                    .strip()
+                    .lower()
+                    .splitlines()
                 )
                 expected_file_names = [
                     file
                     for file in context.kickstart_current_run_input_files
-                    if re.match(file_regex_pattern,file)
+                    if re.match(file_regex_pattern, file)
                 ]
                 console_printer.print_info(f"Expected File Name: {expected_file_names}")
 
@@ -242,7 +246,7 @@ def step_impl(context, module_name):
 
                 for actual_line in actual_content:
                     assert (
-                            actual_line in final_expected_contents
+                        actual_line in final_expected_contents
                     ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
 
     elif schema_config["record_layout"].lower() == "json":
@@ -276,5 +280,5 @@ def step_impl(context, module_name):
 
             for input_line, output_line in zip(actual_content, expected_content):
                 assert (
-                        input_line.lower() == output_line.lower()
+                    input_line.lower() == output_line.lower()
                 ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"

@@ -128,10 +128,10 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
             for num in range(1, item["total_files"] + 1):
                 output_file_name = (
                     item["file_pattern"]
-                        .replace("run-date", run_date)
-                        .replace("collection", collection)
-                        .replace("epoc-time", epoc_time)
-                        .replace("seq-num", str(num))
+                    .replace("run-date", run_date)
+                    .replace("collection", collection)
+                    .replace("epoc-time", epoc_time)
+                    .replace("seq-num", str(num))
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 console_printer.print_info(
@@ -159,9 +159,9 @@ def generate_json_files(schema_config, local_output_folder, record_count):
         epoc_time = str(date_helper.get_current_epoch_seconds())
         output_file_name = (
             schema_config["output_file_pattern"]
-                .replace("run-date", run_date)
-                .replace("collection", collection)
-                .replace("epoc-time", epoc_time)
+            .replace("run-date", run_date)
+            .replace("collection", collection)
+            .replace("epoc-time", epoc_time)
         )
         output_file = os.path.join(local_output_folder, output_file_name)
         num = 1
@@ -253,17 +253,17 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                     column_name = ",".join(
                         [
                             re.sub("[^0-9a-zA-Z$]+", " ", col)
-                                .strip()
-                                .replace(" ", "_")
-                                .lower()
+                            .strip()
+                            .replace(" ", "_")
+                            .lower()
                             for col in collections_schema.keys()
                         ]
                     )
                     table_name = collection if keys == "full" else f"{collection}_delta"
                     hive_export_bash_command = (
-                            f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                            + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                            + f" &>> /var/log/kickstart_adg/e2e.log"
+                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                        + f" &>> /var/log/kickstart_adg/e2e.log"
                     )
                     hive_export_list.append(hive_export_bash_command)
 
@@ -281,9 +281,9 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                     ]
                 )
                 hive_export_bash_command = (
-                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                    + f" &>> /var/log/kickstart_adg/e2e.log"
                 )
                 hive_export_list.append(hive_export_bash_command)
 
