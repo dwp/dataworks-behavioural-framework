@@ -131,7 +131,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
                     .replace("run-date", run_date)
                     .replace("collection", collection)
                     .replace("epoc-time", epoc_time)
-                    .replace("seq-num", str(seq_num))
+                    .replace("seq-num", str(num))
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 console_printer.print_info(
