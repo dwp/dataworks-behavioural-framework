@@ -245,7 +245,11 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
             for collection, collections_schema in schema_config["schema"].items():
                 date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
                 for keys, item in schema_config["output_file_pattern"].items():
-                    file_name = f"e2e_{collection}.csv" if keys == "full" else f"e2e_{collection}_delta.csv"
+                    file_name = (
+                        f"e2e_{collection}.csv"
+                        if keys == "full"
+                        else f"e2e_{collection}_delta.csv"
+                    )
                     column_name = ",".join(
                         [
                             re.sub("[^0-9a-zA-Z$]+", " ", col)
