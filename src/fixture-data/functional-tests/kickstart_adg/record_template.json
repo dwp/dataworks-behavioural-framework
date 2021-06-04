@@ -37,7 +37,7 @@
         "Bid Id": "uuid",
         "Closing Date": "date",
         "End Date": "date",
-        "Employability Support": "text",
+        "Employability Support": "user-input",
         "Employer Job Reference": "text",
         "Employer Name": "string",
         "Hours per Week": "numeric",
@@ -64,11 +64,20 @@
     },
     "record_layout" : "CSV",
     "record_delimiter" : ",",
-    "output_file_pattern": "run-date_collection_epoc-time.csv"
+    "output_file_pattern": {
+      "full" : {
+        "file_pattern" : "run-date_collection_epoc-time.csv",
+        "total_files"  : 1
+      },
+      "delta" : {
+        "file_pattern" : "run-date_collection_epoc-time_delta_seq-num.csv",
+        "total_files"  : 10
+      }
+    }
   },
   "application" : {
     "schema" : {
-      "grant_applications" : {
+      "kick-mksas-applications" : {
         "id": {
           "value"   : "uuid",
           "pii_flg" : false
@@ -318,10 +327,10 @@
           "value" : "timestamp",
           "pii_flg" : false
         }
-    }
+      }
     },
     "record_layout" : "JSON",
-    "output_file_pattern" : "run-date_application-collection_epoc-time.json"
+    "output_file_pattern" : "run-date-collection-epoc-time.json"
   },
   "payment" : {
     "schema" : {
@@ -415,7 +424,7 @@
           "value" : "string",
           "pii_flg" : false
         }
-    },
+      },
       "note" : {
         "id": {
           "value"   : "uuid",
@@ -591,7 +600,7 @@
           "pii_flg" : false
         }
       }
-      },
+    },
     "record_layout" : "JSON",
     "output_file_pattern" : "run-date_payment-collection_epoc-time.json"
   }
