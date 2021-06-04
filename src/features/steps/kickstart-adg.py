@@ -203,7 +203,11 @@ def step_impl(context, module_name):
                     if load_type == "full"
                     else f"e2e_{collection}_delta.csv"
                 )
-                file_regex_pattern=rf'.*{collection}_[0-9]*.csv' if load_type == "full" else rf'.*{collection}_[0-9]*_delta_[0-9]*.csv'
+                file_regex_pattern = (
+                    rf".*{collection}_[0-9]*.csv"
+                    if load_type == "full"
+                    else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
+                )
                 s3_result_key = os.path.join(
                     context.kickstart_hive_result_path, f"{file_name}"
                 )
@@ -221,7 +225,7 @@ def step_impl(context, module_name):
                 expected_file_names = [
                     file
                     for file in context.kickstart_current_run_input_files
-                    if re.match(file_regex_pattern,file)
+                    if re.match(file_regex_pattern, file)
                 ]
                 console_printer.print_info(f"Expected File Name: {expected_file_names}")
 
