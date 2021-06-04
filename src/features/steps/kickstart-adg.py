@@ -1,5 +1,6 @@
 from behave import given, when, then
 import os
+import re
 import json
 from datetime import datetime, timedelta
 from helpers import (
@@ -80,44 +81,52 @@ def step_impl(context, modules):
     additional_step_args = {}
     KICKSTART_MODULES = modules.split(",")
     for module_name in KICKSTART_MODULES:
-        correlation_id = f"kickstart_{module_name}_analytical_dataset_generation"
-        data_product_name = "KICKSTART-ADG"
-        processing_dt = datetime.strftime(
-            datetime.now() - timedelta(days=1), "%Y-%m-%d"
-        )
-        status = "COMPLETED"
+        schema_config = context.kickstart_schema_config[module_name]
+        for keys, item in schema_config["output_file_pattern"].items():
+            correlation_id = (
+                f"kickstart_{module_name}_analytical_dataset_generation"
+                if keys == "full"
+                else f"kickstart_{module_name}_analytical_dataset_generation_delta"
+            )
+            data_product_name = "KICKSTART-ADG"
+            processing_dt = datetime.strftime(
+                datetime.now() - timedelta(days=1), "%Y-%m-%d"
+            )
+            status = "COMPLETED"
 
-        console_printer.print_info(
-            f"The value to used as run time parameter \n"
-            + f"correlation_id = {correlation_id} \n"
-            + f"data_product_name = {data_product_name} \n"
-            + f"processing_dt = {processing_dt} \n"
-            + f"status  = {status} \n"
-        )
-        console_printer.print_info(
-            f"Adjusting entry in dynamodb table {DYNAMO_DB_TABLE_NAME} for correlation_id {correlation_id} for e2e test"
-        )
+            console_printer.print_info(
+                f"The value to used as run time parameter \n"
+                + f"correlation_id = {correlation_id} \n"
+                + f"data_product_name = {data_product_name} \n"
+                + f"processing_dt = {processing_dt} \n"
+                + f"status  = {status} \n"
+            )
+            console_printer.print_info(
+                f"Adjusting entry in dynamodb table {DYNAMO_DB_TABLE_NAME} for correlation_id {correlation_id} for e2e test"
+            )
 
-        Item = {
-            AUDIT_TABLE_HASH_KEY: {"S": correlation_id},
-            AUDIT_TABLE_RANGE_KEY: {"S": data_product_name},
-            "Date": {"S": processing_dt},
-            "Run_Id": {"N": "1"},
-            "Status": {"S": status},
-        }
-
-        aws_helper.insert_item_to_dynamo_db(DYNAMO_DB_TABLE_NAME, Item)
-
-        additional_step_args.update(
-            {
-                f"submit-job-{module_name}": [
-                    "--module_name",
-                    f"{module_name}",
-                    "--e2e_test_flg",
-                    "True",
-                ]
+            Item = {
+                AUDIT_TABLE_HASH_KEY: {"S": correlation_id},
+                AUDIT_TABLE_RANGE_KEY: {"S": data_product_name},
+                "Date": {"S": processing_dt},
+                "Run_Id": {"N": "1"},
+                "Status": {"S": status},
             }
-        )
+
+            aws_helper.insert_item_to_dynamo_db(DYNAMO_DB_TABLE_NAME, Item)
+
+            additional_step_args.update(
+                {
+                    f"submit-job-{module_name}-{keys}": [
+                        "--module_name",
+                        f"{module_name}",
+                        "--e2e_test_flg",
+                        "True",
+                        "--load_type",
+                        f"{keys}",
+                    ]
+                }
+            )
 
     emr_launcher_config.update({"additional_step_args": additional_step_args})
 
@@ -188,33 +197,57 @@ def step_impl(context, module_name):
 
     if schema_config["record_layout"].lower() == "csv":
         for collection in schema_config["schema"].keys():
-            s3_result_key = os.path.join(
-                context.kickstart_hive_result_path, f"e2e_{collection}.csv"
-            )
-            console_printer.print_info(f"S3 Request Location: {s3_result_key}")
-            file_content = aws_helper.get_s3_object(
-                None, context.published_bucket, s3_result_key
-            ).decode("utf-8")
-            actual_content = (
-                file_content.replace("\t", ",")
-                .replace("NULL", "None")
-                .strip()
-                .splitlines()
-            )
-            expected_file_name = [
-                file
-                for file in context.kickstart_current_run_input_files
-                if collection in file
-            ][0]
-            console_printer.print_info(f"Expected File Name: {expected_file_name}")
-            expected_content = file_helper.get_contents_of_file(
-                expected_file_name, False
-            ).splitlines()[1:]
+            for load_type in ["full", "delta"]:
+                file_name = (
+                    f"e2e_{collection}.csv"
+                    if load_type == "full"
+                    else f"e2e_{collection}_delta.csv"
+                )
+                file_regex_pattern = (
+                    rf".*{collection}_[0-9]*.csv"
+                    if load_type == "full"
+                    else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
+                )
+                s3_result_key = os.path.join(
+                    context.kickstart_hive_result_path, f"{file_name}"
+                )
+                console_printer.print_info(f"S3 Request Location: {s3_result_key}")
+                file_content = aws_helper.get_s3_object(
+                    None, context.published_bucket, s3_result_key
+                ).decode("utf-8")
+                actual_content = (
+                    file_content.replace("\t", ",")
+                    .replace("NULL", "None")
+                    .strip()
+                    .lower()
+                    .splitlines()
+                )
+                expected_file_names = [
+                    file
+                    for file in context.kickstart_current_run_input_files
+                    if re.match(file_regex_pattern, file)
+                ]
+                console_printer.print_info(f"Expected File Name: {expected_file_names}")
 
-            for input_line, output_line in zip(actual_content, expected_content):
-                assert (
-                    input_line.lower() == output_line.lower()
-                ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
+                expected_contents = [
+                    file_helper.get_contents_of_file(file, False).splitlines()[1:]
+                    for file in expected_file_names
+                ]
+                final_expected_contents = [
+                    row.lower() for items in expected_contents for row in items
+                ]
+
+                console_printer.print_info(
+                    f"Check the total items in actual and expected list"
+                )
+                assert len(actual_content) == len(
+                    final_expected_contents
+                ), f"Total actual items {len(actual_content)} does not match Expected count {len(final_expected_contents)}  for collection {collection}"
+
+                for actual_line in actual_content:
+                    assert (
+                        actual_line in final_expected_contents
+                    ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
 
     elif schema_config["record_layout"].lower() == "json":
         for collection in schema_config["schema"].keys():
