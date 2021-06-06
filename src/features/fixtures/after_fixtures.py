@@ -146,3 +146,22 @@ def terminate_mongo_latest_cluster(context, timeout=30, **kwargs):
         console_printer.print_info(
             "No cluster id found for mongo latest so not terminating any cluster"
         )
+
+
+@fixture
+def terminate_ingest_replica_cluster(context):
+    console_printer.print_info("Executing 'terminate_ingest_replica_cluster' fixture")
+    if (
+        "ingest_replica_emr_cluster_id" in context
+        and context.ingest_replica_emr_cluster_id is not None
+    ):
+        try:
+            aws_helper.terminate_emr_cluster(context.ingest_replica_emr_cluster_id)
+        except Exception as e:
+            console_printer.print_warning_text(
+                f"Unable to terminate cluster due to error:{e}"
+            )
+    else:
+        console_printer.print_warning_text(
+            "No ingest-replica cluster identified to terminate"
+        )

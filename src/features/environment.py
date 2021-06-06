@@ -517,3 +517,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_kickstart_cluster, context)
     if tag == "fixture.terminate.mongo_latest.cluster":
         use_fixture(after_fixtures.terminate_mongo_latest_cluster, context)
+    if tag == "fixture.terminate.ingest_replica.cluster":
+        use_fixture(after_fixtures.terminate_ingest_replica_cluster, context)
