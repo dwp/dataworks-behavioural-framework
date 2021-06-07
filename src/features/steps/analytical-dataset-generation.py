@@ -56,14 +56,14 @@ ADG_INCREMENTAL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
-    "data.businessAudit"
+    "data.businessAudit",
 ]
 
 ADG_DB_FULL_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"]
+    "appointments": ["appointment"],
 }
 
 ADG_DB_INCREMENTAL_COLLECTION = {
@@ -71,21 +71,21 @@ ADG_DB_INCREMENTAL_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
-    "data": ["businessAudit"]
+    "data": ["businessAudit"],
 }
 
 ADG_DB_INCREMENTAL_COLLECTION_DATED_OUTPUT = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"]
+    "appointments": ["appointment"],
 }
 
 ADG_INCREMENTAL_TOPICS_DATED_OUTPUT = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"]
+    "appointments": ["appointment"],
 }
 
 
