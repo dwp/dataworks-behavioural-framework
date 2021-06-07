@@ -59,35 +59,25 @@ ADG_INCREMENTAL_TOPICS = [
     "data.businessAudit",
 ]
 
-ADG_DB_FULL_COLLECTION = {
+ADG_DB_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
 }
 
-ADG_DB_INCREMENTAL_COLLECTION = {
-    "agent-core": ["agent", "agentToDo", "team"],
-    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
-    "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
-    "data": ["businessAudit"],
-}
-
-ADG_DB_INCREMENTAL_COLLECTION_DATED_OUTPUT = {
-    "agent-core": ["agent", "agentToDo", "team"],
-    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
-    "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
-}
-
-ADG_INCREMENTAL_TOPICS_DATED_OUTPUT = {
-    "agent-core": ["agent", "agentToDo", "team"],
-    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
-    "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
-}
-
+ADG_INCREMENTAL_TOPICS_DATED = [
+    "db.agent-core.agent",
+    "db.agent-core.agentToDo",
+    "db.agent-core.team",
+    "db.core.statement",
+    "db.core.contract",
+    "db.core.claimant",
+    "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
+    "db.appointments.appointment",
+]
 
 @given(
     "the data of the format in the template file '{template_name}' for '{snapshot_type}' as an input to analytical data set generation emr"
@@ -283,11 +273,9 @@ def step_verify_analytical_datasets(context, snapshot_type):
     )
     console_printer.print_info(f"Keys in data location : {keys}")
     if snapshot_type == "full":
-        ADG_DB_COLLECTION = ADG_DB_FULL_COLLECTION
         ADG_TOPICS = ADG_FULL_TOPICS
     else:
-        ADG_DB_COLLECTION = ADG_DB_INCREMENTAL_COLLECTION_DATED_OUTPUT
-        ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED_OUTPUT
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
     console_printer.print_info(f"keys are : {keys}")
     console_printer.print_info(f"ADG_TOPICS are : {ADG_TOPICS}")
     assert len(keys) == len(ADG_TOPICS)
