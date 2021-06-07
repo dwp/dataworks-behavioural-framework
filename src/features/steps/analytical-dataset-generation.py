@@ -399,7 +399,7 @@ def step_impl(context, snapshot_type, expected):
     if snapshot_type == "full":
         ADG_TOPICS = ADG_FULL_TOPICS
     else:
-        ADG_TOPICS = ADG_INCREMENTAL_TOPICS
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
 
     for topic in ADG_TOPICS:
         response = export_status_helper.get_item_from_export_status_table(
