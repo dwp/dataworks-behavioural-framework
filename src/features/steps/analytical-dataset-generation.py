@@ -79,6 +79,7 @@ ADG_INCREMENTAL_TOPICS_DATED = [
     "db.appointments.appointment",
 ]
 
+
 @given(
     "the data of the format in the template file '{template_name}' for '{snapshot_type}' as an input to analytical data set generation emr"
 )
