@@ -56,14 +56,14 @@ ADG_INCREMENTAL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
-    "data.businessAudit",
+    "data.businessAudit"
 ]
 
 ADG_DB_FULL_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
+    "appointments": ["appointment"]
 }
 
 ADG_DB_INCREMENTAL_COLLECTION = {
@@ -71,21 +71,21 @@ ADG_DB_INCREMENTAL_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
-    "data": ["businessAudit"],
+    "data": ["businessAudit"]
 }
 
 ADG_DB_INCREMENTAL_COLLECTION_DATED_OUTPUT = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
+    "appointments": ["appointment"]
 }
 
 ADG_INCREMENTAL_TOPICS_DATED_OUTPUT = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
-    "appointments": ["appointment"],
+    "appointments": ["appointment"]
 }
 
 
@@ -288,6 +288,8 @@ def step_verify_analytical_datasets(context, snapshot_type):
     else:
         ADG_DB_COLLECTION = ADG_DB_INCREMENTAL_COLLECTION_DATED_OUTPUT
         ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED_OUTPUT
+    console_printer.print_info(f"keys are : {keys}")
+    console_printer.print_info(f"ADG_TOPICS are : {ADG_TOPICS}")
     assert len(keys) == len(ADG_TOPICS)
     for ADG_DB, collections in ADG_DB_COLLECTION.items():
         for collection in collections:
