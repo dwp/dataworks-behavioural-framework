@@ -32,7 +32,7 @@ CORRELATION_ID_VALUE = "e2e_test"
 S3_PREFIX = "s3_prefix"
 SNAPSHOT_TYPE = "snapshot_type"
 EXPORT_DATE = "export_date"
-ADG_TOPICS = [
+ADG_FULL_TOPICS = [
     "db.agent-core.agent",
     "db.agent-core.agentToDo",
     "db.agent-core.team",
@@ -43,7 +43,20 @@ ADG_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
-    "data.audit",
+]
+
+ADG_INCREMENTAL_TOPICS = [
+    "db.agent-core.agent",
+    "db.agent-core.agentToDo",
+    "db.agent-core.team",
+    "db.core.statement",
+    "db.core.contract",
+    "db.core.claimant",
+    "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
+    "db.appointments.appointment",
+    "data.businessAudit",
 ]
 
 ADG_DB_COLLECTION = {
@@ -51,14 +64,31 @@ ADG_DB_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
-    "data": ["audit"],
 }
+
+ADG_INCREMENTAL_TOPICS_DATED = [
+    "db.agent-core.agent",
+    "db.agent-core.agentToDo",
+    "db.agent-core.team",
+    "db.core.statement",
+    "db.core.contract",
+    "db.core.claimant",
+    "db.core.claimantCommitment",
+    "db.core.toDo",
+    "db.accepted-data.personDetails",
+    "db.appointments.appointment",
+]
 
 
 @given(
-    "the data of the format in the template file '{template_name}' as an input to analytical data set generation emr"
+    "the data of the format in the template file '{template_name}' for '{snapshot_type}' as an input to analytical data set generation emr"
 )
-def step_(context, template_name):
+def step_(context, template_name, snapshot_type):
+
+    if snapshot_type == "full":
+        ADG_TOPICS = ADG_FULL_TOPICS
+    else:
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS
 
     for topic in ADG_TOPICS:
         snapshot_local_file = (
@@ -243,6 +273,12 @@ def step_verify_analytical_datasets(context, snapshot_type):
         context.published_bucket, context.data_path, PART_FILE_REGEX
     )
     console_printer.print_info(f"Keys in data location : {keys}")
+    if snapshot_type == "full":
+        ADG_TOPICS = ADG_FULL_TOPICS
+    else:
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
+    console_printer.print_info(f"keys are : {keys}")
+    console_printer.print_info(f"ADG_TOPICS are : {ADG_TOPICS}")
     assert len(keys) == len(ADG_TOPICS)
     for ADG_DB, collections in ADG_DB_COLLECTION.items():
         for collection in collections:
@@ -356,8 +392,15 @@ def metadata_table_step_impl(context, snapshot_type):
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
 
 
-@then("The dynamodb status for each collection is set to '{expected}'")
-def step_impl(context, expected):
+@then(
+    "The dynamodb status for each collection for '{snapshot_type}' is set to '{expected}'"
+)
+def step_impl(context, snapshot_type, expected):
+    if snapshot_type == "full":
+        ADG_TOPICS = ADG_FULL_TOPICS
+    else:
+        ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
+
     for topic in ADG_TOPICS:
         response = export_status_helper.get_item_from_export_status_table(
             context.dynamo_db_export_status_table_name,
