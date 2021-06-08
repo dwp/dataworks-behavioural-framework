@@ -17,6 +17,7 @@ CIPHERTEXT = "ciphertext"
 S3_PREFIX_FOR_INPUT = "dataworks-egress-testing-input/"
 S3_PREFIX_FOR_SFT_INPUT = "dataworks-egress-testing-sft-input/"
 S3_PREFIX_FOR_OUTPUT = "data-egress-testing-output/"
+S3_PREFIX_FOR_SFT_OUTPUT = "sft/"
 TEMPLATE_FOLDER = "data_egress_data"
 TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 
@@ -25,6 +26,12 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
 )
 def step_prepare_data_egress_test(context, template_name):
+
+    aws_helper.clear_s3_prefix(
+        context.snapshot_s3_output_bucket,
+        S3_PREFIX_FOR_SFT_OUTPUT,
+        True
+    )
 
     template_file = os.path.join(
         context.fixture_path_local, TEMPLATE_FOLDER, template_name
@@ -95,12 +102,22 @@ def step_verify_data_egress_content(context):
 
 @then("verify content of the SFT output file")
 def step_verify_stf_content(context):
-    if not snapshots_helper.wait_for_snapshots_to_be_sent_to_s3(
-        context.timeout,
-        1,
-        context.snapshot_s3_output_bucket,
-        "",
-    ):
-        raise AssertionError(
-            f"Snapshots found at '{'snapshot_s3_full_output_path'}' was not above or matching expected minimum of '{'generated_snapshots_count'}'"
-        )
+    time.sleep(10)
+    keys = aws_helper.get_s3_file_object_keys_matching_pattern(
+        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, OUTPUT_FILE_REGEX
+    )
+
+    console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
+    assert len(keys) == 1
+    output_file_content = aws_helper.get_s3_object(
+        bucket=context.snapshot_s3_output_bucket, key=keys[0], s3_client=None
+    ).decode()
+    console_printer.print_info(f"sft file content is : {output_file_content}")
+    console_printer.print_info(f"sft file content is : {output_file_content} 2")
+    assert (
+        output_file_content == "This is just sample data to test data egress service."
+    )
+
+
+
+
