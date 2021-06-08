@@ -165,27 +165,24 @@ def generate_json_files(schema_config, local_output_folder, record_count):
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
         output_file_name = get_file_name(
-            file_pattern=schema_config["output_file_pattern"],
+            file_pattern=schema_config["output_file_pattern"][collection],
             run_date=run_date,
-            collection=collection,
             epoc_time=epoc_time
         )
         output_file = os.path.join(local_output_folder, output_file_name)
         num = 1
         data = []
         JSON_BLOB = {
-            "extract": {
-                "service": "application-service",
-                "dataExtract": "application",
-                "start": datetime.strftime(
-                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
-                ),
-                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
-            },
             "fields": [
                 {"fieldName": column, "pii": column_property["pii_flg"]}
                 for column, column_property in collection_schema.items()
             ],
+            "extract": {
+                "start": datetime.strftime(
+                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                ),
+                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
+            }
         }
         with open(output_file, "w+") as writer:
             while num <= int(record_count):
