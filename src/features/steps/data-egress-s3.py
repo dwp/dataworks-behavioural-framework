@@ -23,16 +23,38 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 
 
 @given(
+    "the data in file '{template_name}' written to '{file_location}'"
+)
+def step_prepare_sft_test(context, template_name):
+    aws_helper.clear_s3_prefix(
+    context.snapshot_s3_output_bucket,
+    S3_PREFIX_FOR_SFT_OUTPUT,
+    True
+    )
+
+    ec2_client = aws_helper.get_client('ec2')
+ 
+    custom_filter = [{
+    'Name':'tag:Application	', 
+    'Values': ['dataworks-aws-data-egress']}]
+    
+    response = ec2_client.describe_instances(Filters=custom_filter)
+    console_printer.print_info(f"Response from describe instances {response}")
+
+    # ssm_client = aws_helper.get_client('ssm')
+    # commands = ['echo "hello world"']
+    # instance_ids = ['', '']
+    # resp = ssm_client.send_command(
+    #     DocumentName="AWS-RunShellScript", # One of AWS' preconfigured documents
+    #     Parameters={'commands': commands},
+    #     InstanceIds=instance_ids,
+    # )
+    # console_printer.print_info(f"Response from ssm {resp}")
+
+@given(
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
 )
 def step_prepare_data_egress_test(context, template_name):
-
-    aws_helper.clear_s3_prefix(
-        context.snapshot_s3_output_bucket,
-        S3_PREFIX_FOR_SFT_OUTPUT,
-        True
-    )
-
     template_file = os.path.join(
         context.fixture_path_local, TEMPLATE_FOLDER, template_name
     )
@@ -62,15 +84,6 @@ def step_prepare_data_egress_test(context, template_name):
         metadata,
     )
     console_printer.print_info(f"Uploading success file to S3")
-
-    # upload file to sft input path
-    s3_sft_key = os.path.join(S3_PREFIX_FOR_SFT_INPUT, file_name)
-    console_printer.print_info(f"Uploading SFT file to S3")
-    aws_helper.put_object_in_s3(
-        unencrypted_content,
-        context.published_bucket,
-        s3_sft_key
-    )
 
     console_printer.print_info(f"Uploading success file to S3")
     template_success_file = os.path.join(
