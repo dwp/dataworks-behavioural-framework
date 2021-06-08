@@ -15,6 +15,7 @@ IV = "iv"
 DATAENCRYPTIONKEYID = "datakeyencryptionkeyid"
 CIPHERTEXT = "ciphertext"
 S3_PREFIX_FOR_INPUT = "dataworks-egress-testing-input/"
+S3_PREFIX_FOR_SFT_INPUT = "dataworks-egress-testing-sft-input/"
 S3_PREFIX_FOR_OUTPUT = "data-egress-testing-output/"
 TEMPLATE_FOLDER = "data_egress_data"
 TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
@@ -55,6 +56,16 @@ def step_prepare_data_egress_test(context, template_name):
     )
     console_printer.print_info(f"Uploading success file to S3")
 
+    # upload file to sft input path
+    s3_sft_key = os.path.join(S3_PREFIX_FOR_SFT_INPUT, file_name)
+    console_printer.print_info(f"Uploading SFT file to S3")
+    aws_helper.put_object_in_s3(
+        unencrypted_content,
+        context.published_bucket,
+        s3_sft_key
+    )
+
+    console_printer.print_info(f"Uploading success file to S3")
     template_success_file = os.path.join(
         context.fixture_path_local, TEMPLATE_FOLDER, TEMPLATE_SUCCESS_FILE
     )
