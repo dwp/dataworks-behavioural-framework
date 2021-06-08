@@ -137,6 +137,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
                     file_pattern=item["file_pattern"],
                     run_date=run_date,
                     collection=collection,
+                    epoc_time=epoc_time,
                     sequence_num=num
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
