@@ -25,7 +25,7 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 @given(
     "the data in file '{template_name}' written to '{file_location}'"
 )
-def step_prepare_sft_test(context, template_name):
+def step_prepare_sft_test(context, template_name, file_location):
     aws_helper.clear_s3_prefix(
     context.snapshot_s3_output_bucket,
     S3_PREFIX_FOR_SFT_OUTPUT,
