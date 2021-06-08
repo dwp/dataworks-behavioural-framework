@@ -134,7 +134,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
         for keys, item in schema_config["output_file_pattern"].items():
             for num in range(1, item["total_files"] + 1):
                 output_file_name = get_file_name(
-                    file_pattern=item["output_file_pattern"],
+                    file_pattern=item["file_pattern"],
                     run_date=run_date,
                     collection=collection,
                     sequence_num=num
