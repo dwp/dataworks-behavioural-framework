@@ -167,6 +167,7 @@ def generate_json_files(schema_config, local_output_folder, record_count):
         output_file_name = get_file_name(
             file_pattern=schema_config["output_file_pattern"][collection],
             run_date=run_date,
+            collection=collection,
             epoc_time=epoc_time
         )
         output_file = os.path.join(local_output_folder, output_file_name)
