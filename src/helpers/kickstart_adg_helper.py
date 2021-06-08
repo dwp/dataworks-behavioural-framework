@@ -5,6 +5,7 @@ import string
 import uuid
 import sys
 import re
+import gzip
 import random as rd
 from datetime import datetime, timedelta
 from helpers import (
@@ -45,15 +46,12 @@ def dataGenText():
     result_str = " ".join([str_1, str_2, str_3])
     return rd.choice([result_str, None])
 
-
 def dataGenTimestamp():
     current_date = datetime.today()
     return rd.choice([datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S"), None])
 
-
 def dataGenUUID():
     return str(uuid.uuid1())
-
 
 def dataGenString():
     letters = string.ascii_letters
@@ -118,20 +116,28 @@ def get_schema_config(template_root_path, template_name):
             f"Problem while generating kickstart schema because of error {str(ex)}"
         )
 
+def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0):
+    output_file_name = (
+        file_pattern
+            .replace("run-date", run_date)
+            .replace("collection", collection)
+            .replace("epoc-time", epoc_time)
+            .replace("seq-num", str(sequence_num))
+    )
+    return output_file_name
+
 
 def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
-
         for keys, item in schema_config["output_file_pattern"].items():
             for num in range(1, item["total_files"] + 1):
-                output_file_name = (
-                    item["file_pattern"]
-                    .replace("run-date", run_date)
-                    .replace("collection", collection)
-                    .replace("epoc-time", epoc_time)
-                    .replace("seq-num", str(num))
+                output_file_name = get_file_name(
+                    file_pattern=item["output_file_pattern"],
+                    run_date=run_date,
+                    collection=collection,
+                    sequence_num=num
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 console_printer.print_info(
@@ -157,11 +163,11 @@ def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
-        output_file_name = (
-            schema_config["output_file_pattern"]
-            .replace("run-date", run_date)
-            .replace("collection", collection)
-            .replace("epoc-time", epoc_time)
+        output_file_name = get_file_name(
+            file_pattern=schema_config["output_file_pattern"],
+            run_date=run_date,
+            collection=collection,
+            epoc_time=epoc_time
         )
         output_file = os.path.join(local_output_folder, output_file_name)
         num = 1
@@ -330,10 +336,10 @@ def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
 
             console_printer.print_info(f"Extracting the raw data from local directory")
             data = file_helper.get_contents_of_file(file, False).encode("utf-8")
-
+            compressed_data = gzip.compress(data)
             console_printer.print_info(f"Applying encryption to the raw data")
             input_data = historic_data_load_generator.encrypt(
-                file_iv_whole, plaintext_key, data
+                file_iv_whole, plaintext_key, compressed_data
             )
             inputs_s3_key = os.path.join(folder_name, file_name + ".enc")
 
