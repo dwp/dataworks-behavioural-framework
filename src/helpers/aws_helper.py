@@ -1812,27 +1812,27 @@ def check_if_s3_object_exists(bucket, key, s3_client=None):
 
     return False
 
-def execute_commands_on_ec2_by_tags_and_wait(commands: list, ec2_tags: list, timeout: int,  ssm_client=None):
+
+def execute_commands_on_ec2_by_tags_and_wait(
+    commands: list, ec2_tags: list, timeout: int, ssm_client=None
+):
     """Executes command on ec2 instances filtered by tags
 
     Keyword arguments:
        commands -- Array of string commands to run
        key -- Array of Application names the instances are tagged with
-       timeout -- The time in seconds to wait for the commands to be run 
+       timeout -- The time in seconds to wait for the commands to be run
        ssm_client -- an established ssm client (optional)
     """
-        
+
     if not ssm_client:
-        ssm_client = get_client('ssm')
-   
+        ssm_client = get_client("ssm")
+
     resp = ssm_client.send_command(
-        DocumentName="AWS-RunShellScript", 
-        Parameters={'commands': commands},
+        DocumentName="AWS-RunShellScript",
+        Parameters={"commands": commands},
         TimeoutSeconds=30,
-        Targets=[{
-            'Key': 'tag:Application',
-            'Values': ec2_tags
-        }]
+        Targets=[{"Key": "tag:Application", "Values": ec2_tags}],
     )
 
     console_printer.print_info(f"Response from ssm {resp}")
