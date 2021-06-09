@@ -32,19 +32,9 @@ def step_prepare_sft_test(context, template_name, file_location):
     False
     )
 
-    # ec2_client = aws_helper.get_client('ec2')
- 
-    # custom_filter = [{
-    # 'Name':'tag:Application', 
-    # 'Values': ['dataworks-aws-data-egress']}]
-    
-    # response = ec2_client.describe_instances(Filters=custom_filter)
-    # console_printer.print_info(f"Response from describe instances {response}")
-
     console_printer.print_info(f"Executing commands on Ec2")
     ssm_client = aws_helper.get_client('ssm')
-    commands = ['echo "hello world"', 'sudo su', 'cd /var/lib/docker/volumes/data-egress/_data', 'echo "test" >> test1.txt']
-    # instance_ids = ['', '']
+    commands = ['echo "hello world"', 'sudo su', 'cd /var/lib/docker/volumes/data-egress/_data/test', 'echo "test" >> test1.txt']
     resp = ssm_client.send_command(
         DocumentName="AWS-RunShellScript", 
         Parameters={'commands': commands},
