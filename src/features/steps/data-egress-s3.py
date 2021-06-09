@@ -130,7 +130,7 @@ def step_verify_stf_content(context):
     for s3_key in keys:
         output_file_content = aws_helper.get_s3_object(
             bucket=context.snapshot_s3_output_bucket, key=s3_key, s3_client=None
-        ).decode()
+        ).decode().strip()
         console_printer.print_info(f"sft file content is : {output_file_content}")
         console_printer.print_info(f"sft file content is : {output_file_content} 2")
         assert (
