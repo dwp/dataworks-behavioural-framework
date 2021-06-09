@@ -15,7 +15,6 @@ IV = "iv"
 DATAENCRYPTIONKEYID = "datakeyencryptionkeyid"
 CIPHERTEXT = "ciphertext"
 S3_PREFIX_FOR_INPUT = "dataworks-egress-testing-input/"
-S3_PREFIX_FOR_SFT_INPUT = "dataworks-egress-testing-sft-input/"
 S3_PREFIX_FOR_OUTPUT = "data-egress-testing-output/"
 S3_PREFIX_FOR_SFT_OUTPUT = "sft/"
 TEMPLATE_FOLDER = "data_egress_data"
@@ -78,7 +77,6 @@ def step_prepare_data_egress_test(context, template_name):
         s3_key,
         metadata,
     )
-    console_printer.print_info(f"Uploading success file to S3")
 
     console_printer.print_info(f"Uploading success file to S3")
     template_success_file = os.path.join(
@@ -94,7 +92,7 @@ def step_prepare_data_egress_test(context, template_name):
 def step_verify_data_egress_content(context):
     time.sleep(10)
     keys = aws_helper.get_s3_file_object_keys_matching_pattern(
-        context.published_bucket, S3_PREFIX_FOR_OUTPUT, "OUTPUT_FILE_REGEX"
+        context.published_bucket, S3_PREFIX_FOR_OUTPUT, OUTPUT_FILE_REGEX
     )
     console_printer.print_info(f"Keys in data egress output location : {keys}")
     console_printer.print_info(f"Keys in data egress output location : {keys} 2")
