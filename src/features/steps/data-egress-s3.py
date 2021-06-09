@@ -48,7 +48,7 @@ def step_prepare_sft_test(context, template_name, file_location):
     resp = ssm_client.send_command(
         DocumentName="AWS-RunShellScript", 
         Parameters={'commands': commands},
-        TimeoutSeconds=20,
+        TimeoutSeconds=30,
         Targets=[{
             'Key': 'tag:Application',
             'Values': [
