@@ -165,7 +165,7 @@ def generate_json_files(schema_config, local_output_folder, record_count):
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
         output_file_name = get_file_name(
-            file_pattern=schema_config["output_file_pattern"][collection],
+            file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
             run_date=run_date,
             collection=collection,
             epoc_time=epoc_time
