@@ -126,15 +126,16 @@ def step_verify_stf_content(context):
     )
 
     console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
-    assert len(keys) == 1
-    output_file_content = aws_helper.get_s3_object(
-        bucket=context.snapshot_s3_output_bucket, key=keys[0], s3_client=None
-    ).decode()
-    console_printer.print_info(f"sft file content is : {output_file_content}")
-    console_printer.print_info(f"sft file content is : {output_file_content} 2")
-    assert (
-        output_file_content == "This is just sample data to test data egress service."
-    )
+    assert len(keys) > 0
+    for s3_key in keys:
+        output_file_content = aws_helper.get_s3_object(
+            bucket=context.snapshot_s3_output_bucket, key=s3_key, s3_client=None
+        ).decode()
+        console_printer.print_info(f"sft file content is : {output_file_content}")
+        console_printer.print_info(f"sft file content is : {output_file_content} 2")
+        assert (
+            output_file_content == "e2e test"
+        )
 
 
 
