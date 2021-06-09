@@ -423,11 +423,13 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             f"This the local file name in the list: {context.kickstart_current_run_input_files}"
         )
         file_regex_pattern = rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
+
+        console_printer.print_info(f"Expected File Pattern: {file_regex_pattern}")
         expected_file_names = [
             file
             for file in context.kickstart_current_run_input_files
             if re.match(file_regex_pattern, file)
-        ]
+        ][0]
 
         console_printer.print_info(f"Expected File Name: {expected_file_names}")
         expected_json = json.loads(
