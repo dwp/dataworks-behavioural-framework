@@ -34,7 +34,7 @@ def step_prepare_sft_test(context, template_name, file_location):
 
     console_printer.print_info(f"Executing commands on Ec2")
     ssm_client = aws_helper.get_client('ssm')
-    commands = ['echo "hello world"', 'sudo su', 'cd /var/lib/docker/volumes/data-egress/_data/test', 'echo "test" >> test1.txt']
+    commands = ['echo "hello world"', 'sudo su', 'cd /var/lib/docker/volumes/data-egress/_data/test', 'echo "e2e test" >> test1.txt']
     resp = ssm_client.send_command(
         DocumentName="AWS-RunShellScript", 
         Parameters={'commands': commands},
