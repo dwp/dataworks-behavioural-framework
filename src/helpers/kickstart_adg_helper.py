@@ -443,9 +443,8 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
         ).splitlines()
 
         final_expected_contents = [
-            row.lower()
-            for items in expected_contents
-            for row in items
+            item.lower()
+            for item in expected_contents
         ]
 
     return actual_contents, final_expected_contents
