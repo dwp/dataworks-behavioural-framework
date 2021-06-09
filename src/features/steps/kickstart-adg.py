@@ -124,11 +124,14 @@ def step_impl(context, modules):
                         "--e2e_test_flg",
                         "True",
                         "--load_type",
-                        f"{key}",
+                        f"{key}"
                     ]
                 }
             )
 
+    console_printer.print_info(
+        f"submitting spark step : {additional_step_args}"
+    )
     emr_launcher_config.update({"additional_step_args": additional_step_args})
 
     console_printer.print_info(
