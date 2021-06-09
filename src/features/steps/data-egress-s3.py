@@ -59,6 +59,12 @@ def step_prepare_sft_test(context, template_name, file_location):
     console_printer.print_info(f"Response from ssm {resp}")
 
     console_printer.print_info(f"CommandId from ssm request {resp['Command']['CommandId']}")
+    time.sleep(30)
+    status = ssm_client.list_commands(
+        CommandId=resp['Command']['CommandId']
+    )
+    console_printer.print_info(f"Response from ssm status {status}")
+    console_printer.print_info(f"Response from ssm status {status} 2")
 
 @given(
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
