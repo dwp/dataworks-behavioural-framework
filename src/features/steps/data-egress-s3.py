@@ -15,15 +15,39 @@ DATAENCRYPTIONKEYID = "datakeyencryptionkeyid"
 CIPHERTEXT = "ciphertext"
 S3_PREFIX_FOR_INPUT = "dataworks-egress-testing-input/"
 S3_PREFIX_FOR_OUTPUT = "data-egress-testing-output/"
+S3_PREFIX_FOR_SFT_OUTPUT = "sft/"
 TEMPLATE_FOLDER = "data_egress_data"
 TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
+
+
+@given("the data in file '{template_name}' written to '{file_location}' directory")
+def step_prepare_sft_test(context, template_name, file_location):
+    # remove all sft files currently in the stub nifi output bucket
+    aws_helper.clear_s3_prefix(
+        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, False
+    )
+
+    template_file = os.path.join(
+        context.fixture_path_local, TEMPLATE_FOLDER, template_name
+    )
+    with open(template_file, "r") as unencrypted_file:
+        unencrypted_content = unencrypted_file.read()
+
+    console_printer.print_info(f"Executing commands on Ec2")
+    commands = [
+        "sudo su",
+        f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
+        f"echo {unencrypted_content} >> test1.txt",
+    ]
+    aws_helper.execute_commands_on_ec2_by_tags_and_wait(
+        commands, ["dataworks-aws-data-egress"], 30
+    )
 
 
 @given(
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
 )
 def step_prepare_data_egress_test(context, template_name):
-
     template_file = os.path.join(
         context.fixture_path_local, TEMPLATE_FOLDER, template_name
     )
@@ -52,8 +76,8 @@ def step_prepare_data_egress_test(context, template_name):
         s3_key,
         metadata,
     )
-    console_printer.print_info(f"Uploading success file to S3")
 
+    console_printer.print_info(f"Uploading success file to S3")
     template_success_file = os.path.join(
         context.fixture_path_local, TEMPLATE_FOLDER, TEMPLATE_SUCCESS_FILE
     )
@@ -80,3 +104,28 @@ def step_verify_data_egress_content(context):
     assert (
         output_file_content == "This is just sample data to test data egress service."
     )
+
+
+@then("verify content of the SFT output file")
+def step_verify_stf_content(context):
+    time.sleep(10)
+    keys = aws_helper.get_s3_file_object_keys_matching_pattern(
+        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, ".*"
+    )
+
+    console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
+    assert len(keys) > 0
+    for s3_key in keys:
+        output_file_content = (
+            aws_helper.get_s3_object(
+                bucket=context.snapshot_s3_output_bucket, key=s3_key, s3_client=None
+            )
+            .decode()
+            .strip()
+        )
+        console_printer.print_info(f"sft file content is : {output_file_content}")
+        console_printer.print_info(f"sft file content is : {output_file_content} 2")
+        assert (
+            output_file_content
+            == "This is just sample data to test data egress service."
+        )
