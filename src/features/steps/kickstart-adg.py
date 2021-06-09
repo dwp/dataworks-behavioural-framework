@@ -79,7 +79,7 @@ def step_impl(context, record_count, module_name, PII_Flag):
 def step_impl(context, modules):
     emr_launcher_config = {}
     additional_step_args = {}
-    KICKSTART_MODULES = modules.split(",")
+    KICKSTART_MODULES = modules.replace(' ','').split(",")
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
         for key, item in schema_config["output_file_pattern"].items():
