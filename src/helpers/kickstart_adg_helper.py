@@ -282,6 +282,7 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                         + re.sub(
                             r"(?!^)[A-Z]", lambda x: "_" + x.group(0).lower(), col[1:]
                         )
+                        if col != "timestamp" else "created_at"
                         for col in collections_schema.keys()
                     ]
                 )
