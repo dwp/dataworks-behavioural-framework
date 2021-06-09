@@ -195,91 +195,26 @@ def step_impl(context):
 @then("The input result matches with final output for module '{module_name}'")
 def step_impl(context, module_name):
     schema_config = context.kickstart_schema_config[module_name]
+    console_printer.print_info(
+        "Getting the actual and expected contents"
+    )
+    for collection in schema_config["schema"].keys():
+        if schema_config["record_layout"].lower() == "csv":
+            for load_type in schema_config["output_file_pattern"].keys():
+                actual_contents, expected_contents = \
+                    kickstart_adg_helper.get_actual_and_expected_data(context, collection, schema_config, load_type)
 
-    if schema_config["record_layout"].lower() == "csv":
-        for collection in schema_config["schema"].keys():
-            for load_type in ["full", "delta"]:
-                file_name = (
-                    f"e2e_{collection}.csv"
-                    if load_type == "full"
-                    else f"e2e_{collection}_delta.csv"
-                )
-                file_regex_pattern = (
-                    rf".*{collection}_[0-9]*.csv"
-                    if load_type == "full"
-                    else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
-                )
-                s3_result_key = os.path.join(
-                    context.kickstart_hive_result_path, f"{file_name}"
-                )
-                console_printer.print_info(f"S3 Request Location: {s3_result_key}")
-                file_content = aws_helper.get_s3_object(
-                    None, context.published_bucket, s3_result_key
-                ).decode("utf-8")
-                actual_content = (
-                    file_content.replace("\t", ",")
-                    .replace("NULL", "None")
-                    .strip()
-                    .lower()
-                    .splitlines()
-                )
-                expected_file_names = [
-                    file
-                    for file in context.kickstart_current_run_input_files
-                    if re.match(file_regex_pattern, file)
-                ]
-                console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        elif schema_config["record_layout"].lower() == "json":
+            actual_contents, expected_contents = \
+                kickstart_adg_helper.get_actual_and_expected_data(context, collection, schema_config)
 
-                expected_contents = [
-                    file_helper.get_contents_of_file(file, False).splitlines()[1:]
-                    for file in expected_file_names
-                ]
-                final_expected_contents = [
-                    row.lower() for items in expected_contents for row in items
-                ]
+        console_printer.print_info(
+            f"Check the total items in actual and expected list"
+        )
+        assert len(actual_contents) == len(expected_contents), \
+            f"Total actual items {len(actual_contents)} does not match Expected count {len(expected_contents)}  for collection {collection}"
 
-                console_printer.print_info(
-                    f"Check the total items in actual and expected list"
-                )
-                assert len(actual_content) == len(
-                    final_expected_contents
-                ), f"Total actual items {len(actual_content)} does not match Expected count {len(final_expected_contents)}  for collection {collection}"
-
-                for actual_line in actual_content:
-                    assert (
-                        actual_line in final_expected_contents
-                    ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
-
-    elif schema_config["record_layout"].lower() == "json":
-        for collection in schema_config["schema"].keys():
-            s3_result_key = os.path.join(
-                context.kickstart_hive_result_path, f"e2e_{collection}.csv"
-            )
-            console_printer.print_info(f"S3 Request Location: {s3_result_key}")
-            file_content = aws_helper.get_s3_object(
-                None, context.published_bucket, s3_result_key
-            ).decode("utf-8")
-            actual_content = file_content.replace("NULL", "None").strip().splitlines()
-            console_printer.print_info(
-                f"This the local file name in the list: {context.kickstart_current_run_input_files}"
-            )
-            expected_file_name = [
-                file
-                for file in context.kickstart_current_run_input_files
-                if f"{module_name}-{collection}" in file
-            ][0]
-            console_printer.print_info(f"Expected File Name: {expected_file_name}")
-            expected_json = json.loads(
-                file_helper.get_contents_of_file(expected_file_name, False)
-            )["data"]
-            expected_content = "\n".join(
-                [
-                    "\t".join([str(record[field]) for field in record])
-                    for record in expected_json
-                ]
-            ).splitlines()
-
-            for input_line, output_line in zip(actual_content, expected_content):
-                assert (
-                    input_line.lower() == output_line.lower()
-                ), f"Expected result of '{input_line}', does not match '{output_line}' for collection {collection}"
+        for actual_line in actual_contents:
+            assert (
+                actual_line in expected_contents), \
+                f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"

@@ -365,105 +365,86 @@ def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
                 input_data, context.published_bucket, inputs_s3_key, metadata=metadata
             )
 
-def data_validation(context, schema_config):
+def get_actual_and_expected_data(context, collection, schema_config, load_type="delta"):
 
     if schema_config["record_layout"].lower() == "csv":
-        for collection in schema_config["schema"].keys():
-            for load_type in schema_config["output_file_pattern"].keys():
-                file_name = (
-                    f"e2e_{collection}.csv"
-                    if load_type == "full"
-                    else f"e2e_{collection}_delta.csv"
-                )
-                file_regex_pattern = (
-                    rf".*{collection}_[0-9]*.csv"
-                    if load_type == "full"
-                    else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
-                )
-                s3_result_key = os.path.join(
-                    context.kickstart_hive_result_path, f"{file_name}"
-                )
-                console_printer.print_info(f"S3 Request Location: {s3_result_key}")
-                file_content = aws_helper.get_s3_object(
-                    None, context.published_bucket, s3_result_key
-                ).decode("utf-8")
-                actual_content = (
-                    file_content.replace("\t", ",")
-                        .replace("NULL", "None")
-                        .strip()
-                        .lower()
-                        .splitlines()
-                )
-                expected_file_names = [
-                    file
-                    for file in context.kickstart_current_run_input_files
-                    if re.match(file_regex_pattern, file)
-                ]
-                console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        file_name = (
+            f"e2e_{collection}.csv"
+            if load_type == "full"
+            else f"e2e_{collection}_delta.csv"
+        )
+        file_regex_pattern = (
+            rf".*{collection}_[0-9]*.csv"
+            if load_type == "full"
+            else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
+        )
+        s3_result_key = os.path.join(
+            context.kickstart_hive_result_path, f"{file_name}"
+        )
 
-                expected_contents = [
-                    file_helper.get_contents_of_file(file, False).splitlines()[1:]
-                    for file in expected_file_names
-                ]
-                final_expected_contents = [
-                    row.lower() for items in expected_contents for row in items
-                ]
+        console_printer.print_info(f"S3 Request Location: {s3_result_key}")
+        file_content = aws_helper.get_s3_object(
+            None, context.published_bucket, s3_result_key
+        ).decode("utf-8")
+        actual_contents = (
+            file_content.replace("\t", ",")
+                .replace("NULL", "None")
+                .strip()
+                .lower()
+                .splitlines()
+        )
+        expected_file_names = [
+            file
+            for file in context.kickstart_current_run_input_files
+            if re.match(file_regex_pattern, file)
+        ]
 
-                console_printer.print_info(
-                    f"Check the total items in actual and expected list"
-                )
-                assert len(actual_content) == len(
-                    final_expected_contents
-                ), f"Total actual items {len(actual_content)} does not match Expected count {len(final_expected_contents)}  for collection {collection}"
-
-                for actual_line in actual_content:
-                    assert (
-                            actual_line in final_expected_contents
-                    ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
+        console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        expected_contents = [
+            file_helper.get_contents_of_file(file, False).splitlines()[1:]
+            for file in expected_file_names
+        ]
+        final_expected_contents = [
+            row.lower() for items in expected_contents for row in items
+        ]
 
     elif schema_config["record_layout"].lower() == "json":
-        for collection in schema_config["schema"].keys():
-            s3_result_key = os.path.join(
-                context.kickstart_hive_result_path, f"e2e_{collection}.csv"
-            )
-            console_printer.print_info(f"S3 Request Location: {s3_result_key}")
-            file_content = aws_helper.get_s3_object(
-                None, context.published_bucket, s3_result_key
-            ).decode("utf-8")
-            actual_content = file_content.replace("NULL", "None").strip().splitlines()
-            console_printer.print_info(
-                f"This the local file name in the list: {context.kickstart_current_run_input_files}"
-            )
-            file_regex_pattern = rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
-            expected_file_names = [
-                file
-                for file in context.kickstart_current_run_input_files
-                if re.match(file_regex_pattern, file)
+        s3_result_key = os.path.join(
+            context.kickstart_hive_result_path, f"e2e_{collection}.csv"
+        )
+
+        console_printer.print_info(f"S3 Request Location: {s3_result_key}")
+        file_content = aws_helper.get_s3_object(
+            None, context.published_bucket, s3_result_key
+        ).decode("utf-8")
+        actual_contents = file_content.replace("NULL", "None").strip().splitlines()
+
+        console_printer.print_info(
+            f"This the local file name in the list: {context.kickstart_current_run_input_files}"
+        )
+        file_regex_pattern = rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
+        expected_file_names = [
+            file
+            for file in context.kickstart_current_run_input_files
+            if re.match(file_regex_pattern, file)
+        ]
+
+        console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        expected_json = json.loads(
+            file_helper.get_contents_of_file(expected_file_names, False)
+        )["data"]
+        expected_contents = "\n".join(
+            [
+                "\t".join([str(record[field]) for field in record])
+                for record in expected_json
             ]
-            console_printer.print_info(f"Expected File Name: {expected_file_names}")
-            expected_json = json.loads(
-                file_helper.get_contents_of_file(expected_file_names, False)
-            )["data"]
-            expected_contents = "\n".join(
-                [
-                    "\t".join([str(record[field]) for field in record])
-                    for record in expected_json
-                ]
-            ).splitlines()
+        ).splitlines()
 
-            final_expected_contents = [
-                row.lower() for items in expected_contents for row in items
-            ]
+        final_expected_contents = [
+            row.lower()
+            for items in expected_contents
+            for row in items
+        ]
 
-            console_printer.print_info(
-                f"Check the total items in actual and expected list"
-            )
-            assert len(actual_content) == len(
-                final_expected_contents
-            ), f"Total actual items {len(actual_content)} does not match Expected count {len(final_expected_contents)}  for collection {collection}"
-
-            for actual_line in actual_content:
-                assert (
-                        actual_line in final_expected_contents
-                ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
+    return actual_contents, final_expected_contents
 
