@@ -626,8 +626,14 @@
     },
     "record_layout" : "JSON",
     "output_file_pattern" : {
-      "grant_applications" : "run-date-kick-mksas-applications-epoc-time.json",
-      "grant_applications_audit" : "run-date-kick-mksas-applications-audit-epoc-time.json"
+      "grant_applications" : {
+        "file_name" : "run-date-kick-mksas-applications-epoc-time.json",
+        "regex_pattern" : ".*kick-mksas-applications-[0-9]*.json"
+      },
+      "grant_applications_audit" : {
+        "file_name" : "run-date-kick-mksas-applications-audit-epoc-time.json",
+        "regex_pattern" : ".*kick-mksas-applications-audit-[0-9]*.json"
+      }
     }
   }
 }
