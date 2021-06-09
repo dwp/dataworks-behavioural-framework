@@ -23,38 +23,31 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 
 
 @given(
-    "the data in file '{template_name}' written to '{file_location}'"
+    "the data in file '{template_name}' written to '{file_location}' directory"
 )
 def step_prepare_sft_test(context, template_name, file_location):
+    #remove all sft files currently in the stub nifi output bucket
     aws_helper.clear_s3_prefix(
     context.snapshot_s3_output_bucket,
     S3_PREFIX_FOR_SFT_OUTPUT,
     False
     )
 
-    console_printer.print_info(f"Executing commands on Ec2")
-    ssm_client = aws_helper.get_client('ssm')
-    commands = ['echo "hello world"', 'sudo su', 'cd /var/lib/docker/volumes/data-egress/_data/test', 'echo "e2e test" >> test1.txt']
-    resp = ssm_client.send_command(
-        DocumentName="AWS-RunShellScript", 
-        Parameters={'commands': commands},
-        TimeoutSeconds=30,
-        Targets=[{
-            'Key': 'tag:Application',
-            'Values': [
-                'dataworks-aws-data-egress'
-            ]
-        }]
+    template_file = os.path.join(
+        context.fixture_path_local, TEMPLATE_FOLDER, template_name
     )
-    console_printer.print_info(f"Response from ssm {resp}")
+    with open(template_file, "r") as unencrypted_file:
+        unencrypted_content = unencrypted_file.read()
 
-    console_printer.print_info(f"CommandId from ssm request {resp['Command']['CommandId']}")
-    time.sleep(30)
-    status = ssm_client.list_commands(
-        CommandId=resp['Command']['CommandId']
-    )
-    console_printer.print_info(f"Response from ssm status {status}")
-    console_printer.print_info(f"Response from ssm status {status} 2")
+
+    console_printer.print_info(f"Executing commands on Ec2")
+    commands = [
+        "sudo su",
+         f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
+         f"echo {unencrypted_content} >> test1.txt"
+          ]
+    aws_helper.execute_commands_on_ec2_by_tags_and_wait(commands, ['dataworks-aws-data-egress'], 30)
+
 
 @given(
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
@@ -134,9 +127,5 @@ def step_verify_stf_content(context):
         console_printer.print_info(f"sft file content is : {output_file_content}")
         console_printer.print_info(f"sft file content is : {output_file_content} 2")
         assert (
-            output_file_content == "e2e test"
+            output_file_content == "This is just sample data to test data egress service."
         )
-
-
-
-
