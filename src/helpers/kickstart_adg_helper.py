@@ -417,7 +417,12 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
         file_content = aws_helper.get_s3_object(
             None, context.published_bucket, s3_result_key
         ).decode("utf-8")
-        actual_contents = file_content.replace("NULL", "None").strip().splitlines()
+        actual_contents = (
+            file_content.replace("NULL", "None")
+                .strip()
+                .lower()
+                .splitlines()
+        )
 
         console_printer.print_info(
             f"This the local file name in the list: {context.kickstart_current_run_input_files}"
