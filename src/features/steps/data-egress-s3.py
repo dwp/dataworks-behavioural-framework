@@ -7,7 +7,6 @@ from helpers import (
     historic_data_load_generator,
     aws_helper,
     console_printer,
-    snapshots_helper,
 )
 
 OUTPUT_FILE_REGEX = r".*.txt"
