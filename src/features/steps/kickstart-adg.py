@@ -82,10 +82,11 @@ def step_impl(context, modules):
     KICKSTART_MODULES = modules.split(",")
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
-        for keys, item in schema_config["output_file_pattern"].items():
+        for key, item in schema_config["output_file_pattern"].items():
+            key = key if key in ("full", "delta") else "delta"
             correlation_id = (
                 f"kickstart_{module_name}_analytical_dataset_generation"
-                if keys == "full"
+                if key == "full"
                 else f"kickstart_{module_name}_analytical_dataset_generation_delta"
             )
             data_product_name = "KICKSTART-ADG"
@@ -117,13 +118,13 @@ def step_impl(context, modules):
 
             additional_step_args.update(
                 {
-                    f"submit-job-{module_name}-{keys}": [
+                    f"submit-job-{module_name}-{key}": [
                         "--module_name",
                         f"{module_name}",
                         "--e2e_test_flg",
                         "True",
                         "--load_type",
-                        f"{keys}",
+                        f"{key}",
                     ]
                 }
             )
