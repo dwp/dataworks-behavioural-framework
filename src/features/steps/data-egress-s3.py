@@ -29,27 +29,34 @@ def step_prepare_sft_test(context, template_name, file_location):
     aws_helper.clear_s3_prefix(
     context.snapshot_s3_output_bucket,
     S3_PREFIX_FOR_SFT_OUTPUT,
-    True
+    False
     )
 
-    ec2_client = aws_helper.get_client('ec2')
+    # ec2_client = aws_helper.get_client('ec2')
  
-    custom_filter = [{
-    'Name':'tag:Application	', 
-    'Values': ['dataworks-aws-data-egress']}]
+    # custom_filter = [{
+    # 'Name':'tag:Application', 
+    # 'Values': ['dataworks-aws-data-egress']}]
     
-    response = ec2_client.describe_instances(Filters=custom_filter)
-    console_printer.print_info(f"Response from describe instances {response}")
+    # response = ec2_client.describe_instances(Filters=custom_filter)
+    # console_printer.print_info(f"Response from describe instances {response}")
 
-    # ssm_client = aws_helper.get_client('ssm')
-    # commands = ['echo "hello world"']
+    console_printer.print_info(f"Executing commands on Ec2")
+    ssm_client = aws_helper.get_client('ssm')
+    commands = ['echo "hello world"', 'sudo su', 'cd /data-egress', 'echo "test" >> test1.txt']
     # instance_ids = ['', '']
-    # resp = ssm_client.send_command(
-    #     DocumentName="AWS-RunShellScript", # One of AWS' preconfigured documents
-    #     Parameters={'commands': commands},
-    #     InstanceIds=instance_ids,
-    # )
-    # console_printer.print_info(f"Response from ssm {resp}")
+    resp = ssm_client.send_command(
+        DocumentName="AWS-RunShellScript", 
+        Parameters={'commands': commands},
+        TimeoutSeconds=20,
+        Targets=[{
+            'Key': 'tag:Application',
+            'Values': [
+                'dataworks-aws-data-egress'
+            ]
+        }]
+    )
+    console_printer.print_info(f"Response from ssm {resp}")
 
 @given(
     "the data in file '{template_name}' encrypted using DKS and uploaded to S3 bucket"
