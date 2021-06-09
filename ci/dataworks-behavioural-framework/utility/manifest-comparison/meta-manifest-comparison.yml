@@ -179,8 +179,8 @@ meta-manifest-comparison:
           type: docker-image
           source:
             repository: ((dataworks.terraform_repository))
-            version: ((dataworks.terraform_version))
-            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_13_version))
+            tag: ((dataworks.terraform_13_version))
         run:
           path: sh
           args:
@@ -204,8 +204,8 @@ meta-manifest-comparison:
           type: docker-image
           source:
             repository: ((dataworks.terraform_repository))
-            version: ((dataworks.terraform_version))
-            tag: ((dataworks.terraform_version))
+            version: ((dataworks.terraform_13_version))
+            tag: ((dataworks.terraform_13_version))
         run:
           path: sh
           args:
