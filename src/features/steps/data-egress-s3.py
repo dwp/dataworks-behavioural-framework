@@ -104,7 +104,7 @@ def step_prepare_data_egress_test(context, template_name):
 def step_verify_data_egress_content(context):
     time.sleep(10)
     keys = aws_helper.get_s3_file_object_keys_matching_pattern(
-        context.published_bucket, S3_PREFIX_FOR_OUTPUT, ".*"
+        context.published_bucket, S3_PREFIX_FOR_OUTPUT, "OUTPUT_FILE_REGEX"
     )
     console_printer.print_info(f"Keys in data egress output location : {keys}")
     console_printer.print_info(f"Keys in data egress output location : {keys} 2")
@@ -122,7 +122,7 @@ def step_verify_data_egress_content(context):
 def step_verify_stf_content(context):
     time.sleep(10)
     keys = aws_helper.get_s3_file_object_keys_matching_pattern(
-        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, OUTPUT_FILE_REGEX
+        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, ".*"
     )
 
     console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
