@@ -5,6 +5,7 @@ import string
 import uuid
 import sys
 import re
+import gzip
 import random as rd
 from datetime import datetime, timedelta
 from helpers import (
@@ -45,15 +46,12 @@ def dataGenText():
     result_str = " ".join([str_1, str_2, str_3])
     return rd.choice([result_str, None])
 
-
 def dataGenTimestamp():
     current_date = datetime.today()
     return rd.choice([datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S"), None])
 
-
 def dataGenUUID():
     return str(uuid.uuid1())
-
 
 def dataGenString():
     letters = string.ascii_letters
@@ -118,20 +116,29 @@ def get_schema_config(template_root_path, template_name):
             f"Problem while generating kickstart schema because of error {str(ex)}"
         )
 
+def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0):
+    output_file_name = (
+        file_pattern
+            .replace("run-date", run_date)
+            .replace("collection", collection)
+            .replace("epoc-time", epoc_time)
+            .replace("seq-num", str(sequence_num))
+    )
+    return output_file_name
+
 
 def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
-
         for keys, item in schema_config["output_file_pattern"].items():
             for num in range(1, item["total_files"] + 1):
-                output_file_name = (
-                    item["file_pattern"]
-                    .replace("run-date", run_date)
-                    .replace("collection", collection)
-                    .replace("epoc-time", epoc_time)
-                    .replace("seq-num", str(num))
+                output_file_name = get_file_name(
+                    file_pattern=item["file_pattern"],
+                    run_date=run_date,
+                    collection=collection,
+                    epoc_time=epoc_time,
+                    sequence_num=num
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 console_printer.print_info(
@@ -157,28 +164,26 @@ def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         epoc_time = str(date_helper.get_current_epoch_seconds())
-        output_file_name = (
-            schema_config["output_file_pattern"]
-            .replace("run-date", run_date)
-            .replace("collection", collection)
-            .replace("epoc-time", epoc_time)
+        output_file_name = get_file_name(
+            file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
+            run_date=run_date,
+            collection=collection,
+            epoc_time=epoc_time
         )
         output_file = os.path.join(local_output_folder, output_file_name)
         num = 1
         data = []
         JSON_BLOB = {
-            "extract": {
-                "service": "application-service",
-                "dataExtract": "application",
-                "start": datetime.strftime(
-                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
-                ),
-                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
-            },
             "fields": [
                 {"fieldName": column, "pii": column_property["pii_flg"]}
                 for column, column_property in collection_schema.items()
             ],
+            "extract": {
+                "start": datetime.strftime(
+                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                ),
+                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
+            }
         }
         with open(output_file, "w+") as writer:
             while num <= int(record_count):
@@ -253,17 +258,17 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                     column_name = ",".join(
                         [
                             re.sub("[^0-9a-zA-Z$]+", " ", col)
-                            .strip()
-                            .replace(" ", "_")
-                            .lower()
+                                .strip()
+                                .replace(" ", "_")
+                                .lower()
                             for col in collections_schema.keys()
                         ]
                     )
                     table_name = collection if keys == "full" else f"{collection}_delta"
                     hive_export_bash_command = (
-                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                            f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                            + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                            + f" &>> /var/log/kickstart_adg/e2e.log"
                     )
                     hive_export_list.append(hive_export_bash_command)
 
@@ -277,13 +282,14 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                         + re.sub(
                             r"(?!^)[A-Z]", lambda x: "_" + x.group(0).lower(), col[1:]
                         )
+                        if col != "timestamp" else "created_at"
                         for col in collections_schema.keys()
                     ]
                 )
                 hive_export_bash_command = (
-                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                    + f" &>> /var/log/kickstart_adg/e2e.log"
+                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                        + f" &>> /var/log/kickstart_adg/e2e.log"
                 )
                 hive_export_list.append(hive_export_bash_command)
 
@@ -330,10 +336,10 @@ def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
 
             console_printer.print_info(f"Extracting the raw data from local directory")
             data = file_helper.get_contents_of_file(file, False).encode("utf-8")
-
+            compressed_data = gzip.compress(data)
             console_printer.print_info(f"Applying encryption to the raw data")
             input_data = historic_data_load_generator.encrypt(
-                file_iv_whole, plaintext_key, data
+                file_iv_whole, plaintext_key, compressed_data
             )
             inputs_s3_key = os.path.join(folder_name, file_name + ".enc")
 
@@ -358,3 +364,92 @@ def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
             aws_helper.put_object_in_s3_with_metadata(
                 input_data, context.published_bucket, inputs_s3_key, metadata=metadata
             )
+
+def get_actual_and_expected_data(context, collection, schema_config, load_type="delta"):
+
+    if schema_config["record_layout"].lower() == "csv":
+        file_name = (
+            f"e2e_{collection}.csv"
+            if load_type == "full"
+            else f"e2e_{collection}_delta.csv"
+        )
+        file_regex_pattern = (
+            rf".*{collection}_[0-9]*.csv"
+            if load_type == "full"
+            else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
+        )
+        s3_result_key = os.path.join(
+            context.kickstart_hive_result_path, f"{file_name}"
+        )
+
+        console_printer.print_info(f"S3 Request Location: {s3_result_key}")
+        file_content = aws_helper.get_s3_object(
+            None, context.published_bucket, s3_result_key
+        ).decode("utf-8")
+        actual_contents = (
+            file_content.replace("\t", ",")
+                .replace("NULL", "None")
+                .strip()
+                .lower()
+                .splitlines()
+        )
+        expected_file_names = [
+            file
+            for file in context.kickstart_current_run_input_files
+            if re.match(file_regex_pattern, file)
+        ]
+
+        console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        expected_contents = [
+            file_helper.get_contents_of_file(file, False).splitlines()[1:]
+            for file in expected_file_names
+        ]
+        final_expected_contents = [
+            row.lower() for items in expected_contents for row in items
+        ]
+
+    elif schema_config["record_layout"].lower() == "json":
+        s3_result_key = os.path.join(
+            context.kickstart_hive_result_path, f"e2e_{collection}.csv"
+        )
+
+        console_printer.print_info(f"S3 Request Location: {s3_result_key}")
+        file_content = aws_helper.get_s3_object(
+            None, context.published_bucket, s3_result_key
+        ).decode("utf-8")
+        actual_contents = (
+            file_content.replace("NULL", "None")
+                .strip()
+                .lower()
+                .splitlines()
+        )
+
+        console_printer.print_info(
+            f"This the local file name in the list: {context.kickstart_current_run_input_files}"
+        )
+        file_regex_pattern = rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
+
+        console_printer.print_info(f"Expected File Pattern: {file_regex_pattern}")
+        expected_file_names = [
+            file
+            for file in context.kickstart_current_run_input_files
+            if re.match(file_regex_pattern, file)
+        ][0]
+
+        console_printer.print_info(f"Expected File Name: {expected_file_names}")
+        expected_json = json.loads(
+            file_helper.get_contents_of_file(expected_file_names, False)
+        )["data"]
+        expected_contents = "\n".join(
+            [
+                "\t".join([str(record[field]) for field in record])
+                for record in expected_json
+            ]
+        ).splitlines()
+
+        final_expected_contents = [
+            item.lower()
+            for item in expected_contents
+        ]
+
+    return actual_contents, final_expected_contents
