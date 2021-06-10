@@ -46,12 +46,15 @@ def dataGenText():
     result_str = " ".join([str_1, str_2, str_3])
     return rd.choice([result_str, None])
 
+
 def dataGenTimestamp():
     current_date = datetime.today()
     return rd.choice([datetime.strftime(current_date, "%Y-%m-%d %H:%M:%S"), None])
 
+
 def dataGenUUID():
     return str(uuid.uuid1())
+
 
 def dataGenString():
     letters = string.ascii_letters
@@ -116,13 +119,13 @@ def get_schema_config(template_root_path, template_name):
             f"Problem while generating kickstart schema because of error {str(ex)}"
         )
 
+
 def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0):
     output_file_name = (
-        file_pattern
-            .replace("run-date", run_date)
-            .replace("collection", collection)
-            .replace("epoc-time", epoc_time)
-            .replace("seq-num", str(sequence_num))
+        file_pattern.replace("run-date", run_date)
+        .replace("collection", collection)
+        .replace("epoc-time", epoc_time)
+        .replace("seq-num", str(sequence_num))
     )
     return output_file_name
 
@@ -138,7 +141,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
                     run_date=run_date,
                     collection=collection,
                     epoc_time=epoc_time,
-                    sequence_num=num
+                    sequence_num=num,
                 )
                 output_file = os.path.join(local_output_folder, output_file_name)
                 console_printer.print_info(
@@ -168,7 +171,7 @@ def generate_json_files(schema_config, local_output_folder, record_count):
             file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
             run_date=run_date,
             collection=collection,
-            epoc_time=epoc_time
+            epoc_time=epoc_time,
         )
         output_file = os.path.join(local_output_folder, output_file_name)
         num = 1
@@ -183,7 +186,7 @@ def generate_json_files(schema_config, local_output_folder, record_count):
                     datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
                 ),
                 "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
-            }
+            },
         }
         with open(output_file, "w+") as writer:
             while num <= int(record_count):
@@ -258,17 +261,17 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                     column_name = ",".join(
                         [
                             re.sub("[^0-9a-zA-Z$]+", " ", col)
-                                .strip()
-                                .replace(" ", "_")
-                                .lower()
+                            .strip()
+                            .replace(" ", "_")
+                            .lower()
                             for col in collections_schema.keys()
                         ]
                     )
                     table_name = collection if keys == "full" else f"{collection}_delta"
                     hive_export_bash_command = (
-                            f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                            + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                            + f" &>> /var/log/kickstart_adg/e2e.log"
+                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                        + f" &>> /var/log/kickstart_adg/e2e.log"
                     )
                     hive_export_list.append(hive_export_bash_command)
 
@@ -282,14 +285,15 @@ def generate_hive_queries(schema_config, published_bucket, s3_path):
                         + re.sub(
                             r"(?!^)[A-Z]", lambda x: "_" + x.group(0).lower(), col[1:]
                         )
-                        if col != "timestamp" else "created_at"
+                        if col != "timestamp"
+                        else "created_at"
                         for col in collections_schema.keys()
                     ]
                 )
                 hive_export_bash_command = (
-                        f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
-                        + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
-                        + f" &>> /var/log/kickstart_adg/e2e.log"
+                    f"hive -e 'SELECT {column_name} FROM uc_kickstart.{collection} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
+                    + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
+                    + f" &>> /var/log/kickstart_adg/e2e.log"
                 )
                 hive_export_list.append(hive_export_bash_command)
 
@@ -365,6 +369,7 @@ def files_upload_to_s3(context, local_file_list, folder_name, upload_method):
                 input_data, context.published_bucket, inputs_s3_key, metadata=metadata
             )
 
+
 def get_actual_and_expected_data(context, collection, schema_config, load_type="delta"):
 
     if schema_config["record_layout"].lower() == "csv":
@@ -378,9 +383,7 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             if load_type == "full"
             else rf".*{collection}_[0-9]*_delta_[0-9]*.csv"
         )
-        s3_result_key = os.path.join(
-            context.kickstart_hive_result_path, f"{file_name}"
-        )
+        s3_result_key = os.path.join(context.kickstart_hive_result_path, f"{file_name}")
 
         console_printer.print_info(f"S3 Request Location: {s3_result_key}")
         file_content = aws_helper.get_s3_object(
@@ -388,10 +391,10 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
         ).decode("utf-8")
         actual_contents = (
             file_content.replace("\t", ",")
-                .replace("NULL", "None")
-                .strip()
-                .lower()
-                .splitlines()
+            .replace("NULL", "None")
+            .strip()
+            .lower()
+            .splitlines()
         )
         expected_file_names = [
             file
@@ -418,16 +421,15 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             None, context.published_bucket, s3_result_key
         ).decode("utf-8")
         actual_contents = (
-            file_content.replace("NULL", "None")
-                .strip()
-                .lower()
-                .splitlines()
+            file_content.replace("NULL", "None").strip().lower().splitlines()
         )
 
         console_printer.print_info(
             f"This the local file name in the list: {context.kickstart_current_run_input_files}"
         )
-        file_regex_pattern = rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
+        file_regex_pattern = (
+            rf'{schema_config["output_file_pattern"][collection]["regex_pattern"]}'
+        )
 
         console_printer.print_info(f"Expected File Pattern: {file_regex_pattern}")
         expected_file_names = [
@@ -447,9 +449,6 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             ]
         ).splitlines()
 
-        final_expected_contents = [
-            item.lower()
-            for item in expected_contents
-        ]
+        final_expected_contents = [item.lower() for item in expected_contents]
 
     return actual_contents, final_expected_contents
