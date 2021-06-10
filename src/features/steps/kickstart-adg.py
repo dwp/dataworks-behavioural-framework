@@ -124,7 +124,7 @@ def step_impl(context, modules):
                         "--e2e_test_flg",
                         "True",
                         "--load_type",
-                        f"{key}"
+                        f"{key}",
                     ]
                 }
             )
