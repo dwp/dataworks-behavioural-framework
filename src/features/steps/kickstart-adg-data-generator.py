@@ -56,4 +56,3 @@ def step_impl(context, data_encryption):
         local_file_list=context.kickstart_current_run_input_files,
         folder_name=S3_KEY_KICSKTART_TEST,
         upload_method=data_encryption)
-
