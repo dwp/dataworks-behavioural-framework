@@ -79,7 +79,7 @@ def step_impl(context, record_count, module_name, PII_Flag):
 def step_impl(context, modules):
     emr_launcher_config = {}
     additional_step_args = {}
-    KICKSTART_MODULES = modules.replace(' ','').split(",")
+    KICKSTART_MODULES = modules.replace(" ", "").split(",")
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
         for key, item in schema_config["output_file_pattern"].items():
@@ -129,9 +129,7 @@ def step_impl(context, modules):
                 }
             )
 
-    console_printer.print_info(
-        f"submitting spark step : {additional_step_args}"
-    )
+    console_printer.print_info(f"submitting spark step : {additional_step_args}")
     emr_launcher_config.update({"additional_step_args": additional_step_args})
 
     console_printer.print_info(
@@ -198,26 +196,31 @@ def step_impl(context):
 @then("The input result matches with final output for module '{module_name}'")
 def step_impl(context, module_name):
     schema_config = context.kickstart_schema_config[module_name]
-    console_printer.print_info(
-        "Getting the actual and expected contents"
-    )
+    console_printer.print_info("Getting the actual and expected contents")
     for collection in schema_config["schema"].keys():
         if schema_config["record_layout"].lower() == "csv":
             for load_type in schema_config["output_file_pattern"].keys():
-                actual_contents, expected_contents = \
-                    kickstart_adg_helper.get_actual_and_expected_data(context, collection, schema_config, load_type)
+                (
+                    actual_contents,
+                    expected_contents,
+                ) = kickstart_adg_helper.get_actual_and_expected_data(
+                    context, collection, schema_config, load_type
+                )
 
         elif schema_config["record_layout"].lower() == "json":
-            actual_contents, expected_contents = \
-                kickstart_adg_helper.get_actual_and_expected_data(context, collection, schema_config)
+            (
+                actual_contents,
+                expected_contents,
+            ) = kickstart_adg_helper.get_actual_and_expected_data(
+                context, collection, schema_config
+            )
 
-        console_printer.print_info(
-            f"Check the total items in actual and expected list"
-        )
-        assert len(actual_contents) == len(expected_contents), \
-            f"Total actual items {len(actual_contents)} does not match Expected count {len(expected_contents)}  for collection {collection}"
+        console_printer.print_info(f"Check the total items in actual and expected list")
+        assert len(actual_contents) == len(
+            expected_contents
+        ), f"Total actual items {len(actual_contents)} does not match Expected count {len(expected_contents)}  for collection {collection}"
 
         for actual_line in actual_contents:
             assert (
-                    actual_line in expected_contents), \
-                f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
+                actual_line in expected_contents
+            ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
