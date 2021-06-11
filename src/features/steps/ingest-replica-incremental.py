@@ -208,4 +208,3 @@ def step_impl(context, record_count):
 
     for collection_name, id_set in generated_ids.items():
         assert id_set == hive_ids[collection_name]
-
