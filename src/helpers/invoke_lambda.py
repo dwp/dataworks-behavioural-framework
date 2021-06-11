@@ -76,6 +76,18 @@ def invoke_pdm_emr_launcher_lambda(payload):
     return json.loads(response.decode())
 
 
+def invoke_ingest_replica_incremental_emr_launcher_lambda(payload):
+    """Triggers incremental_ingest_replica_emr_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function(
+        "incremental_ingest_replica_emr_launcher", payload
+    )
+    return json.loads(response.decode())
+
+
 def invoke_claimant_mysql_metadata_interface(payload=None):
     """Triggers invoke_claimant_mysql_metadata_interface lambda with the given payload.
 

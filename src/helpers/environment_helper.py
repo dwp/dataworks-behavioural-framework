@@ -470,6 +470,8 @@ def set_test_run_common_variables(context):
 
     context.clive_output_s3_prefix = "data/uc_clive"
 
+    context.ingest_replica_output_s3_prefix = "intra-day-tests"
+
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
