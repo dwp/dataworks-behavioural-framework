@@ -68,6 +68,7 @@ def step_prepare_data_egress_test(context, template_name):
         DATAENCRYPTIONKEYID: context.encryption_master_key_id,
         IV: iv,
     }
+    aws_helper.clear_s3_prefix(context.published_bucket, S3_PREFIX_FOR_INPUT, False)
 
     console_printer.print_info(f"Uploading DKS encrypted file to S3")
     aws_helper.put_object_in_s3_with_metadata(
