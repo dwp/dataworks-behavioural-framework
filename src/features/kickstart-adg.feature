@@ -12,6 +12,6 @@ Feature: Kickstart adg process, to source data and valid final tables for expect
     And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'delta' extract and add step Ids to the list
     And  Add validation steps 'application-hive-validation-queries' to kickstart adg emr cluster for 'application' with 'delta' extract and add step Ids to the list
     Then Wait for all the steps to complete
-    And The input result matches with final output for module 'vacancy'
-    And The input result matches with final output for module 'application'
+    And The input result matches with final output for module 'vacancy' with 'delta' extract
+    And The input result matches with final output for module 'application' with 'delta' extract
 

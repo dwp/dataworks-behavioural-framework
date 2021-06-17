@@ -194,26 +194,25 @@ def step_impl(context):
             )
 
 
-@then("The input result matches with final output for module '{module_name}'")
-def step_impl(context, module_name):
+@then("The input result matches with final output for module '{module_name}' with '{load_type}' extract")
+def step_impl(context, module_name, load_type):
     schema_config = context.kickstart_schema_config[module_name]
     console_printer.print_info("Getting the actual and expected contents")
     for collection in schema_config["schema"].keys():
         if schema_config["record_layout"].lower() == "csv":
-            for load_type in schema_config["output_file_pattern"].keys():
-                (
-                    actual_contents,
-                    expected_contents,
-                ) = kickstart_adg_helper.get_actual_and_expected_data(
-                    context, collection, schema_config, load_type
-                )
+            (
+                actual_contents,
+                expected_contents,
+            ) = kickstart_adg_helper.get_actual_and_expected_data(
+                context, collection, schema_config, load_type
+            )
 
         elif schema_config["record_layout"].lower() == "json":
             (
                 actual_contents,
                 expected_contents,
             ) = kickstart_adg_helper.get_actual_and_expected_data(
-                context, collection, schema_config
+                context, collection, schema_config, load_type
             )
 
         console_printer.print_info(f"Check the total items in actual and expected list")
