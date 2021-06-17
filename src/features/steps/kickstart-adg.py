@@ -155,9 +155,9 @@ def step_impl(context, modules, load_type):
 
 
 @when(
-    "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and add step Ids to the list"
+    "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' with '{load_type}' extract and add step Ids to the list"
 )
-def step_impl(context, step_name, module_name):
+def step_impl(context, step_name, module_name, load_type):
 
     context.kickstart_adg_hive_cluster_step_name = f"{module_name}-{step_name}"
     context.kickstart_hive_result_path = f"{S3_KEY_KICSKTART_TEST}"
@@ -165,7 +165,8 @@ def step_impl(context, step_name, module_name):
     console_printer.print_info(f"generating the list of hive queries to be executed")
 
     hive_queries_list = kickstart_adg_helper.generate_hive_queries(
-        schema_config, context.published_bucket, context.kickstart_hive_result_path
+        schema_config, context.published_bucket, context.kickstart_hive_result_path,
+        load_type
     )
 
     console_printer.print_info(
