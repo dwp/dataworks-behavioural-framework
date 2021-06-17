@@ -75,59 +75,61 @@ def step_impl(context, record_count, module_name, PII_Flag):
         )
 
 
-@when("Start kickstart adg emr process for modules '{modules}' and get step ids")
-def step_impl(context, modules):
+@when(
+    "Start kickstart adg emr process for modules '{modules}' with '{load_type}' extract and get step ids"
+)
+def step_impl(context, modules, load_type):
     emr_launcher_config = {}
     additional_step_args = {}
     KICKSTART_MODULES = modules.replace(" ", "").split(",")
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
-        for key, item in schema_config["output_file_pattern"].items():
-            key = key if key in ("full", "delta") else "delta"
-            correlation_id = (
-                f"kickstart_{module_name}_analytical_dataset_generation"
-                if key == "full"
-                else f"kickstart_{module_name}_analytical_dataset_generation_delta"
-            )
-            data_product_name = "KICKSTART-ADG"
-            processing_dt = datetime.strftime(
-                datetime.now() - timedelta(days=1), "%Y-%m-%d"
-            )
-            status = "COMPLETED"
+        key = load_type
+        correlation_id = (
+            f"kickstart_{module_name}_analytical_dataset_generation"
+            if key == "full"
+            else f"kickstart_{module_name}_analytical_dataset_generation_delta"
+        )
+        data_product_name = "KICKSTART-ADG"
+        processing_dt = datetime.strftime(
+            datetime.now() - timedelta(days=1), "%Y-%m-%d"
+        )
+        status = "COMPLETED"
 
-            console_printer.print_info(
-                f"The value to used as run time parameter \n"
-                + f"correlation_id = {correlation_id} \n"
-                + f"data_product_name = {data_product_name} \n"
-                + f"processing_dt = {processing_dt} \n"
-                + f"status  = {status} \n"
-            )
-            console_printer.print_info(
-                f"Adjusting entry in dynamodb table {DYNAMO_DB_TABLE_NAME} for correlation_id {correlation_id} for e2e test"
-            )
+        console_printer.print_info(
+            f"The value to used as run time parameter \n"
+            + f"correlation_id = {correlation_id} \n"
+            + f"data_product_name = {data_product_name} \n"
+            + f"processing_dt = {processing_dt} \n"
+            + f"status  = {status} \n"
+        )
 
-            Item = {
-                AUDIT_TABLE_HASH_KEY: {"S": correlation_id},
-                AUDIT_TABLE_RANGE_KEY: {"S": data_product_name},
-                "Date": {"S": processing_dt},
-                "Run_Id": {"N": "1"},
-                "Status": {"S": status},
+        console_printer.print_info(
+            f"Adjusting entry in dynamodb table {DYNAMO_DB_TABLE_NAME} for correlation_id {correlation_id} for e2e test"
+        )
+
+        Item = {
+            AUDIT_TABLE_HASH_KEY: {"S": correlation_id},
+            AUDIT_TABLE_RANGE_KEY: {"S": data_product_name},
+            "Date": {"S": processing_dt},
+            "Run_Id": {"N": "1"},
+            "Status": {"S": status},
+        }
+
+        aws_helper.insert_item_to_dynamo_db(DYNAMO_DB_TABLE_NAME, Item)
+
+        additional_step_args.update(
+            {
+                f"submit-job-{module_name}": [
+                    "--module_name",
+                    f"{module_name}",
+                    "--e2e_test_flg",
+                    "True",
+                    "--load_type",
+                    f"{key}",
+                ]
             }
-
-            aws_helper.insert_item_to_dynamo_db(DYNAMO_DB_TABLE_NAME, Item)
-
-            additional_step_args.update(
-                {
-                    f"submit-job-{module_name}-{key}": [
-                        "--module_name",
-                        f"{module_name}",
-                        "--e2e_test_flg",
-                        "True",
-                        "--load_type",
-                        f"{key}",
-                    ]
-                }
-            )
+        )
 
     console_printer.print_info(f"submitting spark step : {additional_step_args}")
     emr_launcher_config.update({"additional_step_args": additional_step_args})
@@ -155,9 +157,9 @@ def step_impl(context, modules):
 
 
 @when(
-    "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' and add step Ids to the list"
+    "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' with '{load_type}' extract and add step Ids to the list"
 )
-def step_impl(context, step_name, module_name):
+def step_impl(context, step_name, module_name, load_type):
 
     context.kickstart_adg_hive_cluster_step_name = f"{module_name}-{step_name}"
     context.kickstart_hive_result_path = f"{S3_KEY_KICSKTART_TEST}"
@@ -165,7 +167,10 @@ def step_impl(context, step_name, module_name):
     console_printer.print_info(f"generating the list of hive queries to be executed")
 
     hive_queries_list = kickstart_adg_helper.generate_hive_queries(
-        schema_config, context.published_bucket, context.kickstart_hive_result_path
+        schema_config,
+        context.published_bucket,
+        context.kickstart_hive_result_path,
+        load_type,
     )
 
     console_printer.print_info(
@@ -193,26 +198,27 @@ def step_impl(context):
             )
 
 
-@then("The input result matches with final output for module '{module_name}'")
-def step_impl(context, module_name):
+@then(
+    "The input result matches with final output for module '{module_name}' with '{load_type}' extract"
+)
+def step_impl(context, module_name, load_type):
     schema_config = context.kickstart_schema_config[module_name]
     console_printer.print_info("Getting the actual and expected contents")
     for collection in schema_config["schema"].keys():
         if schema_config["record_layout"].lower() == "csv":
-            for load_type in schema_config["output_file_pattern"].keys():
-                (
-                    actual_contents,
-                    expected_contents,
-                ) = kickstart_adg_helper.get_actual_and_expected_data(
-                    context, collection, schema_config, load_type
-                )
+            (
+                actual_contents,
+                expected_contents,
+            ) = kickstart_adg_helper.get_actual_and_expected_data(
+                context, collection, schema_config, load_type
+            )
 
         elif schema_config["record_layout"].lower() == "json":
             (
                 actual_contents,
                 expected_contents,
             ) = kickstart_adg_helper.get_actual_and_expected_data(
-                context, collection, schema_config
+                context, collection, schema_config, load_type
             )
 
         console_printer.print_info(f"Check the total items in actual and expected list")
