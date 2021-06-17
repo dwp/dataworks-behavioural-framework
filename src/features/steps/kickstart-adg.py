@@ -75,7 +75,9 @@ def step_impl(context, record_count, module_name, PII_Flag):
         )
 
 
-@when("Start kickstart adg emr process for modules '{modules}' with '{load_type}' extract and get step ids")
+@when(
+    "Start kickstart adg emr process for modules '{modules}' with '{load_type}' extract and get step ids"
+)
 def step_impl(context, modules, load_type):
     emr_launcher_config = {}
     additional_step_args = {}
@@ -165,8 +167,10 @@ def step_impl(context, step_name, module_name, load_type):
     console_printer.print_info(f"generating the list of hive queries to be executed")
 
     hive_queries_list = kickstart_adg_helper.generate_hive_queries(
-        schema_config, context.published_bucket, context.kickstart_hive_result_path,
-        load_type
+        schema_config,
+        context.published_bucket,
+        context.kickstart_hive_result_path,
+        load_type,
     )
 
     console_printer.print_info(
@@ -194,7 +198,9 @@ def step_impl(context):
             )
 
 
-@then("The input result matches with final output for module '{module_name}' with '{load_type}' extract")
+@then(
+    "The input result matches with final output for module '{module_name}' with '{load_type}' extract"
+)
 def step_impl(context, module_name, load_type):
     schema_config = context.kickstart_schema_config[module_name]
     console_printer.print_info("Getting the actual and expected contents")
