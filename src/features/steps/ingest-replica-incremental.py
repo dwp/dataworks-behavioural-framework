@@ -157,8 +157,8 @@ def step_impl(context):
             )
 
 
-@then("The processed data, '{record_count}' records, is available in HIVE")
-def step_impl(context, record_count):
+@then("The processed data is available in HIVE")
+def step_impl(context):
     # Generated IDs
     generated_ids = {}
     for collection in context.topics_for_test:
