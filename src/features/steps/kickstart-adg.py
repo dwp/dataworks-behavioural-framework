@@ -82,7 +82,7 @@ def step_impl(context, modules, load_type):
     KICKSTART_MODULES = modules.replace(" ", "").split(",")
     for module_name in KICKSTART_MODULES:
         schema_config = context.kickstart_schema_config[module_name]
-        key = key if load_type in ("full", "delta") else "delta"
+        key = load_type
         correlation_id = (
             f"kickstart_{module_name}_analytical_dataset_generation"
             if key == "full"
