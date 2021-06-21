@@ -223,6 +223,11 @@ function execute_behave() {
         UCFS_CLAIMANT_DOMAIN_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_base_path_mapping_ucfs_claimant.value.domain_name')"
         UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v1_getAwardDetails.value.path')"
         UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v2_getAwardDetails.value.path')"
+
+        UCFS_CLAIMANT_DOMAIN_NAME_LONDON="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_base_path_mapping_ucfs_claimant_london.value.domain_name')"
+        UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS_LONDON="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v1_getAwardDetails_london.value.path')"
+        UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS_LONDON="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v2_getAwardDetails_london.value.path')"
+
         UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.nino_salt_london_ssm_param.value')"
     else
         echo "Skipping TF_UCFS_CLAIMANT_OUTPUT_FILE=${TF_UCFS_CLAIMANT_OUTPUT_FILE}"

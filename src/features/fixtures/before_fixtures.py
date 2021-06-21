@@ -685,6 +685,16 @@ def claimant_api_setup(context):
 
 
 @fixture
+def claimant_api_setup_london(context):
+    console_printer.print_info("Executing 'claimant_api_setup' fixture")
+    context.execute_steps(
+        f"given The claimant API 'business' region is set to 'London'"
+    )
+    context.execute_steps(f"given The claimant API 'storage' region is set to 'London'")
+    context.execute_steps(f"given The nino salt has been retrieved")
+
+
+@fixture
 def s3_clear_published_bucket_pdm_test_input(context, timeout=30, **kwargs):
     console_printer.print_info(
         "Executing 's3_clear_published_bucket_pdm_test_input' fixture"

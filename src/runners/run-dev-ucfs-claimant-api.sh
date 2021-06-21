@@ -2,7 +2,6 @@
 
 test_run_id="${1:-NOT_SET}"
 test_run_type="ucfs-claimant-api"
-feature_tag="@ucfs-claimant-api"
 mongo_import_key="NOT_SET"
 number_of_topics=3
 
@@ -11,4 +10,5 @@ if [[ "${test_run_id}" == "NOT_SET" ]]; then
   test_run_id=1
 fi
 
-./run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "${feature_tag}" "${mongo_import_key}" "${number_of_topics}"
+./run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "@ucfs-claimant-api" "${mongo_import_key}" "${number_of_topics}"
+./run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "@ucfs-claimant-api-london" "${mongo_import_key}" "${number_of_topics}"
