@@ -414,6 +414,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.ucfs_claimant_kafka_consumer_stop, context)
     if tag == "fixture.claimant.api.setup":
         use_fixture(before_fixtures.claimant_api_setup, context)
+    if tag == "fixture.claimant.api.setup.london":
+        use_fixture(before_fixtures.claimant_api_setup_london, context)
     if tag == "fixture.s3.clear.published.bucket.pdm.test.input":
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_input, context)
     if tag == "fixture.s3.clear.published.bucket.pdm.test.output":
