@@ -223,7 +223,7 @@ function execute_behave() {
         UCFS_CLAIMANT_DOMAIN_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_base_path_mapping_ucfs_claimant.value.domain_name')"
         UCFS_CLAIMANT_API_BECOME_REGIONAL="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.ucfs_claimant_ireland_become_regional.value')"
         UCFS_CLAIMANT_API_USE_LONDON="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.ucfs_claimant_api_gateway_use_london.value')"
-        if [[ $UCFS_CLAIMANT_API_BECOME_REGIONAL && $UCFS_CLAIMANT_API_USE_LONDON == 'true' ]]; then
+        if [[ "${UCFS_CLAIMANT_API_BECOME_REGIONAL}" == "true" && "${UCFS_CLAIMANT_API_USE_LONDON}" == "true" ]]; then
           UCFS_CLAIMANT_API_ACTIVE_REGION='London'
         else
           UCFS_CLAIMANT_API_ACTIVE_REGION='Ireland'
