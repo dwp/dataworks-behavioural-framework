@@ -676,9 +676,9 @@ def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
 
 @fixture
 def claimant_api_setup(context):
-    console_printer.print_info("Executing 'claimant_api_setup' fixture")
+    console_printer.print_info(f"Executing 'claimant_api_setup' fixture. Active region '{context.ucfs_claimant_active_region}'")
     context.execute_steps(
-        f"given The claimant API 'business' region is set to 'Ireland'"
+        f"given The claimant API 'business' region is set to '{context.ucfs_claimant_active_region}'"
     )
     context.execute_steps(f"given The claimant API 'storage' region is set to 'London'")
     context.execute_steps(f"given The nino salt has been retrieved")

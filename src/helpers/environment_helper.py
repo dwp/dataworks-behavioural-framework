@@ -432,6 +432,9 @@ def set_test_run_common_variables(context):
     context.ucfs_claimant_domain_name = context.config.userdata.get(
         "UCFS_CLAIMANT_DOMAIN_NAME"
     )
+    context.ucfs_claimant_active_region = context.config.userdata.get(
+        "UCFS_CLAIMANT_API_ACTIVE_REGION"
+    )
     context.ucfs_claimant_api_path_v1_get_award_details = context.config.userdata.get(
         "UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS"
     )

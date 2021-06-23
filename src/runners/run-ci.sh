@@ -221,6 +221,13 @@ function execute_behave() {
 
     if [[ ! -z "${TF_UCFS_CLAIMANT_OUTPUT_FILE}" && "${TF_UCFS_CLAIMANT_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         UCFS_CLAIMANT_DOMAIN_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_base_path_mapping_ucfs_claimant.value.domain_name')"
+        UCFS_CLAIMANT_API_BECOME_REGIONAL="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.ucfs_claimant_ireland_become_regional.value')"
+        UCFS_CLAIMANT_API_USE_LONDON="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.ucfs_claimant_api_gateway_use_london.value')"
+        if [[ $UCFS_CLAIMANT_API_BECOME_REGIONAL && $UCFS_CLAIMANT_API_USE_LONDON == 'true' ]]; then
+          UCFS_CLAIMANT_API_ACTIVE_REGION='London'
+        else
+          UCFS_CLAIMANT_API_ACTIVE_REGION='Ireland'
+        fi
         UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v1_getAwardDetails.value.path')"
         UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v2_getAwardDetails.value.path')"
         UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.nino_salt_london_ssm_param.value')"
@@ -488,6 +495,7 @@ function execute_behave() {
     -D CORPORATE_STORAGE_S3_BUCKET_ID="${CORPORATE_STORAGE_S3_BUCKET_ID}" \
     -D DATA_STREAMING_TESTS_SKIP_RECONCILING="${DATA_STREAMING_TESTS_SKIP_RECONCILING}" \
     -D UCFS_CLAIMANT_DOMAIN_NAME="${UCFS_CLAIMANT_DOMAIN_NAME}" \
+    -D UCFS_CLAIMANT_API_ACTIVE_REGION=${UCFS_CLAIMANT_API_ACTIVE_REGION} \
     -D UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS="${UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS}" \
     -D UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS="${UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS}" \
     -D UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME="${UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME}" \
