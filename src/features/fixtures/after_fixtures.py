@@ -1,5 +1,6 @@
 import os
 from behave import fixture
+from botocore.exceptions import ClientError
 from helpers import (
     aws_helper,
     console_printer,
