@@ -63,7 +63,7 @@ def terminate_adg_cluster(context, timeout=30, **kwargs):
         try:
             aws_helper.terminate_emr_cluster(context.adg_cluster_id)
         except ClientError as error:
-            console_printer.print_warning(
+            console_printer.print_warning_text(
                 f"Error occured when terminating ADG cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
             )
 
@@ -81,7 +81,7 @@ def terminate_clive_cluster(context, timeout=30, **kwargs):
         try:
             aws_helper.terminate_emr_cluster(context.clive_cluster_id)
         except ClientError as error:
-            console_printer.print_warning(
+            console_printer.print_warning_text(
                 f"Error occured when terminating clive cluster with id of '{context.clive_cluster_id}' as the following error occurred: '{error}'"
             )
 
@@ -99,7 +99,7 @@ def terminate_pdm_cluster(context, timeout=30, **kwargs):
         try:
             aws_helper.terminate_emr_cluster(context.pdm_cluster_id)
         except ClientError as error:
-            console_printer.print_warning(
+            console_printer.print_warning_text(
                 f"Error occured when terminating PDM cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
             )
     else:
@@ -119,7 +119,7 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
         try:
             aws_helper.terminate_emr_cluster(context.kickstart_adg_cluster_id)
         except ClientError as error:
-            console_printer.print_warning(
+            console_printer.print_warning_text(
                 f"Error occured when terminating kickstart cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
             )
     else:
@@ -139,7 +139,7 @@ def terminate_mongo_latest_cluster(context, timeout=30, **kwargs):
         try:
             aws_helper.terminate_emr_cluster(context.mongo_latest_cluster_id)
         except ClientError as error:
-            console_printer.print_warning(
+            console_printer.print_warning_text(
                 f"Error occured when terminating mongo latest cluster with id of '{context.mongo_latest_cluster_id}' as the following error occurred: '{error}'"
             )
 
