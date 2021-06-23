@@ -456,8 +456,8 @@ def set_test_run_common_variables(context):
         )
     )
     context.ucrs_kms_decrypt_role_arn = context.config.userdata.get(
-            "UCRS_KMS_DECRYPT_ROLE_ARN"
-        )
+        "UCRS_KMS_DECRYPT_ROLE_ARN"
+    )
 
     context.monitoring_sns_topic_arn = context.config.userdata.get(
         "MONITORING_SNS_TOPIC_ARN"
