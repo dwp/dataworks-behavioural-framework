@@ -14,6 +14,14 @@ Feature: UCFS Claimant API
     When I query for the first new claimant from claimant API 'v2'
     Then Take home pay can be successfully decoded as '123.45'
 
+  @work-in-progress
+  Scenario: Take home pay can be decoded when querying for new claimant with UCRS KMS Decrypt role
+    Given We are using the UCRS KMS Decrypt
+    And UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of 'single_new_claimant.yml'
+    And The new claimants can be found from claimant API 'v2'
+    When I query for the first new claimant from claimant API 'v2'
+    Then Take home pay can be successfully decoded as '123.45'
+
   Scenario: Claimant is found when querying for new claimant
     Given UCFS send claimant API kafka messages with input file of 'valid_file_input.json' and data file of 'single_new_claimant.yml'
     And The new claimants can be found from claimant API 'v2'

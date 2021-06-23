@@ -19,6 +19,10 @@ from helpers import (
 
 message_type = "claimant_api"
 
+@given("We are using the UCRS KMS Decrypt")
+def step_impl(context):
+    aws_helper.set_details_for_role_assumption(context.ucrs_kms_decrypt_role_arn, context.aws_session_timeout_seconds)
+    aws_helper.clear_session()
 
 @given("The claimant API '{region_type}' region is set to '{region}'")
 def step_impl(context, region_type, region):
