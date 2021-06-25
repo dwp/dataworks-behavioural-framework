@@ -95,6 +95,7 @@ def step_impl(context):
         f"--collections {collections_spaced} "
         f"--output_s3_bucket {output_s3_bucket} "
         f"--output_s3_prefix {output_s3_prefix} "
+        f"--test"
     )
 
     step_name = "spark-submit"
@@ -131,7 +132,7 @@ def step_impl(context):
             file=hive_name,
         )
         hive_export_bash_command = (
-            f"hive -e 'Select * from {hive_name};' >> ~/{hive_name} && "
+            f"hive -e 'Select * from intraday_tests.{hive_name};' >> ~/{hive_name} && "
             f"aws s3 cp ~/{hive_name} {s3_file}"
             f" &>> /var/log/e2e.log"
         )
