@@ -2,6 +2,7 @@
 @test
 Feature: Analytical data set generation end to end test
 
+    @analytical-dataset-generation-full
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
     Scenario: Analytical data set generation end to end test for full
@@ -13,6 +14,7 @@ Feature: Analytical data set generation end to end test
       And the ADG metadata table is correct for 'full'
       And The dynamodb status for each collection for 'incremental' is set to 'Completed'
 
+    @analytical-dataset-generation-incremental
     @fixture.s3.clear.snapshot.start
     @fixture.terminate.adg.cluster
     Scenario: Analytical data set generation end to end test for incremental
