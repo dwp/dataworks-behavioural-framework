@@ -27,7 +27,7 @@ data "terraform_remote_state" "management" {
 
 provider "aws" {
   version = "~> 3.42.0"
-  region  = "{{provider_region}}"
+  region  = "{{terraform.provider_region}}"
 
   assume_role {
     role_arn = "arn:aws:iam::${lookup(local.account, local.environment)}:role/${var.assume_role}"
