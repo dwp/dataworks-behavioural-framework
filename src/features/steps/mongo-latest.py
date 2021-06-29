@@ -126,7 +126,7 @@ def step_(context, expected_result_file_name, step_name):
     )
 
     assert (
-        expected == actual
+        expected in actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
