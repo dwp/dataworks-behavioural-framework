@@ -1,4 +1,5 @@
 import json
+import time
 import csv
 import os
 import string
@@ -129,13 +130,15 @@ def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0)
     )
     return output_file_name
 
+def get_milliseconds():
+    return int(round(time.time() * 1000))
 
 def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        epoc_time = str(date_helper.get_current_epoch_seconds())
         for keys, item in schema_config["output_file_pattern"].items():
             for num in range(1, item["total_files"] + 1):
+                epoc_time = str(get_milliseconds())
                 output_file_name = get_file_name(
                     file_pattern=item["file_pattern"],
                     run_date=run_date,
@@ -167,7 +170,7 @@ def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
         for _ in range(schema_config["output_file_pattern"][collection]["total_files"]):
-            epoc_time = str(date_helper.get_current_epoch_seconds())
+            epoc_time = str(get_milliseconds())
             output_file_name = get_file_name(
                 file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
                 run_date=run_date,
