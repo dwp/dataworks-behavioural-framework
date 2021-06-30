@@ -202,7 +202,7 @@ def step_impl(context):
             ]
 
             hive_ids[collection] = {
-                record["message"]["_id"]["e2eId"] for record in hive_records
+                record["_id"]["e2eId"] for record in hive_records
             }
         else:
             raise AssertionError(f"S3 file {file} not parseable")
