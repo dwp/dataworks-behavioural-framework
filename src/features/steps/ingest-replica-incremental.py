@@ -201,9 +201,7 @@ def step_impl(context):
                 json.loads(line.split("\t")[2]) for line in file_content.split("\n")
             ]
 
-            hive_ids[collection] = {
-                record["message"]["_id"]["e2eId"] for record in hive_records
-            }
+            hive_ids[collection] = {record["_id"]["e2eId"] for record in hive_records}
         else:
             raise AssertionError(f"S3 file {file} not parseable")
 
