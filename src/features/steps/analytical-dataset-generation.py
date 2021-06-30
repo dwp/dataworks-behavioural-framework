@@ -269,7 +269,6 @@ def metadata_table_step_impl(context, snapshot_type):
 
     allowed_steps = [
         "spark-submit",
-        "create_pdm_trigger",
         "flush-pushgateway",
         "send_notification",
     ]
