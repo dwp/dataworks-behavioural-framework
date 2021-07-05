@@ -130,8 +130,10 @@ def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0)
     )
     return output_file_name
 
+
 def get_milliseconds():
     return int(round(time.time() * 1000))
+
 
 def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
@@ -172,7 +174,9 @@ def generate_json_files(schema_config, local_output_folder, record_count):
         for _ in range(schema_config["output_file_pattern"][collection]["total_files"]):
             epoc_time = str(get_milliseconds())
             output_file_name = get_file_name(
-                file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
+                file_pattern=schema_config["output_file_pattern"][collection][
+                    "file_name"
+                ],
                 run_date=run_date,
                 collection=collection,
                 epoc_time=epoc_time,
@@ -196,9 +200,13 @@ def generate_json_files(schema_config, local_output_folder, record_count):
                 while num <= int(record_count):
                     record = {}
                     for column, column_property in collection_schema.items():
-                        record.update({column: dataTypeMapping(column_property["value"])()})
+                        record.update(
+                            {column: dataTypeMapping(column_property["value"])()}
+                        )
                         if "default" in column_property:
-                            record.update({column: rd.choice(column_property["default"])})
+                            record.update(
+                                {column: rd.choice(column_property["default"])}
+                            )
                     data.append(record)
                     num += 1
                 JSON_BLOB.update({"data": data})
@@ -444,16 +452,17 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
 
         console_printer.print_info(f"Expected File Name: {expected_file_names}")
 
-        expected_json = [json.loads(
-            file_helper.get_contents_of_file(file, False)
-        )["data"] for file in expected_file_names]
+        expected_json = [
+            json.loads(file_helper.get_contents_of_file(file, False))["data"]
+            for file in expected_file_names
+        ]
 
-        expected_contents = ["\n".join(
-            [
-                "\t".join([str(record[field]) for field in record])
-                for record in item
-            ]
-        ).splitlines() for item in expected_json]
+        expected_contents = [
+            "\n".join(
+                ["\t".join([str(record[field]) for field in record]) for record in item]
+            ).splitlines()
+            for item in expected_json
+        ]
 
         final_expected_contents = [
             row.lower() for items in expected_contents for row in items
