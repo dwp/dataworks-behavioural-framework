@@ -95,9 +95,9 @@ def step_impl(context, timeout_mins):
 
 
 @then(
-    "the mongo latest result for step '{step_name}' matches the expected results of '{expected_result_file_name}'"
+    "the mongo latest result for step '{step_name}' matches the expected results of '{expected_result_file_names}'"
 )
-def step_(context, expected_result_file_name, step_name):
+def step_(context, expected_result_file_names, step_name):
     remote_file = (
         context.mongo_latest_results_s3_file
         if step_name == "hive-query"
@@ -112,22 +112,27 @@ def step_(context, expected_result_file_name, step_name):
         .strip()
     )
 
-    expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "mongo_latest",
-        "expected",
-        expected_result_file_name,
-    )
-    expected = (
-        file_helper.get_contents_of_file(expected_file_name, False)
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
-    )
+    expected_contents = []
+
+    for expected_result_file_name in expected_result_file_names.split(","):
+        expected_file_name = os.path.join(
+            context.fixture_path_local,
+            "mongo_latest",
+            "expected",
+            expected_result_file_name,
+        )
+        expected_contents.append((
+            file_helper.get_contents_of_file(expected_file_name, False)
+            .replace("\t", "")
+            .replace(" ", "")
+            .strip()
+        ))
+
+    results = [expected_content in actual for expected_content in expected_contents]
 
     assert (
-        expected in actual
-    ), f"Expected result of '{expected}', does not match '{actual}'"
+        any(results)
+    ), f"None of the expected results in '{expected_contents}', are contained in actual result of '{actual}'"
 
 
 @then("the mongo latest cluster tags have been created correctly")
