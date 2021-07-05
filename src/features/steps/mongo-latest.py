@@ -121,17 +121,19 @@ def step_(context, expected_result_file_names, step_name):
             "expected",
             expected_result_file_name,
         )
-        expected_contents.append((
-            file_helper.get_contents_of_file(expected_file_name, False)
-            .replace("\t", "")
-            .replace(" ", "")
-            .strip()
-        ))
+        expected_contents.append(
+            (
+                file_helper.get_contents_of_file(expected_file_name, False)
+                .replace("\t", "")
+                .replace(" ", "")
+                .strip()
+            )
+        )
 
     results = [expected_content in actual for expected_content in expected_contents]
 
-    assert (
-        any(results)
+    assert any(
+        results
     ), f"None of the expected results in '{expected_contents}', are contained in actual result of '{actual}'"
 
 
