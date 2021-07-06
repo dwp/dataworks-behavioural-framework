@@ -71,7 +71,7 @@
       },
       "delta" : {
         "file_pattern" : "run-date_collection_epoc-time_delta_seq-num.csv",
-        "total_files"  : 10
+        "total_files"  : 5
       }
     }
   },
@@ -628,11 +628,13 @@
     "output_file_pattern" : {
       "grant_applications" : {
         "file_name" : "run-date-kick-mksas-applications-epoc-time.json",
-        "regex_pattern" : ".*kick-mksas-applications-[0-9]*.json"
+        "regex_pattern" : ".*kick-mksas-applications-[0-9]*.json",
+        "total_files" : 5
       },
       "grant_applications_audit" : {
         "file_name" : "run-date-kick-mksas-applications-audit-epoc-time.json",
-        "regex_pattern" : ".*kick-mksas-applications-audit-[0-9]*.json"
+        "regex_pattern" : ".*kick-mksas-applications-audit-[0-9]*.json",
+        "total_files" : 5
       }
     }
   }

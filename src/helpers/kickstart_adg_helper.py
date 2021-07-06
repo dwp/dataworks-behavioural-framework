@@ -1,4 +1,5 @@
 import json
+import time
 import csv
 import os
 import string
@@ -130,12 +131,16 @@ def get_file_name(file_pattern, run_date, collection, epoc_time, sequence_num=0)
     return output_file_name
 
 
+def get_milliseconds():
+    return int(round(time.time() * 1000))
+
+
 def generate_csv_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        epoc_time = str(date_helper.get_current_epoch_seconds())
         for keys, item in schema_config["output_file_pattern"].items():
             for num in range(1, item["total_files"] + 1):
+                epoc_time = str(get_milliseconds())
                 output_file_name = get_file_name(
                     file_pattern=item["file_pattern"],
                     run_date=run_date,
@@ -166,39 +171,46 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
 def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        epoc_time = str(date_helper.get_current_epoch_seconds())
-        output_file_name = get_file_name(
-            file_pattern=schema_config["output_file_pattern"][collection]["file_name"],
-            run_date=run_date,
-            collection=collection,
-            epoc_time=epoc_time,
-        )
-        output_file = os.path.join(local_output_folder, output_file_name)
-        num = 1
-        data = []
-        JSON_BLOB = {
-            "fields": [
-                {"fieldName": column, "pii": column_property["pii_flg"]}
-                for column, column_property in collection_schema.items()
-            ],
-            "extract": {
-                "start": datetime.strftime(
-                    datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
-                ),
-                "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
-            },
-        }
-        with open(output_file, "w+") as writer:
-            while num <= int(record_count):
-                record = {}
-                for column, column_property in collection_schema.items():
-                    record.update({column: dataTypeMapping(column_property["value"])()})
-                    if "default" in column_property:
-                        record.update({column: rd.choice(column_property["default"])})
-                data.append(record)
-                num += 1
-            JSON_BLOB.update({"data": data})
-            writer.write(json.dumps(JSON_BLOB, indent=4))
+        for _ in range(schema_config["output_file_pattern"][collection]["total_files"]):
+            epoc_time = str(get_milliseconds())
+            output_file_name = get_file_name(
+                file_pattern=schema_config["output_file_pattern"][collection][
+                    "file_name"
+                ],
+                run_date=run_date,
+                collection=collection,
+                epoc_time=epoc_time,
+            )
+            output_file = os.path.join(local_output_folder, output_file_name)
+            num = 1
+            data = []
+            JSON_BLOB = {
+                "fields": [
+                    {"fieldName": column, "pii": column_property["pii_flg"]}
+                    for column, column_property in collection_schema.items()
+                ],
+                "extract": {
+                    "start": datetime.strftime(
+                        datetime.now() - timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ"
+                    ),
+                    "end": datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%SZ"),
+                },
+            }
+            with open(output_file, "w+") as writer:
+                while num <= int(record_count):
+                    record = {}
+                    for column, column_property in collection_schema.items():
+                        record.update(
+                            {column: dataTypeMapping(column_property["value"])()}
+                        )
+                        if "default" in column_property:
+                            record.update(
+                                {column: rd.choice(column_property["default"])}
+                            )
+                    data.append(record)
+                    num += 1
+                JSON_BLOB.update({"data": data})
+                writer.write(json.dumps(JSON_BLOB, indent=4))
 
 
 def generate_data(module_name, record_count, schema_config, temp_folder):
@@ -436,19 +448,24 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             file
             for file in context.kickstart_current_run_input_files
             if re.match(file_regex_pattern, file)
-        ][0]
+        ]
 
         console_printer.print_info(f"Expected File Name: {expected_file_names}")
-        expected_json = json.loads(
-            file_helper.get_contents_of_file(expected_file_names, False)
-        )["data"]
-        expected_contents = "\n".join(
-            [
-                "\t".join([str(record[field]) for field in record])
-                for record in expected_json
-            ]
-        ).splitlines()
 
-        final_expected_contents = [item.lower() for item in expected_contents]
+        expected_json = [
+            json.loads(file_helper.get_contents_of_file(file, False))["data"]
+            for file in expected_file_names
+        ]
+
+        expected_contents = [
+            "\n".join(
+                ["\t".join([str(record[field]) for field in record]) for record in item]
+            ).splitlines()
+            for item in expected_json
+        ]
+
+        final_expected_contents = [
+            row.lower() for items in expected_contents for row in items
+        ]
 
     return actual_contents, final_expected_contents
