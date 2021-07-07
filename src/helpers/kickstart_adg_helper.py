@@ -458,9 +458,7 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
         ]
 
         expected_contents = [
-            "\n".join(
-                ["\t".join([str(record[field]) for field in record]) for record in item]
-            ).splitlines()
+            ["\t".join([str(record[field]) for field in record]) for record in item]
             for item in expected_json
         ]
 
@@ -468,6 +466,11 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             row.lower() for items in expected_contents for row in items
         ]
 
-        console_printer.print_info(f"Expected File Name: {str(final_expected_contents)}")
+        inputs_s3_key = os.path.join(context.kickstart_hive_result_path, f"expected_e2e_{collection}.csv")
+
+
+        aws_helper.put_object_in_s3(
+            body="\n".join(final_expected_contents), s3_bucket=context.published_bucket, s3_key=inputs_s3_key
+        )
 
     return actual_contents, final_expected_contents
