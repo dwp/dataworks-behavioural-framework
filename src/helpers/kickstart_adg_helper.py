@@ -466,7 +466,7 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             row.lower() for items in expected_contents for row in items
         ]
 
-        inputs_s3_key = os.path.join(context.kickstart_hive_result_path, f"expected_e2e_{collection}.csv")
+        inputs_s3_key = os.path.join(f"kickstart-e2e-tests", f"expected_e2e_{collection}.csv")
 
 
         aws_helper.put_object_in_s3(
