@@ -468,4 +468,6 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
             row.lower() for items in expected_contents for row in items
         ]
 
+        console_printer.print_info(f"Expected File Name: {str(final_expected_contents)}")
+
     return actual_contents, final_expected_contents
