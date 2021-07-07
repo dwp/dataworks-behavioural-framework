@@ -140,7 +140,7 @@ def step_impl(context):
             f"--output_s3_prefix {output_s3_prefix}",
             f"--triggered_time {int(time.time()*1000)}",
             f"--database_name {context.database_name}",
-            f"--end_time {int(time.time()*1000)}"
+            f"--end_time {int(time.time()*1000)}",
         ]
     )
 
