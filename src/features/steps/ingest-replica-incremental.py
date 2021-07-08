@@ -56,7 +56,10 @@ def step_impl(context):
 def step_impl(context):
     emr_launcher_config = {
         "s3_overrides": None,
-        "overrides": {"Instances": {"KeepJobFlowAliveWhenNoSteps": True}, "Steps": []},
+        "overrides": {
+            "Name": "ingest-replica-incremental-e2e",
+            "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
+            "Steps": []},
         "extend": None,
         "additional_step_args": None,
     }
