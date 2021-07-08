@@ -59,7 +59,8 @@ def step_impl(context):
         "overrides": {
             "Name": "ingest-replica-incremental-e2e",
             "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
-            "Steps": []},
+            "Steps": [],
+        },
         "extend": None,
         "additional_step_args": None,
     }
