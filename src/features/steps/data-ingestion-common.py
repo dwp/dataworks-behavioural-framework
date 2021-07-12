@@ -15,6 +15,12 @@ from helpers import (
     "The latest id from the Kafka dlq file '{dlq_file_template}' has not been written to the '{table}' metadata table with id format of '{id_format}'"
 )
 def step_impl(context, dlq_file_template, table, id_format):
+    if context.data_streaming_tests_skip_reconciling:
+        console_printer.print_warning_text(
+            f"Not verifying reconciliation due to DATA_STREAMING_TESTS_SKIP_RECONCILING being set to '{str(context.data_streaming_tests_skip_reconciling)}'"
+        )
+        return
+
     wrap_id_value = id_format == "wrapped"
     table_name = streaming_data_helper.get_metadata_store_table_name(
         table, context.metadata_store_tables
