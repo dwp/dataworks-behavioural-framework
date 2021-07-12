@@ -147,7 +147,7 @@ def send_start_export_message(
         message["trigger-adg"] = trigger_adg_string.lower()
 
     if export_date_override:
-        message["export-date"] = export_date_override,
+        message["export-date"] = (export_date_override,)
 
     if clear_s3_snapshots is not None:
         message["clear-s3-snapshots"] = clear_s3_snapshots.lower()
