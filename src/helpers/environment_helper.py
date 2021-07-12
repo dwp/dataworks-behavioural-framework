@@ -245,6 +245,12 @@ def set_test_run_common_variables(context):
     context.export_process_trigger_adg_override = context.config.userdata.get(
         "GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE"
     )
+    context.export_process_clear_s3_snapshots = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_CLEAR_S3_SNAPSHOTS"
+    )
+    context.export_process_clear_s3_manifests = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_CLEAR_S3_MANIFESTS"
+    )
 
     context.generate_snapshots_trigger_snapshot_sender_override = (
         context.config.userdata.get(

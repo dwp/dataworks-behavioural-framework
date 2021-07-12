@@ -88,6 +88,8 @@ def send_start_export_message(
     correlation_id,
     trigger_adg_string,
     export_date_override,
+    clear_s3_snapshots,
+    clear_s3_manifests,
     mongo_snapshot_full_s3_location=None,
 ):
     """Sends the relevant SNS message for starting the exporter.
@@ -105,6 +107,8 @@ def send_start_export_message(
     correlation_id -- Correlation Id override or None for a uuid
     trigger_adg_string -- True for HTME to trigger ADG when finished (defaults to False)
     export_date_override -- Correlation Id override or None for not sending, which means using today's date
+    clear_s3_snapshots -- True for HTME to delete any existing snapshots before it runs (defaults to False)
+    clear_s3_manifests -- True for HTME to delete any existing manifests before it runs (defaults to False)
     mongo_snapshot_full_s3_location -- full location for the snapshots (or None if not needed)
     """
     reprocess_files = "true" if ss_reprocess_files else "false"
@@ -143,7 +147,13 @@ def send_start_export_message(
         message["trigger-adg"] = trigger_adg_string.lower()
 
     if export_date_override:
-        message["export-date"] = export_date_override
+        message["export-date"] = export_date_override,
+
+    if clear_s3_snapshots is not None:
+        message["clear-s3-snapshots"] = clear_s3_snapshots.lower()
+
+    if clear_s3_manifests is not None:
+        message["clear-s3-manifests"] = clear_s3_manifests.lower()
 
     return aws_helper.publish_message_to_sns(
         message, uc_export_to_crown_controller_messages_sns_arn
