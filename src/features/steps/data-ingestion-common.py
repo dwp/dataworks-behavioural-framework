@@ -69,6 +69,12 @@ def step_impl(context, dlq_file_template, table, id_format):
     "The latest id and timestamp have been correctly written to the '{table}' metadata table with id format of '{id_format}' for message type '{message_type}'"
 )
 def step_impl(context, table, id_format, message_type):
+    if context.data_streaming_tests_skip_reconciling:
+        console_printer.print_warning_text(
+            f"Not verifying reconciliation due to DATA_STREAMING_TESTS_SKIP_RECONCILING being set to '{str(context.data_streaming_tests_skip_reconciling)}'"
+        )
+        return
+
     folder = streaming_data_helper.generate_fixture_data_folder(message_type)
 
     context.latest_metadata_store_ids = []
