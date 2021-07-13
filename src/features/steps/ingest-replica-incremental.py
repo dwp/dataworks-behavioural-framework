@@ -65,11 +65,7 @@ def step_impl(context):
         "additional_step_args": None,
     }
     payload_json = json.dumps(emr_launcher_config)
-    cluster_response = (
-        invoke_lambda.invoke_intraday_emr_launcher_lambda(
-            payload_json
-        )
-    )
+    cluster_response = invoke_lambda.invoke_intraday_emr_launcher_lambda(payload_json)
 
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")

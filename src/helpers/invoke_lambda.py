@@ -82,9 +82,7 @@ def invoke_intraday_emr_launcher_lambda(payload):
     Keyword arguments:
     payload -- the input for the lambda invocation
     """
-    response = aws_helper.invoke_lambda_function(
-        "intraday-emr-launcher", payload
-    )
+    response = aws_helper.invoke_lambda_function("intraday-emr-launcher", payload)
     return json.loads(response.decode())
 
 
