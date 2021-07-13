@@ -56,13 +56,17 @@ def step_impl(context):
 def step_impl(context):
     emr_launcher_config = {
         "s3_overrides": None,
-        "overrides": {"Instances": {"KeepJobFlowAliveWhenNoSteps": True}, "Steps": []},
+        "overrides": {
+            "Name": "intraday-incremental-e2e",
+            "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
+            "Steps": [],
+        },
         "extend": None,
         "additional_step_args": None,
     }
     payload_json = json.dumps(emr_launcher_config)
     cluster_response = (
-        invoke_lambda.invoke_ingest_replica_incremental_emr_launcher_lambda(
+        invoke_lambda.invoke_intraday_emr_launcher_lambda(
             payload_json
         )
     )
@@ -88,13 +92,13 @@ def step_impl(context):
     database_items = []
     for collection in collections_list:
         database_items += aws_helper.scan_dynamodb_with_filters(
-            "intra-day", {"Collection": collection}
+            "intraday-job-status", {"Collection": collection}
         )
 
     # Delete relevant database items
     for item in database_items:
         aws_helper.delete_item_from_dynamodb(
-            "intra-day",
+            "intraday-job-status",
             {
                 "CorrelationId": {"S": item["CorrelationId"]},
                 "Collection": {"S": item["Collection"]},
@@ -104,7 +108,7 @@ def step_impl(context):
     # Create initial records for collections
     for collection in collections_list:
         aws_helper.insert_item_to_dynamo_db(
-            table_name="intra-day",
+            table_name="intraday-job-status",
             item_dict={
                 "CorrelationId": {"S": "000"},
                 "Collection": {"S": collection},
