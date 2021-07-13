@@ -118,7 +118,11 @@ def step_impl(context, modules, load_type):
             }
 
             aws_helper.insert_item_to_dynamo_db(DYNAMO_DB_TABLE_NAME, Item)
-            STEP_NAME=f"submit-job-{module_name}-{key}" if key == "incremental" else f"submit-job-{module_name}"
+            STEP_NAME = (
+                f"submit-job-{module_name}-{key}"
+                if key == "incremental"
+                else f"submit-job-{module_name}"
+            )
             additional_step_args.update(
                 {
                     f"{STEP_NAME}": [
@@ -162,7 +166,9 @@ def step_impl(context, modules, load_type):
 )
 def step_impl(context, step_name, module_name, load_type):
 
-    context.kickstart_adg_hive_cluster_step_name = f"{module_name}-{step_name}-{load_type}"
+    context.kickstart_adg_hive_cluster_step_name = (
+        f"{module_name}-{step_name}-{load_type}"
+    )
     context.kickstart_hive_result_path = f"{S3_KEY_KICSKTART_TEST}"
     schema_config = context.kickstart_schema_config[module_name]
     console_printer.print_info(f"generating the list of hive queries to be executed")

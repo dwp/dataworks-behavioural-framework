@@ -268,13 +268,15 @@ def generate_hive_queries(schema_config, published_bucket, s3_path, load_type):
                 column_name = ",".join(
                     [
                         re.sub("[^0-9a-zA-Z$]+", " ", col)
-                            .strip()
-                            .replace(" ", "_")
-                            .lower()
+                        .strip()
+                        .replace(" ", "_")
+                        .lower()
                         for col in collections_schema.keys()
                     ]
                 )
-                table_name = collection if load_type == "full" else f"{collection}_{load_type}"
+                table_name = (
+                    collection if load_type == "full" else f"{collection}_{load_type}"
+                )
                 hive_export_bash_command = (
                     f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
                     + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
