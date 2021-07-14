@@ -264,12 +264,7 @@ def generate_hive_queries(schema_config, published_bucket, s3_path, load_type):
         if schema_config["record_layout"].lower() == "csv":
             for collection, collections_schema in schema_config["schema"].items():
                 date_uploaded = datetime.strftime(datetime.now(), "%Y-%m-%d")
-                keys = load_type
-                file_name = (
-                    f"e2e_{collection}.csv"
-                    if keys == "full"
-                    else f"e2e_{collection}_delta.csv"
-                )
+                file_name = f"e2e_{collection}_{load_type}.csv"
                 column_name = ",".join(
                     [
                         re.sub("[^0-9a-zA-Z$]+", " ", col)
@@ -279,7 +274,9 @@ def generate_hive_queries(schema_config, published_bucket, s3_path, load_type):
                         for col in collections_schema.keys()
                     ]
                 )
-                table_name = collection if keys == "full" else f"{collection}_delta"
+                table_name = (
+                    collection if load_type == "full" else f"{collection}_{load_type}"
+                )
                 hive_export_bash_command = (
                     f"hive -e 'SELECT {column_name} FROM uc_kickstart.{table_name} where date_uploaded=\"{date_uploaded}\";' >> ~/{file_name} && "
                     + f"aws s3 cp ~/{file_name} s3://{published_bucket}/{s3_path}/"
@@ -388,7 +385,7 @@ def get_actual_and_expected_data(context, collection, schema_config, load_type="
         file_name = (
             f"e2e_{collection}.csv"
             if load_type == "full"
-            else f"e2e_{collection}_delta.csv"
+            else f"e2e_{collection}_{load_type}.csv"
         )
         file_regex_pattern = (
             rf".*{collection}_[0-9]*.csv"
