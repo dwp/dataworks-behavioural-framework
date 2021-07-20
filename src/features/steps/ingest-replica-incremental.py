@@ -127,7 +127,7 @@ def step_impl(context):
     )
     output_s3_bucket = context.published_bucket
     output_s3_prefix = context.ingest_replica_output_s3_prefix
-    context.database_name = "intra_day_tests"
+    context.database_name = "intraday_tests"
 
     # Add step to cluster
     command = " ".join(
