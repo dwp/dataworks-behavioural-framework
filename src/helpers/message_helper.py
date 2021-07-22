@@ -192,7 +192,9 @@ def send_start_snapshot_sending_message(
         "snapshot_type": snapshot_type,
     }
 
-    aws_helper.send_message_to_sqs(snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_"))
+    aws_helper.send_message_to_sqs(
+        snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_")
+    )
 
 
 def get_consolidated_topics_list(
