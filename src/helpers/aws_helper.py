@@ -858,21 +858,30 @@ def put_object_in_s3(body, s3_bucket, s3_key):
     s3_client.put_object(Body=body, Bucket=s3_bucket, Key=s3_key)
 
 
-def send_message_to_sqs(queue_url, message_body):
+def send_message_to_sqs(queue_url, message_body, message_group_id=None):
     """Post a message to an SQS queue.
 
     Keyword arguments:
     queue_url -- the url of the sqs queue to send the message to
     message_body -- the string body for the message
+    message_group_id -- if not None, then uses this message group
     """
     console_printer.print_info(
         f"Sending message to sqs: '{message_body}' on queue '{queue_url}'"
     )
     sqs_client = get_client(service_name="sqs")
-    sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=message_body,
-    )
+
+    if message_group_id is not None:
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=message_body,
+            MessageGroupId=message_group_id,
+        )
+    else:
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=message_body,
+        )
 
 
 def send_files_to_kafka_producer_sns(
