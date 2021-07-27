@@ -30,12 +30,14 @@ def step_impl(context):
     # generate command(s) to flush data
     command_list = [f"flush '{collection}'" for collection in collections]
     hbase_cmd_string = "; ".join(command_list)
-    shell_cmd_string = f"echo -e \"{hbase_cmd_string}\" | hbase shell -n "
+    shell_cmd_string = f'echo -e "{hbase_cmd_string}" | hbase shell -n '
 
     # execute commands using bash step, and wait
     step_name = "flush tables"
     step = emr_step_generator.generate_bash_step(
-        emr_cluster_id=ingest_hbase_id, bash_command=shell_cmd_string, step_type=step_name
+        emr_cluster_id=ingest_hbase_id,
+        bash_command=shell_cmd_string,
+        step_type=step_name,
     )
     execution_state = aws_helper.poll_emr_cluster_step_status(
         step, ingest_hbase_id, 2500
