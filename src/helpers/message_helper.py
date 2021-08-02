@@ -182,7 +182,7 @@ def send_start_snapshot_sending_message(
     """
     reprocess_files_value = "true" if reprocess_files else "false"
 
-    message = {
+    message_body = {
         "shutdown_flag": "true",
         "correlation_id": correlation_id,
         "topic_name": topic_name,
