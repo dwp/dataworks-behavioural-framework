@@ -193,7 +193,7 @@ def send_start_snapshot_sending_message(
     }
 
     aws_helper.send_message_to_sqs(
-        snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_")
+        snapshot_sender_sqs_queue, str(message_body), topic_name.replace(".", "_")
     )
 
 
