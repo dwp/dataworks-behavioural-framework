@@ -35,6 +35,7 @@ EXPORT_DATE = "export_date"
 ADG_FULL_TOPICS = [
     "db.agent-core.agent",
     "db.agent-core.agentToDo",
+    "db.agent-core.agentToDoArchive",
     "db.agent-core.team",
     "db.core.statement",
     "db.core.contract",
@@ -43,6 +44,7 @@ ADG_FULL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
+    "db.claimant-history.claimHistoryEntry",
 ]
 
 ADG_INCREMENTAL_TOPICS = [
@@ -64,6 +66,7 @@ ADG_DB_COLLECTION = {
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
+    "claimant-history": ["claimHistoryEntry"],
 }
 
 ADG_INCREMENTAL_TOPICS_DATED = [
