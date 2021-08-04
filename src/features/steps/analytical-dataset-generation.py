@@ -62,7 +62,7 @@ ADG_INCREMENTAL_TOPICS = [
 ]
 
 ADG_DB_COLLECTION = {
-    "agent-core": ["agent", "agentToDo", "agentToDoArchive", "team"],
+    "agent-core": ["agent", "agentToDo", "team", "agentToDoArchive", ],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
