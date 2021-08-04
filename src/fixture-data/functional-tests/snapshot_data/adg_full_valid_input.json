@@ -28,7 +28,9 @@
       },
       "declaredDateTime": {
         "d_date": "2026-05-10T12:11:19.019Z"
-      }
+      },
+      "uc_feature_string": "uc.agent.claimant.history.refer.hrt.to.decision.maker.nationality",
+      "agent_string": "MANDATORY_RECONSIDERATION"
     }
   ],
   "assessmentPeriod": {
