@@ -61,12 +61,19 @@ ADG_INCREMENTAL_TOPICS = [
     "data.businessAudit",
 ]
 
-ADG_DB_COLLECTION = {
-    "agent-core": ["agent", "agentToDo", "team", "agentToDoArchive", ],
+ADG_FULL_DB_COLLECTION = {
+    "agent-core": ["agent", "agentToDo", "team", "agentToDoArchive"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
     "appointments": ["appointment"],
     "claimant-history": ["claimHistoryEntry"],
+}
+
+ADG_INCREMENTAL_DB_COLLECTION = {
+    "agent-core": ["agent", "agentToDo", "team"],
+    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
+    "accepted-data": ["personDetails"],
+    "appointments": ["appointment"],
 }
 
 ADG_INCREMENTAL_TOPICS_DATED = [
@@ -189,8 +196,10 @@ def step_verify_analytical_datasets(context, snapshot_type):
     console_printer.print_info(f"Keys in data location : {keys}")
     if snapshot_type == "full":
         ADG_TOPICS = ADG_FULL_TOPICS
+        ADG_DB_COLLECTION = ADG_FULL_DB_COLLECTION
     else:
         ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
+        ADG_DB_COLLECTION = ADG_INCREMENTAL_DB_COLLECTION
     console_printer.print_info(f"keys are : {keys}")
     console_printer.print_info(f"ADG_TOPICS are : {ADG_TOPICS}")
     assert len(keys) == len(ADG_TOPICS)
