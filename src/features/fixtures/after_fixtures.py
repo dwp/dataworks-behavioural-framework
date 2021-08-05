@@ -99,7 +99,7 @@ def terminate_uc_feature_cluster(context, timeout=30, **kwargs):
             aws_helper.terminate_emr_cluster(context.uc_feature_cluster_id)
         except ClientError as error:
             console_printer.print_warning_text(
-                f"Error occured when terminating uc feature cluster with id of '{context.clive_cluster_id}' as the following error occurred: '{error}'"
+                f"Error occured when terminating uc feature cluster with id of '{context.uc_feature_cluster_id}' as the following error occurred: '{error}'"
             )
 
     else:
