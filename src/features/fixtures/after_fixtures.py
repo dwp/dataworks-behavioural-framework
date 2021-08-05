@@ -90,6 +90,7 @@ def terminate_clive_cluster(context, timeout=30, **kwargs):
             "No cluster id found for clive so not terminating any cluster"
         )
 
+
 @fixture
 def terminate_uc_feature_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_uc_feature_cluster' fixture")
@@ -106,6 +107,7 @@ def terminate_uc_feature_cluster(context, timeout=30, **kwargs):
         console_printer.print_info(
             "No cluster id found for uc feature so not terminating any cluster"
         )
+
 
 @fixture
 def terminate_pdm_cluster(context, timeout=30, **kwargs):

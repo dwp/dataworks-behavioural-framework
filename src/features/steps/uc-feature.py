@@ -71,9 +71,13 @@ def step_impl(context, timeout_mins):
         )
 
 
-@then("the UC-FEATURE result matches the expected results of '{expected_result_file_name}'")
+@then(
+    "the UC-FEATURE result matches the expected results of '{expected_result_file_name}'"
+)
 def step_(context, expected_result_file_name):
-    console_printer.print_info(f"S3 Request Location: {context.uc_feature_results_s3_file}")
+    console_printer.print_info(
+        f"S3 Request Location: {context.uc_feature_results_s3_file}"
+    )
     actual = (
         aws_helper.get_s3_object(
             None, context.published_bucket, context.uc_feature_results_s3_file
