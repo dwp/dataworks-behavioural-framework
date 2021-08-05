@@ -252,7 +252,9 @@ def htme_start_incremental(context, timeout=30, **kwargs):
 
 @fixture
 def htme_start_drift_testing_incremental(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 'htme_start_drift_testing_incremental' fixture")
+    console_printer.print_info(
+        "Executing 'htme_start_drift_testing_incremental' fixture"
+    )
     updated_topics = message_helper.get_consolidated_topics_list(
         context.topics,
         "drift_testing_incremental",
