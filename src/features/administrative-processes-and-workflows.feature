@@ -22,7 +22,7 @@ Feature: Administrative processes and workflows
   Scenario: Start the sending of S3 incremental snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'incremental'
 
-  @admin-send-incremental-snapshots-to-crown
+  @admin-send-drift-testing-incremental-snapshots-to-crown
   @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 incremental snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'drift_testing_incremental'
