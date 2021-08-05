@@ -66,7 +66,7 @@ def invoke_clive_emr_launcher_lambda(payload):
     return json.loads(response.decode())
 
 def invoke_uc_feature_emr_launcher_lambda(payload):
-    """Triggers aws_clive_emr_launcher lambda with the given payload.
+    """Triggers uc_feature_emr_launcher lambda with the given payload.
 
     Keyword arguments:
     payload -- the input for the lambda invocation
