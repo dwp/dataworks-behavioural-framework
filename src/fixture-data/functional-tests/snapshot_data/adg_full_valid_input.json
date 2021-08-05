@@ -91,7 +91,7 @@
   "gracePeriodEndDate": null,
   "landlordPayment": "0",
   "uc_feature_string": "uc.agent.claimant.history.refer.hrt.to.decision.maker.nationality",
-  "metadata": {
+  "metaData": {
     "agentToDoType": "MAKE_A_DECISION_MANDATORY_RECONSIDERATION"
   }
 }
