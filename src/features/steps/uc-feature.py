@@ -158,8 +158,5 @@ def metadata_table_step_impl(context):
         item["Cluster_Id"]["S"] == context.uc_feature_cluster_id
     ), f"Cluster_Id was '{item['Cluster_Id']['S']}', expected '{context.uc_feature_cluster_id}'"
     assert (
-        item["S3_Prefix_Analytical_DataSet"]["S"] == context.uc_feature_test_input_s3_prefix
-    ), f"S3_Prefix_Snapshots was '{item['S3_Prefix_Snapshots']['S']}', expected '{context.uc_feature_test_input_s3_prefix}'"
-    assert (
         item["Snapshot_Type"]["S"] == snapshot_type
     ), f"Snapshot_Type was '{item['Snapshot_Type']['S']}', expected '{snapshot_type}'"
