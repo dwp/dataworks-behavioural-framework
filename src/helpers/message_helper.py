@@ -223,7 +223,7 @@ def get_consolidated_topics_list(
                         return default_topic_list_incremental.split(",")
                     elif snapshot_type.lower() == "drift_testing_incremental":
                         return default_topic_list_drift_testing_incremental.split(",")
-                    else
+                    else:
                         return default_topic_list_full.split(",")
                 else:
                     return topics_override.split(",")
