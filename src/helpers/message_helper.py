@@ -178,7 +178,7 @@ def send_start_snapshot_sending_message(
     correlation_id -- the test run name
     reprocess_files -- boolean to reprocess files or not
     export_date -- the date the files were exported
-    snapshot_type -- full or incremental for the type of the snapshots
+    snapshot_type -- full, incremental or drift_testing_incremental for the type of the snapshots
     """
     reprocess_files_value = "true" if reprocess_files else "false"
 
@@ -202,6 +202,7 @@ def get_consolidated_topics_list(
     snapshot_type,
     default_topic_list_full,
     default_topic_list_incremental,
+    default_topic_list_drift_testing_incremental,
     topics_overrides=None,
 ):
     """Works out the topics needed for snapshot sender based on the passed in overrides.
@@ -211,17 +212,19 @@ def get_consolidated_topics_list(
     snapshot_type -- either "full" or "incremental" if using the default topic lists (defaults to "full")
     default_topic_list_full -- if snapshot_type is "full" then this comma delimited list is used for the topics
     default_topic_list_incremental -- if snapshot_type is "incremental" then this comma delimited list is used for the topics
+    default_topic_list_drift_testing_incremental -- if snapshot_type is "drift_testing_incremental" then this comma delimited list is used for the topics
     topics_override -- if provided as an array of comma delimited lists, the first valid one is used for the topics
     """
     if topics_overrides is not None:
         for topics_override in topics_overrides:
             if topics_override:
                 if topics_override.lower() == "all":
-                    return (
-                        default_topic_list_incremental.split(",")
-                        if snapshot_type.lower() == "incremental"
-                        else default_topic_list_full.split(",")
-                    )
+                    if snapshot_type.lower() == "incremental":
+                        return default_topic_list_incremental.split(",")
+                    elif snapshot_type.lower() == "drift_testing_incremental":
+                        return default_topic_list_drift_testing_incremental.split(",")
+                    else:
+                        return default_topic_list_full.split(",")
                 else:
                     return topics_override.split(",")
 

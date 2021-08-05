@@ -332,6 +332,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
         use_fixture(before_fixtures.htme_start_incremental, context)
+    if tag == "fixture.htme.start.drift.testing.incremental":
+        use_fixture(before_fixtures.htme_start_drift_testing_incremental, context)
     if tag == "fixture.htme.start.max":
         use_fixture(before_fixtures.htme_start_max, context)
     if tag == "fixture.snapshot.sender.start.max":
