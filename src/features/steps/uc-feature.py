@@ -45,9 +45,9 @@ def step_impl(context, step_name):
     s3_path = f"{context.uc_feature_test_input_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     uc_feature_hive_export_bash_command = (
-        f"hive -e 'SELECT * FROM uc_feature.contract;' >> ~/{file_name} && "
+        f"hive -e 'SELECT * FROM uc_feature.mandatory_reconsideration_plus_json;' >> ~/{file_name} && "
         + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
-        + f" &>> /var/log/aws-clive/e2e.log"
+        + f" &>> /var/log/aws_uc_feature/e2e.log"
     )
 
     context.uc_feature_cluster_step_id = emr_step_generator.generate_bash_step(
