@@ -115,7 +115,7 @@ def step_uc_feature_cluster_tags_have_been_created_correctly(context):
 
 @then("I check the UC-FEATURE metadata table is correct")
 def metadata_table_step_impl(context):
-    data_product = "UC-FEATURE"
+    data_product = "aws_uc_feature"
     table_name = "data_pipeline_metadata"
     snapshot_type = "full"
 
