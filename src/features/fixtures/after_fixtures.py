@@ -94,9 +94,9 @@ def terminate_clive_cluster(context, timeout=30, **kwargs):
 def terminate_uc_feature_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_uc_feature_cluster' fixture")
 
-    if "clive_cluster_id" in context and context.clive_cluster_id is not None:
+    if "uc_feature_cluster_id" in context and context.uc_feature_cluster_id is not None:
         try:
-            aws_helper.terminate_emr_cluster(context.clive_cluster_id)
+            aws_helper.terminate_emr_cluster(context.uc_featurecluster_id)
         except ClientError as error:
             console_printer.print_warning_text(
                 f"Error occured when terminating uc feature cluster with id of '{context.clive_cluster_id}' as the following error occurred: '{error}'"
