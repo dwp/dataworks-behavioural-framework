@@ -96,7 +96,7 @@ def terminate_uc_feature_cluster(context, timeout=30, **kwargs):
 
     if "uc_feature_cluster_id" in context and context.uc_feature_cluster_id is not None:
         try:
-            aws_helper.terminate_emr_cluster(context.uc_featurecluster_id)
+            aws_helper.terminate_emr_cluster(context.uc_feature_cluster_id)
         except ClientError as error:
             console_printer.print_warning_text(
                 f"Error occured when terminating uc feature cluster with id of '{context.clive_cluster_id}' as the following error occurred: '{error}'"
