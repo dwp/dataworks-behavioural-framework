@@ -31,6 +31,7 @@ def step_impl(context, snapshot_type):
             snapshot_type,
             context.default_topic_list_full_delimited,
             context.default_topic_list_incremental_delimited,
+            context.default_topic_list_drift_testing_incrementals,
             [context.generate_snapshots_topics_override],
         )
 
@@ -56,6 +57,7 @@ def step_impl(context, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [context.generate_snapshots_topics_override],
     )
     start_time = (
@@ -190,6 +192,7 @@ def step_impl(context, statuses, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.send_snapshots_topics_override,
             context.generate_snapshots_topics_override,

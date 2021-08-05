@@ -214,6 +214,7 @@ def htme_start_full(context, timeout=30, **kwargs):
         "full",
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,
@@ -235,6 +236,7 @@ def htme_start_incremental(context, timeout=30, **kwargs):
         "incremental",
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,
@@ -653,6 +655,7 @@ def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,

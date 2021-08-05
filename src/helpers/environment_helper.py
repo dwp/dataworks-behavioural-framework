@@ -226,6 +226,10 @@ def set_test_run_common_variables(context):
         "HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT"
     ).split("\n")
 
+    default_topic_list_drift_testing_incrementals = context.config.userdata.get(
+        "HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT"
+    ).split("\n")
+
     default_topic_list_full_delimited_with_space = "', '".join(default_topic_list_full)
     collection_list_full = (
         "'" + default_topic_list_full_delimited_with_space.replace("db.", "") + "'"
@@ -240,6 +244,10 @@ def set_test_run_common_variables(context):
 
     context.default_topic_list_incremental_delimited = ",".join(
         default_topic_list_incrementals
+    )
+
+    context.default_topic_list_drift_testing_incrementals = ",".join(
+        default_topic_list_drift_testing_incrementals
     )
 
     context.export_process_trigger_adg_override = context.config.userdata.get(

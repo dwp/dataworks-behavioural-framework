@@ -173,6 +173,7 @@ function execute_behave() {
         DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.data_pipeline_metadata_dynamo.value.name')"
         HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.full.content')"
         HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.incrementals.content')"
+        HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.drift_testing_incrementals.content')"
 
         MANIFEST_S3_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_bucket.value.id')"
         MANIFEST_S3_INPUT_LOCATION_IMPORT_HISTORIC="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.historic_folder')"
