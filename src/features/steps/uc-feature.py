@@ -58,7 +58,7 @@ def step_impl(context, step_name):
     context.uc_feature_results_s3_file = os.path.join(s3_path, file_name)
 
 
-@then("I wait '{timeout_mins}' minutes for hive-query to finish")
+@then("I wait '{timeout_mins}' minutes for uc-feature hive-query to finish")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60
     execution_state = aws_helper.poll_emr_cluster_step_status(
