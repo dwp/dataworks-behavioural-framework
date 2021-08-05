@@ -12,6 +12,12 @@ Feature: Administrative processes and workflows
     Given Snapshot sender is scaled if it will be triggered for snapshot type of 'incremental'
     When The export process is performed with default settings for snapshot type of 'incremental'
 
+  @admin-generate-drift-testing-incremental-snapshots
+  @fixture.htme.start.drift.testing.incremental
+  Scenario: Start an export from HBase to snapshot files on S3 for the incremental snapshot topics
+    Given Snapshot sender is scaled if it will be triggered for snapshot type of 'drift_testing_incremental'
+    When The export process is performed with default settings for snapshot type of 'drift_testing_incremental'
+
   @admin-send-full-snapshots-to-crown
   @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 full snapshots to Crown

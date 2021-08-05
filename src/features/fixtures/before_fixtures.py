@@ -251,6 +251,28 @@ def htme_start_incremental(context, timeout=30, **kwargs):
 
 
 @fixture
+def htme_start_drift_testing_incremental(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'htme_start_drift_testing_incremental' fixture")
+    updated_topics = message_helper.get_consolidated_topics_list(
+        context.topics,
+        "drift_testing_incremental",
+        context.default_topic_list_full_delimited,
+        context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
+        [
+            context.generate_snapshots_topics_override,
+            context.send_snapshots_topics_override,
+        ],
+    )
+    desired_count = manifest_comparison_helper.get_desired_asg_count(
+        updated_topics, context.asg_max_count_htme
+    )
+    context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
+        context.asg_prefix_htme, int(desired_count)
+    )
+
+
+@fixture
 def htme_start_max(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'htme_start_max' fixture")
     context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
