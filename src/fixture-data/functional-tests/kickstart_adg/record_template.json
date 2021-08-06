@@ -741,23 +741,22 @@
         "introduction_id": "varchar",
         "supplier_number": "bigint",
         "site_name": "varchar",
-        "status":"payment_state" ,
-        "payment_number":"bigint",
-        "invoice_number":"bigint" ,
+        "status": "payment_state",
+        "payment_number": "bigint",
+        "invoice_number": "bigint",
         "invoice_amount": "interger(12)",
-        "invoice_date":"date",
-        "employer_payroll_id":"varchar",
-        "date_of_birth":"date",
-        "rti_check":"boolean",
-        "gateway":"varchar",
-        "confirmed_start_date":"timestamp",
-        "end_date":"date",
-        "due_date":"date",
-        "sent_date":"date",
-        "version":"integer",
+        "invoice_date": "date",
+        "employer_payroll_id": "varchar",
+        "date_of_birth": "date",
+        "rti_check": "boolean",
+        "gateway": "varchar",
+        "confirmed_start_date": "timestamp",
+        "end_date": "date",
+        "due_date": "date",
+        "sent_date": "date",
+        "version": "integer",
         "invoice_number_text": "varchar"
       },
-
       "employee": {
         "id": {
           "value": "uuid",
@@ -768,7 +767,7 @@
           "is_nullable": "false"
         },
         "claimant_id": "varchar",
-        "full_name":"text",
+        "full_name": "text",
         "date_of_birth": "date",
         "nino": "bytea",
         "nino_hash": {
@@ -796,7 +795,7 @@
         "vacancy_holder_phone_number": "",
         "vacancy_holder_email": "bytea",
         "created_date": "date",
-        "placement_status":"boolean",
+        "placement_status": "boolean",
         "version": "integer"
       },
       "supplier": {
@@ -804,7 +803,7 @@
           "value": "uuid",
           "is_nullable": "false"
         },
-        "payee_name":"varchar",
+        "payee_name": "varchar",
         "supplier_number": {
           "value": "bigint",
           "is_nullable": "bigint"
@@ -822,16 +821,16 @@
           "value": "uuid",
           "is_nullable": "false"
         },
-        "entity_id":"uuid" ,
-        "type":"text",
+        "entity_id": "uuid",
+        "type": "text",
         "username": "varchar",
         "text": "varchar",
         "note_date": "date"
       },
-      "payment_error":{
+      "payment_error": {
         "id": "uuid",
         "application_id": "varchar",
-        "introduction_id":"varchar",
+        "introduction_id": "varchar",
         "supplier_number": "varchar",
         "site_name": "varchar",
         "invoice_amount": "varchar",
@@ -845,7 +844,7 @@
         "filename": "varchar"
       },
       "supplier_error": {
-        "id":{
+        "id": {
           "value": "uuid",
           "is_nullable": "false"
         },
@@ -855,6 +854,19 @@
         "error_time": "timestamp",
         "invoice_number": "varchar",
         "filename": "varchar"
+      }
+    },
+    "record_layout": "JSON",
+    "output_file_pattern": {
+      "grant_applications": {
+        "file_name": "run-date-kick-mksas-applications-epoc-time.json",
+        "regex_pattern": ".*kick-mksas-applications-[0-9]*.json",
+        "total_files": 5
+      },
+      "grant_applications_audit": {
+        "file_name": "run-date-kick-mksas-applications-audit-epoc-time.json",
+        "regex_pattern": ".*kick-mksas-applications-audit-[0-9]*.json",
+        "total_files": 5
       }
     }
   }
