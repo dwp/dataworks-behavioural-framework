@@ -772,6 +772,33 @@
        "error_time": "timestamp",
        "invoice_number": "varchar",
        "filename": "varchar"
+     },
+     "payment": {
+       "id": {
+         "value": "uuid",
+         "is_nullable": "false"
+       },
+       "batch_id": "uuid",
+       "application_id": "varchar",
+       "supplier_id": "uuid",
+       "introduction_id": "varchar",
+       "supplier_number": "bigint",
+       "site_name": "varchar",
+       "status": "varchar",
+       "payment_number": "bigint",
+       "invoice_number": "bigint",
+       "invoice_amount": "interger(12)",
+       "invoice_date": "date",
+       "employer_payroll_id": "varchar",
+       "date_of_birth": "date",
+       "rti_check": "boolean",
+       "gateway": "varchar",
+       "confirmed_start_date": "timestamp",
+       "end_date":"date",
+       "due_date": "date",
+       "sent_date": "date",
+       "version": "integer",
+       "invoice_number_text": "varchar"
      }
     },
     "record_layout": "JSON",
