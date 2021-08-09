@@ -733,20 +733,44 @@
      "supplier": {
        "id": {
          "value": "uuid",
-         "is_nullable": "false"
+         "pii_flg": false
        },
-       "payee_name": "varchar",
+       "payee_name":{
+         "value": "varchar",
+         "pii_flg": false
+       },
        "supplier_number": {
          "value": "bigint",
-         "is_nullable": "false"
+         "pii_flg": false
        },
-       "invoice_number": "bigint",
-       "site_name": "varchar",
-       "application_id": "varchar",
-       "organisation_name": "varchar",
-       "created_date": "date",
-       "updated_date": "date",
-       "version": "integer"
+       "invoice_number":{
+         "value": "bigint",
+         "pii_flg": false
+       },
+       "site_name": {
+         "value": "varchar",
+         "pii_flg": false
+       },
+       "application_id": {
+         "value": "varchar",
+         "pii_flg": false
+       },
+       "organisation_name":{
+         "value": "varchar",
+         "pii_flg": false
+       },
+       "created_date": {
+         "value": "date",
+         "pii_flg": false
+       },
+       "updated_date":{
+         "value": "integer",
+         "pii_flg": false
+       },
+       "version": {
+         "value": "integer",
+         "pii_flg": false
+       }
      }
     },
     "record_layout": "JSON",
