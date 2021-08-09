@@ -817,6 +817,47 @@
        "created_date": "date",
        "updated_date": "date",
        "version": "integer"
+     },
+     "employee": {
+       "id": {
+         "value": "uuid",
+         "is_nullable": "false"
+       },
+       "introduction_id": {
+         "value": "varchar",
+         "is_nullable": "false"
+       },
+       "claimant_id": "varchar",
+       "full_name": "text",
+       "date_of_birth": "date",
+       "nino": "bytea",
+       "nino_hash":{
+         "value": "bigint",
+         "is_nullable": "false",
+         "default": [
+           "0"
+         ]
+       },
+       "application_id": "varchar",
+       "anticipated_start_date": "timestamp",
+       "actual_start_date": "timestamp",
+       "gateway": "varchar",
+       "gateway_is_employer": "varchar",
+       "gateway_name": "varchar",
+       "gateway_contact_name": "bytea",
+       "gateway_phone_number": "varchar",
+       "gateway_email": "varchar",
+       "employer": "varchar",
+       "employer_name": "",
+       "employer_contact_name": "varchar",
+       "employer_phone_number": "varchar",
+       "employer_email": "varchar",
+       "vacancy_holder_contact_name": "bytea",
+       "vacancy_holder_phone_number": "bytea",
+       "vacancy_holder_email": "bytea",
+       "created_date": "date",
+       "placement_status": "boolean",
+       "version": "integer"
      }
     },
     "record_layout": "JSON",
