@@ -776,8 +776,8 @@
     "record_layout": "JSON",
     "output_file_pattern": {
       "supplier": {
-        "file_name": "run-date-kick-mkpas-payment-epoc-time.json",
-        "regex_pattern": ".*kick-mkpas-payment-[0-9]*.json",
+        "file_name": "run-date-kick-mkpas-supplier-epoc-time.json",
+        "regex_pattern": ".*kick-mkpas-supplier-[0-9]*.json",
         "total_files": 5
       }
       }
