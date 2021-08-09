@@ -760,6 +760,18 @@
        "error_time": "timestamp",
        "filename": "varchar"
 
+     },
+     "supplier_error": {
+       "id": {
+         "value": "uuid",
+         "is_nullable": "false"
+       },
+       "supplier_number": "varchar",
+       "payee_name": "varchar",
+       "site_name": "varchar",
+       "error_time": "timestamp",
+       "invoice_number": "varchar",
+       "filename": "varchar"
      }
     },
     "record_layout": "JSON",
