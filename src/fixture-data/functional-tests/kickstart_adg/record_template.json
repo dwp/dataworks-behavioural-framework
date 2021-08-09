@@ -740,7 +740,27 @@
         "username": "varchar",
         "text": "varchar",
         "note_date": "date"
-      }
+      },
+     "payment_error": {
+       "id": {
+         "value": "uuid",
+         "is_nullable": "false"
+       },
+       "application_id": "varchar",
+       "introduction_id": "varchar",
+       "supplier_number": "varchar",
+       "site_name": "varchar",
+       "invoice_amount": "varchar",
+       "payment_number": "varchar",
+       "employer_payroll_id": "varchar",
+       "date_of_birth": "varchar",
+       "rti_check": "varchar",
+       "confirmed_start_date": "varchar",
+       "end_date": "date",
+       "error_time": "timestamp",
+       "filename": "varchar"
+
+     }
     },
     "record_layout": "JSON",
     "output_file_pattern": {
