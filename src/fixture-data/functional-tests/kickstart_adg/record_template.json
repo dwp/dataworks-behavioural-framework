@@ -799,6 +799,24 @@
        "sent_date": "date",
        "version": "integer",
        "invoice_number_text": "varchar"
+     },
+     "supplier": {
+       "id": {
+         "value": "uuid",
+         "is_nullable": "false"
+       },
+       "payee_name": "varchar",
+       "supplier_number": {
+         "value": "bigint",
+         "is_nullable": "false"
+       },
+       "invoice_number": "bigint",
+       "site_name": "varchar",
+       "application_id": "varchar",
+       "organisation_name": "varchar",
+       "created_date": "date",
+       "updated_date": "date",
+       "version": "integer"
      }
     },
     "record_layout": "JSON",
