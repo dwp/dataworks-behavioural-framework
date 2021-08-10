@@ -97,6 +97,7 @@ def dataTypeMapping(type):
             "integer": dataGenInteger,
             "double": dataGenDouble,
             "user-input": dataGenText,
+            "varchar": dataGenString,
         }
 
         return datatypes[type]

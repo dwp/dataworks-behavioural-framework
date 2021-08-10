@@ -14,5 +14,3 @@ Feature: Generate data for kickstart adg process
   Scenario: Generate test data for kickstart payment adg process
     Given The template file 'record_template.json' as an input, generate '100' records per table for 'payment'
     Then upload the local files to s3 bucket in 'encrypted' format
-
-
