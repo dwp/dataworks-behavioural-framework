@@ -14,12 +14,16 @@ from helpers import aws_helper, console_printer
 
 
 def get_hsm_pub_key_id():
-    pub_key_id = aws_helper.get_ssm_parameter_value('ucfs.development.businessdata.hsmkey.id')
+    pub_key_id = aws_helper.get_ssm_parameter_value(
+        "ucfs.development.businessdata.hsmkey.id"
+    )
     return pub_key_id
 
 
 def get_hsm_pub_key():
-    hsm_pub_key = aws_helper.get_ssm_parameter_value('ucfs.development.businessdata.hsmkey.pub')
+    hsm_pub_key = aws_helper.get_ssm_parameter_value(
+        "ucfs.development.businessdata.hsmkey.pub"
+    )
     return hsm_pub_key
 
 
@@ -64,9 +68,10 @@ def encrypt_data_aes_ctr(data_key, plaintext_string, iv=None):
 
 def read_test_data(file_name):
     home_dir = pathlib.Path(__file__).resolve().parents[2]
-    test_data_location = "src/fixture-data/functional-tests/dataworks_kafka_producer_data"
+    test_data_location = (
+        "src/fixture-data/functional-tests/dataworks_kafka_producer_data"
+    )
     file_path = f"{home_dir}/{test_data_location}/{file_name}"
     fh = open(file_path, "r")
     plaintext_string = fh.read()
     return plaintext_string
-

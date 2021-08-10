@@ -1854,22 +1854,25 @@ def purge_sqs_queue(queue_name, aws_region="eu-west-2"):
     console_printer.print_info(f"Purging queue: {queue_name}")
     service_name = "sqs"
     client = boto3.client(service_name, region_name=aws_region)
-    queue_url = client.get_queue_url(QueueName=queue_name)['QueueUrl']
+    queue_url = client.get_queue_url(QueueName=queue_name)["QueueUrl"]
     client.purge_queue(QueueUrl=queue_url)
 
 
-def execute_linux_command(instance_id, linux_command, username="root", aws_region="eu-west-2"):
+def execute_linux_command(
+    instance_id, linux_command, username="root", aws_region="eu-west-2"
+):
     service_name = "ssm"
-    cmd = f"sudo su -c \"{linux_command}\" -s /bin/sh {username}"
+    cmd = f'sudo su -c "{linux_command}" -s /bin/sh {username}'
 
     client = boto3.client(service_name, region_name=aws_region)
     response = client.send_command(
         InstanceIds=[instance_id],
         DocumentName="AWS-RunShellScript",
-        Parameters={'commands': [cmd]}, )
+        Parameters={"commands": [cmd]},
+    )
     time.sleep(10)
 
-    command_id = response['Command']['CommandId']
+    command_id = response["Command"]["CommandId"]
     output = client.get_command_invocation(InstanceId=instance_id, CommandId=command_id)
 
     return output
@@ -1886,4 +1889,6 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     service_name = "ssm"
     client = boto3.client(service_name, region_name=aws_region)
 
-    return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)["Parameter"]["Value"]
+    return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)[
+        "Parameter"
+    ]["Value"]

@@ -478,13 +478,19 @@ def set_test_run_common_variables(context):
 
     context.ingest_replica_output_s3_prefix = "intra-day-tests"
 
-    context.dataworks_model_output_s3_bucket = context.config.userdata.get("DATAWORKS_MODEL_OUTPUT_BUCKET")
+    context.dataworks_model_output_s3_bucket = context.config.userdata.get(
+        "DATAWORKS_MODEL_OUTPUT_BUCKET"
+    )
 
     context.dataworks_model_output_s3_prefix = "e2e"
 
-    context.dataworks_model_sqs_queue = context.config.userdata.get("DATAWORKS_MODEL_OUTPUT_SQS")
+    context.dataworks_model_sqs_queue = context.config.userdata.get(
+        "DATAWORKS_MODEL_OUTPUT_SQS"
+    )
 
-    context.dataworks_kafka_producer_instance = context.config.userdata.get("DATAWORKS_STREAMS_KAFKA_PRODUCER")
+    context.dataworks_kafka_producer_instance = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER"
+    )
 
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(

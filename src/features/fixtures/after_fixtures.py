@@ -167,11 +167,14 @@ def terminate_ingest_replica_cluster(context):
             "No ingest-replica cluster identified to terminate"
         )
 
+
 @fixture
 def dataworks_stop_kafka_producer_app(context):
     console_printer.print_info("Executing 'stop_kafka_producer_app' fixture")
 
     # Execute the shell script - stop the e2e test application
     linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
-    aws_helper.execute_linux_command(instance_id=context.dataworks_kafka_producer_instance, linux_command=linux_command)
-
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_producer_instance,
+        linux_command=linux_command,
+    )

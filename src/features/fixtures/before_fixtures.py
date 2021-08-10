@@ -730,17 +730,29 @@ def dataworks_init_kafka_producer(context, timeout=60, **kwargs):
 
     # Execute the shell script - stop any e2e test app
     linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
-    aws_helper.execute_linux_command(instance_id=context.dataworks_kafka_producer_instance, linux_command=linux_command)
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_producer_instance,
+        linux_command=linux_command,
+    )
 
     # Execute the shell script - delete e2e test topic if it exists
-    linux_command = "sh /home/ec2-user/kafka/utils/run_delete_topic.sh e2e_flagged_journals"
-    aws_helper.execute_linux_command(instance_id=context.dataworks_kafka_producer_instance, linux_command=linux_command)
+    linux_command = (
+        "sh /home/ec2-user/kafka/utils/run_delete_topic.sh e2e_flagged_journals"
+    )
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_producer_instance,
+        linux_command=linux_command,
+    )
 
     # Create a topic for e2e tests
-    linux_command = "sh /home/ec2-user/kafka/utils/run_create_topic.sh e2e_flagged_journals"
-    aws_helper.execute_linux_command(instance_id=context.dataworks_kafka_producer_instance, linux_command=linux_command)
+    linux_command = (
+        "sh /home/ec2-user/kafka/utils/run_create_topic.sh e2e_flagged_journals"
+    )
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_producer_instance,
+        linux_command=linux_command,
+    )
 
     # wait for a 60secs
     time.sleep(int(timeout))
     console_printer.print_info("COMPLETE:Initialising e2e tests...")
-
