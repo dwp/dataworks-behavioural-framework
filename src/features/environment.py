@@ -422,6 +422,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_clive_output, context)
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
+    if tag == "fixture.init.e2e.dataworks.kafka.producer":
+        use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
 
 
 def after_all(context):
@@ -519,3 +521,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_mongo_latest_cluster, context)
     if tag == "fixture.terminate.ingest_replica.cluster":
         use_fixture(after_fixtures.terminate_ingest_replica_cluster, context)
+    if tag == "fixture.stop.e2e.dataworks.kafka.producer":
+        use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
