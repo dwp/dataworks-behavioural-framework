@@ -71,6 +71,7 @@ function set_file_locations() {
     export TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER="${local_file_location}/dataworks-aws-ucfs-claimant-consumer.json"
     export TF_COMMON_OUTPUT_FILE="${local_file_location}/aws-common-infrastructure.json"
     export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}/dataworks-aws-ingestion-ecs-cluster.json"
+    export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}/dataworks-ml-streams-kafka-producer.json"
 }
 
 # shellcheck disable=SC2112
@@ -216,6 +217,8 @@ function execute_behave() {
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
         ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
+        DATAWORKS_MODEL_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_bucket.value.id')"
+        DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_sqs.value.name')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
@@ -241,6 +244,13 @@ function execute_behave() {
         UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT="$(cat ${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER} |  jq -r '.claimant_api_kafka_consumer.value.task_count')"
     else
         echo "Skipping TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
+    fi
+
+    if [[ ! -z "${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}" && "${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}" != "NOT_SET"  ]]; then
+        echo "Using ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} ..."
+        DATAWORKS_STREAMS_KAFKA_PRODUCER="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} |  jq -r '.dataworks_kafka_producer.value')"
+    else
+        echo "Skipping TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}"
     fi
 
     if [[ -z "${TEST_RUN_NAME}" ]]; then
@@ -504,6 +514,9 @@ function execute_behave() {
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_CLUSTER_NAME="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_CLUSTER_NAME}" \
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME}" \
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT}" \
+    -D DATAWORKS_MODEL_OUTPUT_BUCKET="${DATAWORKS_MODEL_OUTPUT_BUCKET}" \
+    -D DATAWORKS_STREAMS_KAFKA_PRODUCER="${DATAWORKS_STREAMS_KAFKA_PRODUCER}" \
+    -D DATAWORKS_MODEL_OUTPUT_SQS="${DATAWORKS_MODEL_OUTPUT_SQS}" \
     -D AWS_REGION_MAIN="${AWS_REGION_MAIN}" \
     -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}"
     
@@ -530,7 +543,7 @@ echo "Inputs: TF_UCFS_CLAIMANT_OUTPUT_FILE=${TF_UCFS_CLAIMANT_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
 echo "Inputs: TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER=${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}"
-
+echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}"
 execute_behave
 
 delete_config "${local_folder}"
