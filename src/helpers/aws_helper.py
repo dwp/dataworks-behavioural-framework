@@ -1878,16 +1878,9 @@ def execute_linux_command(
     return output
 
 
-def upload_file_to_s3(bucket, object_key, metadata, body, aws_region="eu-west-2"):
-    service_name = "s3"
-
-    client = boto3.client(service_name, region_name=aws_region)
-    client.put_object(Bucket=bucket, Key=object_key, Body=body, Metadata=metadata)
-
-
 def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     service_name = "ssm"
-    client = boto3.client(service_name, region_name=aws_region)
+    client = get_client(service_name=service_name, region=aws_region)
 
     return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)[
         "Parameter"

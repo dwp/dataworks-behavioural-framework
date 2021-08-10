@@ -1,5 +1,5 @@
 @dataworks-kafka-producer-app
-Feature: Publish data in S3 bucket data to kafka topic
+Feature: Publish data in S3 bucket to kafka topic
   @fixture.init.e2e.dataworks.kafka.producer
   @fixture.stop.e2e.dataworks.kafka.producer
   Scenario: End-2-End scenario for a kafka producer application

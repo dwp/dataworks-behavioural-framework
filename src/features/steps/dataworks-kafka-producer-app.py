@@ -46,11 +46,11 @@ def step_impl(context, file_name):
     object_key = f"{context.dataworks_model_output_s3_prefix}/{file_name}"
 
     # Upload the data to s3
-    aws_helper.upload_file_to_s3(
+    aws_helper.put_object_in_s3_with_metadata(
         body=encrypted_data,
-        bucket=context.dataworks_model_output_s3_bucket,
+        s3_bucket=context.dataworks_model_output_s3_bucket,
         metadata=metadata,
-        object_key=object_key,
+        s3_key=object_key,
     )
 
     # Wait for the file to be processed
