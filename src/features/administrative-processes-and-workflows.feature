@@ -89,6 +89,6 @@ Feature: Administrative processes and workflows
     Then The asg has scaled correctly
 
   @admin-scale-down-ingestion-ecs-cluster
-  @fixture.ingestion.ecs.cluster.stop
+  @fixture.ingest.ecs.cluster.stop
   Scenario: Stop the Ingestion ECS cluster instances
     Then The asg has scaled correctly
