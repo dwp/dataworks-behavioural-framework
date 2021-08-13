@@ -125,3 +125,13 @@ def invoke_mongo_latest_emr_launcher_lambda(payload):
     """
     response = aws_helper.invoke_lambda_function("mongo_latest_emr_launcher", payload)
     return json.loads(response.decode())
+
+
+def invoke_glue_launcher_lambda(payload):
+    """Triggers glue_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function("glue_launcher", payload)
+    return json.loads(response.decode())

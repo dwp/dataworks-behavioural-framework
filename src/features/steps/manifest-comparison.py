@@ -1,7 +1,12 @@
 import os
 import json
 from behave import given
-from helpers import aws_helper, manifest_comparison_helper, console_printer
+from helpers import (
+    aws_helper,
+    manifest_comparison_helper,
+    console_printer,
+    invoke_lambda,
+)
 
 
 @given("The manifest generation tables have been created")
@@ -336,3 +341,23 @@ def step_impl(context):
 
         results_actual_array = results_actual.splitlines()
         console_printer.print_info(f"Actual results: '{results_actual_array}'")
+
+
+@when("I start the kafka reconciliation")
+def step_impl(context):
+    payload = {
+        "detail": {
+            "jobName": f"{context.test_run_name}",
+            "jobQueue": "dataworks-behavioural-framework",
+            "status": "SUCCEEDED",
+            "ignoreBatchChecks": "true",
+        }
+    }
+
+    payload_json = json.dumps(payload)
+    console_printer.print_info(f"Glue launcher lambda payload is: '{payload_json}'")
+    invoke_lambda.invoke_glue_launcher_lambda(
+        payload_json
+    )
+
+    console_printer.print_info(f"Kafka reconciliation started via Glue launcher lambda")
