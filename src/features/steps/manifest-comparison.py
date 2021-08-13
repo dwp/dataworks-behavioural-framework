@@ -356,8 +356,6 @@ def step_impl(context):
 
     payload_json = json.dumps(payload)
     console_printer.print_info(f"Glue launcher lambda payload is: '{payload_json}'")
-    invoke_lambda.invoke_glue_launcher_lambda(
-        payload_json
-    )
+    invoke_lambda.invoke_glue_launcher_lambda(payload_json)
 
     console_printer.print_info(f"Kafka reconciliation started via Glue launcher lambda")
