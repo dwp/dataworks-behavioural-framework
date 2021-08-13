@@ -1,0 +1,14 @@
+jobs:
+  - name: production-start-kafka-reconciliation
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - put: meta
+            resource: meta-prod
+          - get: dataworks-behavioural-framework
+            trigger: false
+      - .: (( inject meta-manifest-comparison.plan.start-kafka-reconciliation ))
+        config:
+          params:
+            AWS_ACC: ((aws_account.production))
+            AWS_ROLE_ARN: arn:aws:iam::((aws_account.production)):role/ci

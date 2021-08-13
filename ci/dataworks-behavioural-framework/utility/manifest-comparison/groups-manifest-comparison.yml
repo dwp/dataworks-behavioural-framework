@@ -1,7 +1,7 @@
 groups:
-- name: scheduled-comparison-jobs
+- name: kafka-reconciliation
   jobs:
-  - production-daily-comparison
+  - production-start-kafka-reconciliation
   
 - name: manual-comparison-jobs
   jobs:
