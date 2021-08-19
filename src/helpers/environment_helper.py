@@ -488,7 +488,7 @@ def set_test_run_common_variables(context):
 
     context.uc_feature_output_s3_prefix = "data/uc_feature"
 
-    context.ingest_replica_output_s3_prefix = "intra-day-tests"
+    context.ingest_replica_output_s3_prefix = "intraday"
 
     context.dataworks_model_output_s3_bucket = context.config.userdata.get(
         "DATAWORKS_MODEL_OUTPUT_BUCKET"
