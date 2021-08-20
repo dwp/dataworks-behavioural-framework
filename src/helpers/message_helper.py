@@ -1,6 +1,5 @@
 from helpers import aws_helper
 
-
 def send_start_import_message(
     queue,
     s3_suffix,
@@ -193,7 +192,7 @@ def send_start_snapshot_sending_message(
     }
 
     aws_helper.send_message_to_sqs(
-        snapshot_sender_sqs_queue, str(message_body), topic_name.replace(".", "_")
+        snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_")
     )
 
 
