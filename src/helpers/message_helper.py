@@ -1,4 +1,5 @@
 from helpers import aws_helper
+import json
 
 def send_start_import_message(
     queue,
@@ -181,7 +182,7 @@ def send_start_snapshot_sending_message(
     """
     reprocess_files_value = "true" if reprocess_files else "false"
 
-    message_body = {
+    message_body = json.dumps({
         "shutdown_flag": "true",
         "correlation_id": correlation_id,
         "topic_name": topic_name,
@@ -189,7 +190,7 @@ def send_start_snapshot_sending_message(
         "export_date": export_date,
         "s3_full_folder": s3_full_folder,
         "snapshot_type": snapshot_type,
-    }
+    })
 
     aws_helper.send_message_to_sqs(
         snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_")
