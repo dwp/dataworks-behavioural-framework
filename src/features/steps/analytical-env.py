@@ -105,7 +105,9 @@ def step_non_sc_role_assumed(context):
 @when(
     "The user Attempts to read data tagged with the pii:true tag from the Clive database in the published S3 bucket"
 )
-@when("The user Attempts to read PII data from the equality database in the published S3 bucket")
+@when(
+    "The user Attempts to read PII data from the equality database in the published S3 bucket"
+)
 def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.published_bucket,
