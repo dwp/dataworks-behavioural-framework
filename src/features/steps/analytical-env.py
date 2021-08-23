@@ -105,6 +105,9 @@ def step_non_sc_role_assumed(context):
 @when(
     "The user Attempts to read data tagged with the pii:true tag from the Clive database in the published S3 bucket"
 )
+@when(
+    "The user Attempts to read PII data from the equality database in the published S3 bucket"
+)
 def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.published_bucket,
@@ -504,6 +507,25 @@ def step_uc_lab_assumed(context):
     )
 
 
+@given("A user is not cleared to read equality DB data in the published S3 bucket")
+def step_uc_equality_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_equality/"
+
+    tag_map = {"pii": "true", "db": "uc_equality", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
 @given(
     "A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket"
 )
@@ -649,6 +671,25 @@ def step_clive_pii_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_clive/"
 
     tag_map = {"pii": "true", "db": "uc_clive", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
+@given("A user is cleared to read equality DB and PII data in the published S3 bucket")
+def step_clive_pii_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_equality/"
+
+    tag_map = {"pii": "true", "db": "uc_equality", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
         context.analytical_test_data_s3_location["file_name"],
         context.analytical_test_data_s3_location["path"],
