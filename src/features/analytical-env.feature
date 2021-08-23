@@ -412,8 +412,27 @@ Feature: Creating Analytical Environment for End Users
     Then The user is unable to read the data
 
   @fixture.setup.rbac_uc_clive__pii_user
-  @fixture.cleanup.role_and_s3
   Scenario: An SC Clive user attempts to access data in the uc_lab DB in the published S3 bucket
+    Given A user is not cleared to read uc_lab DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_clive__pii_user
+  @fixture.cleanup.role_and_s3
+  Scenario: An SC Clive user attempts to access data in the equality DB in the published S3 bucket
+    Given A user is not cleared to read equality DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_equality__pii_user_and_role
+  Scenario: An SC equality user attempts to access PII equality DB data in the published S3 bucket
+    Given A user is cleared to read equality DB and PII data in the published S3 bucket
+    When The user Attempts to read PII data from the equality database in the published S3 bucket
+    Then The user is able to read the data
+
+  @fixture.setup.rbac_uc_equality__pii_user
+  @fixture.cleanup.role_and_s3
+  Scenario: An SC equality user attempts to access data in the uc_lab DB in the published S3 bucket
     Given A user is not cleared to read uc_lab DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is unable to read the data
