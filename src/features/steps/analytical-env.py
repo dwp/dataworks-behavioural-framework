@@ -526,6 +526,25 @@ def step_uc_equality_assumed(context):
     )
 
 
+@given("A user is not cleared to read uc_ers DB data in the published S3 bucket")
+def step_uc_ers_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_ers/"
+
+    tag_map = {"pii": "true", "db": "uc_ers", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
 @given(
     "A user is cleared to read ucs_latest_unredacted DB data in the published S3 bucket"
 )
@@ -576,6 +595,30 @@ def step_uc_mongo_latest_assumed(context):
 )
 def step_ucs_latest_redacted_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/ucs_latest_redacted/"
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
+@given(
+    "A user is not cleared to write to uc_equality DB location in the published S3 bucket"
+)
+def step_uc_equality_user_write_access(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_equality/"
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
+@given(
+      "A user is cleared to write to uc_ers DB location in the published S3 bucket"
+    )
+def step_uc_ers_user_write_access(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_ers/"
     analytical_env_helper.assume_role_for_test(
         context.aws_acc,
         context.analytical_test_e2e_role,
@@ -686,10 +729,29 @@ def step_clive_pii_assumed(context):
 
 
 @given("A user is cleared to read equality DB and PII data in the published S3 bucket")
-def step_clive_pii_assumed(context):
+def step_uc_equality_assumed(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_equality/"
 
     tag_map = {"pii": "true", "db": "uc_equality", "table": "test_table"}
+    analytical_env_helper.setup_test_file_in_s3(
+        context.analytical_test_data_s3_location["file_name"],
+        context.analytical_test_data_s3_location["path"],
+        context.published_bucket,
+        context.timeout,
+        tag_map,
+    )
+    analytical_env_helper.assume_role_for_test(
+        context.aws_acc,
+        context.analytical_test_e2e_role,
+        context.aws_session_timeout_seconds,
+    )
+
+
+@given("A user is cleared to read uc_ers DB and PII data in the published S3 bucket")
+def step_uc_ers_assumed(context):
+    context.analytical_test_data_s3_location["path"] = "data/uc_ers/"
+
+    tag_map = {"pii": "true", "db": "uc_ers", "table": "test_table"}
     analytical_env_helper.setup_test_file_in_s3(
         context.analytical_test_data_s3_location["file_name"],
         context.analytical_test_data_s3_location["path"],

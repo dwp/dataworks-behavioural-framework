@@ -340,6 +340,18 @@ def before_tag(context, tag):
             context,
             "rbac_uc_equality__pii",
         )
+    if tag == "fixture.setup.rbac_uc_equality__all_user_and_role":
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_equality__all",
+        )
+    if tag == "fixture.setup.rbac_uc_equality__all_user":
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc_equality__all",
+        )
     if tag == "fixture.htme.start.full":
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
