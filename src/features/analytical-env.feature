@@ -431,9 +431,40 @@ Feature: Creating Analytical Environment for End Users
     Then The user is able to read the data
 
   @fixture.setup.rbac_uc_equality__pii_user
-  @fixture.cleanup.role_and_s3
   Scenario: An SC equality user attempts to access data in the uc_lab DB in the published S3 bucket
     Given A user is not cleared to read uc_lab DB data in the published S3 bucket
     When The user attempts to read data in the published S3 bucket location
     Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_equality__pii_user
+  Scenario: A user with read access to uc_equality DB attempts to write data in the published S3 bucket location
+    Given A user is not cleared to write to uc_equality DB location in the published S3 bucket
+    When The user attempts to write to the published S3 bucket location
+    Then The user is unable to write to the location
+
+  @fixture.setup.rbac_uc_equality__pii_user
+  @fixture.cleanup.role_and_s3
+  Scenario: An SC equality user attempts to access data in the uc_ers DB in the published S3 bucket
+    Given A user is not cleared to read uc_ers DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_ers__all_user_and_role
+  Scenario: An SC uc_ers user attempts to access PII uc_ers DB data in the published S3 bucket
+    Given A user is cleared to read uc_ers DB and PII data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is able to read the data
+
+  @fixture.setup.rbac_uc_ers__all_user
+  Scenario: An SC uc_ers user attempts to access data in the uc_lab DB in the published S3 bucket
+    Given A user is not cleared to read uc_lab DB data in the published S3 bucket
+    When The user attempts to read data in the published S3 bucket location
+    Then The user is unable to read the data
+
+  @fixture.setup.rbac_uc_ers__all_user
+  @fixture.cleanup.role_and_s3
+  Scenario: A user with write access to uc_ers DB attempts to write data in the published S3 bucket location
+    Given A user is cleared to write to uc_ers DB location in the published S3 bucket
+    When The user attempts to write to the published S3 bucket location
+    Then The user is able to write to the location
 
