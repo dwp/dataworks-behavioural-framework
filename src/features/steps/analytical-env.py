@@ -614,9 +614,7 @@ def step_uc_equality_user_write_access(context):
     )
 
 
-@given(
-      "A user is cleared to write to uc_ers DB location in the published S3 bucket"
-    )
+@given("A user is cleared to write to uc_ers DB location in the published S3 bucket")
 def step_uc_ers_user_write_access(context):
     context.analytical_test_data_s3_location["path"] = "data/uc_ers/"
     analytical_env_helper.assume_role_for_test(
