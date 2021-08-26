@@ -178,7 +178,7 @@ def metadata_table_step_impl(context):
 
     allowed_steps = [
         "flush-pushgateway",
-        "executeUpdateAll",
+        "cbol-report",
         "bash",
     ]
 
