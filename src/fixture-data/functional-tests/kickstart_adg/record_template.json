@@ -771,7 +771,313 @@
          "value": "integer",
          "pii_flg": false
        }
-     }
+     },
+      "employee": {
+        "nino_hash": {
+          "value": "bigint",
+          "pii_flg": false
+        },
+        "status_change_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "anticipated_start_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "claimant_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway_contact_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "vacancy_holder_contact_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "gateway_email": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "full_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway_is_employer": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "employer_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "introduction_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "supplier_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "version": {
+          "value": "integer",
+          "pii_flg": false
+        },
+        "employer_phone_number": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "employer_contact_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway_name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "date_of_birth": {
+          "value": "bytea",
+          "pii_flg": false
+        },
+        "nino": {
+          "value": "bytea",
+          "pii_flg": false
+        },
+        "application_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "next_payment_due_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "task_status": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "vacancy_holder_phone_number":{
+          "value": "bytea",
+          "pii_flg": false
+        },
+        "actual_start_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "employer":{
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "actual_placement_end_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "created_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "placement_status":{
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "vacancy_holder_email": {
+          "value": "bytea",
+          "pii_flg": false
+        },
+        "planned_placement_end_date":{
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "employer_email": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway_phone_number": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "updated_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        }
+      },
+      "payment": {
+        "payment_number": {
+          "value": "bigint",
+          "pii_flg": false
+        },
+        "application_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "invoice_number_text": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "gateway": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "supplier_id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "end_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "invoice_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "batch_id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "invoice_amount": {
+          "value": "int",
+          "pii_flg": false
+        },
+        "rti_difference": {
+          "value": "int",
+          "pii_flg": false
+        },
+        "sent_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "due_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "introduction_id": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "supplier_number": {
+          "value": "bigint",
+          "pii_flg": false
+        },
+        "status": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "bacs_reference": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "employee_id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "invoice_number": {
+          "value": "bigint",
+          "pii_flg": false
+        },
+        "confirmed_start_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "rti_actual_amount": {
+          "value": "int",
+          "pii_flg": false
+        },
+        "rti_end_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "rti_start_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "version":{
+          "value": "int",
+          "pii_flg": false
+        },
+        "rti_check": {
+          "value": "boolean",
+          "pii_flg": false
+        },
+        "updated_date":{
+          "value": "timestamp",
+          "pii_flg": false
+        }
+      },
+      "task": {
+        "service_key": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "name": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "completed_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "metadata_hash": {
+          "value": "bigint",
+          "pii_flg": false
+        },
+        "task_type": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "version": {
+          "value": "int",
+          "pii_flg": false
+        },
+        "description": {
+          "value": "varchar",
+          "pii_flg": false
+        },
+        "created_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "created_date": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "user_detail_id": {
+          "value": "uuid",
+          "pii_flg": false
+        },
+        "assigned_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "completed_date": {
+          "value": "boolean",
+          "pii_flg": false
+        },
+        "due_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        },
+        "updated_date": {
+          "value": "timestamp",
+          "pii_flg": false
+        }
+      }
     },
     "record_layout": "JSON",
     "output_file_pattern": {
@@ -779,8 +1085,23 @@
         "file_name": "run-date-kick-mkpas-supplier-epoc-time.json",
         "regex_pattern": ".*kick-mkpas-supplier-[0-9]*.json",
         "total_files": 5
+      },
+      "employee": {
+        "file_name": "run-date-kick-mkpas-employee-epoc-time.json",
+        "regex_pattern": ".*kick-mkpas-employee-[0-9]*.json",
+        "total_files": 5
+      },
+      "payment": {
+        "file_name": "run-date-kick-mkpas-payment-epoc-time.json",
+        "regex_pattern": ".*kick-mkpas-payment-[0-9]*.json",
+        "total_files": 5
+      },
+      "task": {
+        "file_name": "run-date-kick-mkpas-task-epoc-time.json",
+        "regex_pattern": ".*kick-mkpas-task-[0-9]*.json",
+        "total_files": 5
       }
-      }
+    }
     }
   }
 
