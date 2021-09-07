@@ -846,11 +846,11 @@
           "pii_flg": false
         },
         "date_of_birth": {
-          "value": "bytea",
+          "value": "timestamp",
           "pii_flg": false
         },
         "nino": {
-          "value": "bytea",
+          "value": "timestamp",
           "pii_flg": false
         },
         "application_id": {
@@ -866,7 +866,7 @@
           "pii_flg": false
         },
         "vacancy_holder_phone_number":{
-          "value": "bytea",
+          "value": "bigint",
           "pii_flg": false
         },
         "actual_start_date": {
@@ -890,7 +890,7 @@
           "pii_flg": false
         },
         "vacancy_holder_email": {
-          "value": "bytea",
+          "value": "varchar",
           "pii_flg": false
         },
         "planned_placement_end_date":{
