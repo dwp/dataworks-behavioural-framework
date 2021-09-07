@@ -948,11 +948,11 @@
           "pii_flg": false
         },
         "invoice_amount": {
-          "value": "int",
+          "value": "integer",
           "pii_flg": false
         },
         "rti_difference": {
-          "value": "int",
+          "value": "integer",
           "pii_flg": false
         },
         "sent_date": {
@@ -992,7 +992,7 @@
           "pii_flg": false
         },
         "rti_actual_amount": {
-          "value": "int",
+          "value": "integer",
           "pii_flg": false
         },
         "rti_end_date": {
@@ -1004,7 +1004,7 @@
           "pii_flg": false
         },
         "version":{
-          "value": "int",
+          "value": "integer",
           "pii_flg": false
         },
         "rti_check": {
@@ -1038,7 +1038,7 @@
           "pii_flg": false
         },
         "version": {
-          "value": "int",
+          "value": "integer",
           "pii_flg": false
         },
         "description": {
