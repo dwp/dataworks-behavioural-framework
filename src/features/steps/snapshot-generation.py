@@ -105,6 +105,7 @@ def step_impl(context, snapshot_type):
         context.generate_snapshots_export_date_override,
         context.export_process_clear_s3_snapshots,
         context.export_process_clear_s3_manifests,
+        "false",
         mongo_snapshot_full_s3_location,
     )
 
@@ -130,6 +131,7 @@ def step_impl(context, snapshot_type):
         context.generate_snapshots_export_date_override,
         context.export_process_clear_s3_snapshots,
         context.export_process_clear_s3_manifests,
+        "false",
     )
 
 
@@ -153,6 +155,7 @@ def step_impl(context, snapshot_type):
         context.generate_snapshots_export_date_override,
         context.export_process_clear_s3_snapshots,
         context.export_process_clear_s3_manifests,
+        "false",
     )
 
 
@@ -177,6 +180,7 @@ def step_impl(context, start_timestamp, end_timestamp, snapshot_type):
         context.generate_snapshots_export_date_override,
         context.export_process_clear_s3_snapshots,
         context.export_process_clear_s3_manifests,
+        "true",
     )
 
 
