@@ -91,6 +91,7 @@ def send_start_export_message(
     export_date_override,
     clear_s3_snapshots,
     clear_s3_manifests,
+    send_to_ris,
     mongo_snapshot_full_s3_location=None,
 ):
     """Sends the relevant SNS message for starting the exporter.
@@ -110,6 +111,7 @@ def send_start_export_message(
     export_date_override -- Correlation Id override or None for not sending, which means using today's date
     clear_s3_snapshots -- True for HTME to delete any existing snapshots before it runs (defaults to False)
     clear_s3_manifests -- True for HTME to delete any existing manifests before it runs (defaults to False)
+    send_to_ris -- True for HTME to send default topics to ris (defaults to False)
     mongo_snapshot_full_s3_location -- full location for the snapshots (or None if not needed)
     """
     reprocess_files = "true" if ss_reprocess_files else "false"
@@ -155,6 +157,9 @@ def send_start_export_message(
 
     if clear_s3_manifests is not None:
         message["clear-s3-manifests"] = clear_s3_manifests.lower()
+
+    if send_to_ris == "true":
+        message["send-to-ris"] = send_to_ris
 
     return aws_helper.publish_message_to_sns(
         message, uc_export_to_crown_controller_messages_sns_arn
