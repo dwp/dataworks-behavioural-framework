@@ -88,6 +88,7 @@ def send_start_export_message(
     snapshot_type,
     correlation_id,
     trigger_adg_string,
+    send_to_ris_string,
     export_date_override,
     clear_s3_snapshots,
     clear_s3_manifests,
@@ -108,6 +109,7 @@ def send_start_export_message(
     snapshot_type -- either "full" or "incremental"
     correlation_id -- Correlation Id override or None for a uuid
     trigger_adg_string -- True for HTME to trigger ADG when finished (defaults to False)
+    send_to_ris_string -- True for HTME to send the default topics to RIS for that environment when finished (defaults to False)
     export_date_override -- Correlation Id override or None for not sending, which means using today's date
     clear_s3_snapshots -- True for HTME to delete any existing snapshots before it runs (defaults to False)
     clear_s3_manifests -- True for HTME to delete any existing manifests before it runs (defaults to False)
@@ -148,6 +150,9 @@ def send_start_export_message(
 
     if trigger_adg_string is not None:
         message["trigger-adg"] = trigger_adg_string.lower()
+
+    if send_to_ris_string is not None:
+        message["send-to-ris"] = send_to_ris_string.lower()
 
     if export_date_override:
         message["export-date"] = export_date_override
