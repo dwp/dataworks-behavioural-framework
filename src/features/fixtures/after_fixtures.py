@@ -118,7 +118,7 @@ def terminate_pdm_cluster(context, timeout=30, **kwargs):
             aws_helper.terminate_emr_cluster(context.pdm_cluster_id)
         except ClientError as error:
             console_printer.print_warning_text(
-                f"Error occured when terminating PDM cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
+                f"Error occured when terminating PDM cluster with id of '{context.pdm_cluster_id}' as the following error occurred: '{error}'"
             )
     else:
         console_printer.print_info(
@@ -138,7 +138,7 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
             aws_helper.terminate_emr_cluster(context.kickstart_adg_cluster_id)
         except ClientError as error:
             console_printer.print_warning_text(
-                f"Error occured when terminating kickstart cluster with id of '{context.adg_cluster_id}' as the following error occurred: '{error}'"
+                f"Error occured when terminating kickstart cluster with id of '{context.kickstart_adg_cluster_id}' as the following error occurred: '{error}'"
             )
     else:
         console_printer.print_info(
@@ -183,6 +183,23 @@ def terminate_ingest_replica_cluster(context):
     else:
         console_printer.print_warning_text(
             "No ingest-replica cluster identified to terminate"
+        )
+
+
+@fixture
+def terminate_cyi_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'terminate_cyi_cluster' fixture")
+
+    if "cyi_cluster_id" in context and context.cyi_cluster_id is not None:
+        try:
+            aws_helper.terminate_emr_cluster(context.cyi_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning_text(
+                f"Error occured when terminating CYI cluster with id of '{context.cyi_cluster_id}' as the following error occurred: '{error}'"
+            )
+    else:
+        console_printer.print_info(
+            "No cluster id found for CYI so not terminating any cluster"
         )
 
 
