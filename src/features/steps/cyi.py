@@ -19,12 +19,14 @@ from datetime import datetime
 @given("I upload a CYI file")
 def step_impl(context):
     context.cyi_export_date = datetime.now().strftime("%Y-%m-%d")
-    input_file_unzipped = os.path.join(context.fixture_path_local, "cyi", "input", "cyi_input.json")
+    input_file_unzipped = os.path.join(
+        context.fixture_path_local, "cyi", "input", "cyi_input.json"
+    )
     input_file_zipped = os.path.join(context.temp_folder, "cyi_input.json.gz")
     s3_prefix = os.path.join(context.cyi_input_s3_prefix, "cyi_input.json.gz")
 
-    with open(input_file_unzipped, 'rb') as f_in:
-        with gzip.open(input_file_zipped, 'wb') as f_out:
+    with open(input_file_unzipped, "rb") as f_in:
+        with gzip.open(input_file_zipped, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
 
     aws_helper.upload_file_to_s3_and_wait_for_consistency(
@@ -47,14 +49,18 @@ def step_impl(context, timeout_minutes):
     )
 
     while context.cyi_cluster_id == None and time.time() < timeout_time:
-        context.cyi_cluster_id = aws_helper.get_newest_emr_cluster_id("cyi", ["BOOTSTRAPPING", "RUNNING"])
+        context.cyi_cluster_id = aws_helper.get_newest_emr_cluster_id(
+            "cyi", ["BOOTSTRAPPING", "RUNNING"]
+        )
         if context.cyi_cluster_id is not None:
             console_printer.print_info(
                 f"Found cluster with id of '{context.cyi_cluster_id}'"
             )
         time.sleep(5)
 
-    assert context.cyi_cluster_id is not None, f"Could not find a running CYI cluster after {timeout_minutes} minutes"
+    assert (
+        context.cyi_cluster_id is not None
+    ), f"Could not find a running CYI cluster after {timeout_minutes} minutes"
 
 
 @when("I insert the '{step_name}' step onto the CYI cluster")
@@ -86,10 +92,12 @@ def step_impl(context):
 
     context.cyi_cluster_correlation_id = None
     for cluster_tag in cluster_tags:
-        if cluster_tag["Key"] ==  "Correlation_Id":
+        if cluster_tag["Key"] == "Correlation_Id":
             context.cyi_cluster_correlation_id = cluster_tag["Value"]
 
-    assert context.cyi_cluster_correlation_id is not None, f"Could not find correlation id in cluster tags of '{cluster_tags}'"
+    assert (
+        context.cyi_cluster_correlation_id is not None
+    ), f"Could not find correlation id in cluster tags of '{cluster_tags}'"
 
     console_printer.print_info(
         f"Retrieved Correlation_Id of '{context.cyi_cluster_correlation_id}'"
@@ -103,7 +111,9 @@ def step_impl(context, timeout_mins):
         context.cyi_cluster_step_id, context.cyi_cluster_id, timeout_secs
     )
 
-    assert execution_state == "COMPLETED", f"'{context.cyi_cluster_step_name}' step failed with final status of '{execution_state}'"
+    assert (
+        execution_state == "COMPLETED"
+    ), f"'{context.cyi_cluster_step_name}' step failed with final status of '{execution_state}'"
 
 
 @then("the CYI result matches the expected results of '{expected_result_file_name}'")

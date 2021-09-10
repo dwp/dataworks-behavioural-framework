@@ -1369,7 +1369,9 @@ def get_newest_emr_cluster_id(cluster_name, cluster_statuses=None):
 
     while True:
         if marker and cluster_statuses:
-            response = client.list_clusters(ClusterStates=cluster_statuses, Marker=marker)
+            response = client.list_clusters(
+                ClusterStates=cluster_statuses, Marker=marker
+            )
         elif cluster_statuses:
             response = client.list_clusters(ClusterStates=cluster_statuses)
         elif marker:
@@ -1377,18 +1379,28 @@ def get_newest_emr_cluster_id(cluster_name, cluster_statuses=None):
         else:
             response = client.list_clusters()
 
-        clusters.extend([cluster for cluster in response["Clusters"] if cluster["Name"] == cluster_name])
+        clusters.extend(
+            [
+                cluster
+                for cluster in response["Clusters"]
+                if cluster["Name"] == cluster_name
+            ]
+        )
 
-        if 'Marker' in response:
-            marker = response['Marker']
+        if "Marker" in response:
+            marker = response["Marker"]
         else:
             break
 
     latest_cluster = None
     for cluster in clusters:
-        if latest_cluster is None or cluster["Status"]["Timeline"]["CreationDateTime"] > latest_cluster["Status"]["Timeline"]["CreationDateTime"]:
+        if (
+            latest_cluster is None
+            or cluster["Status"]["Timeline"]["CreationDateTime"]
+            > latest_cluster["Status"]["Timeline"]["CreationDateTime"]
+        ):
             latest_cluster = cluster
-    
+
     return latest_cluster["Id"] if latest_cluster else None
 
 
