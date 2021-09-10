@@ -1355,6 +1355,43 @@ def get_emr_cluster_step(step_name, cluster_id):
             return step
 
 
+def get_newest_emr_cluster_id(cluster_name, cluster_statuses=None):
+    """Gets the newest emr cluster with the given name
+
+    Keyword arguments:
+    cluster_name -- the name of the cluster to find
+    cluster_statuses -- (aaray) if provided, only return the cluster if the status matches one of these
+    """
+    client = get_client(service_name="emr")
+
+    marker = None
+    clusters = []
+
+    while True:
+        if marker and cluster_statuses:
+            response = client.list_clusters(ClusterStates=cluster_statuses, Marker=marker)
+        elif cluster_statuses:
+            response = client.list_clusters(ClusterStates=cluster_statuses)
+        elif marker:
+            response = client.list_clusters(Marker=marker)
+        else:
+            response = client.list_clusters()
+
+        clusters.extend([cluster for cluster in response["Clusters"] if cluster["Name"] == cluster_name])
+
+        if 'Marker' in response:
+            marker = response['Marker']
+        else:
+            break
+
+    latest_cluster = None
+    for cluster in clusters:
+        if latest_cluster is None or cluster["Status"]["Timeline"]["CreationDateTime"] > latest_cluster["Status"]["Timeline"]["CreationDateTime"]:
+            latest_cluster = cluster
+    
+    return latest_cluster["Id"] if latest_cluster else None
+
+
 def terminate_emr_cluster(cluster_id):
     """Terminates the given EMR cluster
 
@@ -1573,7 +1610,7 @@ def attempt_assume_role(s3_client, max_tries):
             s3_client = get_client("s3")
             break
         except ClientError as e:
-            if e.response["Error"]["Code"] is "AccessDenied":
+            if e.response["Error"]["Code"] == "AccessDenied":
                 tries += 1
                 console_printer.print_warning_text(f"Try Number {tries}")
             else:
@@ -1704,11 +1741,11 @@ def wait_for_policy_to_be_attached_to_role(role_name, iam_client=None):
     policy_count = 0
     tries = 0
 
-    while (policy_count is 0) and (tries < 5):
+    while (policy_count == 0) and (tries < 5):
         try:
             policies = iam_client.list_attached_role_policies(RoleName=role_name)
         except ClientError as e:
-            if e.response["Error"]["Code"] is "NoSuchEntityException":
+            if e.response["Error"]["Code"] == "NoSuchEntityException":
                 pass
             else:
                 raise e
