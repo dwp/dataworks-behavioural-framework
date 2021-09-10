@@ -742,6 +742,22 @@ def s3_clear_clive_output(context, timeout=30, **kwargs):
 
 
 @fixture
+def s3_clear_cyi_input(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_cyi_input' fixture")
+    aws_helper.clear_s3_prefix(
+        context.s3_ingest_bucket, context.cyi_input_s3_prefix, False
+    )
+
+
+@fixture
+def s3_clear_cyi_output(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_cyi_output' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.cyi_output_s3_prefix, False
+    )
+
+
+@fixture
 def s3_clear_uc_feature_output(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_uc_feature_output' fixture")
     aws_helper.clear_s3_prefix(

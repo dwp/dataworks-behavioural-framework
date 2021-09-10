@@ -452,6 +452,10 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
+    if tag == "fixture.s3.clear.cyi.input":
+        use_fixture(before_fixtures.s3_clear_cyi_input, context)
+    if tag == "fixture.s3.clear.cyi.output":
+        use_fixture(before_fixtures.s3_clear_cyi_output, context)
 
 
 def after_all(context):
