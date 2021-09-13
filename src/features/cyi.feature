@@ -10,5 +10,5 @@ Feature: CYI tests, to run CYI and validate its output
     When I insert the 'hive-query' step onto the CYI cluster
     And I get the CYI Correlation Id from the tags
     And I wait '30' minutes for the CYI hive-query to finish
-    Then the CYI result matches the expected results of 'cyi_external_expected .csv'
+    Then the CYI result matches the expected results of 'cyi_managed_expected.csv'
     And I check the CYI metadata table is correct
