@@ -69,7 +69,7 @@ def step_impl(context, step_name):
     s3_path = f"{context.cyi_test_input_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     cyi_hive_export_bash_command = (
-        f"hive -e 'SELECT * FROM cyi.cyi_external;' >> ~/{file_name} && "
+        f"hive -e 'SELECT * FROM cyi.cyi_managed;' >> ~/{file_name} && "
         + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{s3_path}/"
         + f" &>> /var/log/cyi/e2e.log"
     )
@@ -144,7 +144,7 @@ def step_(context, expected_result_file_name):
     )
 
     assert (
-        expected == actual
+        expected in actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
