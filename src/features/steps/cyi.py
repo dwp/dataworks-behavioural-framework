@@ -23,7 +23,9 @@ def step_impl(context):
         context.fixture_path_local, "cyi", "input", "cyi_input.json"
     )
     input_file_zipped = os.path.join(context.temp_folder, "cyi_input.json.gz")
-    s3_prefix = os.path.join(context.cyi_input_s3_prefix, context.cyi_export_date, "cyi_input.json.gz")
+    s3_prefix = os.path.join(
+        context.cyi_input_s3_prefix, context.cyi_export_date, "cyi_input.json.gz"
+    )
 
     with open(input_file_unzipped, "rb") as f_in:
         with gzip.open(input_file_zipped, "wb") as f_out:
