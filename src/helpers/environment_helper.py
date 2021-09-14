@@ -491,7 +491,7 @@ def set_test_run_common_variables(context):
 
     context.cyi_output_s3_prefix = "data/cyi"
 
-    context.cyi_input_s3_prefix = "cyi/"
+    context.cyi_input_s3_prefix = "cyi"
 
     context.uc_feature_test_input_s3_prefix = "e2e-test-uc-feature-dataset"
 
