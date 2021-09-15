@@ -456,6 +456,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_input, context)
     if tag == "fixture.s3.clear.cyi.output":
         use_fixture(before_fixtures.s3_clear_cyi_output, context)
+    if tag == "fixture.s3.clear.cyi.test.output":
+        use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
 
 
 def after_all(context):

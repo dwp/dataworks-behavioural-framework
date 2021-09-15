@@ -68,7 +68,7 @@ def step_impl(context, timeout_minutes):
 @when("I insert the '{step_name}' step onto the CYI cluster")
 def step_impl(context, step_name):
     context.cyi_cluster_step_name = step_name
-    s3_path = f"{context.cyi_test_input_s3_prefix}/{context.test_run_name}"
+    s3_path = f"{context.cyi_test_output_s3_prefix}/{context.test_run_name}"
     file_name = f"{context.test_run_name}.csv"
     cyi_hive_export_bash_command = (
         f"hive -e 'SELECT * FROM cyi.cyi_managed;' >> ~/{file_name} && "
