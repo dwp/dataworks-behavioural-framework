@@ -3,6 +3,7 @@
 Feature: CYI tests, to run CYI and validate its output
   @fixture.s3.clear.cyi.input
   @fixture.s3.clear.cyi.output
+  @fixture.s3.clear.cyi.test.output
   @fixture.terminate.cyi.cluster
   Scenario: CYI dataset E2E given latest ADG output
     Given I upload a CYI file
