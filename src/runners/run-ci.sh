@@ -61,17 +61,17 @@ function set_file_locations() {
 
     local_file_location="${1}"
 
-    export TF_INGEST_OUTPUT_FILE="${local_file_location}/aws-ingestion.json"
-    export TF_INTERNAL_COMPUTE_OUTPUT_FILE="${local_file_location}/aws-internal-compute.json"
-    export TF_SNAPSHOT_SENDER_OUTPUT_FILE="${local_file_location}/aws-snapshot-sender.json"
-    export TF_MGMT_OUTPUT_FILE="${local_file_location}/aws-management-infrastructure.json"
-    export TF_ADG_OUTPUT_FILE="${local_file_location}/aws-analytical-dataset-generation.json"
-    export TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE="${local_file_location}/dataworks-aws-ingest-consumers.json"
-    export TF_UCFS_CLAIMANT_OUTPUT_FILE="${local_file_location}/ucfs-claimant.json"
-    export TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER="${local_file_location}/dataworks-aws-ucfs-claimant-consumer.json"
-    export TF_COMMON_OUTPUT_FILE="${local_file_location}/aws-common-infrastructure.json"
-    export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}/dataworks-aws-ingestion-ecs-cluster.json"
-    export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}/dataworks-ml-streams-kafka-producer.json"
+    export TF_INGEST_OUTPUT_FILE="${local_file_location}aws-ingestion.json"
+    export TF_INTERNAL_COMPUTE_OUTPUT_FILE="${local_file_location}aws-internal-compute.json"
+    export TF_SNAPSHOT_SENDER_OUTPUT_FILE="${local_file_location}aws-snapshot-sender.json"
+    export TF_MGMT_OUTPUT_FILE="${local_file_location}aws-management-infrastructure.json"
+    export TF_ADG_OUTPUT_FILE="${local_file_location}aws-analytical-dataset-generation.json"
+    export TF_DATAWORKS_AWS_INGEST_CONSUMERS_FILE="${local_file_location}dataworks-aws-ingest-consumers.json"
+    export TF_UCFS_CLAIMANT_OUTPUT_FILE="${local_file_location}ucfs-claimant.json"
+    export TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER="${local_file_location}dataworks-aws-ucfs-claimant-consumer.json"
+    export TF_COMMON_OUTPUT_FILE="${local_file_location}aws-common-infrastructure.json"
+    export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}dataworks-aws-ingestion-ecs-cluster.json"
+    export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}dataworks-ml-streams-kafka-producer.json"
 }
 
 # shellcheck disable=SC2112
