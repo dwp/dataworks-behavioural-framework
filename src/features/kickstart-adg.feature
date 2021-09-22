@@ -1,7 +1,6 @@
 @aws-kickstart-adg
 @test
 Feature: Kickstart adg process, to source data and valid final tables for expected outcome
-
   @fixture.s3.clear.kickstart.start
   @fixture.terminate.kickstart.cluster
   Scenario: Kickstart adg end to end test for vacancy, application data with delta extract
