@@ -85,10 +85,10 @@ def generate_arguments_for_corporate_data_load(
 
     topics_qualified = default_topic_list if topics.lower() == "all" else topics
 
-    start_date = "NOT_SET" if skip_earlier_than is None else skip_earlier_than
-    end_date = "NOT_SET" if skip_later_than is None else skip_later_than
-    partitions = "NOT_SET" if partition_count is None else partition_count
-    per_execution = "NOT_SET" if prefix_per_execution is None else prefix_per_execution
+    start_date = "NOT_SET" if not skip_earlier_than else skip_earlier_than
+    end_date = "NOT_SET" if not skip_later_than else skip_later_than
+    partitions = "NOT_SET" if not partition_count else partition_count
+    per_execution = "NOT_SET" if not prefix_per_execution else prefix_per_execution
 
     return f'{topics_qualified} {s3_base_prefix} {metadata_table_name} {correlation_id} "{file_pattern}" {start_date} {end_date} {partitions} {per_execution}'
 
