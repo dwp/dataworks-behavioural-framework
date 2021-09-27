@@ -107,6 +107,8 @@ function execute_behave() {
         METADATA_STORE_TABLE_NAME_AUDIT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.audit')"
 
         CDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.run_cdl_s3_url')"
+        CDL_SPLIT_INPUTS_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.cdl_split_inputs_s3_url')"
+
         HDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.historic_data_loader.value.run_hdl_s3_url')"
 
         CDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.s3_base_prefix')"
@@ -496,6 +498,7 @@ function execute_behave() {
     -D RECONCILER_EQUALITIES_DESIRED_TASK_COUNT="${RECONCILER_EQUALITIES_DESIRED_TASK_COUNT}" \
     -D RECONCILER_AUDIT_DESIRED_TASK_COUNT="${RECONCILER_AUDIT_DESIRED_TASK_COUNT}" \
     -D CDL_RUN_SCRIPT_S3_URL="${CDL_RUN_SCRIPT_S3_URL}" \
+    -D CDL_SPLIT_INPUTS_S3_URL="${CDL_SPLIT_INPUTS_S3_URL}" \
     -D HDL_RUN_SCRIPT_S3_URL="${HDL_RUN_SCRIPT_S3_URL}" \
     -D CREATE_HBASE_TABLES_SCRIPT_S3_URL="${CREATE_HBASE_TABLES_SCRIPT_S3_URL}" \
     -D DATA_LOAD_TOPICS="${DATA_LOAD_TOPICS}" \
