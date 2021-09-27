@@ -40,6 +40,7 @@ Feature: Processes to load and import data in to ingest hbase
   Scenario: Corporate data loader is run on ingest hase EMR cluster to load data to HBase
     Given A bash 'download cdl script' step is started on the ingest-hbase EMR cluster
     And The 'download cdl script' step is executed successfully
+    And A bash 'download cdl input split script' step is started on the ingest-hbase EMR cluster
     When The corporate data is loaded in to HBase with default settings
     Then The data load is completed successfully with timeout setting of 'false'
 
