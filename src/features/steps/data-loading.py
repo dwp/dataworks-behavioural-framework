@@ -164,6 +164,7 @@ def step_impl(
             end_date,
             partition_count,
             prefix_per_execution,
+            None,
         )
 
     context.data_load_step_id = emr_step_generator.generate_script_step(
