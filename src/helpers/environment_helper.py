@@ -397,7 +397,9 @@ def set_test_run_common_variables(context):
     ]
 
     context.cdl_run_script_s3_url = context.config.userdata.get("CDL_RUN_SCRIPT_S3_URL")
-    context.cdl_split_inputs_s3_url = context.config.userdata.get("CDL_SPLIT_INPUTS_S3_URL")
+    context.cdl_split_inputs_s3_url = context.config.userdata.get(
+        "CDL_SPLIT_INPUTS_S3_URL"
+    )
 
     context.hdl_run_script_s3_url = context.config.userdata.get("HDL_RUN_SCRIPT_S3_URL")
     context.create_hbase_tables_script_url = context.config.userdata.get(
