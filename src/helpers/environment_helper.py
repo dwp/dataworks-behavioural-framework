@@ -308,10 +308,8 @@ def set_test_run_common_variables(context):
             "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
         )
     )
-    context.corporate_data_use_split_inputs_override = (
-        context.config.userdata.get(
-            "CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE"
-        )
+    context.corporate_data_use_split_inputs_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE"
     )
 
     context.corporate_data_ingestion_partitions_count_override = (
