@@ -56,6 +56,7 @@ def generate_arguments_for_corporate_data_load(
     skip_later_than,
     partition_count,
     prefix_per_execution,
+    use_split_inputs,
 ):
     """Works out the topics needed for snapshot sender based on the passed in overrides.
 
@@ -70,6 +71,7 @@ def generate_arguments_for_corporate_data_load(
     skip_later_than -- format of date time must be `yyyy-MM-dd` (or None)
     partition_count -- number of partitions to split the run by (or None)
     prefix_per_execution -- true (as a string) to enable a prefix per execution when running the jar
+    use_split_inputs -- true (as a string) to pass the s3 files lists to CDL rather than CDL generate them per topic
 
     """
     console_printer.print_info(
@@ -79,7 +81,7 @@ def generate_arguments_for_corporate_data_load(
     console_printer.print_info(
         f"Topics list is '{topics}', s3 base prefix is '{s3_base_prefix}', correlation id is '{correlation_id}',"
         f" file pattern is '{file_pattern}', metadata table name is '{metadata_table_name}',"
-        f" prefix per execution setting is '{prefix_per_execution}',"
+        f" prefix per execution setting is '{prefix_per_execution}', use split inputs is '{use_split_inputs}'"
         f" start date is '{skip_earlier_than}' and end date is '{skip_later_than}'"
     )
 
@@ -89,8 +91,9 @@ def generate_arguments_for_corporate_data_load(
     end_date = "NOT_SET" if not skip_later_than else skip_later_than
     partitions = "NOT_SET" if not partition_count else partition_count
     per_execution = "NOT_SET" if not prefix_per_execution else prefix_per_execution
+    split_inputs = "NOT_SET" if not use_split_inputs else use_split_inputs
 
-    return f'{topics_qualified} {s3_base_prefix} {metadata_table_name} {correlation_id} "{file_pattern}" {start_date} {end_date} {partitions} {per_execution}'
+    return f'{topics_qualified} {s3_base_prefix} {metadata_table_name} {correlation_id} "{file_pattern}" {start_date} {end_date} {partitions} {per_execution} {split_inputs}'
 
 
 def generate_corporate_data_s3_prefix(base_prefix, database, collection, timestamp):
