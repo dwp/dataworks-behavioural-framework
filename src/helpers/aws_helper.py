@@ -1911,7 +1911,7 @@ def execute_linux_command(
     instance_id, linux_command, username="root", aws_region="eu-west-2"
 ):
     service_name = "ssm"
-    cmd = f'sudo su -c "{linux_command}" -s /bin/sh {username}'
+    cmd = f"sudo su -c '{linux_command}' -s /bin/sh {username}"
 
     client = get_client(service_name=service_name, region=aws_region)
     response = client.send_command(
