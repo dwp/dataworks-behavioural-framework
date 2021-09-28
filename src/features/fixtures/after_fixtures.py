@@ -213,3 +213,20 @@ def dataworks_stop_kafka_producer_app(context):
         instance_id=context.dataworks_kafka_producer_instance,
         linux_command=linux_command,
     )
+
+@fixture
+def dataworks_stop_kafka_consumer_app(context):
+    console_printer.print_info("Executing 'stop_kafka_consumer_app' fixture")
+
+    # Execute the shell script - stop the e2e test application
+    console_printer.print_info("Stopping e2e test application")
+    linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_dlq_consumer_instance,
+        linux_command=linux_command,
+    )
+
+    # Clear S3 bucket
+    console_printer.print_info(f"Stopping e2e tests...remove any data from s3 bucket: {context.dataworks_kafka_dlq_output_bucket}, prefix: {context.dataworks_dlq_output_s3_prefix}")
+    aws_helper.clear_s3_prefix(s3_bucket=context.dataworks_kafka_dlq_output_bucket, path=context.dataworks_dlq_output_s3_prefix, delete_prefix=True)
+

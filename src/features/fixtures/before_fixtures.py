@@ -815,3 +815,44 @@ def dataworks_init_kafka_producer(context, timeout=60, **kwargs):
     # wait for a 60secs
     time.sleep(int(timeout))
     console_printer.print_info("COMPLETE:Initialising e2e tests...")
+
+
+@fixture
+def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
+    console_printer.print_info("Initialising e2e tests...for dlq consumer")
+
+    # Clear S3 bucket
+    console_printer.print_info(f"Initialising e2e tests...remove any data from s3 bucket: {context.dataworks_kafka_dlq_output_bucket}, prefix: {context.dataworks_dlq_output_s3_prefix}")
+    aws_helper.clear_s3_prefix(s3_bucket=context.dataworks_kafka_dlq_output_bucket, path=context.dataworks_dlq_output_s3_prefix, delete_prefix=True)
+
+    # Execute the shell script - stop any e2e test app
+    console_printer.print_info(f"Initialising e2e tests...stopping any old dlq e2e test application on instance id: {context.dataworks_kafka_dlq_consumer_instance}")
+    linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_dlq_consumer_instance,
+        linux_command=linux_command,
+    )
+
+    # Execute the shell script - delete e2e test topic if it exists
+    console_printer.print_info("Initialising e2e tests...remove any old dlq topic if it exists")
+    linux_command = (
+        "sh /home/ec2-user/kafka/utils/run_delete_topic.sh e2e_dlq_topic"
+    )
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_dlq_consumer_instance,
+        linux_command=linux_command,
+    )
+
+    # Create a topic for e2e tests
+    console_printer.print_info("Initialising e2e tests...create a dlq topic for e2e tests")
+    linux_command = (
+        "sh /home/ec2-user/kafka/utils/run_create_topic.sh e2e_dlq_topic"
+    )
+    aws_helper.execute_linux_command(
+        instance_id=context.dataworks_kafka_dlq_consumer_instance,
+        linux_command=linux_command,
+    )
+
+    # wait for a 60secs
+    time.sleep(int(timeout))
+    console_printer.print_info("COMPLETE:Initialising e2e tests...for dlq consumer")

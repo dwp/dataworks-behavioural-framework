@@ -1,0 +1,74 @@
+[
+  {
+    "traceId": "7903eeae-f0ca-4b78-bfdd-db4f3a5216e0",
+    "unitOfWorkId": "afdde3d9-32c5-4a24-b5f5-7a96db915ca0",
+    "@type": "V4",
+    "message": {
+      "dbObject": "aHEDiKj5xTxxxxA+Pw==",
+      "encryption": {
+        "keyEncryptionKeyId": "cloudhsm:262153,262150",
+        "encryptedEncryptionKey": "U8PxsFVF3tAlxzxxx==",
+        "encryptionKeyId": "ccf9dd0a-a387-4dd5-a31e-859c844384a3",
+        "initialisationVector": "3sFVqJcYDAwRADPevlw8pA=="
+      },
+      "_lastModifiedDateTime": "2021-06-18T18:19:40.909+0000",
+      "@type": "MONGO_INSERT",
+      "_timeBasedHash": "d7c20d0d093afed0630c234eda199122df6610078ffb67a7ab845187d33ace21",
+      "collection": "journal",
+      "_id": {
+        "journalId": "1"
+      },
+      "db": "core"
+    },
+    "version": "core-release_174.46",
+    "timestamp": "2021-06-18T18:19:41.001+0000"
+  },
+  {
+    "traceId": "7903eeae-f0ca-4b78-bfdd-db4f3a5216e0",
+    "unitOfWorkId": "afdde3d9-32c5-4a24-b5f5-7a96db915ca0",
+    "@type": "V4",
+    "message": {
+      "dbObject": "aHEDiKj5xTxxxxA+Pw==",
+      "encryption": {
+        "keyEncryptionKeyId": "cloudhsm:262153,262150",
+        "encryptedEncryptionKey": "U8PxsFVF3tAlxzxxx==",
+        "encryptionKeyId": "ccf9dd0a-a387-4dd5-a31e-859c844384a3",
+        "initialisationVector": "3sFVqJcYDAwRADPevlw8pA=="
+      },
+      "_lastModifiedDateTime": "2021-06-18T18:19:40.909+0000",
+      "@type": "MONGO_INSERT",
+      "_timeBasedHash": "d7c20d0d093afed0630c234eda199122df6610078ffb67a7ab845187d33ace21",
+      "collection": "journal",
+      "_id": {
+        "journalId": "2"
+      },
+      "db": "core"
+    },
+    "version": "core-release_174.46",
+    "timestamp": "2021-06-18T18:19:41.001+0000"
+  },
+  {
+    "traceId": "7903eeae-f0ca-4b78-bfdd-db4f3a5216e0",
+    "unitOfWorkId": "afdde3d9-32c5-4a24-b5f5-7a96db915ca0",
+    "@type": "V4",
+    "message": {
+      "dbObject": "aHEDiKj5xTxxxxA+Pw==",
+      "encryption": {
+        "keyEncryptionKeyId": "cloudhsm:262153,262150",
+        "encryptedEncryptionKey": "U8PxsFVF3tAlxzxxx==",
+        "encryptionKeyId": "ccf9dd0a-a387-4dd5-a31e-859c844384a3",
+        "initialisationVector": "3sFVqJcYDAwRADPevlw8pA=="
+      },
+      "_lastModifiedDateTime": "2021-06-18T18:19:40.909+0000",
+      "@type": "MONGO_INSERT",
+      "_timeBasedHash": "d7c20d0d093afed0630c234eda199122df6610078ffb67a7ab845187d33ace21",
+      "collection": "journal",
+      "_id": {
+        "journalId": "3"
+      },
+      "db": "core"
+    },
+    "version": "core-release_174.46",
+    "timestamp": "2021-06-18T18:19:41.001+0000"
+  }
+]

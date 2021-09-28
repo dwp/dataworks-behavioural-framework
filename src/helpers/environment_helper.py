@@ -521,6 +521,16 @@ def set_test_run_common_variables(context):
         "DATAWORKS_STREAMS_KAFKA_PRODUCER"
     )
 
+    context.dataworks_kafka_dlq_consumer_instance = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER"
+    )
+
+    context.dataworks_dlq_output_s3_prefix = "e2e"
+
+    context.dataworks_kafka_dlq_output_bucket = context.config.userdata.get(
+        "DATAWORKS_DLQ_OUTPUT_BUCKET"
+    )
+
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
