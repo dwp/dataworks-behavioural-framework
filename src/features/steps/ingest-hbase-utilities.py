@@ -56,6 +56,8 @@ def step_impl(context, step_type):
         bash_script = "hbase shell <<< list | egrep '^[a-z]' | grep -v '^list' | while read; do echo -e \"disable '$REPLY'\"; done | hbase shell"
     elif step_type == "download cdl script":
         bash_script = f"aws s3 cp {context.cdl_run_script_s3_url} /opt/emr/run_cdl.sh && chmod +x /opt/emr/run_cdl.sh"
+    elif step_type == "download cdl input split script":
+        bash_script = f"aws s3 cp {context.cdl_split_inputs_s3_url} /opt/emr/split_inputs.pl && chmod +x /opt/emr/split_inputs.pl"
     elif step_type == "download hdl script":
         bash_script = f"aws s3 cp {context.hdl_run_script_s3_url} /opt/emr/run_hdl.sh && chmod +x /opt/emr/run_hdl.sh"
     elif step_type == "download create tables script":

@@ -308,6 +308,9 @@ def set_test_run_common_variables(context):
             "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
         )
     )
+    context.corporate_data_use_split_inputs_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE"
+    )
 
     context.corporate_data_ingestion_partitions_count_override = (
         context.config.userdata.get(
@@ -394,6 +397,10 @@ def set_test_run_common_variables(context):
     ]
 
     context.cdl_run_script_s3_url = context.config.userdata.get("CDL_RUN_SCRIPT_S3_URL")
+    context.cdl_split_inputs_s3_url = context.config.userdata.get(
+        "CDL_SPLIT_INPUTS_S3_URL"
+    )
+
     context.hdl_run_script_s3_url = context.config.userdata.get("HDL_RUN_SCRIPT_S3_URL")
     context.create_hbase_tables_script_url = context.config.userdata.get(
         "CREATE_HBASE_TABLES_SCRIPT_S3_URL"
@@ -426,6 +433,7 @@ def set_test_run_common_variables(context):
             context.corporate_data_ingestion_skip_later_than_override,
             context.corporate_data_ingestion_partitions_count_override,
             context.corporate_data_prefix_per_execution_count_override,
+            context.corporate_data_use_split_inputs_override,
         )
     )
 

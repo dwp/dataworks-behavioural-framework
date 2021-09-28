@@ -24,7 +24,7 @@ meta-dataworks-behavioural-framework:
       .: (( inject meta-dataworks-behavioural-framework.resources.ecr-resource ))
       source:
         repository: "dataworks-behavioural-framework"
-        aws_role_arn: arn:aws:iam::((dataworks.aws_management_acc)):role/ci
+        aws_role_arn: arn:aws:iam::((aws_account.management)):role/ci
       check_every: 5m
       
   plan:
