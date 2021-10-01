@@ -150,3 +150,11 @@ def metadata_table_step_impl(context):
     assert (
         item["S3_Prefix_Analytical_DataSet"]["S"] == context.pdm_test_input_s3_prefix
     ), f"S3_Prefix_Analytical_DataSet was '{item['S3_Prefix_Analytical_DataSet']['S']}', expected '{context.pdm_test_input_s3_prefix}'"
+
+
+@then("the pdm_object_tagger has run successfully")
+def step_impl(context):
+    batch_job_status = aws_helper.poll_batch_job_status(
+        job_queue_name="pdm_object_tagger"
+    )
+    assert batch_job_status == "SUCCEEDED"
