@@ -1934,3 +1934,27 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)[
         "Parameter"
     ]["Value"]
+
+
+def poll_batch_job_status(job_queue_name, timeout_in_seconds=None,):
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+
+    while timeout_time < time.time() or timeout_time is None:
+        response = client.list_jobs(jobQueue=job_queue_name)
+        if len(response["jobSummaryList"]) > 0:
+            status = response["jobSummaryList"][0]["status"]
+            if status in ['FAILED', 'SUCCEEDED']:
+                return status
+            else:
+                console_printer.print_info(f"Job status: {status}")
+                time.sleep(5)
+
+        else:
+            console_printer.print_info(
+                f"Waiting for batch job to be submitted to queue: {job_queue_name}"
+            )
+            time.sleep(5)
+            continue
+
+    raise AssertionError(f"Timed out waiting for batch job in queue: {job_queue_name}")
