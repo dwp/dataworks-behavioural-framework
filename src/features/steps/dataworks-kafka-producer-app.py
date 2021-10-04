@@ -24,7 +24,7 @@ def step_impl(context, file_name):
         data_key,
         hsm_pub_key,
         encrypted_data_key,
-    ) = dataworks_kafka_producer_helper.create_new_data_key()
+    ) = dataworks_kafka_producer_helper.create_new_data_key(context)
 
     # Encrypt the data
     (
@@ -32,7 +32,7 @@ def step_impl(context, file_name):
         iv,
         encryption_data_key_id,
     ) = dataworks_kafka_producer_helper.encrypt_data_aes_ctr(
-        plaintext_string=plaintext_string, data_key=data_key
+        plaintext_string=plaintext_string, data_key=data_key, context=context
     )
 
     # Set metadata
@@ -57,7 +57,7 @@ def step_impl(context, file_name):
     time.sleep(30)
 
 
-@then("the consumer group lag should be incremented by '{expected_lag}'")
+@then("the last offset should be incremented by '{expected_lag}'")
 def step_impl(context, expected_lag):
     linux_command = "sh /home/ec2-user/kafka/utils/run_get_topic_last_offset.sh"
     response = aws_helper.execute_linux_command(

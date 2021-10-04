@@ -531,6 +531,13 @@ def set_test_run_common_variables(context):
         "DATAWORKS_DLQ_OUTPUT_BUCKET"
     )
 
+    context.dataworks_streams_kafka_producer_hsm_key_id = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_KEY_ID"
+    )
+
+    context.dataworks_streams_kafka_producer_hsm_pub_key = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_PUB_KEY"
+    )
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
