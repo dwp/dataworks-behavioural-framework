@@ -1,7 +1,10 @@
+import itertools
 import json
 import os
 
 from behave import given, then, when
+
+import helpers.object_tagger_helper
 from helpers import (
     aws_helper,
     console_printer,
@@ -158,3 +161,27 @@ def step_impl(context):
         job_queue_name="pdm_object_tagger"
     )
     assert batch_job_status == "SUCCEEDED"
+
+
+@then("the correct tags are applied to the pdm data")
+def step_impl(context):
+    common_config_bucket = context.common_config_bucket
+    rbac_csv_s3_key = context.pdm_data_classfication_csv
+    pdm_output_prefix = context.pdm_data_prefix
+    published_bucket = context.published_bucket
+
+    all_rbac_tags = helpers.object_tagger_helper.get_rbac_csv_tags(
+        rbac_csv_s3_bucket=common_config_bucket, rbac_csv_s3_key=rbac_csv_s3_key
+    )
+
+    s3_keys = aws_helper.get_s3_file_object_keys_matching_pattern(
+        s3_bucket=published_bucket,
+        s3_prefix=pdm_output_prefix,
+    )
+
+    _ = list(map(
+        helpers.object_tagger_helper.verify_s3_object_required_tags,
+        itertools.repeat(published_bucket),
+        s3_keys[:50],
+        itertools.repeat(all_rbac_tags),
+    ))
