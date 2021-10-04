@@ -543,6 +543,14 @@ def set_test_run_common_variables(context):
         "AWS_REGION_ALTERNATIVE"
     )
 
+    context.pdm_data_prefix = context.config.userdata.get("PDM_DATA_PREFIX")
+    context.pdm_data_classfication_csv = context.config.userdata.get(
+        "PDM_DATA_CLASSIFICATION_CSV_KEY"
+    )
+    context.common_config_bucket = context.config.userdata.get(
+        "DATAWORKS_COMMON_CONFIG_BUCKET"
+    )
+
 
 def set_manifest_variables(context):
     """All variables common to manifest test runs.
