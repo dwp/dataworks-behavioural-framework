@@ -1936,7 +1936,10 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     ]["Value"]
 
 
-def poll_batch_job_status(job_queue_name, timeout_in_seconds=None,):
+def poll_batch_job_status(
+    job_queue_name,
+    timeout_in_seconds=None,
+):
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
 
@@ -1944,7 +1947,7 @@ def poll_batch_job_status(job_queue_name, timeout_in_seconds=None,):
         response = client.list_jobs(jobQueue=job_queue_name)
         if len(response["jobSummaryList"]) > 0:
             status = response["jobSummaryList"][0]["status"]
-            if status in ['FAILED', 'SUCCEEDED']:
+            if status in ["FAILED", "SUCCEEDED"]:
                 return status
             else:
                 console_printer.print_info(f"Job status: {status}")

@@ -2,7 +2,10 @@ from helpers import aws_helper, console_printer
 from typing import List, Dict
 
 
-def aws_tags_are_subset(subset: List[Dict], superset: List[Dict],):
+def aws_tags_are_subset(
+    subset: List[Dict],
+    superset: List[Dict],
+):
     subset_tags_flat = {tag["Key"]: tag["Value"] for tag in subset}
     superset_tags_flat = {tag["Key"]: tag["Value"] for tag in superset}
 
@@ -32,7 +35,9 @@ def verify_s3_object_required_tags(s3_bucket, s3_object_key, tags_dict):
     # replace any strings ending `.db`
     if any(".db" in item for item in split_string):
         for index, value in enumerate(split_string):
-            split_string[index] = value.replace(".db", "") if value.endswith(".db") else value
+            split_string[index] = (
+                value.replace(".db", "") if value.endswith(".db") else value
+            )
 
     db_name = None
     table_name = None
@@ -41,7 +46,7 @@ def verify_s3_object_required_tags(s3_bucket, s3_object_key, tags_dict):
     for i in range(2, 5):
         if split_string[-i] in tags_dict:
             db_name = split_string[-i]
-            table_name = split_string[-(i-1)]
+            table_name = split_string[-(i - 1)]
             break
 
     console_printer.print_info(f"DB: {db_name} | TABLE: {table_name}")
@@ -81,7 +86,9 @@ def verify_s3_object_required_tags(s3_bucket, s3_object_key, tags_dict):
 
 
 def get_rbac_csv_tags(rbac_csv_s3_bucket: str, rbac_csv_s3_key: str):
-    rbac_csv = aws_helper.get_s3_object(s3_client=None, bucket=rbac_csv_s3_bucket, key=rbac_csv_s3_key)
+    rbac_csv = aws_helper.get_s3_object(
+        s3_client=None, bucket=rbac_csv_s3_bucket, key=rbac_csv_s3_key
+    )
     rows = [row.split(",") for row in rbac_csv.decode("utf-8").split("\r\n")]
 
     tags = {}

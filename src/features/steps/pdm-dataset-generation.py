@@ -179,9 +179,11 @@ def step_impl(context):
         s3_prefix=pdm_output_prefix,
     )
 
-    _ = list(map(
-        helpers.object_tagger_helper.verify_s3_object_required_tags,
-        itertools.repeat(published_bucket),
-        s3_keys[:50],
-        itertools.repeat(all_rbac_tags),
-    ))
+    _ = list(
+        map(
+            helpers.object_tagger_helper.verify_s3_object_required_tags,
+            itertools.repeat(published_bucket),
+            s3_keys[:50],
+            itertools.repeat(all_rbac_tags),
+        )
+    )
