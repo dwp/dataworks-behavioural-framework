@@ -24,15 +24,23 @@ def step_impl(context, file_name):
     for message in messages:
         encoded_data = json.dumps(message)
         message_str = json.dumps(encoded_data)
-        #console_printer.print_info(f"Publish data: {message_str}")
-        linux_command = f"sh /home/ec2-user/kafka/utils/e2e_publish_msg.sh {message_str}"
-        response = aws_helper.execute_linux_command(instance_id=context.dataworks_kafka_dlq_consumer_instance, linux_command=linux_command)
+        # console_printer.print_info(f"Publish data: {message_str}")
+        linux_command = (
+            f"sh /home/ec2-user/kafka/utils/e2e_publish_msg.sh {message_str}"
+        )
+        response = aws_helper.execute_linux_command(
+            instance_id=context.dataworks_kafka_dlq_consumer_instance,
+            linux_command=linux_command,
+        )
 
 
 @then("the consumer should write '{expected_file_count}' files to the S3 bucket")
 def step_impl(context, expected_file_count):
     # Get a list of parquet files from the dlq bucket
-    actual_file_count = dataworks_kafka_consumer_helper.get_parquet_file_count(f"{context.dataworks_kafka_dlq_output_bucket}", f"{context.dataworks_dlq_output_s3_prefix}/")
+    actual_file_count = dataworks_kafka_consumer_helper.get_parquet_file_count(
+        f"{context.dataworks_kafka_dlq_output_bucket}",
+        f"{context.dataworks_dlq_output_s3_prefix}/",
+    )
 
     # Count the parquet files in the s3 location
     assert actual_file_count == int(expected_file_count)

@@ -5,4 +5,4 @@ Feature: Publish data in S3 bucket to kafka topic
   Scenario: End-2-End scenario for a kafka producer application
     Given the e2e kafka producer app is running
     When an encrypted json file 'input-test-data.json' is uploaded to S3 location
-    Then the consumer group lag should be incremented by '6'
+    Then the last offset should be incremented by '6'
