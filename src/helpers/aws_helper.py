@@ -1937,10 +1937,10 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
 
 
 def trigger_batch_job(
-        job_name: str,
-        job_queue_name: str,
-        job_definition: str,
-        parameters=None,
+    job_name: str,
+    job_queue_name: str,
+    job_definition: str,
+    parameters=None,
 ) -> str:
     """
     Triggers a batch job given job_name, job_queue_name, job_definition, and optionally
@@ -1956,14 +1956,17 @@ def trigger_batch_job(
     return response["jobId"]
 
 
-def poll_batch_job_status(job_id, timeout_in_seconds=None, ):
+def poll_batch_job_status(
+    job_id,
+    timeout_in_seconds=None,
+):
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
 
     while timeout_time is None or timeout_time < time.time():
         response = client.describe_jobs(jobs=[job_id])
         status = response["jobs"][0]["status"]
-        if status in ['FAILED', 'SUCCEEDED']:
+        if status in ["FAILED", "SUCCEEDED"]:
             return status
         else:
             console_printer.print_info(f"Job status: {status}")

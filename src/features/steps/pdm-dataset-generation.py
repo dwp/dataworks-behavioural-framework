@@ -163,12 +163,14 @@ def step_impl(context):
         job_definition="s3_object_tagger_job",
         parameters={
             "data-s3-prefix": context.pdm_data_prefix,
-            "csv-location": os.path.join("s3://", context.common_config_bucket, context.pdm_data_classfication_csv)
-        }
+            "csv-location": os.path.join(
+                "s3://",
+                context.common_config_bucket,
+                context.pdm_data_classfication_csv,
+            ),
+        },
     )
-    batch_job_status = aws_helper.poll_batch_job_status(
-        job_id=job_id
-    )
+    batch_job_status = aws_helper.poll_batch_job_status(job_id=job_id)
     assert batch_job_status == "SUCCEEDED"
 
 
