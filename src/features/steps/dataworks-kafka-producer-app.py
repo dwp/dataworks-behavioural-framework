@@ -21,10 +21,7 @@ def step_impl(context, file_name):
     plaintext_string = dataworks_kafka_producer_helper.read_test_data(file_name)
     data_key = base64.b64decode(context.encryption_plaintext_key)
     # Encrypt the data
-    (
-        encrypted_data,
-        iv,
-    ) = dataworks_kafka_producer_helper.encrypt_data_aes_ctr(
+    (encrypted_data, iv,) = dataworks_kafka_producer_helper.encrypt_data_aes_ctr(
         plaintext_string=plaintext_string, data_key=data_key
     )
 
