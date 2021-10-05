@@ -1936,28 +1936,37 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     ]["Value"]
 
 
-def poll_batch_job_status(
-    job_queue_name,
-    timeout_in_seconds=None,
-):
+def trigger_batch_job(
+        job_name: str,
+        job_queue_name: str,
+        job_definition: str,
+        parameters=None,
+) -> str:
+    """
+    Triggers a batch job given job_name, job_queue_name, job_definition, and optionally
+    additional parameters.  Returns jobId of submitted job
+    """
+    client = get_client("batch")
+    response = client.submit_job(
+        jobName=job_name,
+        jobQueue=job_queue_name,
+        jobDefinition=job_definition,
+        parameters=parameters,
+    )
+    return response["jobId"]
+
+
+def poll_batch_job_status(job_id, timeout_in_seconds=None, ):
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
 
-    while timeout_time < time.time() or timeout_time is None:
-        response = client.list_jobs(jobQueue=job_queue_name)
-        if len(response["jobSummaryList"]) > 0:
-            status = response["jobSummaryList"][0]["status"]
-            if status in ["FAILED", "SUCCEEDED"]:
-                return status
-            else:
-                console_printer.print_info(f"Job status: {status}")
-                time.sleep(5)
-
+    while timeout_time is None or timeout_time < time.time():
+        response = client.describe_jobs(jobs=[job_id])
+        status = response["jobs"][0]["status"]
+        if status in ['FAILED', 'SUCCEEDED']:
+            return status
         else:
-            console_printer.print_info(
-                f"Waiting for batch job to be submitted to queue: {job_queue_name}"
-            )
+            console_printer.print_info(f"Job status: {status}")
             time.sleep(5)
-            continue
 
-    raise AssertionError(f"Timed out waiting for batch job in queue: {job_queue_name}")
+    raise AssertionError(f"Timed out waiting for batch job in queue")
