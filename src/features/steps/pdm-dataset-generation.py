@@ -194,7 +194,7 @@ def step_impl(context):
         map(
             object_tagger_helper.verify_s3_object_required_tags,
             itertools.repeat(published_bucket),
-            s3_keys[:50],
+            s3_keys,
             itertools.repeat(all_rbac_tags),
         )
     )
