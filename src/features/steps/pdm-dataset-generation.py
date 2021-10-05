@@ -11,7 +11,7 @@ from helpers import (
     emr_step_generator,
     file_helper,
     invoke_lambda,
-    object_tagger_helper
+    object_tagger_helper,
 )
 
 CLUSTER_ARN = "ClusterArn"
