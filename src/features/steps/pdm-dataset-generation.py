@@ -1,15 +1,18 @@
+import itertools
 import json
 import os
+from datetime import datetime
 
 from behave import given, then, when
+
 from helpers import (
     aws_helper,
     console_printer,
     emr_step_generator,
     file_helper,
     invoke_lambda,
+    object_tagger_helper,
 )
-from datetime import datetime
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
@@ -150,3 +153,55 @@ def metadata_table_step_impl(context):
     assert (
         item["S3_Prefix_Analytical_DataSet"]["S"] == context.pdm_test_input_s3_prefix
     ), f"S3_Prefix_Analytical_DataSet was '{item['S3_Prefix_Analytical_DataSet']['S']}', expected '{context.pdm_test_input_s3_prefix}'"
+
+
+@then("the pdm_object_tagger has run successfully")
+def step_impl(context):
+    job_ids = aws_helper.poll_batch_queue_for_job(
+        job_queue_name="pdm_object_tagger",
+        timeout_in_seconds=300,
+    )
+    if len(job_ids) > 1:
+        console_printer.print_warning_text(
+            "Multiple job ids found for pdm_object_tagger.  Waiting for all to finish"
+        )
+    for job_id in job_ids:
+        status = aws_helper.poll_batch_job_status(job_id=job_id, timeout_in_seconds=300)
+        console_printer.print_info("\n")
+        assert status == "SUCCEEDED"
+
+
+@then("the correct tags are applied to the pdm data")
+def step_impl(context):
+    common_config_bucket = context.common_config_bucket
+    rbac_csv_s3_key = context.pdm_data_classfication_csv
+    pdm_output_prefix = context.pdm_data_prefix
+    published_bucket = context.published_bucket
+
+    all_rbac_tags = object_tagger_helper.get_rbac_csv_tags(
+        rbac_csv_s3_bucket=common_config_bucket, rbac_csv_s3_key=rbac_csv_s3_key
+    )
+
+    s3_keys = aws_helper.get_s3_file_object_keys_matching_pattern(
+        s3_bucket=published_bucket,
+        s3_prefix=pdm_output_prefix,
+    )
+
+    keys_with_tags = [
+        (
+            key,
+            object_tagger_helper.rbac_required_tags(key, tags_dict=all_rbac_tags),
+            aws_helper.get_tags_of_file_in_s3(s3_bucket=published_bucket, s3_key=key)[
+                "TagSet"
+            ],
+        )
+        for key in s3_keys
+    ]
+
+    for key, required_tags, actual_tags in keys_with_tags:
+        try:
+            assert object_tagger_helper.aws_tags_are_subset(required_tags, actual_tags)
+        except AssertionError:
+            console_printer.print_bold_text(f"FAILED: {key}")
+            console_printer.print_bold_text(f"FAILED: required: {required_tags}")
+            console_printer.print_bold_text(f"FAILED: actual:   {actual_tags}")

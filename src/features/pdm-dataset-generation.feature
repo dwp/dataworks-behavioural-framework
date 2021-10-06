@@ -14,3 +14,5 @@ Feature: PDM data set generation tests, to source data and valid final tables fo
     And wait a maximum of '120' minutes for the last step to finish
     Then the PDM result matches the expected results of 'youth_obligation_model_results.csv'
     And the PDM metadata table is correct
+    And the pdm_object_tagger has run successfully
+    And the correct tags are applied to the pdm data
