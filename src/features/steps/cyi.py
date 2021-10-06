@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 
 @given("I upload a CYI file")
 def step_impl(context):
-    yesterday = datetime.now() - timedelta(days=1)
+    context.today = datetime.now().strftime("%Y-%m-%d")
+    yesterday = context.today - timedelta(days=1)
     context.cyi_export_date = yesterday.strftime("%Y-%m-%d")
     input_file_unzipped = os.path.join(
         context.fixture_path_local, "cyi", "input", "cyi_input.json"
@@ -119,7 +120,7 @@ def step_impl(context, timeout_mins):
     ), f"'{context.cyi_cluster_step_name}' step failed with final status of '{execution_state}'"
 
 
-@then("the CYI result matches the expected results of '{expected_result_file_name}'")
+@then("the CYI result matches the expected results of '{expected_result_file_name_1}' and '{expected_result_file_name_2}'")
 def step_(context, expected_result_file_name):
     console_printer.print_info(f"S3 Request Location: {context.cyi_results_s3_file}")
     actual = (
@@ -132,22 +133,41 @@ def step_(context, expected_result_file_name):
         .strip()
     )
 
-    expected_file_name = os.path.join(
+    expected_file_name_1 = os.path.join(
         context.fixture_path_local,
         "cyi",
         "expected",
-        expected_result_file_name,
+        expected_result_file_name_1,
     )
-    expected = (
-        file_helper.get_contents_of_file(expected_file_name, False)
+
+    expected_file_name_2 = os.path.join(
+        context.fixture_path_local,
+        "cyi",
+        "expected",
+        expected_result_file_name_2,
+    )
+    expected_1 = (
+        file_helper.get_contents_of_file(expected_file_name_1, False)
         .replace("export_date", context.cyi_export_date)
         .replace("\t", "")
         .replace(" ", "")
         .strip()
     )
 
+    expected_2 = (
+        file_helper.get_contents_of_file(expected_file_name_2, False)
+            .replace("export_date", context.cyi_export_date)
+            .replace("\t", "")
+            .replace(" ", "")
+            .strip()
+    )
+
     assert (
-        expected in actual
+        expected_1 in actual
+    ), f"Expected result of '{expected}', does not match '{actual}'"
+
+    assert (
+            expected_2 in actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
@@ -186,8 +206,8 @@ def metadata_table_step_impl(context):
         item["Run_Id"]["N"] == "1"
     ), f"Run_Id was '{item['Run_Id']['N']}', expected '1'"
     assert (
-        item["Date"]["S"] == context.cyi_export_date
-    ), f"Date was '{item['Date']['S']}', expected '{context.cyi_export_date}'"
+        item["Date"]["S"] == context.today
+    ), f"Date was '{item['Date']['S']}', expected '{context.today}'"
     assert (
         item["CurrentStep"]["S"] in allowed_steps
     ), f"CurrentStep was '{item['CurrentStep']['S']}', expected one of '{allowed_steps}'"
