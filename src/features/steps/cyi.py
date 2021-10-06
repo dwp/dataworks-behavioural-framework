@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 @given("I upload a CYI file")
 def step_impl(context):
     context.today = datetime.now().strftime("%Y-%m-%d")
-    yesterday = context.today - timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
     context.cyi_export_date = yesterday.strftime("%Y-%m-%d")
     input_file_unzipped = os.path.join(
         context.fixture_path_local, "cyi", "input", "cyi_input.json"
