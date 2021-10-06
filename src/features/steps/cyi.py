@@ -120,7 +120,9 @@ def step_impl(context, timeout_mins):
     ), f"'{context.cyi_cluster_step_name}' step failed with final status of '{execution_state}'"
 
 
-@then("the CYI result matches the expected results of '{expected_result_file_name_1}' and '{expected_result_file_name_2}'")
+@then(
+    "the CYI result matches the expected results of '{expected_result_file_name_1}' and '{expected_result_file_name_2}'"
+)
 def step_(context, expected_result_file_name_1, expected_result_file_name_2):
     console_printer.print_info(f"S3 Request Location: {context.cyi_results_s3_file}")
     actual = (
@@ -156,10 +158,10 @@ def step_(context, expected_result_file_name_1, expected_result_file_name_2):
 
     expected_2 = (
         file_helper.get_contents_of_file(expected_file_name_2, False)
-            .replace("export_date", context.cyi_export_date)
-            .replace("\t", "")
-            .replace(" ", "")
-            .strip()
+        .replace("export_date", context.cyi_export_date)
+        .replace("\t", "")
+        .replace(" ", "")
+        .strip()
     )
 
     assert (
@@ -167,7 +169,7 @@ def step_(context, expected_result_file_name_1, expected_result_file_name_2):
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
     assert (
-            expected_2 in actual
+        expected_2 in actual
     ), f"Expected result of '{expected}', does not match '{actual}'"
 
 
