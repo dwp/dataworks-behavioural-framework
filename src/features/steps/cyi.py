@@ -121,7 +121,7 @@ def step_impl(context, timeout_mins):
 
 
 @then("the CYI result matches the expected results of '{expected_result_file_name_1}' and '{expected_result_file_name_2}'")
-def step_(context, expected_result_file_name):
+def step_(context, expected_result_file_name_1, expected_result_file_name_2):
     console_printer.print_info(f"S3 Request Location: {context.cyi_results_s3_file}")
     actual = (
         aws_helper.get_s3_object(
