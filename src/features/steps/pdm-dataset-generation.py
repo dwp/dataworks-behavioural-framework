@@ -171,7 +171,6 @@ def step_impl(context):
         assert status == "SUCCEEDED"
 
 
-
 @then("the correct tags are applied to the pdm data")
 def step_impl(context):
     common_config_bucket = context.common_config_bucket
@@ -192,8 +191,11 @@ def step_impl(context):
         (
             key,
             object_tagger_helper.rbac_required_tags(key, tags_dict=all_rbac_tags),
-            aws_helper.get_tags_of_file_in_s3(s3_bucket=published_bucket, s3_key=key)["TagSet"]
-        ) for key in s3_keys
+            aws_helper.get_tags_of_file_in_s3(s3_bucket=published_bucket, s3_key=key)[
+                "TagSet"
+            ],
+        )
+        for key in s3_keys
     ]
 
     for key, required_tags, actual_tags in keys_with_tags:
