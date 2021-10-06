@@ -157,21 +157,19 @@ def metadata_table_step_impl(context):
 
 @then("the pdm_object_tagger has run successfully")
 def step_impl(context):
-    job_id = aws_helper.trigger_batch_job(
+    job_ids = aws_helper.poll_batch_queue_for_job(
         job_queue_name="pdm_object_tagger",
-        job_name="object-tagging_pdm-object-tagging-e2e",
-        job_definition="s3_object_tagger_job",
-        parameters={
-            "data-s3-prefix": context.pdm_data_prefix,
-            "csv-location": os.path.join(
-                "s3://",
-                context.common_config_bucket,
-                context.pdm_data_classfication_csv,
-            ),
-        },
+        timeout_in_seconds=300,
     )
-    batch_job_status = aws_helper.poll_batch_job_status(job_id=job_id)
-    assert batch_job_status == "SUCCEEDED"
+    if len(job_ids) > 1:
+        console_printer.print_warning_text(
+            "Multiple job ids found for pdm_object_tagger.  Waiting for all to finish"
+        )
+    for job_id in job_ids:
+        status = aws_helper.poll_batch_job_status(job_id=job_id, timeout_in_seconds=300)
+        console_printer.print_info("\n")
+        assert status == "SUCCEEDED"
+
 
 
 @then("the correct tags are applied to the pdm data")
@@ -190,11 +188,18 @@ def step_impl(context):
         s3_prefix=pdm_output_prefix,
     )
 
-    _ = list(
-        map(
-            object_tagger_helper.verify_s3_object_required_tags,
-            itertools.repeat(published_bucket),
-            s3_keys,
-            itertools.repeat(all_rbac_tags),
-        )
-    )
+    keys_with_tags = [
+        (
+            key,
+            object_tagger_helper.rbac_required_tags(key, tags_dict=all_rbac_tags),
+            aws_helper.get_tags_of_file_in_s3(s3_bucket=published_bucket, s3_key=key)["TagSet"]
+        ) for key in s3_keys
+    ]
+
+    for key, required_tags, actual_tags in keys_with_tags:
+        try:
+            assert object_tagger_helper.aws_tags_are_subset(required_tags, actual_tags)
+        except AssertionError:
+            console_printer.print_bold_text(f"FAILED: {key}")
+            console_printer.print_bold_text(f"FAILED: required: {required_tags}")
+            console_printer.print_bold_text(f"FAILED: actual:   {actual_tags}")

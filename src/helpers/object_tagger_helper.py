@@ -1,3 +1,5 @@
+import logging
+
 from helpers import aws_helper, console_printer
 from typing import List, Dict
 
@@ -18,71 +20,63 @@ def aws_tags_are_subset(
     return True
 
 
-def verify_s3_object_required_tags(s3_bucket, s3_object_key, tags_dict):
+def rbac_required_tags(s3_object_key, tags_dict):
     # infer table/db from s3 object key
-    console_printer.print_info(f"KEY: {s3_object_key}")
     split_string = s3_object_key.split("/")
     if len(split_string) < 3:
         console_printer.print_warning_text(
             f"Key doesn't match pattern: {s3_object_key}"
         )
-        return
+        return []
 
-    # cater for keys ending "_$folder$"
+    # replace keys ending "_$folder$"
     if split_string[-1].endswith("_$folder$"):
         split_string[-1] = split_string[-1][0:-9]
 
-    # replace any strings ending `.db`
-    if any(".db" in item for item in split_string):
-        for index, value in enumerate(split_string):
-            split_string[index] = (
-                value.replace(".db", "") if value.endswith(".db") else value
-            )
+    # replace any substrings ending ".db"
+    for index, value in enumerate(split_string):
+        split_string[index] = (
+            value.replace(".db", "") if value.endswith(".db") else value
+        )
 
     db_name = None
     table_name = None
 
-    # check if 2nd last string is in dict of DBs
-    for i in range(2, 5):
-        if split_string[-i] in tags_dict:
-            db_name = split_string[-i]
-            table_name = split_string[-(i - 1)]
-            break
+    # check strings backwards from second-last component for match in rbac csv
+    try:
+        for i in range(2, 5):
+            if split_string[-i] in tags_dict:
+                db_name = split_string[-i]
+                table_name = split_string[-(i - 1)]
+                break
+        if not (table_name and db_name):
+            raise
+    except Exception as e:
+        logging.warning(f"Caught exception while inferring db name: {e}")
+        return []
 
-    console_printer.print_info(f"DB: {db_name} | TABLE: {table_name}")
     if not (table_name and db_name):
         console_printer.print_warning_text(
             f"Couldn't identify db/table names from key: {s3_object_key}"
         )
-        return
+        return []
 
-    if db_name not in tags_dict:
-        console_printer.print_warning_text(
-            f"db '{db_name}' not found in classification csv"
-        )
-        return
     elif table_name not in tags_dict[db_name]:
         console_printer.print_warning_text(
             f"table '{table_name}' not found in classification csv"
         )
-        return
+        return [
+            {"Key": "table", "Value": table_name},
+            {"Key": "db", "Value": db_name},
+            {"Key": "pii", "Value": ""},
+        ]
 
     else:
-        required_tags_list = [
+        return [
             {"Key": "table", "Value": table_name},
             {"Key": "db", "Value": db_name},
             {"Key": "pii", "Value": tags_dict[db_name][table_name]},
         ]
-
-        aws_object_tags_list = aws_helper.get_tags_of_file_in_s3(
-            s3_bucket=s3_bucket,
-            s3_key=s3_object_key,
-        ).get("TagSet")
-
-        assert aws_tags_are_subset(
-            subset=required_tags_list,
-            superset=aws_object_tags_list,
-        )
 
 
 def get_rbac_csv_tags(rbac_csv_s3_bucket: str, rbac_csv_s3_key: str):

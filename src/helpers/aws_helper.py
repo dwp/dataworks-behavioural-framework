@@ -1956,6 +1956,23 @@ def trigger_batch_job(
     return response["jobId"]
 
 
+def poll_batch_queue_for_job(
+    job_queue_name: str,
+    timeout_in_seconds=None,
+):
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+    while timeout_time is None or timeout_time > time.time():
+        response = client.list_jobs(jobQueue=job_queue_name)
+        if len(response["jobSummaryList"]) > 0:
+            return [job["jobId"] for job in response["jobSummaryList"]]
+        else:
+            console_printer.print_info("Waiting for batch job to be submitted")
+            time.sleep(5)
+            continue
+    raise AssertionError("Timed out waiting for batch job to be submitted")
+
+
 def poll_batch_job_status(
     job_id,
     timeout_in_seconds=None,
@@ -1963,13 +1980,13 @@ def poll_batch_job_status(
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
 
-    while timeout_time is None or timeout_time < time.time():
+    while timeout_time is None or timeout_time > time.time():
         response = client.describe_jobs(jobs=[job_id])
         status = response["jobs"][0]["status"]
+        console_printer.print_info(f"Job status: {status}")
         if status in ["FAILED", "SUCCEEDED"]:
             return status
         else:
-            console_printer.print_info(f"Job status: {status}")
             time.sleep(5)
 
     raise AssertionError(f"Timed out waiting for batch job in queue")
