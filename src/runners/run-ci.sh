@@ -270,8 +270,8 @@ function execute_behave() {
 
     if [[ ! -z "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" && "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" != "${NOT_SET_FLAG}" ]]; then
         echo "Using ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} ..."
-        PDM_DATA_CLASSIFICATION_CSV_KEY="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value.config_prefix" )/$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value.config_file")"
-        PDM_DATA_PREFIX="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value.data_s3_prefix")"
+        UC_FEATURE_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".uc_feature_object_tagger_data_classification.value")"
+        PDM_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value")"
     else
         echo "Skipping TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
     fi
@@ -550,7 +550,8 @@ function execute_behave() {
     -D AWS_REGION_MAIN="${AWS_REGION_MAIN}" \
     -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}" \
     -D PDM_DATA_CLASSIFICATION_CSV_KEY="${PDM_DATA_CLASSIFICATION_CSV_KEY}" \
-    -D PDM_DATA_PREFIX="${PDM_DATA_PREFIX}" \
+    -D UC_FEATURE_DATA_CLASSIFICATION="${UC_FEATURE_DATA_CLASSIFICATION}" \
+    -D PDM_DATA_CLASSIFICATION="${PDM_DATA_CLASSIFICATION}" \
     -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
 
     export test_exit_code=$?
