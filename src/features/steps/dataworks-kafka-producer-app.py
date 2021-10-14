@@ -8,11 +8,12 @@ from helpers import aws_helper, dataworks_kafka_producer_helper
 
 @given("the e2e kafka producer app is running")
 def step_impl(context):
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-producer")
+
     # Start kafka producer
     linux_command = "nohup sh /home/ec2-user/kafka/run_e2e.sh &"
-    aws_helper.execute_linux_command(
-        context.dataworks_kafka_producer_instance, linux_command
-    )
+    aws_helper.execute_linux_command(instance_id, linux_command)
 
 
 @when("an encrypted json file '{file_name}' is uploaded to S3 location")
@@ -49,9 +50,10 @@ def step_impl(context, file_name):
 
 @then("the last offset should be incremented by '{expected_lag}'")
 def step_impl(context, expected_lag):
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-producer")
+
     linux_command = "sh /home/ec2-user/kafka/utils/run_get_topic_last_offset.sh"
-    response = aws_helper.execute_linux_command(
-        context.dataworks_kafka_producer_instance, linux_command
-    )
+    response = aws_helper.execute_linux_command(instance_id, linux_command)
     actual_lag = response["StandardOutputContent"].rstrip()
     assert actual_lag == expected_lag

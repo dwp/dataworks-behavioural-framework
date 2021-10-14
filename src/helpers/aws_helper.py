@@ -1990,3 +1990,16 @@ def poll_batch_job_status(
             time.sleep(5)
 
     raise AssertionError(f"Timed out waiting for batch job in queue")
+
+
+def get_instance_id(instance_name, region_name="eu-west-2"):
+    service_name = "ec2"
+    client = get_client(service_name=service_name, region=region_name)
+    filters = [
+        {"Name": "tag:Name", "Values": [instance_name]},
+        {"Name": "instance-state-name", "Values": ["running"]},
+    ]
+
+    response = client.describe_instances(Filters=filters)
+    instance_id = response["Reservations"][0]["Instances"][0]["InstanceId"]
+    return instance_id
