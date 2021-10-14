@@ -2,7 +2,7 @@
 
 test_run_id="${1:-NOT_SET}"
 test_run_type="work-in-progress"
-feature_tag="@work-in-progress"
+feature_tag="@dataworks-kafka-producer-app"
 mongo_import_key="NOT_SET"
 number_of_topics=3
 
