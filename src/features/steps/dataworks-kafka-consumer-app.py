@@ -32,7 +32,9 @@ def step_impl(context, file_name):
         linux_command = (
             f"sh /home/ec2-user/kafka/utils/e2e_publish_msg.sh {message_str}"
         )
-        response = aws_helper.execute_linux_command(instance_id=instance_id, linux_command=linux_command)
+        response = aws_helper.execute_linux_command(
+            instance_id=instance_id, linux_command=linux_command
+        )
 
 
 @then("the consumer should write '{expected_file_count}' files to the S3 bucket")
