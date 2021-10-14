@@ -11,9 +11,10 @@ def step_impl(context, data_product):
     if data_product in ["pdm", "uc_feature"]:
         job_queue_name = data_product + "_object_tagger"
     else:
-        raise AssertionError(f"Data product {data_product} not defined in step"
-                             f" 'the {{data_product}} object_tagger has run"
-                             f" successfully'")
+        raise AssertionError(
+            f"Data product {data_product} not defined in step 'the {{data_product}}"
+            f" object_tagger has run successfully'"
+        )
 
     job_ids = aws_helper.poll_batch_queue_for_job(
         job_queue_name=job_queue_name,
@@ -39,14 +40,14 @@ def step_impl(context, data_product):
     elif data_product == "pdm":
         configuration = json.loads(context.pdm_data_classification)
     else:
-        raise AssertionError(f"Data product not defined under step"
-                             f" 'the correct tags are applied to the"
-                             f" {{data_product}} data'")
+        raise AssertionError(
+            f"Data product not defined under step 'the correct tags are applied to the"
+            f" {{data_product}} data'"
+        )
 
     output_prefix = configuration["data_s3_prefix"]
     rbac_file_path = os.path.join(
-        configuration["config_prefix"],
-        configuration["config_file"]
+        configuration["config_prefix"], configuration["config_file"]
     )
     if not output_prefix[-1] == "/":
         output_prefix += "/"
@@ -72,7 +73,6 @@ def step_impl(context, data_product):
     ]
 
     for key, required_tags, actual_tags in keys_with_tags:
-        console_printer.print_info(
-            f"key: {key}\nrequired: {required_tags}\nactual:{actual_tags}")
-        assert object_tagger_helper.aws_tags_are_subset(required_tags,
-                                                        actual_tags), "Required tags not applied to s3 objects"
+        assert object_tagger_helper.aws_tags_are_subset(
+            required_tags, actual_tags
+        ), "Required tags not applied to s3 objects"
