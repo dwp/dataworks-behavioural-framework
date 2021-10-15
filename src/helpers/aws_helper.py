@@ -1,25 +1,21 @@
-import ast
+import base64
 import decimal
 import json
-import base64
-import logging
-
-import time
 import os
 import re
+import time
 import uuid
-import boto3
-from botocore.exceptions import ClientError
-from boto3.exceptions import S3UploadFailedError
-from boto3.dynamodb.conditions import Key, And
-from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
-from exceptions import aws_exceptions
 from functools import reduce
-from pprint import pprint
+from typing import List
+
+import boto3
+from boto3.dynamodb.conditions import Key, And
+from boto3.exceptions import S3UploadFailedError
 from botocore.config import Config
-from helpers import invoke_lambda, template_helper, file_helper, console_printer
-import typing
+from botocore.exceptions import ClientError
+
+from helpers import invoke_lambda, template_helper, console_printer
 
 aws_role_arn = None
 aws_profile = None
@@ -1958,14 +1954,24 @@ def trigger_batch_job(
 
 def poll_batch_queue_for_job(
     job_queue_name: str,
+    job_definition_names: List[str],
     timeout_in_seconds=None,
 ):
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
     while timeout_time is None or timeout_time > time.time():
-        response = client.list_jobs(jobQueue=job_queue_name)
-        if len(response["jobSummaryList"]) > 0:
-            return [job["jobId"] for job in response["jobSummaryList"]]
+        response = client.list_jobs(
+            jobQueue=job_queue_name,
+            filters=[{"name": "jobDefinition", "values": job_definition_names}],
+        )
+        active_job_list = [
+            job
+            for job in response["jobSummaryList"]
+            if job["status"] not in ["FAILED", "SUCCEEDED"]
+        ]
+
+        if len(active_job_list) > 0:
+            return active_job_list
         else:
             console_printer.print_info("Waiting for batch job to be submitted")
             time.sleep(5)
