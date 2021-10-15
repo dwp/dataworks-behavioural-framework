@@ -1,26 +1,21 @@
-import ast
+import base64
 import decimal
 import json
-import base64
-import logging
-from typing import List
-
-import time
 import os
 import re
+import time
 import uuid
-import boto3
-from botocore.exceptions import ClientError
-from boto3.exceptions import S3UploadFailedError
-from boto3.dynamodb.conditions import Key, And
-from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
-from exceptions import aws_exceptions
 from functools import reduce
-from pprint import pprint
+from typing import List
+
+import boto3
+from boto3.dynamodb.conditions import Key, And
+from boto3.exceptions import S3UploadFailedError
 from botocore.config import Config
-from helpers import invoke_lambda, template_helper, file_helper, console_printer
-import typing
+from botocore.exceptions import ClientError
+
+from helpers import invoke_lambda, template_helper, console_printer
 
 aws_role_arn = None
 aws_profile = None
