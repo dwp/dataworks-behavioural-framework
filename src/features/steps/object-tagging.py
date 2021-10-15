@@ -19,7 +19,7 @@ def step_impl(context, data_product):
     job_ids = aws_helper.poll_batch_queue_for_job(
         job_queue_name=job_queue_name,
         timeout_in_seconds=300,
-        job_definition_names=["s3_object_tagger_job"]
+        job_definition_names=["s3_object_tagger_job"],
     )
     if len(job_ids) > 1:
         console_printer.print_warning_text(
