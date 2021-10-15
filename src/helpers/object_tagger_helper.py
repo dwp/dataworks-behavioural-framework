@@ -49,8 +49,6 @@ def rbac_required_tags(s3_object_key, tags_dict):
                 db_name = split_string[-i]
                 table_name = split_string[-(i - 1)]
                 break
-        if not (table_name and db_name):
-            raise
     except Exception as e:
         logging.warning(f"Caught exception while inferring db name: {e}")
         return []
