@@ -1962,10 +1962,10 @@ def poll_batch_queue_for_job(
     while timeout_time is None or timeout_time > time.time():
         response = client.list_jobs(
             jobQueue=job_queue_name,
-            filters=[{"name": "jobDefinition", "values": job_definition_names}],
+            filters=[{"name": "JOB_DEFINITION", "values": job_definition_names}],
         )
         active_job_list = [
-            job
+            job["jobId"]
             for job in response["jobSummaryList"]
             if job["status"] not in ["FAILED", "SUCCEEDED"]
         ]
