@@ -19,9 +19,9 @@ def json_element(journal_id):
     element = {
         "journal_id": str(journal_id),
         "flagged": "yes",
-        "timestamp": datetime.today().strftime('%d%m%Y'),
+        "timestamp": datetime.today().strftime("%d%m%Y"),
         "modelIdentifier": "v1",
-        "modelRunDate": "01062021"
+        "modelRunDate": "01062021",
     }
 
     return json.dumps(element)
@@ -54,11 +54,14 @@ def upload_file_to_s3(context, data_obj, data_key, file_counter):
 
 
 def get_message_count_old(context):
-    client = aws_helper.get_client('sqs')
-    queue_url = client.get_queue_url(QueueName=context.dataworks_model_sqs_queue)['QueueUrl']
-    response = client.get_queue_attributes(QueueUrl=queue_url, AttributeNames=['All'])
-    message_count = response['Attributes']['ApproximateNumberOfMessages']
+    client = aws_helper.get_client("sqs")
+    queue_url = client.get_queue_url(QueueName=context.dataworks_model_sqs_queue)[
+        "QueueUrl"
+    ]
+    response = client.get_queue_attributes(QueueUrl=queue_url, AttributeNames=["All"])
+    message_count = response["Attributes"]["ApproximateNumberOfMessages"]
     return message_count
+
 
 def get_message_count(context):
     instance_id = aws_helper.get_instance_id("dataworks-kafka-producer")

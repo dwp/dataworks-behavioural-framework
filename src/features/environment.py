@@ -460,7 +460,7 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_output, context)
     if tag == "fixture.s3.clear.cyi.test.output":
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
-    if tag== "fixture.init.e2e.dataworks.kafka.producer.perf.test":
+    if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
 
 

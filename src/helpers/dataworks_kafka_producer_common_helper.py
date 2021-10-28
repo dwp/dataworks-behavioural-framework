@@ -61,4 +61,6 @@ def dataworks_stop_kafka_producer_app(context):
         instance_id=instance_id,
         linux_command=linux_command,
     )
-    console_printer.print_info("Executing 'stop_kafka_producer_app' fixture....complete")
+    console_printer.print_info(
+        "Executing 'stop_kafka_producer_app' fixture....complete"
+    )

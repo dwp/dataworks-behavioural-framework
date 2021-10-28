@@ -208,6 +208,7 @@ def terminate_cyi_cluster(context, timeout=30, **kwargs):
 def dataworks_stop_kafka_producer_app(context):
     dataworks_kafka_producer_common_helper.dataworks_stop_kafka_producer_app(context)
 
+
 @fixture
 def dataworks_stop_kafka_consumer_app(context):
     console_printer.print_info("Executing 'stop_kafka_consumer_app' fixture")
