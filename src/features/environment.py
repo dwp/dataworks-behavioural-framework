@@ -460,6 +460,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_output, context)
     if tag == "fixture.s3.clear.cyi.test.output":
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
+    if tag== "fixture.init.e2e.dataworks.kafka.producer.perf.test":
+        use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
 
 
 def after_all(context):
@@ -565,3 +567,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
         use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)
+    if tag == "fixture.stop.e2e.dataworks.kafka.producer.perf.test":
+        use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
