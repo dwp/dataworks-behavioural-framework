@@ -567,5 +567,3 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
         use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)
-    if tag == "fixture.stop.e2e.dataworks.kafka.producer.perf.test":
-        use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
