@@ -4,13 +4,17 @@ import time
 from behave import given, when, then
 from datetime import datetime
 
-from helpers import (aws_helper,
-                     dataworks_kafka_producer_perf_test_helper,
-                     dataworks_kafka_producer_common_helper,
-                     console_printer)
+from helpers import (
+    aws_helper,
+    dataworks_kafka_producer_perf_test_helper,
+    dataworks_kafka_producer_common_helper,
+    console_printer,
+)
 
 
-@given("'{file_count}' encrypted json file(s) with '{messages_per_file}' messages are available in S3 location")
+@given(
+    "'{file_count}' encrypted json file(s) with '{messages_per_file}' messages are available in S3 location"
+)
 def step_impl(context, file_count, messages_per_file):
     # Initialise test scenario
     console_printer.print_info("Initialise scenario....")
@@ -19,19 +23,24 @@ def step_impl(context, file_count, messages_per_file):
 
     # Generate test data object
     console_printer.print_info("Generating data file object")
-    data_obj = dataworks_kafka_producer_perf_test_helper.create_data_file(int(messages_per_file))
+    data_obj = dataworks_kafka_producer_perf_test_helper.create_data_file(
+        int(messages_per_file)
+    )
     console_printer.print_info(f"Generating data file object...complete")
     # Get data key
     data_key = base64.b64decode(context.encryption_plaintext_key)
 
     # Upload files to S3
-    console_printer.print_info(f"Uploading files to S3: {context.dataworks_model_output_s3_bucket}")
+    console_printer.print_info(
+        f"Uploading files to S3: {context.dataworks_model_output_s3_bucket}"
+    )
     for file_counter in range(int(file_count)):
-        dataworks_kafka_producer_perf_test_helper.upload_file_to_s3(context=context,
-                                                                    file_counter=file_counter,
-                                                                    data_obj=data_obj,
-                                                                    data_key=data_key
-                                                                    )
+        dataworks_kafka_producer_perf_test_helper.upload_file_to_s3(
+            context=context,
+            file_counter=file_counter,
+            data_obj=data_obj,
+            data_key=data_key,
+        )
     console_printer.print_info("Uploading files to S3...complete")
     time.sleep(10)
 
@@ -45,7 +54,9 @@ def step_impl(context):
     linux_command = "nohup sh /home/ec2-user/kafka/run_e2e.sh &"
     aws_helper.execute_linux_command(instance_id, linux_command)
     context.start_ts = datetime.now()
-    console_printer.print_info(f"Start time for processing files:{datetime.today().strftime('%d-%m-%Y %H:%M:%S')}")
+    console_printer.print_info(
+        f"Start time for processing files:{datetime.today().strftime('%d-%m-%Y %H:%M:%S')}"
+    )
     time.sleep(10)
 
 
@@ -56,9 +67,11 @@ def step_impl(context, expected_message_count):
     console_printer.print_info(f"Messages in kafka topic: {actual_offset}")
 
     # Loop till all the messages have been processed. Offsets start from 0
-    while actual_offset < int(expected_message_count)-1:
+    while actual_offset < int(expected_message_count) - 1:
         # Get message count
-        actual_offset = dataworks_kafka_producer_perf_test_helper.get_message_count(context)
+        actual_offset = dataworks_kafka_producer_perf_test_helper.get_message_count(
+            context
+        )
         console_printer.print_info(f"Messages in kafka topic: {actual_offset}")
         time.sleep(20)
 
