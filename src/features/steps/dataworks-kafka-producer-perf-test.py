@@ -66,13 +66,12 @@ def step_impl(context, expected_message_count):
 
     # Compute time in seconds to process all the files
     time_taken = end_ts - context.start_ts
-    console_printer.print_info(f"End time time for processing files:{datetime.today().strftime('%d-%m-%Y %H:%M:%S')}")
+    console_printer.print_info(
+        f"End time time for processing files:{datetime.today().strftime('%d-%m-%Y %H:%M:%S')}"
+    )
     console_printer.print_info("All data files have now been processed")
     console_printer.print_info(f"Time taken to process: {time_taken}")
     time.sleep(10)
 
     # Stop application after tests have run
     dataworks_kafka_producer_common_helper.dataworks_stop_kafka_producer_app(context)
-
-
-
