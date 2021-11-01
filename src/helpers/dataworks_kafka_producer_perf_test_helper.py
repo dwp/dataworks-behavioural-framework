@@ -52,12 +52,13 @@ def upload_file_to_s3(context, data_obj, data_key, file_counter):
     )
     console_printer.print_info(f"Uploading file to S3: {object_key}...complete")
 
+
 def get_message_count(context):
     instance_id = aws_helper.get_instance_id("dataworks-kafka-producer")
 
     linux_command = "sh /home/ec2-user/kafka/utils/run_get_topic_last_offset.sh"
     response = aws_helper.execute_linux_command(instance_id, linux_command)
     message_count = response["StandardOutputContent"].rstrip()
-    if message_count == '':
-        message_count = '0'
+    if message_count == "":
+        message_count = "0"
     return int(message_count)
