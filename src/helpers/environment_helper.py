@@ -328,6 +328,8 @@ def set_test_run_common_variables(context):
     )
     context.published_bucket = context.config.userdata.get("AWS_PUBLISHED_BUCKET")
 
+    context.processed_bucket = context.config.userdata.get("AWS_PROCESSED_BUCKET")
+
     context.ingest_hbase_emr_cluster_id = context.config.userdata.get(
         "INGEST_HBASE_EMR_CLUSTER_ID"
     )
