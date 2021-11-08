@@ -187,7 +187,7 @@ function execute_behave() {
         INGEST_HBASE_EMR_CLUSTER_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.cluster_id')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_BUCKET_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_bucket')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_ROOT_DIRECTORY="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_directory')"
-        
+
         MONITORING_SNS_TOPIC_ARN="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.sns_topics.value.london_monitoring.arn')"
         MONGO_SNAPSHOT_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_bucket.value.id')"
         MONGO_SNAPSHOT_PATH="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_folder.value.id')"
@@ -218,6 +218,7 @@ function execute_behave() {
 
     if [[ ! -z "${TF_COMMON_OUTPUT_FILE}" && "${TF_COMMON_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
+        AWS_PROCESSED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.processed_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
         ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
