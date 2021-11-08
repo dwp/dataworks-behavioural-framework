@@ -12,6 +12,12 @@ Feature: Administrative processes and workflows
     Given Snapshot sender is scaled if it will be triggered for snapshot type of 'incremental'
     When The export process is performed with default settings for snapshot type of 'incremental'
 
+  @admin-generate-drift-testing-incremental-snapshots
+  @fixture.htme.start.drift.testing.incremental
+  Scenario: Start an export from HBase to snapshot files on S3 for the incremental snapshot topics
+    Given Snapshot sender is scaled if it will be triggered for snapshot type of 'drift_testing_incremental'
+    When The export process is performed with default settings for snapshot type of 'drift_testing_incremental'
+
   @admin-send-full-snapshots-to-crown
   @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 full snapshots to Crown
@@ -21,6 +27,11 @@ Feature: Administrative processes and workflows
   @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 incremental snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'incremental'
+
+  @admin-send-drift-testing-incremental-snapshots-to-crown
+  @fixture.snapshot.sender.start.max
+  Scenario: Start the sending of S3 incremental snapshots to Crown
+    When The snapshot sending process is performed with default settings for snapshot type of 'drift_testing_incremental'
 
   @admin-scale-down-hdi
   @fixture.hdi.stop
@@ -78,6 +89,6 @@ Feature: Administrative processes and workflows
     Then The asg has scaled correctly
 
   @admin-scale-down-ingestion-ecs-cluster
-  @fixture.ingestion.ecs.cluster.stop
+  @fixture.ingest.ecs.cluster.stop
   Scenario: Stop the Ingestion ECS cluster instances
     Then The asg has scaled correctly

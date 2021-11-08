@@ -23,3 +23,7 @@ Feature: Comparison of the manifests from import and export
     When I generate the manifest comparison queries of type 'specific'
     And I run the manifest comparison queries of type 'specific' and upload the result to S3
     Then The query results are printed
+
+  @kafka-reconciliation-start
+  Scenario: The kafka reconciliation is started
+    When I start the kafka reconciliation

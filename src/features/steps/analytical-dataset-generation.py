@@ -43,6 +43,7 @@ ADG_FULL_TOPICS = [
     "db.core.toDo",
     "db.accepted-data.personDetails",
     "db.appointments.appointment",
+    "db.claimant-history.claimHistoryEntry",
 ]
 
 ADG_INCREMENTAL_TOPICS = [
@@ -59,7 +60,15 @@ ADG_INCREMENTAL_TOPICS = [
     "data.businessAudit",
 ]
 
-ADG_DB_COLLECTION = {
+ADG_FULL_DB_COLLECTION = {
+    "agent-core": ["agent", "agentToDo", "team"],
+    "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
+    "accepted-data": ["personDetails"],
+    "appointments": ["appointment"],
+    "claimant-history": ["claimHistoryEntry"],
+}
+
+ADG_INCREMENTAL_DB_COLLECTION = {
     "agent-core": ["agent", "agentToDo", "team"],
     "core": ["statement", "contract", "claimant", "claimantCommitment", "toDo"],
     "accepted-data": ["personDetails"],
@@ -166,95 +175,6 @@ def step_(context, snapshot_type, step_name):
             )
 
 
-@then("insert the '{step_name}' step onto the cluster")
-def step_impl(context, step_name):
-    context.adg_cluster_step_name = step_name
-    file_name = f"{context.test_run_name}.csv"
-    adg_hive_export_bash_command = (
-        f"hive -e 'SELECT * FROM uc_mongo_latest.statement_fact_v;' >> ~/{file_name} && "
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
-        + f" &>> /var/log/adg/e2e.log"
-    )
-
-    context.adg_cluster_step_id = emr_step_generator.generate_bash_step(
-        context.adg_cluster_id,
-        adg_hive_export_bash_command,
-        context.adg_cluster_step_name,
-    )
-    context.adg_results_s3_file = os.path.join(
-        context.mongo_latest_test_query_output_folder, file_name
-    )
-
-
-@then("insert the dynamodb check query step onto the cluster")
-def step_impl(context):
-    context.adg_ddb_cluster_step_name = "dynamodb_check_query"
-    file_name = f"{context.test_run_name}_ddb.csv"
-    adg_hive_export_bash_command = (
-        f"""hive -e "USE AUDIT; SHOW TABLES LIKE 'data_pipeline_metadata_hive';" >> ~/{file_name} && """
-        + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.mongo_latest_test_query_output_folder}/"
-        + f" &>> /var/log/adg/e2e.log"
-    )
-
-    context.adg_ddb_cluster_step_id = emr_step_generator.generate_bash_step(
-        context.adg_cluster_id,
-        adg_hive_export_bash_command,
-        context.adg_ddb_cluster_step_name,
-    )
-    context.adg_ddb_results_s3_file = os.path.join(
-        context.mongo_latest_test_query_output_folder, file_name
-    )
-
-
-@then("wait a maximum of '{timeout_mins}' minutes for the last step to finish")
-def step_impl(context, timeout_mins):
-    timeout_secs = int(timeout_mins) * 60
-    execution_state = aws_helper.poll_emr_cluster_step_status(
-        context.adg_ddb_cluster_step_id, context.adg_cluster_id, timeout_secs
-    )
-
-    if execution_state != "COMPLETED":
-        raise AssertionError(
-            f"'{context.adg_cluster_step_name}' step failed with final status of '{execution_state}'"
-        )
-
-
-@then(
-    "the Mongo-Latest result for step '{step_name}' matches the expected results of '{expected_result_file_name}'"
-)
-def step_(context, expected_result_file_name, step_name):
-    remote_file = (
-        context.adg_results_s3_file
-        if step_name == "hive-query"
-        else context.adg_ddb_results_s3_file
-    )
-    console_printer.print_info(f"S3 Request Location: {remote_file}")
-    actual = (
-        aws_helper.get_s3_object(None, context.published_bucket, remote_file)
-        .decode("ascii")
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
-    )
-
-    expected_file_name = os.path.join(
-        context.fixture_path_local,
-        "mongo_latest",
-        "expected",
-        expected_result_file_name,
-    )
-    expected = (
-        file_helper.get_contents_of_file(expected_file_name, False)
-        .replace("\t", "")
-        .replace(" ", "")
-        .strip()
-    )
-
-    assert (
-        expected == actual
-    ), f"Expected result of '{expected}', does not match '{actual}'"
-
-
 @then("read metadata of the analytical data sets from the path '{metadata_path}'")
 def step_analytical_datasets_metadata(context, metadata_path):
     content = aws_helper.retrieve_files_from_s3(context.published_bucket, metadata_path)
@@ -275,8 +195,10 @@ def step_verify_analytical_datasets(context, snapshot_type):
     console_printer.print_info(f"Keys in data location : {keys}")
     if snapshot_type == "full":
         ADG_TOPICS = ADG_FULL_TOPICS
+        ADG_DB_COLLECTION = ADG_FULL_DB_COLLECTION
     else:
         ADG_TOPICS = ADG_INCREMENTAL_TOPICS_DATED
+        ADG_DB_COLLECTION = ADG_INCREMENTAL_DB_COLLECTION
     console_printer.print_info(f"keys are : {keys}")
     console_printer.print_info(f"ADG_TOPICS are : {ADG_TOPICS}")
     assert len(keys) == len(ADG_TOPICS)
@@ -358,18 +280,9 @@ def metadata_table_step_impl(context, snapshot_type):
 
     allowed_steps = [
         "spark-submit",
-        "create_pdm_trigger",
         "flush-pushgateway",
         "send_notification",
     ]
-
-    if snapshot_type.lower() == "incremental":
-        allowed_steps = [
-            "create_pdm_trigger",
-            "flush-pushgateway",
-            "executeUpdateAll",
-            "bash",
-        ]
 
     assert item["TimeToExist"]["N"] is not None, f"Time to exist was not set"
     assert (

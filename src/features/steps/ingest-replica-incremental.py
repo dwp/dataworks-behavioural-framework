@@ -1,8 +1,8 @@
 import json
 import re
 import os
-from datetime import datetime, timezone
-
+from uuid import uuid4
+import time
 from behave import given, when, then
 
 from helpers import (
@@ -29,12 +29,15 @@ def step_impl(context):
 
     # generate command(s) to flush data
     command_list = [f"flush '{collection}'" for collection in collections]
-    command_string = 'hbase shell <<< "' + "; ".join(command_list) + '"'
+    hbase_cmd_string = "; ".join(command_list)
+    shell_cmd_string = f'echo -e "{hbase_cmd_string}" | hbase shell -n '
 
     # execute commands using bash step, and wait
     step_name = "flush tables"
     step = emr_step_generator.generate_bash_step(
-        emr_cluster_id=ingest_hbase_id, bash_command=command_string, step_type=step_name
+        emr_cluster_id=ingest_hbase_id,
+        bash_command=shell_cmd_string,
+        step_type=step_name,
     )
     execution_state = aws_helper.poll_emr_cluster_step_status(
         step, ingest_hbase_id, 2500
@@ -56,16 +59,16 @@ def step_impl(context):
 def step_impl(context):
     emr_launcher_config = {
         "s3_overrides": None,
-        "overrides": {"Instances": {"KeepJobFlowAliveWhenNoSteps": True}, "Steps": []},
+        "overrides": {
+            "Name": "intraday-incremental-e2e",
+            "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
+            "Steps": [],
+        },
         "extend": None,
         "additional_step_args": None,
     }
     payload_json = json.dumps(emr_launcher_config)
-    cluster_response = (
-        invoke_lambda.invoke_ingest_replica_incremental_emr_launcher_lambda(
-            payload_json
-        )
-    )
+    cluster_response = invoke_lambda.invoke_intraday_emr_launcher_lambda(payload_json)
 
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
@@ -74,6 +77,45 @@ def step_impl(context):
     cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
     context.ingest_replica_emr_cluster_id = cluster_id
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
+
+
+@given("dynamodb is prepared with collection details")
+def step_impl(context):
+    # context dependencies
+    collections_list = [
+        (topic["topic"].replace("db.", "").replace(".", ":"))
+        for topic in context.topics_for_test
+    ]
+
+    # Get relevant database items
+    database_items = []
+    for collection in collections_list:
+        database_items += aws_helper.scan_dynamodb_with_filters(
+            "intraday-job-status", {"Collection": collection}
+        )
+
+    # Delete relevant database items
+    for item in database_items:
+        aws_helper.delete_item_from_dynamodb(
+            "intraday-job-status",
+            {
+                "CorrelationId": {"S": item["CorrelationId"]},
+                "Collection": {"S": item["Collection"]},
+            },
+        )
+
+    # Create initial records for collections
+    for collection in collections_list:
+        aws_helper.insert_item_to_dynamo_db(
+            table_name="intraday-job-status",
+            item_dict={
+                "CorrelationId": {"S": "000"},
+                "Collection": {"S": collection},
+                "TriggeredTime": {"N": "0"},
+                "ProcessedDataEnd": {"N": "0"},
+                "JobStatus": {"S": "EMR_COMPLETED"},
+            },
+        )
 
 
 @when("The pyspark step is added to the ingest-replica cluster")
@@ -88,13 +130,21 @@ def step_impl(context):
     )
     output_s3_bucket = context.published_bucket
     output_s3_prefix = context.ingest_replica_output_s3_prefix
+    context.database_name = "intraday"
 
     # Add step to cluster
-    command = (
-        "spark-submit /var/ci/generate_dataset_from_hbase.py "
-        f"--collections {collections_spaced} "
-        f"--output_s3_bucket {output_s3_bucket} "
-        f"--output_s3_prefix {output_s3_prefix} "
+    command = " ".join(
+        [
+            "spark-submit /var/ci/generate_dataset_from_hbase.py",
+            f"scheduled",
+            f"--correlation_id {uuid4()}",
+            f"--collections {collections_spaced}",
+            f"--output_s3_bucket {output_s3_bucket}",
+            f"--output_s3_prefix {output_s3_prefix}",
+            f"--triggered_time {int(time.time()*1000)}",
+            f"--database_name {context.database_name}",
+            f"--end_time {int(time.time()*1000)}",
+        ]
     )
 
     step_name = "spark-submit"
@@ -116,6 +166,7 @@ def step_impl(context):
     collections = [collection["topic"] for collection in context.topics_for_test]
     published_bucket = context.published_bucket
     output_s3_prefix = context.ingest_replica_output_s3_prefix
+    database_name = context.database_name
 
     # context outputs
     context.hive_s3_outputs = []
@@ -131,7 +182,7 @@ def step_impl(context):
             file=hive_name,
         )
         hive_export_bash_command = (
-            f"hive -e 'Select * from {hive_name};' >> ~/{hive_name} && "
+            f"hive -e 'Select * from {database_name}.{hive_name};' >> ~/{hive_name} && "
             f"aws s3 cp ~/{hive_name} {s3_file}"
             f" &>> /var/log/e2e.log"
         )
@@ -200,9 +251,7 @@ def step_impl(context):
                 json.loads(line.split("\t")[2]) for line in file_content.split("\n")
             ]
 
-            hive_ids[collection] = {
-                record["message"]["_id"]["e2eId"] for record in hive_records
-            }
+            hive_ids[collection] = {record["_id"]["e2eId"] for record in hive_records}
         else:
             raise AssertionError(f"S3 file {file} not parseable")
 

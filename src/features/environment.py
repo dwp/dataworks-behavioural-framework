@@ -328,10 +328,36 @@ def before_tag(context, tag):
             context,
             "rbac_uc_clive__pii",
         )
+    if tag == "fixture.setup.rbac_uc_equality__pii_user_and_role":
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_equality__pii",
+        )
+    if tag == "fixture.setup.rbac_uc_equality__pii_user":
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc_equality__pii",
+        )
+    if tag == "fixture.setup.rbac_uc_ers__all_user_and_role":
+        use_fixture(
+            before_fixtures.setup_user_and_role,
+            context,
+            "rbac_uc_ers__all",
+        )
+    if tag == "fixture.setup.rbac_uc_ers__all_user":
+        use_fixture(
+            before_fixtures.setup_user,
+            context,
+            "rbac_uc_ers__all",
+        )
     if tag == "fixture.htme.start.full":
         use_fixture(before_fixtures.htme_start_full, context)
     if tag == "fixture.htme.start.incremental":
         use_fixture(before_fixtures.htme_start_incremental, context)
+    if tag == "fixture.htme.start.drift.testing.incremental":
+        use_fixture(before_fixtures.htme_start_drift_testing_incremental, context)
     if tag == "fixture.htme.start.max":
         use_fixture(before_fixtures.htme_start_max, context)
     if tag == "fixture.snapshot.sender.start.max":
@@ -420,8 +446,22 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_published_bucket_pdm_test_output, context)
     if tag == "fixture.s3.clear.clive.output":
         use_fixture(before_fixtures.s3_clear_clive_output, context)
+    if tag == "fixture.s3.clear.uc.feature.output":
+        use_fixture(before_fixtures.s3_clear_uc_feature_output, context)
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
+    if tag == "fixture.init.e2e.dataworks.kafka.producer":
+        use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
+    if tag == "fixture.init.e2e.dataworks.kafka.consumer":
+        use_fixture(before_fixtures.dataworks_init_kafka_consumer, context)
+    if tag == "fixture.s3.clear.cyi.input":
+        use_fixture(before_fixtures.s3_clear_cyi_input, context)
+    if tag == "fixture.s3.clear.cyi.output":
+        use_fixture(before_fixtures.s3_clear_cyi_output, context)
+    if tag == "fixture.s3.clear.cyi.test.output":
+        use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
+    if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
+        use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
 
 
 def after_all(context):
@@ -511,11 +551,19 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_adg_cluster, context)
     if tag == "fixture.terminate.clive.cluster":
         use_fixture(after_fixtures.terminate_clive_cluster, context)
+    if tag == "fixture.terminate.uc.feature.cluster":
+        use_fixture(after_fixtures.terminate_uc_feature_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":
         use_fixture(after_fixtures.terminate_pdm_cluster, context)
     if tag == "fixture.terminate.kickstart.cluster":
         use_fixture(after_fixtures.terminate_kickstart_cluster, context)
     if tag == "fixture.terminate.mongo_latest.cluster":
         use_fixture(after_fixtures.terminate_mongo_latest_cluster, context)
+    if tag == "fixture.terminate.cyi.cluster":
+        use_fixture(after_fixtures.terminate_cyi_cluster, context)
     if tag == "fixture.terminate.ingest_replica.cluster":
         use_fixture(after_fixtures.terminate_ingest_replica_cluster, context)
+    if tag == "fixture.stop.e2e.dataworks.kafka.producer":
+        use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
+    if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
+        use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)

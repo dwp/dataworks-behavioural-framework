@@ -66,6 +66,16 @@ def invoke_clive_emr_launcher_lambda(payload):
     return json.loads(response.decode())
 
 
+def invoke_uc_feature_emr_launcher_lambda(payload):
+    """Triggers uc_feature_emr_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function("uc_feature_emr_launcher", payload)
+    return json.loads(response.decode())
+
+
 def invoke_pdm_emr_launcher_lambda(payload):
     """Triggers pdm_emr_launcher lambda with the given payload.
 
@@ -76,15 +86,13 @@ def invoke_pdm_emr_launcher_lambda(payload):
     return json.loads(response.decode())
 
 
-def invoke_ingest_replica_incremental_emr_launcher_lambda(payload):
+def invoke_intraday_emr_launcher_lambda(payload):
     """Triggers incremental_ingest_replica_emr_launcher lambda with the given payload.
 
     Keyword arguments:
     payload -- the input for the lambda invocation
     """
-    response = aws_helper.invoke_lambda_function(
-        "incremental_ingest_replica_emr_launcher", payload
-    )
+    response = aws_helper.invoke_lambda_function("intraday-emr-launcher", payload)
     return json.loads(response.decode())
 
 
@@ -116,4 +124,14 @@ def invoke_mongo_latest_emr_launcher_lambda(payload):
     payload -- the input for the lambda invocation
     """
     response = aws_helper.invoke_lambda_function("mongo_latest_emr_launcher", payload)
+    return json.loads(response.decode())
+
+
+def invoke_glue_launcher_lambda(payload):
+    """Triggers glue_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function("glue_launcher", payload)
     return json.loads(response.decode())

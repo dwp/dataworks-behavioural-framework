@@ -79,7 +79,7 @@
   "overlappingBenefits": [],
   "totalOtherBenefitsAdjustment": "0",
   "capApplied": null,
-  "type": "CALCULATED",
+  "type": "MANDATORY_RECONSIDERATION",
   "preAdjustmentTotal": "317.82",
   "_entityVersion": 4,
   "_lastModifiedDateTime": {
@@ -89,5 +89,9 @@
   "benefitCapThreshold": null,
   "benefitCapAdjustment": null,
   "gracePeriodEndDate": null,
-  "landlordPayment": "0"
+  "landlordPayment": "0",
+  "uc_feature_string": "uc.agent.claimant.history.refer.hrt.to.decision.maker.nationality",
+  "metaData": {
+    "agentToDoType": "MAKE_A_DECISION_MANDATORY_RECONSIDERATION"
+  }
 }

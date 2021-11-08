@@ -226,6 +226,10 @@ def set_test_run_common_variables(context):
         "HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT"
     ).split("\n")
 
+    default_topic_list_drift_testing_incrementals = context.config.userdata.get(
+        "HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT"
+    ).split("\n")
+
     default_topic_list_full_delimited_with_space = "', '".join(default_topic_list_full)
     collection_list_full = (
         "'" + default_topic_list_full_delimited_with_space.replace("db.", "") + "'"
@@ -242,11 +246,21 @@ def set_test_run_common_variables(context):
         default_topic_list_incrementals
     )
 
+    context.default_topic_list_drift_testing_incrementals = ",".join(
+        default_topic_list_drift_testing_incrementals
+    )
+
     context.export_process_trigger_adg_override = context.config.userdata.get(
         "GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE"
     )
-    context.export_process_trigger_pdm_override = context.config.userdata.get(
-        "GENERATE_SNAPSHOTS_TRIGGER_PDM_OVERRIDE"
+    context.export_process_send_to_ris_override = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_SEND_TO_RIS_OVERRIDE"
+    )
+    context.export_process_clear_s3_snapshots = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_CLEAR_S3_SNAPSHOTS"
+    )
+    context.export_process_clear_s3_manifests = context.config.userdata.get(
+        "GENERATE_SNAPSHOTS_CLEAR_S3_MANIFESTS"
     )
 
     context.generate_snapshots_trigger_snapshot_sender_override = (
@@ -293,6 +307,9 @@ def set_test_run_common_variables(context):
         context.config.userdata.get(
             "CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE"
         )
+    )
+    context.corporate_data_use_split_inputs_override = context.config.userdata.get(
+        "CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE"
     )
 
     context.corporate_data_ingestion_partitions_count_override = (
@@ -380,6 +397,10 @@ def set_test_run_common_variables(context):
     ]
 
     context.cdl_run_script_s3_url = context.config.userdata.get("CDL_RUN_SCRIPT_S3_URL")
+    context.cdl_split_inputs_s3_url = context.config.userdata.get(
+        "CDL_SPLIT_INPUTS_S3_URL"
+    )
+
     context.hdl_run_script_s3_url = context.config.userdata.get("HDL_RUN_SCRIPT_S3_URL")
     context.create_hbase_tables_script_url = context.config.userdata.get(
         "CREATE_HBASE_TABLES_SCRIPT_S3_URL"
@@ -412,6 +433,7 @@ def set_test_run_common_variables(context):
             context.corporate_data_ingestion_skip_later_than_override,
             context.corporate_data_ingestion_partitions_count_override,
             context.corporate_data_prefix_per_execution_count_override,
+            context.corporate_data_use_split_inputs_override,
         )
     )
 
@@ -431,6 +453,9 @@ def set_test_run_common_variables(context):
 
     context.ucfs_claimant_domain_name = context.config.userdata.get(
         "UCFS_CLAIMANT_DOMAIN_NAME"
+    )
+    context.ucfs_claimant_active_region = context.config.userdata.get(
+        "UCFS_CLAIMANT_API_ACTIVE_REGION"
     )
     context.ucfs_claimant_api_path_v1_get_award_details = context.config.userdata.get(
         "UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS"
@@ -468,13 +493,65 @@ def set_test_run_common_variables(context):
 
     context.clive_test_input_s3_prefix = "e2e-test-clive-dataset"
 
+    context.cyi_test_output_s3_prefix = "e2e-test-cyi-dataset"
+
     context.clive_output_s3_prefix = "data/uc_clive"
 
-    context.ingest_replica_output_s3_prefix = "intra-day-tests"
+    context.cyi_output_s3_prefix = "data/cyi"
 
+    context.cyi_input_s3_prefix = "cyi"
+
+    context.uc_feature_test_input_s3_prefix = "e2e-test-uc-feature-dataset"
+
+    context.uc_feature_output_s3_prefix = "data/uc_feature"
+
+    context.ingest_replica_output_s3_prefix = "intraday"
+
+    context.dataworks_model_output_s3_bucket = context.config.userdata.get(
+        "DATAWORKS_MODEL_OUTPUT_BUCKET"
+    )
+
+    context.dataworks_model_output_s3_prefix = "e2e"
+
+    context.dataworks_model_sqs_queue = context.config.userdata.get(
+        "DATAWORKS_MODEL_OUTPUT_SQS"
+    )
+
+    context.dataworks_kafka_producer_instance = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER"
+    )
+
+    context.dataworks_kafka_dlq_consumer_instance = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER"
+    )
+
+    context.dataworks_dlq_output_s3_prefix = "e2e"
+
+    context.dataworks_kafka_dlq_output_bucket = context.config.userdata.get(
+        "DATAWORKS_DLQ_OUTPUT_BUCKET"
+    )
+
+    context.dataworks_streams_kafka_producer_hsm_key_id = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_KEY_ID"
+    )
+
+    context.dataworks_streams_kafka_producer_hsm_pub_key = context.config.userdata.get(
+        "DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_PUB_KEY"
+    )
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
+    )
+
+    context.uc_feature_data_classification = context.config.userdata.get(
+        "UC_FEATURE_DATA_CLASSIFICATION"
+    )
+    context.pdm_data_classification = context.config.userdata.get(
+        "PDM_DATA_CLASSIFICATION"
+    )
+
+    context.common_config_bucket = context.config.userdata.get(
+        "DATAWORKS_COMMON_CONFIG_BUCKET"
     )
 
 

@@ -31,6 +31,7 @@ def step_impl(context, snapshot_type):
             snapshot_type,
             context.default_topic_list_full_delimited,
             context.default_topic_list_incremental_delimited,
+            context.default_topic_list_drift_testing_incrementals,
             [context.generate_snapshots_topics_override],
         )
 
@@ -56,6 +57,7 @@ def step_impl(context, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [context.generate_snapshots_topics_override],
     )
     start_time = (
@@ -100,8 +102,11 @@ def step_impl(context, snapshot_type):
         snapshot_type,
         correlation_id,
         context.export_process_trigger_adg_override,
-        context.export_process_trigger_pdm_override,
+        context.export_process_send_to_ris_override,
         context.generate_snapshots_export_date_override,
+        context.export_process_clear_s3_snapshots,
+        context.export_process_clear_s3_manifests,
+        "false",
         mongo_snapshot_full_s3_location,
     )
 
@@ -124,8 +129,11 @@ def step_impl(context, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
-        context.export_process_trigger_pdm_override,
+        context.export_process_send_to_ris_override,
         context.generate_snapshots_export_date_override,
+        context.export_process_clear_s3_snapshots,
+        context.export_process_clear_s3_manifests,
+        "false",
     )
 
 
@@ -146,8 +154,11 @@ def step_impl(context, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
-        context.export_process_trigger_pdm_override,
+        context.export_process_send_to_ris_override,
         context.generate_snapshots_export_date_override,
+        context.export_process_clear_s3_snapshots,
+        context.export_process_clear_s3_manifests,
+        "false",
     )
 
 
@@ -169,8 +180,11 @@ def step_impl(context, start_timestamp, end_timestamp, snapshot_type):
             context.test_run_name, snapshot_type
         ),
         context.export_process_trigger_adg_override,
-        context.export_process_trigger_pdm_override,
+        context.export_process_send_to_ris_override,
         context.generate_snapshots_export_date_override,
+        context.export_process_clear_s3_snapshots,
+        context.export_process_clear_s3_manifests,
+        "true",
     )
 
 
@@ -186,6 +200,7 @@ def step_impl(context, statuses, snapshot_type):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.send_snapshots_topics_override,
             context.generate_snapshots_topics_override,

@@ -1,23 +1,21 @@
-import ast
+import base64
 import decimal
 import json
-import base64
-import time
 import os
 import re
+import time
 import uuid
-import boto3
-from botocore.exceptions import ClientError
-from boto3.exceptions import S3UploadFailedError
-from boto3.dynamodb.conditions import Key, And
-from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
-from exceptions import aws_exceptions
 from functools import reduce
-from pprint import pprint
+from typing import List
+
+import boto3
+from boto3.dynamodb.conditions import Key, And
+from boto3.exceptions import S3UploadFailedError
 from botocore.config import Config
-from helpers import invoke_lambda, template_helper, file_helper, console_printer
-import typing
+from botocore.exceptions import ClientError
+
+from helpers import invoke_lambda, template_helper, console_printer
 
 aws_role_arn = None
 aws_profile = None
@@ -858,21 +856,30 @@ def put_object_in_s3(body, s3_bucket, s3_key):
     s3_client.put_object(Body=body, Bucket=s3_bucket, Key=s3_key)
 
 
-def send_message_to_sqs(queue_url, message_body):
+def send_message_to_sqs(queue_url, message_body, message_group_id=None):
     """Post a message to an SQS queue.
 
     Keyword arguments:
     queue_url -- the url of the sqs queue to send the message to
     message_body -- the string body for the message
+    message_group_id -- if not None, then uses this message group
     """
     console_printer.print_info(
         f"Sending message to sqs: '{message_body}' on queue '{queue_url}'"
     )
     sqs_client = get_client(service_name="sqs")
-    sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=message_body,
-    )
+
+    if message_group_id is not None:
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=message_body,
+            MessageGroupId=message_group_id,
+        )
+    else:
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=message_body,
+        )
 
 
 def send_files_to_kafka_producer_sns(
@@ -1344,6 +1351,55 @@ def get_emr_cluster_step(step_name, cluster_id):
             return step
 
 
+def get_newest_emr_cluster_id(cluster_name, cluster_statuses=None):
+    """Gets the newest emr cluster with the given name
+
+    Keyword arguments:
+    cluster_name -- the name of the cluster to find
+    cluster_statuses -- (aaray) if provided, only return the cluster if the status matches one of these
+    """
+    client = get_client(service_name="emr")
+
+    marker = None
+    clusters = []
+
+    while True:
+        if marker and cluster_statuses:
+            response = client.list_clusters(
+                ClusterStates=cluster_statuses, Marker=marker
+            )
+        elif cluster_statuses:
+            response = client.list_clusters(ClusterStates=cluster_statuses)
+        elif marker:
+            response = client.list_clusters(Marker=marker)
+        else:
+            response = client.list_clusters()
+
+        clusters.extend(
+            [
+                cluster
+                for cluster in response["Clusters"]
+                if cluster["Name"] == cluster_name
+            ]
+        )
+
+        if "Marker" in response:
+            marker = response["Marker"]
+        else:
+            break
+
+    latest_cluster = None
+    for cluster in clusters:
+        if (
+            latest_cluster is None
+            or cluster["Status"]["Timeline"]["CreationDateTime"]
+            > latest_cluster["Status"]["Timeline"]["CreationDateTime"]
+        ):
+            latest_cluster = cluster
+
+    return latest_cluster["Id"] if latest_cluster else None
+
+
 def terminate_emr_cluster(cluster_id):
     """Terminates the given EMR cluster
 
@@ -1562,7 +1618,7 @@ def attempt_assume_role(s3_client, max_tries):
             s3_client = get_client("s3")
             break
         except ClientError as e:
-            if e.response["Error"]["Code"] is "AccessDenied":
+            if e.response["Error"]["Code"] == "AccessDenied":
                 tries += 1
                 console_printer.print_warning_text(f"Try Number {tries}")
             else:
@@ -1693,11 +1749,11 @@ def wait_for_policy_to_be_attached_to_role(role_name, iam_client=None):
     policy_count = 0
     tries = 0
 
-    while (policy_count is 0) and (tries < 5):
+    while (policy_count == 0) and (tries < 5):
         try:
             policies = iam_client.list_attached_role_policies(RoleName=role_name)
         except ClientError as e:
-            if e.response["Error"]["Code"] is "NoSuchEntityException":
+            if e.response["Error"]["Code"] == "NoSuchEntityException":
                 pass
             else:
                 raise e
@@ -1837,3 +1893,119 @@ def execute_commands_on_ec2_by_tags_and_wait(
 
     console_printer.print_info(f"Response from ssm {resp}")
     time.sleep(timeout)
+
+
+def purge_sqs_queue(queue_name, aws_region="eu-west-2"):
+    console_printer.print_info(f"Purging queue: {queue_name}")
+    service_name = "sqs"
+    client = get_client(service_name=service_name, region=aws_region)
+    queue_url = client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+    client.purge_queue(QueueUrl=queue_url)
+
+
+def execute_linux_command(
+    instance_id, linux_command, username="root", aws_region="eu-west-2"
+):
+    service_name = "ssm"
+    cmd = f"sudo su -c '{linux_command}' -s /bin/sh {username}"
+
+    client = get_client(service_name=service_name, region=aws_region)
+    response = client.send_command(
+        InstanceIds=[instance_id],
+        DocumentName="AWS-RunShellScript",
+        Parameters={"commands": [cmd]},
+    )
+    time.sleep(10)
+
+    command_id = response["Command"]["CommandId"]
+    output = client.get_command_invocation(InstanceId=instance_id, CommandId=command_id)
+
+    return output
+
+
+def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
+    service_name = "ssm"
+    client = get_client(service_name=service_name, region=aws_region)
+
+    return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)[
+        "Parameter"
+    ]["Value"]
+
+
+def trigger_batch_job(
+    job_name: str,
+    job_queue_name: str,
+    job_definition: str,
+    parameters=None,
+) -> str:
+    """
+    Triggers a batch job given job_name, job_queue_name, job_definition, and optionally
+    additional parameters.  Returns jobId of submitted job
+    """
+    client = get_client("batch")
+    response = client.submit_job(
+        jobName=job_name,
+        jobQueue=job_queue_name,
+        jobDefinition=job_definition,
+        parameters=parameters,
+    )
+    return response["jobId"]
+
+
+def poll_batch_queue_for_job(
+    job_queue_name: str,
+    job_definition_names: List[str],
+    timeout_in_seconds=None,
+):
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+    while timeout_time is None or timeout_time > time.time():
+        response = client.list_jobs(
+            jobQueue=job_queue_name,
+            filters=[{"name": "JOB_DEFINITION", "values": job_definition_names}],
+        )
+        active_job_list = [
+            job["jobId"]
+            for job in response["jobSummaryList"]
+            if job["status"] not in ["FAILED", "SUCCEEDED"]
+        ]
+
+        if len(active_job_list) > 0:
+            return active_job_list
+        else:
+            console_printer.print_info("Waiting for batch job to be submitted")
+            time.sleep(5)
+            continue
+    raise AssertionError("Timed out waiting for batch job to be submitted")
+
+
+def poll_batch_job_status(
+    job_id,
+    timeout_in_seconds=None,
+):
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+
+    while timeout_time is None or timeout_time > time.time():
+        response = client.describe_jobs(jobs=[job_id])
+        status = response["jobs"][0]["status"]
+        console_printer.print_info(f"Job status: {status}")
+        if status in ["FAILED", "SUCCEEDED"]:
+            return status
+        else:
+            time.sleep(5)
+
+    raise AssertionError(f"Timed out waiting for batch job in queue")
+
+
+def get_instance_id(instance_name, region_name="eu-west-2"):
+    service_name = "ec2"
+    client = get_client(service_name=service_name, region=region_name)
+    filters = [
+        {"Name": "tag:Name", "Values": [instance_name]},
+        {"Name": "instance-state-name", "Values": ["running"]},
+    ]
+
+    response = client.describe_instances(Filters=filters)
+    instance_id = response["Reservations"][0]["Instances"][0]["InstanceId"]
+    return instance_id

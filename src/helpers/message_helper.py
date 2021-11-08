@@ -1,4 +1,5 @@
 from helpers import aws_helper
+import json
 
 
 def send_start_import_message(
@@ -87,8 +88,11 @@ def send_start_export_message(
     snapshot_type,
     correlation_id,
     trigger_adg_string,
-    trigger_pdm_string,
+    send_to_ris_string,
     export_date_override,
+    clear_s3_snapshots,
+    clear_s3_manifests,
+    send_to_ris,
     mongo_snapshot_full_s3_location=None,
 ):
     """Sends the relevant SNS message for starting the exporter.
@@ -105,8 +109,11 @@ def send_start_export_message(
     snapshot_type -- either "full" or "incremental"
     correlation_id -- Correlation Id override or None for a uuid
     trigger_adg_string -- True for HTME to trigger ADG when finished (defaults to False)
-    trigger_pdm_string -- True for ADG to trigger PDM when finished (defaults to False)
+    send_to_ris_string -- True for HTME to send the default topics to RIS for that environment when finished (defaults to False)
     export_date_override -- Correlation Id override or None for not sending, which means using today's date
+    clear_s3_snapshots -- True for HTME to delete any existing snapshots before it runs (defaults to False)
+    clear_s3_manifests -- True for HTME to delete any existing manifests before it runs (defaults to False)
+    send_to_ris -- True for HTME to send default topics to ris (defaults to False)
     mongo_snapshot_full_s3_location -- full location for the snapshots (or None if not needed)
     """
     reprocess_files = "true" if ss_reprocess_files else "false"
@@ -144,11 +151,20 @@ def send_start_export_message(
     if trigger_adg_string is not None:
         message["trigger-adg"] = trigger_adg_string.lower()
 
-    if trigger_pdm_string:
-        message["trigger-pdm"] = trigger_pdm_string.lower()
+    if send_to_ris_string is not None:
+        message["send-to-ris"] = send_to_ris_string.lower()
 
     if export_date_override:
         message["export-date"] = export_date_override
+
+    if clear_s3_snapshots is not None:
+        message["clear-s3-snapshots"] = clear_s3_snapshots.lower()
+
+    if clear_s3_manifests is not None:
+        message["clear-s3-manifests"] = clear_s3_manifests.lower()
+
+    if send_to_ris == "true":
+        message["send-to-ris"] = send_to_ris
 
     return aws_helper.publish_message_to_sns(
         message, uc_export_to_crown_controller_messages_sns_arn
@@ -173,35 +189,25 @@ def send_start_snapshot_sending_message(
     correlation_id -- the test run name
     reprocess_files -- boolean to reprocess files or not
     export_date -- the date the files were exported
-    snapshot_type -- full or incremental for the type of the snapshots
+    snapshot_type -- full, incremental or drift_testing_incremental for the type of the snapshots
     """
     reprocess_files_value = "true" if reprocess_files else "false"
 
-    message_body = (
-        '{"shutdown_flag":"'
-        + f"true"
-        + '", '
-        + '"correlation_id":"'
-        + f"{correlation_id}"
-        + '", '
-        + '"topic_name":"'
-        + f"{topic_name}"
-        + '", '
-        + '"reprocess_files":"'
-        + f"{reprocess_files_value}"
-        + '", '
-        + '"export_date":"'
-        + f"{export_date}"
-        + '", '
-        + '"s3_full_folder":"'
-        + s3_full_folder
-        + '", '
-        + '"snapshot_type":"'
-        + snapshot_type
-        + '"}'
+    message_body = json.dumps(
+        {
+            "shutdown_flag": "true",
+            "correlation_id": correlation_id,
+            "topic_name": topic_name,
+            "reprocess_files": reprocess_files_value,
+            "export_date": export_date,
+            "s3_full_folder": s3_full_folder,
+            "snapshot_type": snapshot_type,
+        }
     )
 
-    aws_helper.send_message_to_sqs(snapshot_sender_sqs_queue, message_body)
+    aws_helper.send_message_to_sqs(
+        snapshot_sender_sqs_queue, message_body, topic_name.replace(".", "_")
+    )
 
 
 def get_consolidated_topics_list(
@@ -209,6 +215,7 @@ def get_consolidated_topics_list(
     snapshot_type,
     default_topic_list_full,
     default_topic_list_incremental,
+    default_topic_list_drift_testing_incremental,
     topics_overrides=None,
 ):
     """Works out the topics needed for snapshot sender based on the passed in overrides.
@@ -218,17 +225,19 @@ def get_consolidated_topics_list(
     snapshot_type -- either "full" or "incremental" if using the default topic lists (defaults to "full")
     default_topic_list_full -- if snapshot_type is "full" then this comma delimited list is used for the topics
     default_topic_list_incremental -- if snapshot_type is "incremental" then this comma delimited list is used for the topics
+    default_topic_list_drift_testing_incremental -- if snapshot_type is "drift_testing_incremental" then this comma delimited list is used for the topics
     topics_override -- if provided as an array of comma delimited lists, the first valid one is used for the topics
     """
     if topics_overrides is not None:
         for topics_override in topics_overrides:
             if topics_override:
                 if topics_override.lower() == "all":
-                    return (
-                        default_topic_list_incremental.split(",")
-                        if snapshot_type.lower() == "incremental"
-                        else default_topic_list_full.split(",")
-                    )
+                    if snapshot_type.lower() == "incremental":
+                        return default_topic_list_incremental.split(",")
+                    elif snapshot_type.lower() == "drift_testing_incremental":
+                        return default_topic_list_drift_testing_incremental.split(",")
+                    else:
+                        return default_topic_list_full.split(",")
                 else:
                     return topics_override.split(",")
 

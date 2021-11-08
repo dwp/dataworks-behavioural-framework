@@ -13,6 +13,7 @@ from helpers import (
     message_helper,
     streaming_manifests_helper,
     streaming_data_helper,
+    dataworks_kafka_producer_common_helper,
 )
 
 
@@ -214,6 +215,7 @@ def htme_start_full(context, timeout=30, **kwargs):
         "full",
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,
@@ -235,6 +237,31 @@ def htme_start_incremental(context, timeout=30, **kwargs):
         "incremental",
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
+        [
+            context.generate_snapshots_topics_override,
+            context.send_snapshots_topics_override,
+        ],
+    )
+    desired_count = manifest_comparison_helper.get_desired_asg_count(
+        updated_topics, context.asg_max_count_htme
+    )
+    context.last_scaled_asg = aws_helper.scale_asg_if_desired_count_is_not_already_set(
+        context.asg_prefix_htme, int(desired_count)
+    )
+
+
+@fixture
+def htme_start_drift_testing_incremental(context, timeout=30, **kwargs):
+    console_printer.print_info(
+        "Executing 'htme_start_drift_testing_incremental' fixture"
+    )
+    updated_topics = message_helper.get_consolidated_topics_list(
+        context.topics,
+        "drift_testing_incremental",
+        context.default_topic_list_full_delimited,
+        context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,
@@ -653,6 +680,7 @@ def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
         snapshot_type,
         context.default_topic_list_full_delimited,
         context.default_topic_list_incremental_delimited,
+        context.default_topic_list_drift_testing_incrementals,
         [
             context.generate_snapshots_topics_override,
             context.send_snapshots_topics_override,
@@ -676,9 +704,11 @@ def dynamodb_clear_ingest_start(context, snapshot_type, topics_list):
 
 @fixture
 def claimant_api_setup(context):
-    console_printer.print_info("Executing 'claimant_api_setup' fixture")
+    console_printer.print_info(
+        f"Executing 'claimant_api_setup' fixture. Active region '{context.ucfs_claimant_active_region}'"
+    )
     context.execute_steps(
-        f"given The claimant API 'business' region is set to 'Ireland'"
+        f"given The claimant API 'business' region is set to '{context.ucfs_claimant_active_region}'"
     )
     context.execute_steps(f"given The claimant API 'storage' region is set to 'London'")
     context.execute_steps(f"given The nino salt has been retrieved")
@@ -713,6 +743,95 @@ def s3_clear_clive_output(context, timeout=30, **kwargs):
 
 
 @fixture
+def s3_clear_cyi_input(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_cyi_input' fixture")
+    aws_helper.clear_s3_prefix(
+        context.s3_ingest_bucket, context.cyi_input_s3_prefix, False
+    )
+
+
+@fixture
+def s3_clear_cyi_output(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_cyi_output' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.cyi_output_s3_prefix, False
+    )
+
+
+@fixture
+def s3_clear_cyi_test_output(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_cyi_test_output' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.cyi_test_output_s3_prefix, False
+    )
+
+
+@fixture
+def s3_clear_uc_feature_output(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_uc_feature_output' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.uc_feature_output_s3_prefix, False
+    )
+
+
+@fixture
 def s3_clear_kickstart_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_kickstart_adg_start' fixture")
     aws_helper.clear_s3_prefix(context.published_bucket, "kickstart-e2e-tests", False)
+
+
+@fixture
+def dataworks_init_kafka_producer(context, timeout=60, **kwargs):
+    dataworks_kafka_producer_common_helper.dataworks_init_kafka_producer(context)
+
+
+@fixture
+def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
+    console_printer.print_info("Initialising e2e tests...for dlq consumer")
+
+    # Clear S3 bucket
+    console_printer.print_info(
+        f"Initialising e2e tests...remove any data from s3 bucket: {context.dataworks_kafka_dlq_output_bucket}, prefix: {context.dataworks_dlq_output_s3_prefix}"
+    )
+    aws_helper.clear_s3_prefix(
+        s3_bucket=context.dataworks_kafka_dlq_output_bucket,
+        path=context.dataworks_dlq_output_s3_prefix,
+        delete_prefix=True,
+    )
+
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-consumer")
+
+    # Execute the shell script - stop any e2e test app
+    console_printer.print_info(
+        f"Initialising e2e tests...stopping any old dlq e2e test application on instance id: {instance_id}"
+    )
+    linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
+    aws_helper.execute_linux_command(
+        instance_id=instance_id,
+        linux_command=linux_command,
+    )
+
+    # Execute the shell script - delete e2e test topic if it exists
+    console_printer.print_info(
+        "Initialising e2e tests...remove any old dlq topic if it exists"
+    )
+    linux_command = "sh /home/ec2-user/kafka/utils/run_delete_topic.sh e2e_dlq_topic"
+    aws_helper.execute_linux_command(
+        instance_id=instance_id,
+        linux_command=linux_command,
+    )
+
+    # Create a topic for e2e tests
+    console_printer.print_info(
+        "Initialising e2e tests...create a dlq topic for e2e tests"
+    )
+    linux_command = "sh /home/ec2-user/kafka/utils/run_create_topic.sh e2e_dlq_topic"
+    aws_helper.execute_linux_command(
+        instance_id=instance_id,
+        linux_command=linux_command,
+    )
+
+    # wait for a 60secs
+    time.sleep(int(timeout))
+    console_printer.print_info("COMPLETE:Initialising e2e tests...for dlq consumer")

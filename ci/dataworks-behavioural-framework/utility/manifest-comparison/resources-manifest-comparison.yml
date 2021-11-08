@@ -56,13 +56,6 @@ resources:
     check_every: 5m
     webhook_token: ((dataworks.concourse_github_webhook_token))
 
-  - name: utc-midday
-    type: time
-    source:
-      start: 12:00
-      stop: 12:05
-      location: UTC
-
   - name: meta-prod
     type: meta
 

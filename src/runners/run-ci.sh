@@ -71,6 +71,9 @@ function set_file_locations() {
     export TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER="${local_file_location}/dataworks-aws-ucfs-claimant-consumer.json"
     export TF_COMMON_OUTPUT_FILE="${local_file_location}/aws-common-infrastructure.json"
     export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}/dataworks-aws-ingestion-ecs-cluster.json"
+    export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}/dataworks-ml-streams-kafka-producer.json"
+    export TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP="${local_file_location}/dataworks-ml-streams-kafka-consumer.json"
+    export TF_DATAWORKS_AWS_S3_OBJECT_TAGGER="${local_file_location}/dataworks-aws-s3-object-tagger.json"
 }
 
 # shellcheck disable=SC2112
@@ -80,40 +83,41 @@ function execute_behave() {
     NOT_SET_FLAG="NOT_SET"
 
     if [[ ! -z "${TF_INGEST_OUTPUT_FILE}" && "${TF_INGEST_OUTPUT_FILE}" != "${NOT_SET_FLAG}" ]]; then
-    echo "Using ${TF_INGEST_OUTPUT_FILE} ..."
-    DLQ_S3_PATH_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_s3_dlq_prefix.value.prefix')"
-    AWS_S3_INPUT_BUCKET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.s3_buckets.value.input_bucket')"
-    MONGO_DATA_LOAD_PREFIXES="NOT_SET"
-    DYNAMODB_TABLE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_job_status_table.value.name')"
-    AWS_SNS_TOPIC_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_sns_topic_arn.value.name[0]')"
-    UCFS_HISTORIC_DATA_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.ucfs_historic_data_prefix.value')"
-    PLAINTEXT_ENCRYPTION_KEY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.plaintext')"
-    ENCRYPTED_ENCRYPTION_KEY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.encrypted')"
-    MASTER_KEY_ID="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.master')"
-    MANIFEST_S3_OUTPUT_LOCATION="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.query_output_s3_prefix')"
-    MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_MAIN="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
-    MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_EQUALITY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
-    MANIFEST_S3_INPUT_LOCATION_EXPORT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.export_folder')"
+        echo "Using ${TF_INGEST_OUTPUT_FILE} ..."
+        DLQ_S3_PATH_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_s3_dlq_prefix.value.prefix')"
+        AWS_S3_INPUT_BUCKET="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.s3_buckets.value.input_bucket')"
+        MONGO_DATA_LOAD_PREFIXES="NOT_SET"
+        DYNAMODB_TABLE_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_job_status_table.value.name')"
+        AWS_SNS_TOPIC_NAME="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.stub_ucfs_sns_topic_arn.value.name[0]')"
+        UCFS_HISTORIC_DATA_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.ucfs_historic_data_prefix.value')"
+        PLAINTEXT_ENCRYPTION_KEY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.plaintext')"
+        ENCRYPTED_ENCRYPTION_KEY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.encrypted')"
+        MASTER_KEY_ID="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.test_encryption_keys.value.master')"
+        MANIFEST_S3_OUTPUT_LOCATION="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.query_output_s3_prefix')"
+        MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_MAIN="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_main')"
+        MANIFEST_S3_INPUT_LOCATION_IMPORT_STREAMING_EQUALITY="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.streaming_folder_equality')"
 
-    ASG_MAX_COUNT_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.max_counts.stub_ucfs_kafka_broker // empty')"
-    ASG_PREFIX_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.stub_ucfs_kafka_broker // empty')"
+        ASG_MAX_COUNT_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.max_counts.stub_ucfs_kafka_broker // empty')"
+        ASG_PREFIX_KAFKA_STUB="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.asg_properties.value.prefixes.stub_ucfs_kafka_broker // empty')"
 
-    K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.main_prefix // empty')"
-    K2HB_EQUALITY_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.equality_prefix // empty')"
-    K2HB_AUDIT_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.audit_prefix // empty')"
+        K2HB_MAIN_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.main_prefix // empty')"
+        K2HB_EQUALITY_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.equality_prefix // empty')"
+        K2HB_AUDIT_MANIFEST_WRITE_S3_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.k2hb_manifest_write_locations.value.audit_prefix // empty')"
 
-    METADATA_STORE_TABLE_NAME_UCFS="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.ucfs')"
-    METADATA_STORE_TABLE_NAME_EQUALITIES="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.equality')"
-    METADATA_STORE_TABLE_NAME_AUDIT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.audit')"
+        METADATA_STORE_TABLE_NAME_UCFS="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.ucfs')"
+        METADATA_STORE_TABLE_NAME_EQUALITIES="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.equality')"
+        METADATA_STORE_TABLE_NAME_AUDIT="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.metadata_store_table_names.value.audit')"
 
-    CDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.run_cdl_s3_url')"
-    HDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.historic_data_loader.value.run_hdl_s3_url')"
+        CDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.run_cdl_s3_url')"
+        CDL_SPLIT_INPUTS_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.cdl_split_inputs_s3_url')"
 
-    CDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.s3_base_prefix')"
-    HDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.ucfs_historic_data_prefix.value')"
-    CDL_DATA_LOAD_FILE_PATTERN_UCFS="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.file_pattern_ucfs')"
+        HDL_RUN_SCRIPT_S3_URL="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.historic_data_loader.value.run_hdl_s3_url')"
 
-    CORPORATE_STORAGE_S3_BUCKET_ID="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_storage_bucket.value.id')"
+        CDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.s3_base_prefix')"
+        HDL_DATA_LOAD_S3_BASE_PREFIX="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.ucfs_historic_data_prefix.value')"
+        CDL_DATA_LOAD_FILE_PATTERN_UCFS="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_data_loader.value.file_pattern_ucfs')"
+
+        CORPORATE_STORAGE_S3_BUCKET_ID="$(cat ${TF_INGEST_OUTPUT_FILE} | jq -r '.corporate_storage_bucket.value.id')"
     else
         echo "Skipping TF_INGEST_OUTPUT_FILE=${TF_INGEST_OUTPUT_FILE}"
     fi
@@ -174,9 +178,11 @@ function execute_behave() {
         DYNAMO_DB_PRODUCT_STATUS_TABLE_NAME="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.data_pipeline_metadata_dynamo.value.name')"
         HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.full.content')"
         HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.incrementals.content')"
+        HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_default_topics_csv.value.drift_testing_incrementals.content')"
 
         MANIFEST_S3_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_bucket.value.id')"
         MANIFEST_S3_INPUT_LOCATION_IMPORT_HISTORIC="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_comparison_parameters.value.historic_folder')"
+        MANIFEST_S3_INPUT_LOCATION_EXPORT="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.manifest_s3_prefixes.value.export')"
 
         INGEST_HBASE_EMR_CLUSTER_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.cluster_id')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_BUCKET_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_bucket')"
@@ -215,12 +221,22 @@ function execute_behave() {
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
         ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
+        DATAWORKS_MODEL_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_bucket.value.id')"
+        DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_sqs.value.name')"
+        DATAWORKS_DLQ_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_dlq_output_bucket.value.id')"
+        DATAWORKS_COMMON_CONFIG_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.config_bucket.value.id')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
 
     if [[ ! -z "${TF_UCFS_CLAIMANT_OUTPUT_FILE}" && "${TF_UCFS_CLAIMANT_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         UCFS_CLAIMANT_DOMAIN_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_base_path_mapping_ucfs_claimant.value.domain_name')"
+        UCFS_CLAIMANT_API_USE_LONDON="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.ucfs_claimant_api_gateway_use_london.value')"
+        if [[ "${UCFS_CLAIMANT_API_USE_LONDON}" == "true" ]]; then
+          UCFS_CLAIMANT_API_ACTIVE_REGION='London'
+        else
+          UCFS_CLAIMANT_API_ACTIVE_REGION='Ireland'
+        fi
         UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v1_getAwardDetails.value.path')"
         UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.aws_api_gateway_resource_v2_getAwardDetails.value.path')"
         UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME="$(cat ${TF_UCFS_CLAIMANT_OUTPUT_FILE} |  jq -r '.nino_salt_london_ssm_param.value')"
@@ -234,6 +250,30 @@ function execute_behave() {
         UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT="$(cat ${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER} |  jq -r '.claimant_api_kafka_consumer.value.task_count')"
     else
         echo "Skipping TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
+    fi
+
+    if [[ ! -z "${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}" && "${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}" != "NOT_SET"  ]]; then
+        echo "Using ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} ..."
+        DATAWORKS_STREAMS_KAFKA_PRODUCER="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} |  jq -r '.dataworks_kafka_producer.value')"
+        DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_KEY_ID="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} |  jq -r '.hsm_key_id.value')"
+        DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_PUB_KEY="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP} |  jq -r '.hsm_pub_key.value')"
+    else
+        echo "Skipping TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}"
+    fi
+
+    if [[ ! -z "${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}" && "${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}" != "NOT_SET"  ]]; then
+        echo "Using ${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP} ..."
+        DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP} |  jq -r '.dataworks_dlq_consumer.value')"
+    else
+        echo "Skipping TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP=${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}"
+    fi
+
+    if [[ ! -z "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" && "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" != "${NOT_SET_FLAG}" ]]; then
+        echo "Using ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} ..."
+        UC_FEATURE_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".uc_feature_object_tagger_data_classification.value")"
+        PDM_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value")"
+    else
+        echo "Skipping TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
     fi
 
     if [[ -z "${TEST_RUN_NAME}" ]]; then
@@ -427,9 +467,12 @@ function execute_behave() {
     -D KAFKA_RECORD_COUNT="${LOAD_TESTS_KAFKA_RECORD_COUNT}" \
     -D HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT="${HTME_DEFAULT_TOPIC_LIST_FULL_CONTENT}" \
     -D HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT="${HTME_DEFAULT_TOPIC_LIST_INCREMENTALS_CONTENT}" \
+    -D HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT="${HTME_DEFAULT_TOPIC_LIST_DRIFT_TESTING_INCREMENTALS_CONTENT}" \
     -D GENERATE_SNAPSHOTS_TRIGGER_SNAPSHOT_SENDER_OVERRIDE="${GENERATE_SNAPSHOTS_TRIGGER_SNAPSHOT_SENDER_OVERRIDE}" \
     -D GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE="${GENERATE_SNAPSHOTS_TRIGGER_ADG_OVERRIDE}" \
-    -D GENERATE_SNAPSHOTS_TRIGGER_PDM_OVERRIDE="${GENERATE_SNAPSHOTS_TRIGGER_PDM_OVERRIDE}" \
+    -D GENERATE_SNAPSHOTS_SEND_TO_RIS_OVERRIDE="${GENERATE_SNAPSHOTS_SEND_TO_RIS_OVERRIDE}" \
+    -D GENERATE_SNAPSHOTS_CLEAR_S3_SNAPSHOTS="${GENERATE_SNAPSHOTS_CLEAR_S3_SNAPSHOTS}" \
+    -D GENERATE_SNAPSHOTS_CLEAR_S3_MANIFESTS="${GENERATE_SNAPSHOTS_CLEAR_S3_MANIFESTS}" \
     -D GENERATE_SNAPSHOTS_REPROCESS_FILES_OVERRIDE="${GENERATE_SNAPSHOTS_REPROCESS_FILES_OVERRIDE}" \
     -D SNAPSHOT_S3_OUTPUT_PATH="${SNAPSHOT_S3_OUTPUT_PATH}" \
     -D SNAPSHOT_S3_OUTPUT_BUCKET="${SNAPSHOT_S3_OUTPUT_BUCKET}" \
@@ -447,6 +490,7 @@ function execute_behave() {
     -D CORPORATE_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE="${CORPORATE_DATA_INGESTION_SKIP_LATER_THAN_OVERRIDE}" \
     -D CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE="${CORPORATE_DATA_INGESTION_PARTITIONS_COUNT_OVERRIDE}" \
     -D CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE="${CORPORATE_DATA_INGESTION_PREFIX_PER_EXECUTION_OVERRIDE}" \
+    -D CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE="${CORPORATE_DATA_INGESTION_USE_SPLIT_INPUTS_OVERRIDE}" \
     -D HISTORIC_IMPORTER_CORRELATION_ID_OVERRIDE="${HISTORIC_IMPORTER_CORRELATION_ID_OVERRIDE}" \
     -D SNAPSHOT_SENDER_SCALE_UP_OVERRIDE="${SNAPSHOT_SENDER_SCALE_UP_OVERRIDE}" \
     -D INGEST_HBASE_EMR_CLUSTER_SNAPSHOT_TABLES_OVERRIDE="${INGEST_HBASE_EMR_CLUSTER_SNAPSHOT_TABLES_OVERRIDE}" \
@@ -475,6 +519,7 @@ function execute_behave() {
     -D RECONCILER_EQUALITIES_DESIRED_TASK_COUNT="${RECONCILER_EQUALITIES_DESIRED_TASK_COUNT}" \
     -D RECONCILER_AUDIT_DESIRED_TASK_COUNT="${RECONCILER_AUDIT_DESIRED_TASK_COUNT}" \
     -D CDL_RUN_SCRIPT_S3_URL="${CDL_RUN_SCRIPT_S3_URL}" \
+    -D CDL_SPLIT_INPUTS_S3_URL="${CDL_SPLIT_INPUTS_S3_URL}" \
     -D HDL_RUN_SCRIPT_S3_URL="${HDL_RUN_SCRIPT_S3_URL}" \
     -D CREATE_HBASE_TABLES_SCRIPT_S3_URL="${CREATE_HBASE_TABLES_SCRIPT_S3_URL}" \
     -D DATA_LOAD_TOPICS="${DATA_LOAD_TOPICS}" \
@@ -488,15 +533,27 @@ function execute_behave() {
     -D CORPORATE_STORAGE_S3_BUCKET_ID="${CORPORATE_STORAGE_S3_BUCKET_ID}" \
     -D DATA_STREAMING_TESTS_SKIP_RECONCILING="${DATA_STREAMING_TESTS_SKIP_RECONCILING}" \
     -D UCFS_CLAIMANT_DOMAIN_NAME="${UCFS_CLAIMANT_DOMAIN_NAME}" \
+    -D UCFS_CLAIMANT_API_ACTIVE_REGION="${UCFS_CLAIMANT_API_ACTIVE_REGION}" \
     -D UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS="${UCFS_CLAIMANT_API_PATH_V1_GET_AWARD_DETAILS}" \
     -D UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS="${UCFS_CLAIMANT_API_PATH_V2_GET_AWARD_DETAILS}" \
     -D UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME="${UCFS_CLAIMANT_API_SALT_SSM_PARAMETER_NAME}" \
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_CLUSTER_NAME="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_CLUSTER_NAME}" \
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_NAME}" \
     -D UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT="${UCFS_CLAIMANT_API_KAFKA_CONSUMER_SERVICE_DESIRED_TASK_COUNT}" \
+    -D DATAWORKS_MODEL_OUTPUT_BUCKET="${DATAWORKS_MODEL_OUTPUT_BUCKET}" \
+    -D DATAWORKS_STREAMS_KAFKA_PRODUCER="${DATAWORKS_STREAMS_KAFKA_PRODUCER}" \
+    -D DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_KEY_ID="${DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_KEY_ID}" \
+    -D DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_PUB_KEY="${DATAWORKS_STREAMS_KAFKA_PRODUCER_HSM_PUB_KEY}" \
+    -D DATAWORKS_MODEL_OUTPUT_SQS="${DATAWORKS_MODEL_OUTPUT_SQS}" \
+    -D DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER="${DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER}" \
+    -D DATAWORKS_DLQ_OUTPUT_BUCKET="${DATAWORKS_DLQ_OUTPUT_BUCKET}" \
     -D AWS_REGION_MAIN="${AWS_REGION_MAIN}" \
-    -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}"
-    
+    -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}" \
+    -D PDM_DATA_CLASSIFICATION_CSV_KEY="${PDM_DATA_CLASSIFICATION_CSV_KEY}" \
+    -D UC_FEATURE_DATA_CLASSIFICATION="${UC_FEATURE_DATA_CLASSIFICATION}" \
+    -D PDM_DATA_CLASSIFICATION="${PDM_DATA_CLASSIFICATION}" \
+    -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
+
     export test_exit_code=$?
 
     set +x
@@ -520,6 +577,9 @@ echo "Inputs: TF_UCFS_CLAIMANT_OUTPUT_FILE=${TF_UCFS_CLAIMANT_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER=${TF_DATAWORKS_AWS_UCFS_CLAIMANT_CONSUMER}"
 echo "Inputs: TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER=${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}"
+echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}"
+echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP=${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}"
+echo "Inputs: TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
 
 execute_behave
 
