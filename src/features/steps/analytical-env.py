@@ -117,9 +117,8 @@ def step_attempt_to_read_data(context):
         ),
     )
 
-@when(
-    "The user attempts to read data in the processed S3 bucket location "
-)
+
+@when("The user attempts to read data in the processed S3 bucket location ")
 def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.processed_bucket,
@@ -688,6 +687,7 @@ def step_attempt_to_write_data(context):
         30,
     )
 
+
 @when("The user attempts to write to another processed S3 bucket location")
 @when("The user attempts to write to the processed S3 bucket location")
 def step_attempt_to_write_data(context):
@@ -703,6 +703,7 @@ def step_attempt_to_write_data(context):
         context.analytical_test_data_s3_location["file_name"],
         30,
     )
+
 
 @then("The user is able to write to the location")
 def step_user_has_write_access(context):
