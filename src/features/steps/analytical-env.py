@@ -118,7 +118,7 @@ def step_attempt_to_read_data(context):
     )
 
 
-@when("The user attempts to read data in the processed S3 bucket location ")
+@when("The user attempts to read data in the processed S3 bucket location")
 def step_attempt_to_read_data(context):
     context.read_access = aws_helper.test_s3_access_read(
         context.processed_bucket,
