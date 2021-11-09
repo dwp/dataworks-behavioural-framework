@@ -147,7 +147,7 @@ def before_tag(context, tag):
     if tag == "fixture.setup.rbac_uc_ris_unredacted__all":
         use_fixture(before_fixtures.setup_user, context, "rbac_uc_ris_unredacted__all")
     if tag == "fixture.setup.rbac_uc__auditlog_redacted_and_sc_and_role":
-        use_fixture(rbac_uc_mongo_latest__uc_mongo_latest__full_access_and_role
+        use_fixture(
             before_fixtures.setup_user_and_role,
             context,
             "rbac_uc__auditlog_redacted",
