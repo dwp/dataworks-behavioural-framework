@@ -1958,15 +1958,24 @@ def poll_batch_queue_for_job(
 ):
 
     statuses = [
-        'SUBMITTED', 'PENDING', 'RUNNABLE', 'STARTING', 'RUNNING', 'SUCCEEDED', 'FAILED'
+        "SUBMITTED",
+        "PENDING",
+        "RUNNABLE",
+        "STARTING",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
     ]
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
     while timeout_time is None or timeout_time > time.time():
-        responses = [client.list_jobs(
-            jobQueue=job_queue_name,
-            jobStatus=status,
-        ) for status in statuses]
+        responses = [
+            client.list_jobs(
+                jobQueue=job_queue_name,
+                jobStatus=status,
+            )
+            for status in statuses
+        ]
         active_job_list = [
             job["jobId"]
             for response in responses
