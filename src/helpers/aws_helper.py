@@ -1954,18 +1954,22 @@ def trigger_batch_job(
 
 def poll_batch_queue_for_job(
     job_queue_name: str,
-    job_definition_names: List[str],
     timeout_in_seconds=None,
 ):
+
+    statuses = [
+        'SUBMITTED', 'PENDING', 'RUNNABLE', 'STARTING', 'RUNNING', 'SUCCEEDED', 'FAILED'
+    ]
     client = get_client("batch")
     timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
     while timeout_time is None or timeout_time > time.time():
-        response = client.list_jobs(
+        responses = [client.list_jobs(
             jobQueue=job_queue_name,
-            filters=[{"name": "JOB_DEFINITION", "values": job_definition_names}],
-        )
+            jobStatus=status,
+        ) for status in statuses]
         active_job_list = [
             job["jobId"]
+            for response in responses
             for job in response["jobSummaryList"]
             if job["status"] not in ["FAILED", "SUCCEEDED"]
         ]
