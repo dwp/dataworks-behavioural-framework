@@ -829,36 +829,6 @@
         "file_name": "run-date-kick-mksps-role-epoc-time.json",
         "regex_pattern": ".*kick-mksps-role-[0-9]*.json",
         "total_files": 5
-      },
-      "supplier_audit": {
-        "file_name": "run-date-kick-mksps-supplier-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-supplier-audit-[0-9]*.json",
-        "total_files": 5
-      },
-      "employee_audit": {
-        "file_name": "run-date-kick-mksps-employee-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-employee-audit-[0-9]*.json",
-        "total_files": 5
-      },
-      "payment_audit": {
-        "file_name": "run-date-kick-mksps-payment-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-payment-audit-[0-9]*.json",
-        "total_files": 5
-      },
-      "task_audit": {
-        "file_name": "run-date-kick-mksps-task-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-task-audit-[0-9]*.json",
-        "total_files": 5
-      },
-      "user_detail_audit": {
-        "file_name": "run-date-kick-mksps-user-detail-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-user-detail-audit-[0-9]*.json",
-        "total_files": 5
-      },
-      "role_audit": {
-        "file_name": "run-date-kick-mksps-role-audit-epoc-time.json",
-        "regex_pattern": ".*kick-mksps-role-audit-[0-9]*.json",
-        "total_files": 5
       }
     }
     }
