@@ -217,11 +217,11 @@ def before_tag(context, tag):
         use_fixture(
             before_fixtures.setup_user_and_role,
             context,
-            "rbac_uc_mongo_latest__full_access",
+            "rbac_uc_mongo_latest_full_access",
         )
     if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__full_access":
         use_fixture(
-            before_fixtures.setup_user, context, "rbac_uc_mongo_latest__full_access"
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest_full_access"
         )
     if (
         tag
@@ -230,11 +230,11 @@ def before_tag(context, tag):
         use_fixture(
             before_fixtures.setup_user_and_role,
             context,
-            "rbac_uc_mongo_latest__read_access",
+            "rbac_uc_mongo_latest_read_access",
         )
     if tag == "fixture.setup.rbac_uc_mongo_latest__uc_mongo_latest__read_access":
         use_fixture(
-            before_fixtures.setup_user, context, "rbac_uc_mongo_latest__read_access"
+            before_fixtures.setup_user, context, "rbac_uc_mongo_latest_read_access"
         )
     if (
         tag
@@ -460,6 +460,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_output, context)
     if tag == "fixture.s3.clear.cyi.test.output":
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
+    if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
+        use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
 
 
 def after_all(context):

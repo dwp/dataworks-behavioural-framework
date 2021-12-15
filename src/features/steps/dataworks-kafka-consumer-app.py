@@ -6,11 +6,12 @@ from helpers import aws_helper, dataworks_kafka_consumer_helper, console_printer
 
 @given("the e2e kafka consumer app is running")
 def step_impl(context):
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-consumer")
+
     # Start kafka consumer is running
     linux_command = "nohup sh /home/ec2-user/kafka/run_e2e.sh &"
-    aws_helper.execute_linux_command(
-        context.dataworks_kafka_dlq_consumer_instance, linux_command
-    )
+    aws_helper.execute_linux_command(instance_id, linux_command)
 
 
 @when("messages are published into the dlq topic using test data in '{file_name}'")
@@ -18,6 +19,9 @@ def step_impl(context, file_name):
     # Read the data file
     console_printer.print_info(f"Read test data")
     messages = dataworks_kafka_consumer_helper.read_test_data(file_name)
+
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-consumer")
 
     # Simulate UC sending DLQ messages - Loop thru the data file and Publish messages in DLQ topic
     console_printer.print_info(f"Publishing {len(messages)} messages to dlq topic")
@@ -29,8 +33,7 @@ def step_impl(context, file_name):
             f"sh /home/ec2-user/kafka/utils/e2e_publish_msg.sh {message_str}"
         )
         response = aws_helper.execute_linux_command(
-            instance_id=context.dataworks_kafka_dlq_consumer_instance,
-            linux_command=linux_command,
+            instance_id=instance_id, linux_command=linux_command
         )
 
 

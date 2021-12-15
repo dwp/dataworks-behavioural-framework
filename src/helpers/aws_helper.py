@@ -1,25 +1,21 @@
-import ast
+import base64
 import decimal
 import json
-import base64
-import logging
-
-import time
 import os
 import re
+import time
 import uuid
-import boto3
-from botocore.exceptions import ClientError
-from boto3.exceptions import S3UploadFailedError
-from boto3.dynamodb.conditions import Key, And
-from traceback import print_exc
 from concurrent.futures import ThreadPoolExecutor, wait
-from exceptions import aws_exceptions
 from functools import reduce
-from pprint import pprint
+from typing import List
+
+import boto3
+from boto3.dynamodb.conditions import Key, And
+from boto3.exceptions import S3UploadFailedError
 from botocore.config import Config
-from helpers import invoke_lambda, template_helper, file_helper, console_printer
-import typing
+from botocore.exceptions import ClientError
+
+from helpers import invoke_lambda, template_helper, console_printer
 
 aws_role_arn = None
 aws_profile = None
@@ -1934,3 +1930,95 @@ def get_ssm_parameter_value(ssm_parameter_value, aws_region="eu-west-2"):
     return client.get_parameter(Name=ssm_parameter_value, WithDecryption=True)[
         "Parameter"
     ]["Value"]
+
+
+def trigger_batch_job(
+    job_name: str,
+    job_queue_name: str,
+    job_definition: str,
+    parameters=None,
+) -> str:
+    """
+    Triggers a batch job given job_name, job_queue_name, job_definition, and optionally
+    additional parameters.  Returns jobId of submitted job
+    """
+    client = get_client("batch")
+    response = client.submit_job(
+        jobName=job_name,
+        jobQueue=job_queue_name,
+        jobDefinition=job_definition,
+        parameters=parameters,
+    )
+    return response["jobId"]
+
+
+def poll_batch_queue_for_job(
+    job_queue_name: str,
+    timeout_in_seconds=None,
+):
+
+    statuses = [
+        "SUBMITTED",
+        "PENDING",
+        "RUNNABLE",
+        "STARTING",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+    ]
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+    while timeout_time is None or timeout_time > time.time():
+        responses = [
+            client.list_jobs(
+                jobQueue=job_queue_name,
+                jobStatus=status,
+            )
+            for status in statuses
+        ]
+        active_job_list = [
+            job["jobId"]
+            for response in responses
+            for job in response["jobSummaryList"]
+            if job["status"] not in ["FAILED", "SUCCEEDED"]
+        ]
+
+        if len(active_job_list) > 0:
+            return active_job_list
+        else:
+            console_printer.print_info("Waiting for batch job to be submitted")
+            time.sleep(5)
+            continue
+    raise AssertionError("Timed out waiting for batch job to be submitted")
+
+
+def poll_batch_job_status(
+    job_id,
+    timeout_in_seconds=None,
+):
+    client = get_client("batch")
+    timeout_time = None if not timeout_in_seconds else time.time() + timeout_in_seconds
+
+    while timeout_time is None or timeout_time > time.time():
+        response = client.describe_jobs(jobs=[job_id])
+        status = response["jobs"][0]["status"]
+        console_printer.print_info(f"Job status: {status}")
+        if status in ["FAILED", "SUCCEEDED"]:
+            return status
+        else:
+            time.sleep(5)
+
+    raise AssertionError(f"Timed out waiting for batch job in queue")
+
+
+def get_instance_id(instance_name, region_name="eu-west-2"):
+    service_name = "ec2"
+    client = get_client(service_name=service_name, region=region_name)
+    filters = [
+        {"Name": "tag:Name", "Values": [instance_name]},
+        {"Name": "instance-state-name", "Values": ["running"]},
+    ]
+
+    response = client.describe_instances(Filters=filters)
+    instance_id = response["Reservations"][0]["Instances"][0]["InstanceId"]
+    return instance_id

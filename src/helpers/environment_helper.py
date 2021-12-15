@@ -328,6 +328,8 @@ def set_test_run_common_variables(context):
     )
     context.published_bucket = context.config.userdata.get("AWS_PUBLISHED_BUCKET")
 
+    context.processed_bucket = context.config.userdata.get("AWS_PROCESSED_BUCKET")
+
     context.ingest_hbase_emr_cluster_id = context.config.userdata.get(
         "INGEST_HBASE_EMR_CLUSTER_ID"
     )
@@ -541,6 +543,17 @@ def set_test_run_common_variables(context):
     context.aws_region_main = context.config.userdata.get("AWS_REGION_MAIN")
     context.aws_region_alternative = context.config.userdata.get(
         "AWS_REGION_ALTERNATIVE"
+    )
+
+    context.uc_feature_data_classification = context.config.userdata.get(
+        "UC_FEATURE_DATA_CLASSIFICATION"
+    )
+    context.pdm_data_classification = context.config.userdata.get(
+        "PDM_DATA_CLASSIFICATION"
+    )
+
+    context.common_config_bucket = context.config.userdata.get(
+        "DATAWORKS_COMMON_CONFIG_BUCKET"
     )
 
 

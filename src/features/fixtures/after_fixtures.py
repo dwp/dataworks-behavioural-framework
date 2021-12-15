@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 from helpers import (
     aws_helper,
     console_printer,
+    dataworks_kafka_producer_common_helper,
 )
 
 
@@ -205,25 +206,21 @@ def terminate_cyi_cluster(context, timeout=30, **kwargs):
 
 @fixture
 def dataworks_stop_kafka_producer_app(context):
-    console_printer.print_info("Executing 'stop_kafka_producer_app' fixture")
-
-    # Execute the shell script - stop the e2e test application
-    linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
-    aws_helper.execute_linux_command(
-        instance_id=context.dataworks_kafka_producer_instance,
-        linux_command=linux_command,
-    )
+    dataworks_kafka_producer_common_helper.dataworks_stop_kafka_producer_app(context)
 
 
 @fixture
 def dataworks_stop_kafka_consumer_app(context):
     console_printer.print_info("Executing 'stop_kafka_consumer_app' fixture")
 
+    # Get instance id
+    instance_id = aws_helper.get_instance_id("dataworks-kafka-consumer")
+
     # Execute the shell script - stop the e2e test application
     console_printer.print_info("Stopping e2e test application")
     linux_command = "sh /home/ec2-user/kafka/utils/stop_e2e_tests.sh"
     aws_helper.execute_linux_command(
-        instance_id=context.dataworks_kafka_dlq_consumer_instance,
+        instance_id=instance_id,
         linux_command=linux_command,
     )
 

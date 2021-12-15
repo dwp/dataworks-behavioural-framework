@@ -73,6 +73,7 @@ function set_file_locations() {
     export TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER="${local_file_location}/dataworks-aws-ingestion-ecs-cluster.json"
     export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}/dataworks-ml-streams-kafka-producer.json"
     export TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP="${local_file_location}/dataworks-ml-streams-kafka-consumer.json"
+    export TF_DATAWORKS_AWS_S3_OBJECT_TAGGER="${local_file_location}/dataworks-aws-s3-object-tagger.json"
 }
 
 # shellcheck disable=SC2112
@@ -186,7 +187,7 @@ function execute_behave() {
         INGEST_HBASE_EMR_CLUSTER_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.cluster_id')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_BUCKET_ID="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_bucket')"
         INGEST_HBASE_EMR_CLUSTER_ROOT_S3_ROOT_DIRECTORY="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.aws_emr_cluster.value.root_directory')"
-        
+
         MONITORING_SNS_TOPIC_ARN="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.sns_topics.value.london_monitoring.arn')"
         MONGO_SNAPSHOT_BUCKET="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_bucket.value.id')"
         MONGO_SNAPSHOT_PATH="$(cat ${TF_INTERNAL_COMPUTE_OUTPUT_FILE} | jq -r '.htme_s3_folder.value.id')"
@@ -217,12 +218,14 @@ function execute_behave() {
 
     if [[ ! -z "${TF_COMMON_OUTPUT_FILE}" && "${TF_COMMON_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
+        AWS_PROCESSED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.processed_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
         ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
         DATAWORKS_MODEL_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_bucket.value.id')"
         DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_sqs.value.name')"
         DATAWORKS_DLQ_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_dlq_output_bucket.value.id')"
+        DATAWORKS_COMMON_CONFIG_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.config_bucket.value.id')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
@@ -264,6 +267,14 @@ function execute_behave() {
         DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER="$(cat ${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP} |  jq -r '.dataworks_dlq_consumer.value')"
     else
         echo "Skipping TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP=${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}"
+    fi
+
+    if [[ ! -z "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" && "${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}" != "${NOT_SET_FLAG}" ]]; then
+        echo "Using ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} ..."
+        UC_FEATURE_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".uc_feature_object_tagger_data_classification.value")"
+        PDM_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value")"
+    else
+        echo "Skipping TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
     fi
 
     if [[ -z "${TEST_RUN_NAME}" ]]; then
@@ -442,6 +453,7 @@ function execute_behave() {
     -D ASG_MAX_COUNT_INGESTION_ECS_CLUSTER="${ASG_MAX_COUNT_INGESTION_ECS_CLUSTER}" \
     -D AWS_DATASETS_BUCKET="${AWS_DATASETS_BUCKET}" \
     -D AWS_PUBLISHED_BUCKET="${AWS_PUBLISHED_BUCKET}" \
+    -D AWS_PROCESSED_BUCKET="${AWS_PROCESSED_BUCKET}"  \
     -D SYNTHETIC_RAWDATA_AWS_ACC="${SYNTHETIC_RAWDATA_AWS_ACC}" \
     -D SYNTHETIC_RAWDATA_PREFIX="${SYNTHETIC_RAWDATA_PREFIX}" \
     -D SYNTHETIC_ENCDATA_PREFIX="${SYNTHETIC_ENCDATA_PREFIX}" \
@@ -538,8 +550,12 @@ function execute_behave() {
     -D DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER="${DATAWORKS_STREAMS_KAFKA_DLQ_CONSUMER}" \
     -D DATAWORKS_DLQ_OUTPUT_BUCKET="${DATAWORKS_DLQ_OUTPUT_BUCKET}" \
     -D AWS_REGION_MAIN="${AWS_REGION_MAIN}" \
-    -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}"
-    
+    -D AWS_REGION_ALTERNATIVE="${AWS_REGION_ALTERNATIVE}" \
+    -D PDM_DATA_CLASSIFICATION_CSV_KEY="${PDM_DATA_CLASSIFICATION_CSV_KEY}" \
+    -D UC_FEATURE_DATA_CLASSIFICATION="${UC_FEATURE_DATA_CLASSIFICATION}" \
+    -D PDM_DATA_CLASSIFICATION="${PDM_DATA_CLASSIFICATION}" \
+    -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
+
     export test_exit_code=$?
 
     set +x
@@ -565,6 +581,7 @@ echo "Inputs: TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
 echo "Inputs: TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER=${TF_DATAWORKS_AWS_INGESTION_ECS_CLUSTER}"
 echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP}"
 echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP=${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}"
+echo "Inputs: TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
 
 execute_behave
 

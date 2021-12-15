@@ -1,7 +1,9 @@
 import json
 import os
+from datetime import datetime
 
 from behave import given, then, when
+
 from helpers import (
     aws_helper,
     console_printer,
@@ -9,7 +11,6 @@ from helpers import (
     file_helper,
     invoke_lambda,
 )
-from datetime import datetime
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
