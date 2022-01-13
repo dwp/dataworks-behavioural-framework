@@ -1,3 +1,4 @@
+@work-in-progress
 @aws-kickstart-adg
 @test
 Feature: Kickstart adg process, to source data and valid final tables for expected outcome
@@ -10,10 +11,11 @@ Feature: Kickstart adg process, to source data and valid final tables for expect
     And Generate '10' records per table for 'payment' with PII flag as 'True' and upload to s3 bucket
 
     When Start kickstart adg emr process for modules 'vacancy, application, payment' with 'delta' extract and get step ids
-    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'delta' extract and add step Ids to the list
-    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'incremental' extract and add step Ids to the list
-    And  Add validation steps 'application-hive-validation-queries' to kickstart adg emr cluster for 'application' with 'delta' extract and add step Ids to the list
-    And  Add validation steps 'payment-hive-validation-queries' to kickstart adg emr cluster for 'payment' with 'delta' extract and add step Ids to the list
+    Then Wait for the regular cluster steps to complete
+    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'delta' extract and store step Ids in a list
+    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'incremental' extract and store step Ids in a list
+    And  Add validation steps 'application-hive-validation-queries' to kickstart adg emr cluster for 'application' with 'delta' extract and store step Ids in a list
+    And  Add validation steps 'payment-hive-validation-queries' to kickstart adg emr cluster for 'payment' with 'delta' extract and store step Ids in a list
 
     Then Wait for all the steps to complete
     And The input result matches with final output for module 'vacancy' with 'delta' extract
