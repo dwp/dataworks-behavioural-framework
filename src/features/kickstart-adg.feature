@@ -1,4 +1,3 @@
-@work-in-progress
 @aws-kickstart-adg
 @test
 Feature: Kickstart adg process, to source data and valid final tables for expected outcome
