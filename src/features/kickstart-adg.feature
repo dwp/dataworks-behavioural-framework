@@ -9,15 +9,13 @@ Feature: Kickstart adg process, to source data and valid final tables for expect
     And Generate '10' records per table for 'vacancy' with PII flag as 'False' and upload to s3 bucket
     And Generate '10' records per table for 'application' with PII flag as 'True' and upload to s3 bucket
     And Generate '10' records per table for 'payment' with PII flag as 'True' and upload to s3 bucket
-
     When Start kickstart adg emr process for modules 'vacancy, application, payment' with 'delta' extract and get step ids
     Then Wait for the regular cluster steps to complete
-    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'delta' extract and store step Ids in a list
-    And  Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'incremental' extract and store step Ids in a list
-    And  Add validation steps 'application-hive-validation-queries' to kickstart adg emr cluster for 'application' with 'delta' extract and store step Ids in a list
-    And  Add validation steps 'payment-hive-validation-queries' to kickstart adg emr cluster for 'payment' with 'delta' extract and store step Ids in a list
-
-    Then Wait for all the steps to complete
+    Then Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'delta' extract and store step Ids in a list
+    Then Add validation steps 'vacancy-hive-validation-queries' to kickstart adg emr cluster for 'vacancy' with 'incremental' extract and store step Ids in a list
+    Then Add validation steps 'application-hive-validation-queries' to kickstart adg emr cluster for 'application' with 'delta' extract and store step Ids in a list
+    Then Add validation steps 'payment-hive-validation-queries' to kickstart adg emr cluster for 'payment' with 'delta' extract and store step Ids in a list
+    Then Wait for remaining steps to complete
     And The input result matches with final output for module 'vacancy' with 'delta' extract
     And The input result matches with final output for module 'vacancy' with 'incremental' extract
     And The input result matches with final output for module 'application' with 'delta' extract
