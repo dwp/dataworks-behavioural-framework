@@ -11,4 +11,4 @@ if [[ "${test_run_id}" == "NOT_SET" ]]; then
   test_run_id=1
 fi
 
-src/runners/run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "${feature_tag}" "${mongo_import_key}" "${number_of_topics}"
+./run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "${feature_tag}" "${mongo_import_key}" "${number_of_topics}"

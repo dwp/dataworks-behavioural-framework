@@ -1,4 +1,3 @@
-@work-in-progress
 @aws-kickstart-adg-data-generator
 @test
 Feature: Generate data for kickstart adg process

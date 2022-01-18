@@ -29,7 +29,6 @@ def step_impl(context, template_name):
         context.fixture_path_local, template_name
     )
 
-
 @given(
     "Generate '{record_count}' records per table for '{module_name}' with PII flag as '{PII_Flag}' and upload to s3 bucket"
 )
@@ -79,7 +78,11 @@ def step_impl(context, record_count, module_name, PII_Flag):
     "Start kickstart adg emr process for modules '{modules}' with '{load_type}' extract and get step ids"
 )
 def step_impl(context, modules, load_type):
-    emr_launcher_config = {}
+    emr_launcher_config = {
+        "overrides": {
+            "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
+        },
+    }
     additional_step_args = {}
     KICKSTART_MODULES = modules.replace(" ", "").split(",")
     for module_name in KICKSTART_MODULES:
@@ -160,6 +163,18 @@ def step_impl(context, modules, load_type):
         context.kickstart_step_ids.append(step_id)
         console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
 
+@then("Wait for the regular cluster steps to complete")
+def step_impl(context):
+    for step in context.kickstart_step_ids:
+        console_printer.print_info(f"check if the step with {step} is complete or not")
+        execution_state = aws_helper.poll_emr_cluster_step_status(
+            step, context.kickstart_adg_cluster_id, 1200
+        )
+        if execution_state != COMPLETED_STATUS:
+            raise AssertionError(
+                f"The step Id {step} failed with final status of '{execution_state}'"
+            )
+
 
 @then(
     "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' with '{load_type}' extract and store step Ids in a list"
@@ -189,19 +204,6 @@ def step_impl(context, step_name, module_name, load_type):
             context.kickstart_adg_hive_cluster_step_name,
         )
         context.validation_kickstart_step_ids.append(kickstart_hive_query_step_id)
-
-
-@then("Wait for the regular cluster steps to complete")
-def step_impl(context):
-    for step in context.kickstart_step_ids:
-        console_printer.print_info(f"check if the step with {step} is complete or not")
-        execution_state = aws_helper.poll_emr_cluster_step_status(
-            step, context.kickstart_adg_cluster_id, 1200
-        )
-        if execution_state != COMPLETED_STATUS:
-            raise AssertionError(
-                f"The step Id {step} failed with final status of '{execution_state}'"
-            )
 
 
 @then("Wait for remaining steps to complete")
@@ -247,5 +249,5 @@ def step_impl(context, module_name, load_type):
 
         for actual_line in actual_contents:
             assert (
-                actual_line in expected_contents
+                    actual_line in expected_contents
             ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
