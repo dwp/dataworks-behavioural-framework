@@ -29,6 +29,7 @@ def step_impl(context, template_name):
         context.fixture_path_local, template_name
     )
 
+
 @given(
     "Generate '{record_count}' records per table for '{module_name}' with PII flag as '{PII_Flag}' and upload to s3 bucket"
 )
@@ -163,6 +164,7 @@ def step_impl(context, modules, load_type):
         context.kickstart_step_ids.append(step_id)
         console_printer.print_info(f"Step id for '{step_name}' : '{step_id}'")
 
+
 @then("Wait for the regular cluster steps to complete")
 def step_impl(context):
     for step in context.kickstart_step_ids:
@@ -249,5 +251,5 @@ def step_impl(context, module_name, load_type):
 
         for actual_line in actual_contents:
             assert (
-                    actual_line in expected_contents
+                actual_line in expected_contents
             ), f"Expected result of '{actual_line}' in not present in expected content for collection {collection}"
