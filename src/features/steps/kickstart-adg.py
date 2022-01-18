@@ -79,7 +79,11 @@ def step_impl(context, record_count, module_name, PII_Flag):
     "Start kickstart adg emr process for modules '{modules}' with '{load_type}' extract and get step ids"
 )
 def step_impl(context, modules, load_type):
-    emr_launcher_config = {}
+    emr_launcher_config = {
+        "overrides": {
+            "Instances": {"KeepJobFlowAliveWhenNoSteps": True},
+        },
+    }
     additional_step_args = {}
     KICKSTART_MODULES = modules.replace(" ", "").split(",")
     for module_name in KICKSTART_MODULES:
