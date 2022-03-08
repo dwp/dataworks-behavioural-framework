@@ -122,7 +122,7 @@ def step_impl(context, snapshot_type):
         None,
         None,
         context.test_run_name,
-        "true",
+        "false",
         context.generate_snapshots_reprocess_files,
         snapshot_type,
         snapshots_helper.get_snapshot_run_correlation_id(
