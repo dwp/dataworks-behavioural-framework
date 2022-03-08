@@ -122,7 +122,7 @@ def step_impl(context, snapshot_type):
         None,
         None,
         context.test_run_name,
-        "true",
+        "false",
         context.generate_snapshots_reprocess_files,
         snapshot_type,
         snapshots_helper.get_snapshot_run_correlation_id(
@@ -212,6 +212,11 @@ def step_impl(context, statuses, snapshot_type):
         )
         if not context.send_snapshots_correlation_id_override
         else context.send_snapshots_correlation_id_override
+    )
+
+    console_printer.print_info(
+        f"Correlation_ID '{correlation_id}' "
+        + f"topics '{topics}'"
     )
 
     status_list = [statuses] if "," not in statuses else statuses.split(",")
