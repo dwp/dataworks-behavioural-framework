@@ -28,7 +28,7 @@ Feature: UCFS Business Data Ingestion full end-to-end in to Crown
         Then The number of snapshots created for each topic is '1' with match type of 'exact' and snapshot type of 'full'
         And Snapshot sender sends the correct snapshots for snapshot type of 'full'
         And The dynamodb messages for each topic are one of 'Success' for snapshot type of 'full'
-        And The dynamodb status for 'SNAPSHOT_SENDER' is set to 'COMPLETED' with snapshot type of 'full'
+#        And The dynamodb status for 'SNAPSHOT_SENDER' is set to 'COMPLETED' with snapshot type of 'full'
 
     @pull-request
     @fixture.s3.clear.historic.data.start
