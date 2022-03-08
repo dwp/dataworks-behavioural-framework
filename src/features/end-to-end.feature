@@ -3,7 +3,6 @@
 @fixture.k2hb.start
 @fixture.htme.start.full
 @test
-@work-in-progress
 Feature: UCFS Business Data Ingestion full end-to-end in to Crown
 
     @pull-request
