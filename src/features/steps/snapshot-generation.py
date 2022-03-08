@@ -215,8 +215,7 @@ def step_impl(context, statuses, snapshot_type):
     )
 
     console_printer.print_info(
-        f"Correlation_ID '{correlation_id}' "
-        + f"topics '{topics}'"
+        f"Correlation_ID '{correlation_id}' " + f"topics '{topics}'"
     )
 
     status_list = [statuses] if "," not in statuses else statuses.split(",")
