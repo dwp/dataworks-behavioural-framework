@@ -6,7 +6,6 @@
 Feature: UCFS Business Data Export to Snapshots
 
     @fixture.htme.start.incremental
-    @fixture.snapshot.sender.start.max
     @fixture.s3.clear.snapshot
     @fixture.s3.clear.incremental.snapshot.output
     @fixture.hbase.clear.ingest.unique.start
