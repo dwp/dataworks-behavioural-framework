@@ -29,10 +29,10 @@ Feature: Sending of snapshot data down to the existing analytical environment
             | input_template_missing_last_modified_date.json                | output_template_missing_last_modified_date.json               | snapshot_record_valid_missing_last_modified_date.json             |
             | input_template_missing_last_modified_and_created_date.json    | output_template_missing_last_modified_and_created_date.json   | snapshot_record_valid_missing_last_modified_and_created_date.json |
         When The import process is performed with skip existing records setting of 'false'
-        And The relevant formatted data is stored in HBase with id format of 'not_wrapped'
-        And The export and snapshot process is performed for snapshot type of 'full'
-        And The dynamodb messages for each topic are one of 'Sent,Received,Success' for snapshot type of 'full'
-        Then The number of snapshots created for each topic is '1' with match type of 'exact' and snapshot type of 'full'
-        And Snapshot sender sends the correct snapshots for snapshot type of 'full'
-        And The dynamodb messages for each topic are one of 'Success' for snapshot type of 'full'
+#        And The relevant formatted data is stored in HBase with id format of 'not_wrapped'
+#        And The export and snapshot process is performed for snapshot type of 'full'
+#        And The dynamodb messages for each topic are one of 'Sent,Received,Success' for snapshot type of 'full'
+#        Then The number of snapshots created for each topic is '1' with match type of 'exact' and snapshot type of 'full'
+#        And Snapshot sender sends the correct snapshots for snapshot type of 'full'
+#        And The dynamodb messages for each topic are one of 'Success' for snapshot type of 'full'
         
