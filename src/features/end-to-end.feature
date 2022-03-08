@@ -21,9 +21,9 @@ Feature: UCFS Business Data Ingestion full end-to-end in to Crown
             | input-file-name-import  | output-file-name-import | snapshot-record-file-name-import |
             | input_template.json     | output_template.json    | snapshot_record_valid.json       |
         When The import process is performed with skip existing records setting of 'false'
-        And The relevant formatted data is stored in HBase with id format of 'not_wrapped'
-        And The export and snapshot process is performed for snapshot type of 'full'
-        And The dynamodb messages for each topic are one of 'Sent,Received,Success' for snapshot type of 'full'
+#        And The relevant formatted data is stored in HBase with id format of 'not_wrapped'
+#        And The export and snapshot process is performed for snapshot type of 'full'
+#        And The dynamodb messages for each topic are one of 'Sent,Received,Success' for snapshot type of 'full'
         And The dynamodb status for 'HTME' is set to 'COMPLETED' with snapshot type of 'full'
 #        Then The number of snapshots created for each topic is '1' with match type of 'exact' and snapshot type of 'full'
 #        And Snapshot sender sends the correct snapshots for snapshot type of 'full'
