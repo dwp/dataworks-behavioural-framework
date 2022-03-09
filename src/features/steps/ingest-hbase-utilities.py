@@ -26,8 +26,7 @@ def step_impl(context, step_type):
 @given("A check is run to see if '{step_type}' step is in-progress")
 def step_impl(context, step_type):
     step = aws_helper.get_emr_cluster_step(
-        "Automated Script Step - major compaction",
-        context.ingest_hbase_emr_cluster_id
+        "Automated Script Step - major compaction", context.ingest_hbase_emr_cluster_id
     )
 
     def step_state(x):
@@ -42,8 +41,8 @@ def step_impl(context, step_type):
     context.ingest_emr_major_compaction_running = None
     context.ingest_emr_major_compaction_completed = None
     if step_state(step) == "RUNNING" or (
-            step_state(step) == "COMPLETED" and
-            utc_event_in_last(step_end(step), minutes=30)
+        step_state(step) == "COMPLETED"
+        and utc_event_in_last(step_end(step), minutes=30)
     ):
         console_printer.print_warning_text(
             "Major compaction is running, or has "
@@ -62,8 +61,10 @@ def step_impl(context, step_type):
     script_name = None
     arguments = None
 
-    if ("skip_ingest_emr_step_submission" in context
-            and context.skip_ingest_emr_step_submission is True):
+    if (
+        "skip_ingest_emr_step_submission" in context
+        and context.skip_ingest_emr_step_submission is True
+    ):
         return
 
     if step_type == "major compaction":
@@ -138,6 +139,8 @@ def step_impl(context, step_type):
 
 
 def utc_event_in_last(naive_datetime: datetime, minutes: int) -> bool:
-    return True if (
-            naive_datetime > (datetime.datetime.utcnow() - timedelta(minutes=minutes))
-    ) else False
+    return (
+        True
+        if (naive_datetime > (datetime.datetime.utcnow() - timedelta(minutes=minutes)))
+        else False
+    )
