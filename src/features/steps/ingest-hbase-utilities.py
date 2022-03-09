@@ -1,6 +1,9 @@
-import os
-from behave import when, then, given
-from helpers import aws_helper, emr_step_generator
+import datetime
+from datetime import timedelta
+
+from behave import when, given
+
+from helpers import aws_helper, emr_step_generator, console_printer
 
 
 @when("An emrfs '{step_type}' step is started on the ingest-hbase EMR cluster")
@@ -20,10 +23,48 @@ def step_impl(context, step_type):
     )
 
 
+@given("A check is run to see if '{step_type}' step is in-progress")
+def step_impl(context, step_type):
+    step = aws_helper.get_emr_cluster_step(
+        "Automated Script Step - major compaction",
+        context.ingest_hbase_emr_cluster_id
+    )
+
+    def step_state(x):
+        return x["Status"]["State"]
+
+    def step_end(x):
+        return x["Status"]["Timeline"]["EndDateTime"].replace(tzinfo=None)
+
+    def step_id(x):
+        return x["Id"]
+
+    context.ingest_emr_major_compaction_running = None
+    context.ingest_emr_major_compaction_completed = None
+    if step_state(step) == "RUNNING" or (
+            step_state(step) == "COMPLETED" and
+            utc_event_in_last(step_end(step), minutes=30)
+    ):
+        console_printer.print_warning_text(
+            "Major compaction is running, or has "
+            "completed within the last 30 minutes\n\n"
+        )
+        context.skip_ingest_emr_step_submission = True
+        context.ingest_hbase_emr_job_step_id = step_id(step)
+    else:
+        console_printer.print_warning_text(
+            "Major Compaction not started/completed recently\n\n"
+        )
+
+
 @when("A script '{step_type}' step is started on the ingest-hbase EMR cluster")
 def step_impl(context, step_type):
     script_name = None
     arguments = None
+
+    if ("skip_ingest_emr_step_submission" in context
+            and context.skip_ingest_emr_step_submission is True):
+        return
 
     if step_type == "major compaction":
         script_name = "/var/ci/major_compaction_script.sh"
@@ -94,3 +135,9 @@ def step_impl(context, step_type):
         raise AssertionError(
             f"'{step_type}' step failed with final status of '{execution_state}'"
         )
+
+
+def utc_event_in_last(naive_datetime: datetime, minutes: int) -> bool:
+    return True if (
+            naive_datetime > (datetime.datetime.utcnow() - timedelta(minutes=minutes))
+    ) else False
