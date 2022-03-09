@@ -18,6 +18,18 @@ Feature: Administrative processes and workflows
     Given Snapshot sender is scaled if it will be triggered for snapshot type of 'drift_testing_incremental'
     When The export process is performed with default settings for snapshot type of 'drift_testing_incremental'
 
+  @admin-send-full-snapshots-to-crown
+  Scenario: Start the sending of S3 full snapshots to Crown
+    When The snapshot sending process is performed with default settings for snapshot type of 'full'
+
+  @admin-send-incremental-snapshots-to-crown
+  Scenario: Start the sending of S3 incremental snapshots to Crown
+    When The snapshot sending process is performed with default settings for snapshot type of 'incremental'
+
+  @admin-send-drift-testing-incremental-snapshots-to-crown
+  Scenario: Start the sending of S3 incremental snapshots to Crown
+    When The snapshot sending process is performed with default settings for snapshot type of 'drift_testing_incremental'
+
   @admin-scale-down-hdi
   @fixture.hdi.stop
   Scenario: Stop the HDI instance
@@ -28,6 +40,10 @@ Feature: Administrative processes and workflows
   Scenario: Stop the HTME instance
     Then The asg has scaled correctly
 
+  @admin-scale-down-snapshotsender
+  Scenario: Stop the Snapshot Sender instance
+    Then The asg has scaled correctly
+
   @admin-scale-up-hdi
   @fixture.historic.data.importer.start.max
   Scenario: Start the HDI instance
@@ -36,6 +52,10 @@ Feature: Administrative processes and workflows
   @admin-scale-up-htme
   @fixture.htme.start.max
   Scenario: Start the HTME instance
+    Then The asg has scaled correctly
+
+  @admin-scale-up-snapshotsender
+  Scenario: Start the Snapshot Sender instance
     Then The asg has scaled correctly
 
   @admin-scale-up-kafka-stub
