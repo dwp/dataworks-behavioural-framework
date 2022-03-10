@@ -34,6 +34,7 @@ Feature: Utilities to work with the ingest hbase emr cluster
 
   @admin-ingest-hbase-major-compaction
   Scenario: A major compaction of all tables is triggered on ingest hase EMR cluster
+    Given A check is run to see if 'major compaction' step is in-progress
     When A script 'download scripts' step is started on the ingest-hbase EMR cluster
     And The 'download scripts' step is executed successfully
     And A script 'major compaction' step is started on the ingest-hbase EMR cluster

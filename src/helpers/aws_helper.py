@@ -1338,7 +1338,7 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
 
 
 def get_emr_cluster_step(step_name, cluster_id):
-    """Returns the step for a given step name if found in the cluster
+    """Returns the most recent step for a given step name if found in the cluster
 
     Keyword arguments:
     step_id -- the id of the job step
