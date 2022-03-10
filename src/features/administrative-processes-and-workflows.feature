@@ -19,17 +19,14 @@ Feature: Administrative processes and workflows
     When The export process is performed with default settings for snapshot type of 'drift_testing_incremental'
 
   @admin-send-full-snapshots-to-crown
-  @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 full snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'full'
 
   @admin-send-incremental-snapshots-to-crown
-  @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 incremental snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'incremental'
 
   @admin-send-drift-testing-incremental-snapshots-to-crown
-  @fixture.snapshot.sender.start.max
   Scenario: Start the sending of S3 incremental snapshots to Crown
     When The snapshot sending process is performed with default settings for snapshot type of 'drift_testing_incremental'
 
@@ -44,7 +41,6 @@ Feature: Administrative processes and workflows
     Then The asg has scaled correctly
 
   @admin-scale-down-snapshotsender
-  @fixture.snapshot.sender.stop
   Scenario: Stop the Snapshot Sender instance
     Then The asg has scaled correctly
 
@@ -59,7 +55,6 @@ Feature: Administrative processes and workflows
     Then The asg has scaled correctly
 
   @admin-scale-up-snapshotsender
-  @fixture.snapshot.sender.start.max
   Scenario: Start the Snapshot Sender instance
     Then The asg has scaled correctly
 
