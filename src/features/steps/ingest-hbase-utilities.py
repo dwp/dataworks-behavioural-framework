@@ -29,6 +29,9 @@ def step_impl(context, step_type):
         "Automated Script Step - major compaction", context.ingest_hbase_emr_cluster_id
     )
 
+    if not step:
+        return
+
     def step_state(x):
         return x["Status"]["State"]
 
