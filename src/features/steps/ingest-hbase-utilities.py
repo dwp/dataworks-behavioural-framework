@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from behave import when, given
 
-from helpers import aws_helper, emr_step_generator, console_printer
+from helpers import aws_helper, emr_step_generator
 
 
 @when("An emrfs '{step_type}' step is started on the ingest-hbase EMR cluster")
@@ -23,39 +23,42 @@ def step_impl(context, step_type):
     )
 
 
-@given("A check is run to see if '{step_type}' step is in-progress")
+@when(
+    "A script '{step_type}' step is started on the ingest-hbase"
+    " EMR cluster, if compaction not recently run"
+)
 def step_impl(context, step_type):
     step = aws_helper.get_emr_cluster_step(
-        "Automated Script Step - major compaction", context.ingest_hbase_emr_cluster_id
+        step_name="Automated Script Step - major compaction",
+        cluster_id=context.ingest_hbase_emr_cluster_id,
     )
 
     if not step:
-        return
-
-    def step_state(x):
-        return x["Status"]["State"]
-
-    def step_end(x):
-        return x["Status"]["Timeline"]["EndDateTime"].replace(tzinfo=None)
-
-    def step_id(x):
-        return x["Id"]
-
-    context.ingest_emr_major_compaction_running = None
-    context.ingest_emr_major_compaction_completed = None
-    if step_state(step) == "RUNNING" or (
-        step_state(step) == "COMPLETED"
-        and utc_event_in_last(step_end(step), minutes=30)
-    ):
-        console_printer.print_warning_text(
-            "Major compaction is running, or has "
-            "completed within the last 30 minutes\n\n"
+        # No major compaction run at all on this cluster continue as normal
+        context.execute_steps(
+            f"When A script '{step_type}' step is started on the ingest-hbase EMR cluster"
         )
-        context.skip_ingest_emr_step_submission = True
-        context.ingest_hbase_emr_job_step_id = step_id(step)
+
+    if (
+        # Major compaction is currently running
+        (emr_step_state(step) in ["PENDING", "RUNNING"])
+        or
+        # Major compaction has completed in last 30 minutes
+        (
+            emr_step_state(step) == "COMPLETED"
+            and utc_event_in_last(emr_step_end(step), minutes=30)
+        )
+    ):
+        # Compaction run recently.  Get latest step of type {step_type} to trace
+        step = aws_helper.get_emr_cluster_step(
+            step_name=f"Automated Script Step - {step_type}",
+            cluster_id=context.ingest_hbase_emr_cluster_id,
+        )
+        context.ingest_hbase_emr_job_step_id = step["Id"]
     else:
-        console_printer.print_warning_text(
-            "Major Compaction not started/completed recently\n\n"
+        # Compaction has not run recently, this job should run as normal
+        context.execute_steps(
+            f"When A script '{step_type}' step is started on the ingest-hbase EMR cluster"
         )
 
 
@@ -147,3 +150,15 @@ def utc_event_in_last(naive_datetime: datetime, minutes: int) -> bool:
         if (naive_datetime > (datetime.datetime.utcnow() - timedelta(minutes=minutes)))
         else False
     )
+
+
+def emr_step_state(x):
+    return x["Status"]["State"]
+
+
+def emr_step_end(x):
+    return x["Status"]["Timeline"]["EndDateTime"].replace(tzinfo=None)
+
+
+def emr_step_id(x):
+    return x["Id"]
