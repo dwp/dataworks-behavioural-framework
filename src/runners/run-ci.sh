@@ -379,7 +379,7 @@ function execute_behave() {
         LOAD_TESTS_KAFKA_RECORD_COUNT="100"
     fi
 
-    pip install -r ../../requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --user
+    pip3 install -r ../../requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --user
 
     cd ../
 
