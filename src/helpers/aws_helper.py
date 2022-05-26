@@ -832,7 +832,7 @@ def put_object_in_s3_with_metadata(body, s3_bucket, s3_key, metadata):
 
     Keyword arguments:
     s3_bucket -- the bucket in which the files is stored
-    s3_key -- the pathe to the file in s3
+    s3_key -- the path to the file in s3
     metadata -- an object with metadata key values  in it ie.:
             [{
                 'Key': 'key',

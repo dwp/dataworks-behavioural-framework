@@ -552,6 +552,13 @@ def set_test_run_common_variables(context):
         "PDM_DATA_CLASSIFICATION"
     )
 
+    context.hbase_export_bucket = context.config.userdata.get(
+        "HBASE_EXPORT_BUCKET"
+    )
+    context.hbase_snapshot_exporter_script = context.config.userdata.get(
+        "HBASE_SNAPSHOT_EXPORTER_SCRIPT"
+    )
+
     context.common_config_bucket = context.config.userdata.get(
         "DATAWORKS_COMMON_CONFIG_BUCKET"
     )
