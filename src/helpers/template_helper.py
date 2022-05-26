@@ -120,3 +120,15 @@ def get_historic_data_importer_prefixes(
             f"Sending one message overall using '{prefixes_list}' for HDI"
         )
         return [prefixes_list]
+
+
+def get_hbase_table_name_fromt_topic_name(topic_name):
+    """Returns a qualified HBASE table name from a topic name.
+
+    Keyword arguments:
+    topic_name -- the topic name
+    """
+    pattern = f"^(?:\w*\.)?([-\w]+)\.([-\w]+)$"
+    matched = re.match(pattern, topic_name)
+    table_name = f"{matched.group(1)}:{matched.group(2)}"
+    return table_name

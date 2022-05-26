@@ -835,3 +835,11 @@ def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
     # wait for a 60secs
     time.sleep(int(timeout))
     console_printer.print_info("COMPLETE:Initialising e2e tests...for dlq consumer")
+
+
+@fixture
+def clean_up_hbase_export_s3_bucket(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'clean_up_hbase_export_s3_bucket' fixture")
+    aws_helper.clear_s3_bucket(
+        context.hbase_export_bucket,
+    )
