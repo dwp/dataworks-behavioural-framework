@@ -569,3 +569,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
         use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)
+    if tag == "fixture.clean.up.hbase.export.hbase.snapshots":
+        use_fixture(after_fixtures.clean_up_hbase_export_hbase_snapshots, context)

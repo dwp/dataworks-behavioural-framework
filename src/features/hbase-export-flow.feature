@@ -7,6 +7,7 @@ Feature: HBASE Snapshot Export Flow Test
   @fixture.hbase.clear.ingest.start
   @fixture.s3.clear.k2hb.manifests.main.start
   @fixture.clean.up.hbase.export.s3.bucket
+  @fixture.clean.up.hbase.export.hbase.snapshots
   Scenario: We can snapshot hbase tables and export them to S3
     Given UCFS send '1' messages of type 'kafka_main' with the given template files, encryption setting of 'true' and wait setting of 'true' with key method of 'different'
         | input-file-name-kafka                                | output-file-name-kafka                             | snapshot-record-file-name-kafka |
