@@ -110,7 +110,9 @@ def step_impl(
             edited_input_file = file[1]
             file_contents = file_helper.get_contents_of_file(edited_input_file, True)
             db_object = json.loads(file_contents)["message"]["dbObject"]
-            context.db_object_checksums.append(hashlib.md5(json.dumps(db_object).encode('utf-8')).hexdigest())
+            context.db_object_checksums.append(
+                hashlib.md5(json.dumps(db_object).encode("utf-8")).hexdigest()
+            )
 
         files_to_send_to_kafka_broker = [
             generated_file[0] for generated_file in generated_files

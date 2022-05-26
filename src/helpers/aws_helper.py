@@ -388,9 +388,7 @@ def clear_s3_prefix(s3_bucket, path, delete_prefix, path_is_folder=True):
 
 
 def clear_s3_bucket(s3_bucket):
-    console_printer.print_info(
-        f"Clearing S3 bucket '{s3_bucket}' of all objects"
-    )
+    console_printer.print_info(f"Clearing S3 bucket '{s3_bucket}' of all objects")
     s3 = get_resource(resource_name="s3")
     bucket = s3.Bucket(s3_bucket)
     bucket.objects.all().delete()

@@ -5,7 +5,7 @@ from helpers import (
     aws_helper,
     console_printer,
     dataworks_kafka_producer_common_helper,
-    emr_step_generator
+    emr_step_generator,
 )
 
 
@@ -238,7 +238,9 @@ def dataworks_stop_kafka_consumer_app(context):
 
 @fixture
 def clean_up_hbase_export_hbase_snapshots(context):
-    bash_script = f"echo \"delete_snapshot '{context.hbase_snapshot_name}'\" | hbase shell -n"
+    bash_script = (
+        f"echo \"delete_snapshot '{context.hbase_snapshot_name}'\" | hbase shell -n"
+    )
     step_type = "Cleanup HBASE Snapshot"
     context.ingest_hbase_emr_job_step_id = emr_step_generator.generate_bash_step(
         context.ingest_hbase_emr_cluster_id,
