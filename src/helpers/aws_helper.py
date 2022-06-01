@@ -433,6 +433,26 @@ def truncate_hbase_table(topic_name):
     return topic_name
 
 
+def delete_hbase_table(topic_name):
+    """Clears all messages from hbase table for a given topic.
+
+    Keyword arguments:
+    topic_name -- Name of the topic
+    """
+    # 'deleteEntireTableWhenInDeleteMode' must be True when 'deleteRequest' is True here due to us wanting to delete the table
+    payload_dict = {
+        "topic": topic_name,
+        "deleteRequest": True,
+        "deleteEntireTableWhenInDeleteMode": True,
+    }
+    payload_json = json.dumps(payload_dict)
+
+    console_printer.print_info(f"Deleting table in HBase with payload {payload_json}")
+    invoke_lambda.invoke_hbase_retriever(payload_json)
+
+    return topic_name
+
+
 def assert_snapshots_in_s3_threaded(
     topics, s3_bucket, s3_prefix, expected_file_count, timeout, exact_count_match=True
 ):

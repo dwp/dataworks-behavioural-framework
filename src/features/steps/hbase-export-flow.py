@@ -12,15 +12,12 @@ from helpers import (
 
 @given("The checksums are uploaded")
 def step_impl(context):
-    context.hbase_table = template_helper.get_hbase_table_name_fromt_topic_name(
-        context.topics[0]
-    )
     for checksum in context.db_object_checksums:
         aws_helper.put_object_in_s3_with_metadata(
             body=b"",
             s3_bucket=context.hbase_export_bucket,
-            s3_key=f"{context.hbase_table}/{checksum}.md5",
-            metadata={},
+            s3_key=f"snapshots/{checksum}.md5",
+            metadata={}
         )
 
 
@@ -42,8 +39,9 @@ def step_impl(context, hbase_snapshot_name):
     script_name = "/opt/emr/hbase-snapshot-exporter.sh"
     context.hbase_snapshot_name = hbase_snapshot_name
 
-    # TODO: support multiple topics / tables
-    arguments = f"{context.hbase_table} s3://{context.hbase_export_bucket}/{context.hbase_table} {context.hbase_snapshot_name}"
+    #TODO: support multiple topics / tables
+    hbase_table = template_helper.get_hbase_table_name_fromt_topic_name(context.topics[0])
+    arguments = f"{hbase_table} s3://{context.hbase_export_bucket}/snapshots {context.hbase_snapshot_name}"
     step_type = "HBASE Snapshot Export"
 
     context.ingest_hbase_emr_job_step_id = emr_step_generator.generate_script_step(
@@ -80,19 +78,16 @@ def step_checker(context, step_type):
             f"'{step_type}' step failed with final status of '{execution_state}'"
         )
 
-
-@then("The Snapshot is available in the S3 bucket")
-def step_impl(context):
-    if not aws_helper.does_s3_key_exist(
-        context.hbase_export_bucket, f"{context.hbase_table}/.hbase-snapshot"
-    ):
+@given("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
+@when("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
+@then("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
+def step_impl(context, hbase_snapshot_name):
+    if not aws_helper.does_s3_key_exist(context.hbase_export_bucket, f"snapshots/.hbase-snapshot/{hbase_snapshot_name}"):
         raise AssertionError(
-            f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/{context.hbase_table}'"
+            f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/snapshots'"
         )
 
-    if not aws_helper.does_s3_key_exist(
-        context.hbase_export_bucket, f"{context.hbase_table}/archive"
-    ):
+    if not aws_helper.does_s3_key_exist(context.hbase_export_bucket, f"snapshots/archive"):
         raise AssertionError(
-            f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/{context.hbase_table}'"
+            f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/snapshots'"
         )

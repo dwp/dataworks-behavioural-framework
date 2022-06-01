@@ -18,4 +18,4 @@ Feature: HBASE Snapshot Export Flow Test
     And The Download HBASE Export script step is executed successfully
     And The HBASE Snapshot Export script is run with HBASE snapshot name 'automated_tests_snapshot'
     And The HBASE Snapshot Export step is executed successfully
-    Then The Snapshot is available in the S3 bucket
+    Then The HBASE Snapshot 'automated_tests_snapshot' is available in the Export S3 bucket
