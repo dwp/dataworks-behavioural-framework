@@ -117,6 +117,8 @@ def step_verify_stf_content(context):
     console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
     assert len(keys) > 0
     for s3_key in keys:
+        if s3_key == S3_PREFIX_FOR_SFT_OUTPUT:
+            continue
         output_file_content = (
             aws_helper.get_s3_object(
                 bucket=context.snapshot_s3_output_bucket, key=s3_key, s3_client=None
