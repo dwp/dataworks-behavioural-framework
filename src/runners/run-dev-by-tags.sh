@@ -16,7 +16,7 @@ emrfs_prefix_override="${11}"
 function set_overrides() {
     echo "Setting overrides for the local test run"
 
-    export AWS_PROFILE_FOR_DOWNLOADS="dataworks-qa"
+    export AWS_PROFILE_FOR_DOWNLOADS="dataworks-development"
     export IS_SYNTHETIC_DATA_INGESTION=""
     export OVERRIDE_ROLE="true"
 
