@@ -467,6 +467,7 @@ def before_tag(context, tag):
     if tag == "fixture.clean.up.hbase.snapshot.cloned.table":
         use_fixture(before_fixtures.clean_up_hbase_snapshot_cloned_table, context)
 
+
 def after_all(context):
     global current_feature
     global current_scenario

@@ -14,7 +14,7 @@ from helpers import (
     streaming_manifests_helper,
     streaming_data_helper,
     dataworks_kafka_producer_common_helper,
-    emr_step_generator
+    emr_step_generator,
 )
 
 
@@ -848,8 +848,8 @@ def clean_up_hbase_export_s3_bucket(context, timeout=30, **kwargs):
 
 @fixture
 def clean_up_hbase_snapshot_cloned_table(context):
-    console_printer.print_info("Executing 'clean_up_hbase_snapshot_cloned_table' fixture")
-    table_name = context.hbase_snapshot_cloned_table.replace(":", ".")
-    aws_helper.delete_hbase_table(
-        f"db.{table_name}"
+    console_printer.print_info(
+        "Executing 'clean_up_hbase_snapshot_cloned_table' fixture"
     )
+    table_name = context.hbase_snapshot_cloned_table.replace(":", ".")
+    aws_helper.delete_hbase_table(f"db.{table_name}")

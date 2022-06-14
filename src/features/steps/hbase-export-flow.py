@@ -17,7 +17,7 @@ def step_impl(context):
             body=b"",
             s3_bucket=context.hbase_export_bucket,
             s3_key=f"snapshots/{checksum}.md5",
-            metadata={}
+            metadata={},
         )
 
 
@@ -39,8 +39,10 @@ def step_impl(context, hbase_snapshot_name):
     script_name = "/opt/emr/hbase-snapshot-exporter.sh"
     context.hbase_snapshot_name = hbase_snapshot_name
 
-    #TODO: support multiple topics / tables
-    hbase_table = template_helper.get_hbase_table_name_fromt_topic_name(context.topics[0])
+    # TODO: support multiple topics / tables
+    hbase_table = template_helper.get_hbase_table_name_fromt_topic_name(
+        context.topics[0]
+    )
     arguments = f"{hbase_table} s3://{context.hbase_export_bucket}/snapshots {context.hbase_snapshot_name}"
     step_type = "HBASE Snapshot Export"
 
@@ -78,16 +80,23 @@ def step_checker(context, step_type):
             f"'{step_type}' step failed with final status of '{execution_state}'"
         )
 
-@given("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
+
+@given(
+    "The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket"
+)
 @when("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
 @then("The HBASE Snapshot '{hbase_snapshot_name}' is available in the Export S3 bucket")
 def step_impl(context, hbase_snapshot_name):
-    if not aws_helper.does_s3_key_exist(context.hbase_export_bucket, f"snapshots/.hbase-snapshot/{hbase_snapshot_name}"):
+    if not aws_helper.does_s3_key_exist(
+        context.hbase_export_bucket, f"snapshots/.hbase-snapshot/{hbase_snapshot_name}"
+    ):
         raise AssertionError(
             f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/snapshots'"
         )
 
-    if not aws_helper.does_s3_key_exist(context.hbase_export_bucket, f"snapshots/archive"):
+    if not aws_helper.does_s3_key_exist(
+        context.hbase_export_bucket, f"snapshots/archive"
+    ):
         raise AssertionError(
             f"Snapshot was not exported to 's3://{context.hbase_export_bucket}/snapshots'"
         )
