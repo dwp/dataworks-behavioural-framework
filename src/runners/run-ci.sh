@@ -75,6 +75,7 @@ function set_file_locations() {
     export TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP="${local_file_location}/dataworks-ml-streams-kafka-consumer.json"
     export TF_DATAWORKS_AWS_S3_OBJECT_TAGGER="${local_file_location}/dataworks-aws-s3-object-tagger.json"
     export TF_DATAWORKS_HBASE_EXPORT="${local_file_location}/dataworks-hbase-export.json"
+    export TF_DATAWORKS_HBASE_IMPORT="${local_file_location}/dataworks-hbase-import.json"
 }
 
 # shellcheck disable=SC2112
@@ -285,6 +286,16 @@ function execute_behave() {
     else
         echo "Skipping TF_DATAWORKS_HBASE_EXPORT=${TF_DATAWORKS_HBASE_EXPORT}"
     fi
+
+    if [[ ! -z "${TF_DATAWORKS_HBASE_IMPORT}" && "${TF_DATAWORKS_HBASE_IMPORT}" != "${NOT_SET_FLAG}" ]]; then
+        echo "Using ${TF_DATAWORKS_HBASE_IMPORT} ..."
+        HBASE_SNAPSHOT_IMPORTER_SCRIPT="$(cat ${TF_DATAWORKS_HBASE_IMPORT} | jq -r ".hbase_snapshot_importer_script.value")"
+        HBASE_SNAPSHOT_RESTORER_SCRIPT="$(cat ${TF_DATAWORKS_HBASE_IMPORT} | jq -r ".hbase_snapshot_restorer_script.value")"
+    else
+        echo "Skipping TF_DATAWORKS_HBASE_IMPORT=${TF_DATAWORKS_HBASE_IMPORT}"
+    fi
+
+
 
     if [[ -z "${TEST_RUN_NAME}" ]]; then
         if [[ -f $META_FOLDER/build-pipeline-name ]]; then
@@ -565,6 +576,8 @@ function execute_behave() {
     -D PDM_DATA_CLASSIFICATION="${PDM_DATA_CLASSIFICATION}" \
     -D HBASE_EXPORT_BUCKET="${HBASE_EXPORT_BUCKET}" \
     -D HBASE_SNAPSHOT_EXPORTER_SCRIPT="${HBASE_SNAPSHOT_EXPORTER_SCRIPT}" \
+    -D HBASE_SNAPSHOT_IMPORTER_SCRIPT="${HBASE_SNAPSHOT_IMPORTER_SCRIPT}" \
+    -D HBASE_SNAPSHOT_RESTORER_SCRIPT="${HBASE_SNAPSHOT_RESTORER_SCRIPT}" \
     -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
 
     export test_exit_code=$?
@@ -594,6 +607,7 @@ echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP=${TF_DATAWORKS_STREAMS_KAF
 echo "Inputs: TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP=${TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP}"
 echo "Inputs: TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
 echo "Inputs: TF_DATAWORKS_HBASE_EXPORT=${TF_DATAWORKS_HBASE_EXPORT}"
+echo "Inputs: TF_DATAWORKS_HBASE_IMPORT=${TF_DATAWORKS_HBASE_IMPORT}"
 
 execute_behave
 
