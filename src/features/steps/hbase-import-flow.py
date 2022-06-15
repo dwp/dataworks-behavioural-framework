@@ -38,7 +38,7 @@ def step_impl(context, hbase_snapshot_name):
     script_name = "/opt/emr/hbase-snapshot-importer.sh"
     context.hbase_snapshot_name = hbase_snapshot_name
 
-    arguments = f"{context.hbase_snapshot_name} {context.hbase_export_bucket} snapshots"
+    arguments = f"{context.hbase_snapshot_name}"
     step_type = "HBASE Snapshot Import"
 
     context.ingest_hbase_emr_job_step_id = emr_step_generator.generate_script_step(
