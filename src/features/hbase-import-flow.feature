@@ -12,13 +12,11 @@ Feature: HBASE Snapshot Import Flow Test
 
   @fixture.clean.up.hbase.export.hbase.snapshots
   Scenario: We can import HBASE Snapshots and restore HBASE tables from them
-    Given The HBASE Snapshot 'automated_tests_snapshot' is available in the Export S3 bucket
     When The HBASE Snapshot 'automated_tests_snapshot' is imported from the HBASE Export Bucket to the HBASE root dir
     Then The imported HBASE Snapshot 'automated_tests_snapshot' is restored
 
   @fixture.clean.up.hbase.export.hbase.snapshots
   @fixture.clean.up.hbase.snapshot.cloned.table
   Scenario: We can import HBASE Snapshots and clone HBASE tables from them
-    Given The HBASE Snapshot 'automated_tests_snapshot' is available in the Export S3 bucket
     When The HBASE Snapshot 'automated_tests_snapshot' is imported from the HBASE Export Bucket to the HBASE root dir
     Then The imported HBASE Snapshot 'automated_tests_snapshot' is cloned into a HBASE table
