@@ -3,7 +3,6 @@
 META_FOLDER="${1}"
 LOCAL_PROFILE="${2}" # Only used for local running
 
-arn_value="arn"
 aws_value="aws"
 service="iam"
 

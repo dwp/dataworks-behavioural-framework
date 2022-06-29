@@ -11,4 +11,4 @@ if [[ "${test_run_id}" == "NOT_SET" ]]; then
   exit 1
 fi
 
-./run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "${feature_tag}" "${mongo_import_key}" "${number_of_topics}"
+./src/runners/run-dev-by-tags.sh "${test_run_id}" "${test_run_type}" "${feature_tag}" "${mongo_import_key}" "${number_of_topics}"

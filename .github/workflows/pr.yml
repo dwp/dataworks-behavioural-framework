@@ -22,7 +22,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ${{ env.IMAGE_NAME }}
-          args: --file=Dockerfile --policy-path=./.snyk --severity-threshold=high --exclude-base-image-vulns --org=dwp-dataworks
+          args: --file=Dockerfile_0 --policy-path=./.snyk --severity-threshold=high --exclude-base-image-vulns --org=dwp-dataworks
 
   format:
     runs-on: ubuntu-latest

@@ -29,8 +29,7 @@ def step_impl(context, template_name):
         context.fixture_path_local, template_name
     )
 
-
-@given(
+@then(
     "Generate '{record_count}' records per table for '{module_name}' with PII flag as '{PII_Flag}' and upload to s3 bucket"
 )
 def step_impl(context, record_count, module_name, PII_Flag):
@@ -177,7 +176,6 @@ def step_impl(context):
                 f"The step Id {step} failed with final status of '{execution_state}'"
             )
 
-
 @then(
     "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' with '{load_type}' extract and store step Ids in a list"
 )
@@ -235,7 +233,6 @@ def step_impl(context, module_name, load_type):
             ) = kickstart_adg_helper.get_actual_and_expected_data(
                 context, collection, schema_config, load_type
             )
-
         elif schema_config["record_layout"].lower() == "json":
             (
                 actual_contents,
@@ -243,7 +240,6 @@ def step_impl(context, module_name, load_type):
             ) = kickstart_adg_helper.get_actual_and_expected_data(
                 context, collection, schema_config, load_type
             )
-
         console_printer.print_info(f"Check the total items in actual and expected list")
         assert len(actual_contents) == len(
             expected_contents

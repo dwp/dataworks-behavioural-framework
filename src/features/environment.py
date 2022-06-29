@@ -450,6 +450,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_uc_feature_output, context)
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
+    if tag == "fixture.s3.clear.ch.start":
+        use_fixture(before_fixtures.s3_clear_ch_start, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
     if tag == "fixture.init.e2e.dataworks.kafka.consumer":
