@@ -135,3 +135,13 @@ def invoke_glue_launcher_lambda(payload):
     """
     response = aws_helper.invoke_lambda_function("glue_launcher", payload)
     return json.loads(response.decode())
+
+
+def invoke_ap_launcher_lambda(payload):
+    """Triggers ap_emr_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function("ap_emr_launcher", payload)
+    return json.loads(response.decode())
