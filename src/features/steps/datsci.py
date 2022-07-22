@@ -27,7 +27,6 @@ def step_(context):
     payload_json = json.dumps(emr_launcher_config)
     console_printer.print_info(f"this is the payload: {payload_json}")
     cluster_response = invoke_lambda.invoke_ap_launcher_lambda(payload_json)
-    print(cluster_response)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
@@ -58,8 +57,6 @@ def step_impl(context, timeout_mins):
     execution_state = aws_helper.poll_emr_cluster_step_status(
         context.datsci_cluster_step_id, context.datsci_cluster_id, timeout_secs
     )
-
-    print(execution_state)
 
     if execution_state != "COMPLETED":
         raise AssertionError(
