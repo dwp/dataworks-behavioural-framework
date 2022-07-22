@@ -40,9 +40,7 @@ def step_(context):
 @then("I insert the '{step_name}' step onto the DATSCI cluster")
 def step_impl(context, step_name):
     context.datsci_cluster_step_name = step_name
-    datsci_bash_command = (
-        f"hive -e 'SELECT * FROM site_data_csv;'"
-    )
+    datsci_bash_command = f"hive -e 'SELECT * FROM site_data_csv;'"
 
     context.datsci_cluster_step_id = emr_step_generator.generate_bash_step(
         context.datsci_cluster_id,
