@@ -18,6 +18,7 @@ CONF_PREFIX = "component/dataworks-aws-ch/steps/"
 E2E_S3_PREFIX = "e2e/data-ingress/companies"
 CLUSTER_ARN = "ClusterArn"
 
+
 @when("The cluster starts without steps")
 def step_impl(context):
     emr_launcher_config = {
@@ -31,9 +32,7 @@ def step_impl(context):
         "additional_step_args": None,
     }
     payload_json = json.dumps(emr_launcher_config)
-    cluster_response = invoke_lambda.invoke_ch_emr_launcher_lambda(
-        payload_json
-    )
+    cluster_response = invoke_lambda.invoke_ch_emr_launcher_lambda(payload_json)
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
@@ -48,28 +47,41 @@ def step_impl(context):
 def step_impl(context):
     if not os.path.isdir(context.temp_folder):
         os.mkdir(context.temp_folder)
-    ch_helper.download_file(context.common_config_bucket, CONF_PREFIX, CONF_FILENAME, context.temp_folder)
+    ch_helper.download_file(
+        context.common_config_bucket, CONF_PREFIX, CONF_FILENAME, context.temp_folder
+    )
     print(os.listdir(context.temp_folder))
     args = ch_helper.get_args(os.path.join(context.temp_folder, CONF_FILENAME))
     context.args_ch = args
 
 
-@then("Generate '{nfiles_per_date}' files with '{nrecords}' rows for both todays and yesterdays date")
+@then(
+    "Generate '{nfiles_per_date}' files with '{nrecords}' rows for both todays and yesterdays date"
+)
 def step_impl(context, nfiles_per_date, nrecords):
-    console_printer.print_info(f"generating files fro the column {context.args_ch['args']['cols']}")
+    console_printer.print_info(
+        f"generating files fro the column {context.args_ch['args']['cols']}"
+    )
 
-    context.filenames = ch_helper.get_filenames_today_yesterday(context.args_ch['args']['filename'],
-                                                int(nfiles_per_date), context.temp_folder)
+    context.filenames = ch_helper.get_filenames_today_yesterday(
+        context.args_ch["args"]["filename"], int(nfiles_per_date), context.temp_folder
+    )
     console_printer.print_info(f"filenames are {context.filenames}")
-    cols = ast.literal_eval(context.args_ch['args']['cols'])
+    cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_files(context.filenames, nrecords, cols)
-    context.rows_expected = int(nfiles_per_date) * int(nrecords)  # latest processed files records not counted
-    context.cols_expected = len(cols)+1  # pre-defined columns + the partitioning column
+    context.rows_expected = int(nfiles_per_date) * int(
+        nrecords
+    )  # latest processed files records not counted
+    context.cols_expected = (
+        len(cols) + 1
+    )  # pre-defined columns + the partitioning column
 
 
 @then("Upload the local files to s3")
 def step_impl(context):
-    console_printer.print_info(f"generated files with columns {context.args_ch['args']['cols']}")
+    console_printer.print_info(
+        f"generated files with columns {context.args_ch['args']['cols']}"
+    )
     for f in context.filenames:
         ch_helper.s3_upload(context, f, E2E_S3_PREFIX)
     context.filename_not_to_process = context.filenames[0]
@@ -113,7 +125,7 @@ def step_impl(context):
             f"--cols {context.cols_expected}",
             f"--db {context.args_ch['args']['db_name']}",
             f"--table {context.args_ch['args']['table_name']}",
-            f"--partitioning_column {context.args_ch['args']['partitioning_column']}"
+            f"--partitioning_column {context.args_ch['args']['partitioning_column']}",
         ]
     )
     step_name = "e2e"
@@ -131,4 +143,6 @@ def step_impl(context):
 
 @then("Verify last imported file was updated on DynamoDB")
 def step_impl(context):
-    assert ch_helper.file_latest_dynamo_fetch in context.filenames[-1], "the dynamoDB item was not updated correctly"
+    assert (
+        ch_helper.file_latest_dynamo_fetch in context.filenames[-1]
+    ), "the dynamoDB item was not updated correctly"

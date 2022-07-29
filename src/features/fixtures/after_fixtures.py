@@ -152,10 +152,7 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
 def terminate_ch_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_kickstart_adg_cluster' fixture")
 
-    if (
-            "ch_cluster_id" in context
-            and context.ch_cluster_id is not None
-    ):
+    if "ch_cluster_id" in context and context.ch_cluster_id is not None:
         try:
             aws_helper.terminate_emr_cluster(context.ch_cluster_id)
         except ClientError as error:

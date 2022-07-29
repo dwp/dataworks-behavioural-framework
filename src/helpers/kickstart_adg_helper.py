@@ -168,6 +168,7 @@ def generate_csv_files(schema_config, local_output_folder, record_count):
                         writer.writerow(record_data)
                         num += 1
 
+
 def generate_json_files(schema_config, local_output_folder, record_count):
     for collection, collection_schema in schema_config["schema"].items():
         run_date = datetime.strftime(datetime.now(), "%Y-%m-%d")

@@ -130,7 +130,7 @@ def assume_role():
     console_printer.print_info(f"time out {aws_session_timeout_seconds}")
 
     assume_role_dict = sts_client.assume_role(
-        RoleArn="arn"+aws_role_arn,
+        RoleArn="arn" + aws_role_arn,
         RoleSessionName=f"{session_name}",
         DurationSeconds=int(aws_session_timeout_seconds),
     )
@@ -1374,6 +1374,7 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
         f"EMR job step with step id of {step_id} did not finish within '{timeout_in_seconds}' seconds"
     )
 
+
 def poll_emr_cluster_status(cluster_id, timeout_in_seconds=None):
     """Polls emr for the cluster status.
 
@@ -1390,10 +1391,8 @@ def poll_emr_cluster_status(cluster_id, timeout_in_seconds=None):
         response = client.describe_cluster(ClusterId=cluster_id)
 
         state = response["Cluster"]["Status"]["State"]
-        if state in ('WAITING', 'TERMINATED', 'TERMINATED_WITH_ERRORS'):
-            console_printer.print_info(
-                f"EMR cluster is now on status: '{state}'"
-            )
+        if state in ("WAITING", "TERMINATED", "TERMINATED_WITH_ERRORS"):
+            console_printer.print_info(f"EMR cluster is now on status: '{state}'")
             return state
 
         time.sleep(1)
@@ -1406,7 +1405,6 @@ def poll_emr_cluster_status(cluster_id, timeout_in_seconds=None):
     raise AssertionError(
         f"EMR did not go on WAITING status within '{timeout_in_seconds}' seconds"
     )
-
 
 
 def get_emr_cluster_step(step_name, cluster_id):

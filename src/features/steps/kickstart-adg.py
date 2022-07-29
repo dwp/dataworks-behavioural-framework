@@ -29,6 +29,7 @@ def step_impl(context, template_name):
         context.fixture_path_local, template_name
     )
 
+
 @then(
     "Generate '{record_count}' records per table for '{module_name}' with PII flag as '{PII_Flag}' and upload to s3 bucket"
 )
@@ -175,6 +176,7 @@ def step_impl(context):
             raise AssertionError(
                 f"The step Id {step} failed with final status of '{execution_state}'"
             )
+
 
 @then(
     "Add validation steps '{step_name}' to kickstart adg emr cluster for '{module_name}' with '{load_type}' extract and store step Ids in a list"
