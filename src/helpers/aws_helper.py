@@ -246,7 +246,6 @@ def delete_item_from_dynamodb(table_name, key_dict):
     return dynamodb_client.delete_item(TableName=f"{table_name}", Key=key_dict)
 
 
-
 def insert_item_to_dynamo_db_v2(table, item):
     """Puts an item in to a table in dynamodb.
 
