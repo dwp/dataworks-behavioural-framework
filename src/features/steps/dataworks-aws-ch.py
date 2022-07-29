@@ -39,7 +39,7 @@ def step_impl(context):
     cluster_identifier_arr = cluster_identifier.split("/")
     cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
     context.ch_cluster_id = cluster_id
-    print(f"found cluster iud {context.ch_cluster_id}")
+    context.source_prefix_companies = E2E_S3_PREFIX
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
 
 
@@ -83,7 +83,7 @@ def step_impl(context):
         f"generated files with columns {context.args_ch['args']['cols']}"
     )
     for f in context.filenames:
-        ch_helper.s3_upload(context, f, E2E_S3_PREFIX)
+        ch_helper.s3_upload(context, f, context.source_prefix_companies)
     context.filename_not_to_process = context.filenames[0]
     context.filenames_expected = context.filenames[1:]
 
