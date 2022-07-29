@@ -68,9 +68,7 @@ def step_impl(context, nfiles_per_date, nrecords):
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_files(context.filenames, nrecords, cols)
-    context.rows_expected = int(nfiles_per_date) * int(
-        nrecords
-    )  # latest processed files records not counted
+    context.rows_expected = int(nfiles_per_date) * int(nrecords)*2 - int(nrecords) # latest processed files records not counted
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column
