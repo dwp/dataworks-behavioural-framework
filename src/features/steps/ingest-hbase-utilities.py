@@ -38,6 +38,7 @@ def step_impl(context, step_type):
         context.execute_steps(
             f"When A script '{step_type}' step is started on the ingest-hbase EMR cluster"
         )
+        return
 
     if (
         # Major compaction is currently running
@@ -66,12 +67,6 @@ def step_impl(context, step_type):
 def step_impl(context, step_type):
     script_name = None
     arguments = None
-
-    if (
-        "skip_ingest_emr_step_submission" in context
-        and context.skip_ingest_emr_step_submission is True
-    ):
-        return
 
     if step_type == "major compaction":
         script_name = "/var/ci/major_compaction_script.sh"

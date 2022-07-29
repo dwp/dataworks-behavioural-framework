@@ -14,6 +14,7 @@ from helpers import (
     streaming_manifests_helper,
     streaming_data_helper,
     dataworks_kafka_producer_common_helper,
+    emr_step_generator,
 )
 
 
@@ -841,3 +842,20 @@ def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
     # wait for a 60secs
     time.sleep(int(timeout))
     console_printer.print_info("COMPLETE:Initialising e2e tests...for dlq consumer")
+
+
+@fixture
+def clean_up_hbase_export_s3_bucket(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'clean_up_hbase_export_s3_bucket' fixture")
+    aws_helper.clear_s3_bucket(
+        context.hbase_export_bucket,
+    )
+
+
+@fixture
+def clean_up_hbase_snapshot_cloned_table(context):
+    console_printer.print_info(
+        "Executing 'clean_up_hbase_snapshot_cloned_table' fixture"
+    )
+    table_name = context.hbase_snapshot_cloned_table.replace(":", ".")
+    aws_helper.delete_hbase_table(f"db.{table_name}")

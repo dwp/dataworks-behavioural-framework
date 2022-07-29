@@ -398,6 +398,13 @@ def clear_s3_prefix(s3_bucket, path, delete_prefix, path_is_folder=True):
                 bucket_object.wait_until_not_exists()
 
 
+def clear_s3_bucket(s3_bucket):
+    console_printer.print_info(f"Clearing S3 bucket '{s3_bucket}' of all objects")
+    s3 = get_resource(resource_name="s3")
+    bucket = s3.Bucket(s3_bucket)
+    bucket.objects.all().delete()
+
+
 def get_total_size_in_bytes_of_s3_folder(s3_bucket, path):
     """Returns the total size of the items with the given prefix.
 
@@ -432,6 +439,26 @@ def truncate_hbase_table(topic_name):
     payload_json = json.dumps(payload_dict)
 
     console_printer.print_info(f"Deleting data in HBase with payload {payload_json}")
+    invoke_lambda.invoke_hbase_retriever(payload_json)
+
+    return topic_name
+
+
+def delete_hbase_table(topic_name):
+    """Clears all messages from hbase table for a given topic.
+
+    Keyword arguments:
+    topic_name -- Name of the topic
+    """
+    # 'deleteEntireTableWhenInDeleteMode' must be True when 'deleteRequest' is True here due to us wanting to delete the table
+    payload_dict = {
+        "topic": topic_name,
+        "deleteRequest": True,
+        "deleteEntireTableWhenInDeleteMode": True,
+    }
+    payload_json = json.dumps(payload_dict)
+
+    console_printer.print_info(f"Deleting table in HBase with payload {payload_json}")
     invoke_lambda.invoke_hbase_retriever(payload_json)
 
     return topic_name
@@ -843,7 +870,7 @@ def put_object_in_s3_with_metadata(body, s3_bucket, s3_key, metadata):
 
     Keyword arguments:
     s3_bucket -- the bucket in which the files is stored
-    s3_key -- the pathe to the file in s3
+    s3_key -- the path to the file in s3
     metadata -- an object with metadata key values  in it ie.:
             [{
                 'Key': 'key',
