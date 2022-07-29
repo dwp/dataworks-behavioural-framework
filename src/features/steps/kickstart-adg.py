@@ -45,7 +45,6 @@ def step_impl(context, record_count, module_name, PII_Flag):
         module_name, record_count, schema_config, context.temp_folder
     )
 
-
     console_printer.print_info(
         f"Adding the list of files generated for current e2e test run into context for validation steps. The list of files are \n"
         f"{list_of_local_files}"
