@@ -10,7 +10,7 @@ COPY src/ /src/
 
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 ENV PATH=$PATH:/root/.local/bin
-RUN pip install -r environment.yml --trusted-host pypi.org --trusted-host files.pythonhosted.org --user
+RUN pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --user
 
 WORKDIR /src
 RUN chmod -R +x runners/
