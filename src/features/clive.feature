@@ -1,4 +1,5 @@
 @clive
+@test
 Feature: Clive tests, to run clive and validate its output
   @fixture.s3.clear.clive.output
   @fixture.terminate.clive.cluster
