@@ -1,8 +1,8 @@
 #!/bin/bash
 
 test_run_id="${1:-NOT_SET}"
-test_run_type="aws-ch"
-feature_tag="@aws-ch"
+test_run_type="dataworks-aws-ch"
+feature_tag="@dataworks-aws-ch"
 mongo_import_key="NOT_SET"
 number_of_topics=3
 

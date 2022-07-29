@@ -116,6 +116,15 @@ def invoke_kickstart_adg_emr_launcher_lambda(payload):
     response = aws_helper.invoke_lambda_function("kickstart_adg_emr_launcher", payload)
     return json.loads(response.decode())
 
+def invoke_ch_emr_launcher_lambda(payload):
+    """Triggers ch_emr_launcher lambda with the given payload.
+
+    Keyword arguments:
+    payload -- the input for the lambda invocation
+    """
+    response = aws_helper.invoke_lambda_function("ch_emr_launcher", payload)
+    return json.loads(response.decode())
+
 
 def invoke_mongo_latest_emr_launcher_lambda(payload):
     """Triggers aws_mongo_latest_emr_launcher lambda with the given payload.
