@@ -142,4 +142,5 @@ def step_impl(context):
 
 @then("Verify last imported file was updated on DynamoDB")
 def step_impl(context):
-    assert ch_helper.file_latest_dynamo_fetch in context.filenames[-1], "the dynamoDB item was not updated correctly"
+    filename = context.filenames[-1]
+    assert ch_helper.file_latest_dynamo_fetch in filename, "the dynamoDB item was not updated correctly"
