@@ -23,7 +23,7 @@ function get_secret_values() {
 
     if [[ ! -z "${account_number}" && "${OVERRIDE_ROLE}" == "true" ]]; then
         # Set for local running
-        export AWS_ROLE_ARN="${arn_value}:${aws_value}:${service}::${account_number}:role/RestrictedAdmin"
+        export AWS_ROLE_ARN="${arn_value}:${aws_value}:${service}::${account_number}:role/administrator"
         export AWS_ACC=${account_number}
     fi
 

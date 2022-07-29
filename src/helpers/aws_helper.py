@@ -130,7 +130,7 @@ def assume_role():
     console_printer.print_info(f"time out {aws_session_timeout_seconds}")
 
     assume_role_dict = sts_client.assume_role(
-        RoleArn="arn" + aws_role_arn,
+        RoleArn=aws_role_arn,
         RoleSessionName=f"{session_name}",
         DurationSeconds=int(aws_session_timeout_seconds),
     )
@@ -246,6 +246,7 @@ def delete_item_from_dynamodb(table_name, key_dict):
     return dynamodb_client.delete_item(TableName=f"{table_name}", Key=key_dict)
 
 
+
 def insert_item_to_dynamo_db_v2(table, item):
     """Puts an item in to a table in dynamodb.
 
@@ -264,9 +265,11 @@ def insert_item_to_dynamo_db(table_name, item_dict):
     item_dict -- dictionary of key/value pairs for the item
     """
     dynamodb_client = get_client(service_name="dynamodb")
+
     console_printer.print_info(
         f"Putting DynamoDb item with dict of '{item_dict}' in to table named {table_name}"
     )
+
     dynamodb_client.put_item(TableName=f"{table_name}", Item=item_dict)
 
 
