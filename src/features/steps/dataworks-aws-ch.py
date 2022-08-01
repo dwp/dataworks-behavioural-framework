@@ -144,6 +144,5 @@ def step_impl(context):
 def step_impl(context):
 
     filename = context.filenames[-1]
-    assert (
-        ch_helper.file_latest_dynamo_fetch in filename
-    ), "the dynamoDB item was not updated correctly"
+    filename_suffix = ch_helper.file_latest_dynamo_fetch(context)
+    assert filename_suffix in filename, "the dynamoDB item was not updated correctly"
