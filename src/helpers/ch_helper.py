@@ -46,7 +46,9 @@ def get_filenames_today_yesterday(filenames_prefix, files_per_date, output_folde
         for j in r
     ]
     res = t1 + t0
-    return [os.path.join(output_folder, k) for k in res]
+    filenames = [os.path.join(output_folder, k) for k in res]
+    filenames.sort(reverse=False)
+    return filenames
 
 
 def gen_string():
