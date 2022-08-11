@@ -31,22 +31,13 @@ def get_args(location: str):
         sys.exit(-1)
 
 
-def get_filenames_today_yesterday(filenames_prefix, files_per_date, output_folder):
-    r = range(files_per_date)
-    t1 = [
-        filenames_prefix + "-" + str(datetime.date.today()) + "-" + f"part{i}.csv"
-        for i in r
-    ]
-    t0 = [
-        filenames_prefix
-        + "-"
-        + str(datetime.date.today() - timedelta(1))
-        + "-"
-        + f"part{j}.csv"
-        for j in r
-    ]
-    res = t1 + t0
-    filenames = [os.path.join(output_folder, k) for k in res]
+def get_filenames(filenames_prefix, n_files, output_folder, context):
+    filenames = [str(datetime.date.today())]
+
+    for i in range(1, n_files):
+        filenames.append(str(datetime.date.today() - timedelta(i)))
+    context.latest_file = filenames[-1]
+    filenames = [os.path.join(output_folder, filenames_prefix + "-" + k + ".csv") for k in filenames]
     filenames.sort(reverse=False)
     return filenames
 
@@ -90,7 +81,8 @@ def s3_upload(context, filename, prefix):
     input_file = file_helper.get_contents_of_file(filename, False)
     inputs_s3_key = os.path.join(prefix, file_name)
     console_printer.print_info(
-        f"Uploading the local file {filename} with basename as {file_name} into s3 bucket {context.published_bucket} using key name as {inputs_s3_key}"
+        f"Uploading the local file {filename} with basename as {file_name} into s3 bucket {context.published_bucket} "
+        f"using key name as {inputs_s3_key}"
     )
     aws_helper.put_object_in_s3(
         input_file, context.data_ingress_stage_bucket, inputs_s3_key
@@ -112,7 +104,7 @@ def filename_latest_dynamo_add(context):
         context.args_ch["audit-table"]["range_key"]: context.args_ch["audit-table"][
             "data_product_name"
         ],
-        "Latest_File": str(datetime.date.today() - timedelta(1)) + "-" + "part0",
+        "Latest_File": context.latest_file,
         "CumulativeSizeBytes": "123",
     }
     aws_helper.insert_item_to_dynamo_db_v2(table, myitem)

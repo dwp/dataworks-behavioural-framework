@@ -13,7 +13,7 @@ from helpers import (
     file_helper,
 )
 
-CONF_FILENAME = "e2e_conf.tpl"
+CONF_FILENAME = "e2e_test_conf.tpl"
 CONF_PREFIX = "component/dataworks-aws-ch/steps/"
 E2E_S3_PREFIX = "e2e/data-ingress/companies"
 CLUSTER_ARN = "ClusterArn"
@@ -33,6 +33,7 @@ def step_impl(context):
     }
     payload_json = json.dumps(emr_launcher_config)
     cluster_response = invoke_lambda.invoke_ch_emr_launcher_lambda(payload_json)
+    console_printer.print_info(f"response : '{cluster_response}'")
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
@@ -55,22 +56,20 @@ def step_impl(context):
 
 
 @then(
-    "Generate '{nfiles_per_date}' files with '{nrecords}' rows for both todays and yesterdays date"
+    "Generate '{n_files}' files each with '{n_rows}' rows"
 )
-def step_impl(context, nfiles_per_date, nrecords):
+def step_impl(context, n_files, n_rows):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
     )
 
-    context.filenames = ch_helper.get_filenames_today_yesterday(
-        context.args_ch["args"]["filename"], int(nfiles_per_date), context.temp_folder
+    context.filenames = ch_helper.get_filenames(
+        context.args_ch["args"]["filename"], int(n_files), context.temp_folder, context
     )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_files(context.filenames, nrecords, cols)
-    context.rows_expected = int(nfiles_per_date) * int(nrecords) * 2 - int(
-        nrecords
-    )  # latest processed files records not counted
+    ch_helper.generate_csv_files(context.filenames, n_rows, cols)
+    context.rows_expected = (int(n_files)-1) * int(n_rows) # latest processed files records not counted
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column
