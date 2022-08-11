@@ -781,9 +781,7 @@ def s3_clear_ch_start(context, timeout=30, **kwargs):
     aws_helper.clear_s3_prefix(
         context.data_ingress_stage_bucket, "e2e/data-ingress/companies", False
     )
-    aws_helper.clear_s3_prefix(
-        context.data_ingress_stage_bucket, "e2e/data", False
-    )
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, "e2e/data", False)
 
 
 @fixture

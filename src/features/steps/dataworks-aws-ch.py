@@ -55,9 +55,7 @@ def step_impl(context):
     context.args_ch = args
 
 
-@then(
-    "Generate '{n_files}' files each with '{n_rows}' rows"
-)
+@then("Generate '{n_files}' files each with '{n_rows}' rows")
 def step_impl(context, n_files, n_rows):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
@@ -69,7 +67,9 @@ def step_impl(context, n_files, n_rows):
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_files(context.filenames, n_rows, cols)
-    context.rows_expected = (int(n_files)-1) * int(n_rows) # latest processed files records not counted
+    context.rows_expected = (int(n_files) - 1) * int(
+        n_rows
+    )  # latest processed files records not counted
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column

@@ -37,7 +37,10 @@ def get_filenames(filenames_prefix, n_files, output_folder, context):
     for i in range(1, n_files):
         filenames.append(str(datetime.date.today() - timedelta(i)))
     context.latest_file = filenames[-1]
-    filenames = [os.path.join(output_folder, filenames_prefix + "-" + k + ".csv") for k in filenames]
+    filenames = [
+        os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
+        for k in filenames
+    ]
     filenames.sort(reverse=False)
     return filenames
 
