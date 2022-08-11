@@ -1,6 +1,7 @@
 @dataworks-aws-ch
 Feature: Ch etl to produce input data and verify correct output after processing
   @fixture.s3.clear.ch.start
+  @fixture.terminate.ch.cluster
   Scenario: Ch cluster end to end test
     When The cluster starts without steps
     Then Download the file that includes the etl arguments from s3 and parse it
