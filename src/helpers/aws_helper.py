@@ -1896,6 +1896,19 @@ def check_if_s3_object_exists(bucket, key, s3_client=None):
     return False
 
 
+def instance_count_by_tag(tag_name:str, tag_value:str):
+    """
+    :return: number of running instances having the given tag
+    """
+    client = get_client("ec2")
+    custom_filter = [{
+        'Name': f'tag:{tag_name}',
+        'Values': [f'{tag_value}']}]
+
+    response = client.describe_instances(Filters=custom_filter)
+    return len(response['Reservations'][0]['Instances'])
+
+
 def execute_commands_on_ec2_by_tags_and_wait(
     commands: list, ec2_tags: list, timeout: int, ssm_client=None
 ):
