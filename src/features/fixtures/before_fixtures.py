@@ -853,3 +853,10 @@ def clean_up_hbase_snapshot_cloned_table(context):
     )
     table_name = context.hbase_snapshot_cloned_table.replace(":", ".")
     aws_helper.delete_hbase_table(f"db.{table_name}")
+
+
+@fixture
+def s3_clear_ingress_sft_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_ingress_sft_start' fixture")
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, "ingress-sft-tests", False)
+

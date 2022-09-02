@@ -466,7 +466,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.clean_up_hbase_export_s3_bucket, context)
     if tag == "fixture.clean.up.hbase.snapshot.cloned.table":
         use_fixture(before_fixtures.clean_up_hbase_snapshot_cloned_table, context)
-
+    if tag == "fixture.s3.clear.ingress.sft.start":
+        use_fixture(before_fixtures.s3_clear_ingress_sft_start, context)
 
 def after_all(context):
     global current_feature
