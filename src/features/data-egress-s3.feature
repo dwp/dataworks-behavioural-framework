@@ -1,4 +1,4 @@
-e@data-egress-s3
+@data-egress-s3
 Feature: Data egress transfer data to S3 end to end test
 
   Scenario: Data Egress service to transfer data to S3 end to end test

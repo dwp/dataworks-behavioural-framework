@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import time
 from helpers import (
     aws_helper,
@@ -17,12 +17,12 @@ def set_asg_instance_count(asg_name, min, max, desired):
 
     client = aws_helper.get_client("autoscaling")
     response = client.put_scheduled_update_group_action(
+        ScheduledActionName="sft-e2e",
+        StartTime=datetime.today() - timedelta(hours=0, minutes=59),
         AutoScalingGroupName=asg_name,
-        Time=datetime.today(),
         MinSize=min,
         MaxSize=max,
         DesiredCapacity=desired,
-        TimeZone='Europe/London'
     )
 
 

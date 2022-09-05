@@ -1,4 +1,4 @@
-@sft.ingress.agent
+@data-ingress-sft
 Feature: Data ingress sft ingress agent
   @fixture.s3.clear.ingress.sft.start
   Scenario: Sft receives data and places it on the s3 bucket
