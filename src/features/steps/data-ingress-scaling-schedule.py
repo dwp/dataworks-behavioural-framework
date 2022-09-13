@@ -22,7 +22,7 @@ def step_impl(context):
     w = context.time_scale_up*60
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
-    data_ingress_helper.check_instance_count(desired_count=1)
+    data_ingress_helper.check_instance_count(desired_count=2)
     console_printer.print_info("scaling successful")
 
 
