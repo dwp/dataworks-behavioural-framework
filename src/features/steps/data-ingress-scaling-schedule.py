@@ -19,7 +19,7 @@ def step_impl(context, time_scale_up, time_scale_down):
 @then("wait for the instance to scale up within the expected time")
 def step_impl(context):
 
-    w = context.time_scale_up*60-100
+    w = (context.time_scale_up*60)-100
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
     data_ingress_helper.check_instance_count(desired_count=2)
