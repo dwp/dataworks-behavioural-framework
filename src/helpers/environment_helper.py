@@ -568,6 +568,9 @@ def set_test_run_common_variables(context):
     context.common_config_bucket = context.config.userdata.get(
         "DATAWORKS_COMMON_CONFIG_BUCKET"
     )
+    context.data_ingress_stage_bucket = context.config.userdata.get(
+        "AWS_DATA_INGRESS_STAGE_BUCKET"
+    )
 
 
 def set_manifest_variables(context):

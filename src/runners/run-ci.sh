@@ -228,6 +228,7 @@ function execute_behave() {
         DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_sqs.value.name')"
         DATAWORKS_DLQ_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_dlq_output_bucket.value.id')"
         DATAWORKS_COMMON_CONFIG_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.config_bucket.value.id')"
+        AWS_DATA_INGRESS_STAGE_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.data_ingress_stage_bucket.value.id')"
     else
         echo "Skipping TF_COMMON_OUTPUT_FILE=${TF_COMMON_OUTPUT_FILE}"
     fi
@@ -578,7 +579,8 @@ function execute_behave() {
     -D HBASE_SNAPSHOT_EXPORTER_SCRIPT="${HBASE_SNAPSHOT_EXPORTER_SCRIPT}" \
     -D HBASE_SNAPSHOT_IMPORTER_SCRIPT="${HBASE_SNAPSHOT_IMPORTER_SCRIPT}" \
     -D HBASE_SNAPSHOT_RESTORER_SCRIPT="${HBASE_SNAPSHOT_RESTORER_SCRIPT}" \
-    -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
+    -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}" \
+    -D AWS_DATA_INGRESS_STAGE_BUCKET="${AWS_DATA_INGRESS_STAGE_BUCKET}"
 
     export test_exit_code=$?
 
