@@ -18,7 +18,7 @@ def set_asg_instance_count(asg_name, min, max, desired):
     client = aws_helper.get_client("autoscaling")
     response = client.put_scheduled_update_group_action(
         ScheduledActionName="sft-e2e",
-        StartTime=datetime.today() + timedelta(hours=0, minutes=2),
+        StartTime=datetime.today() + timedelta(hours=0, minutes=1),
         AutoScalingGroupName=asg_name,
         MinSize=min,
         MaxSize=max,
