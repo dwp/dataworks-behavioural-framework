@@ -49,7 +49,7 @@ def check_task_state(cluster, family, desired_status):
     tasks = ecs.list_tasks(cluster=cluster, desiredStatus=desired_status, family=family)
     try:
         return len(tasks['taskArns']) >= 1
-    except Exception as ex:
-        console_printer.print_error_text(f"no {family} tasks with status {desired_status} found in cluster: {ex}")
+    except:
+        console_printer.print_error_text(f"no {family} tasks with status {desired_status} found in cluster:")
         return False
 

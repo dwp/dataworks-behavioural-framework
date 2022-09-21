@@ -41,9 +41,17 @@ def step_impl(context):
     data_ingress_helper.restart_service("sft_agent_sender", CLUSTER)
     data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
     start = time.time()
-    while not data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running") & data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running"):
+    receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
+    sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
+    while not receiver_running&sender_running:
         if time.time()-start < TIMEOUT:
             time.sleep(15)
+            receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver",
+                                                                    desired_status="running")
+            sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender",
+                                                                  desired_status="running")
+            data_ingress_helper.restart_service("sft_agent_sender", CLUSTER)
+            data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
         else:
             raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
 
