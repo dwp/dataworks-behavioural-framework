@@ -57,6 +57,18 @@ def step_impl(context):
             raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
 
 
+@then("wait for pass file indicating that test virus file was correctly detected")
+def step_wait_pass_file(context):
+    start = time.time()
+    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, PASS_FILE_KEY):
+        if time.time()-start < TIMEOUT:
+            time.sleep(5)
+            time_left = time.time() - start
+            console_printer.print_info(f"timeout in {time_left} seconds")
+        else:
+            raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
+
+
 @then("check if the test file is in s3")
 def step_impl(context):
     td = datetime.today().strftime('%Y-%m-%d')
@@ -68,18 +80,6 @@ def step_impl(context):
             time.sleep(5)
         else:
             raise AssertionError(f"sft file was not sent and received after {TIMEOUT} seconds")
-
-
-@then("Wait for pass file indicating that test virus file was correctly detected")
-def step_wait_pass_file(context):
-    start = time.time()
-    while not aws_helper.does_s3_key_exist(context.data_ingress_stage_bucket, PASS_FILE_KEY):
-        if time.time()-start < TIMEOUT:
-            time.sleep(5)
-            time_left = time.time() - start
-            console_printer.print_info(f"timeout in {time_left} seconds")
-        else:
-            raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 
 
 @then("wait for the instance to scale down within the expected time")

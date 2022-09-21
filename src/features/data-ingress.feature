@@ -5,5 +5,6 @@ Feature: Data ingress cluster scaling schedules
     Given the autoscaling schedules replicas that are set to scale up after '5' min and scale down after '15' min
     Then wait for the instance to scale up within the expected time
     Then run sender agent task to send test data and receiver agent task
+    Then wait for pass file indicating that test virus file was correctly detected
     Then check if the test file is in s3
     Then wait for the instance to scale down within the expected time
