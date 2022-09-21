@@ -40,6 +40,12 @@ def step_impl(context):
 def step_impl(context):
     data_ingress_helper.restart_service("sft_agent_sender", CLUSTER)
     data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
+    start = time.time()
+    while not data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running") & data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running"):
+        if time.time()-start < TIMEOUT:
+            time.sleep(15)
+        else:
+            raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
 
 
 @then("check if the test file is in s3")
@@ -61,6 +67,8 @@ def step_wait_pass_file(context):
     while not aws_helper.does_s3_key_exist(context.data_ingress_stage_bucket, PASS_FILE_KEY):
         if time.time()-start < TIMEOUT:
             time.sleep(5)
+            time_left = time.time() - start
+            console_printer.print_info(f"timeout in {time_left} seconds")
         else:
             raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 

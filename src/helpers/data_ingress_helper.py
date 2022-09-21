@@ -40,4 +40,17 @@ def check_instance_count(desired_count, max_wait=120):
             break
         time.sleep(10)
     if ic != desired_count:
-        raise AssertionError(f"instance count: {ic} did not reach desired size: {desired_count} within the time frame given")
+        raise AssertionError(f"instance count: {ic} did not reach desired size: {desired_count} within the time"
+                             f" frame given")
+
+
+def check_task_state(cluster, family, desired_status):
+    ecs = aws_helper.get_client('ecs')
+    tasks = ecs.list_tasks(cluster=cluster, desiredStatus=desired_status, family=family)
+    try:
+        if len(tasks['taskArns']) >= 1:
+            return True
+    except Exception as ex:
+        console_printer.print_error_text(f"no {family} tasks with status {desired_status} found in cluster: {ex}")
+        return False
+
