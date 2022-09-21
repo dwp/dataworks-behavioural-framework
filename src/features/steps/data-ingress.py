@@ -63,7 +63,7 @@ def step_impl(context):
     filename = FILENAME+td+'.csv'
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
-    while not aws_helper.does_s3_key_exist(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
+    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
         if time.time()-start < TIMEOUT:
             time.sleep(5)
         else:
