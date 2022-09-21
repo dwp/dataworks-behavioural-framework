@@ -22,6 +22,7 @@ def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
         context.time_scale_down = int(time_scale_down)
+        context.start_time = time.time()
     except Exception as ex:
         console_printer.print_error_text(ex)
 
@@ -43,7 +44,7 @@ def step_impl(context):
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
     sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
-    while not receiver_running&sender_running:
+    while not receiver_running & sender_running:
         if time.time()-start < TIMEOUT:
             time.sleep(15)
             receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver",
@@ -81,17 +82,12 @@ def step_wait_pass_file(context):
             raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 
 
-@then("reset the desired and max instance count in the asg to 0")
-def step_impl(context):
-    data_ingress_helper.set_asg_instance_count(ASG, 0, 0, 0)
-    data_ingress_helper.check_instance_count(desired_count=0, max_wait=3*60)
-    console_printer.print_info("scaling successful")
-
-
 @then("wait for the instance to scale down within the expected time")
 def step_impl(context):
-    w = context.time_scale_down*60 - context.time_scale_up*60
-    console_printer.print_info(f"waiting {w} seconds")
-    time.sleep(w)
+    time_now = time.time()
+    w = context.time_scale_down - (time_now - context.time_start)
+    if w > 0:
+        console_printer.print_info(f"waiting {w} seconds")
+        time.sleep(w)
     data_ingress_helper.check_instance_count(desired_count=0)
     console_printer.print_info("scaling successful")
