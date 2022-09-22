@@ -17,8 +17,7 @@ PASS_FILE_KEY = "e2e/eicar_test/not_passed.txt"
 TIMEOUT = 300
 
 
-@given("the autoscaling schedules replicas that are set to scale up after '{time_scale_up}' min"
-       "and scale down after '{time_scale_down}' min")
+@given("the autoscaling schedules replicas that are set to scale up after '{time_scale_up}' min and scale down after '{time_scale_down}' min")
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
@@ -75,7 +74,7 @@ def step_impl(context):
     filename = FILENAME+td+'.csv'
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
-    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket,os.path.join(S3_PREFIX, filename)):
+    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
         if time.time()-start < TIMEOUT:
             time.sleep(5)
         else:
