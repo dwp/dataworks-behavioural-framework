@@ -18,6 +18,8 @@ TIMEOUT = 300
 
 
 @given("the autoscaling schedules replicas that are set to scale up after '{time_scale_up}' min and scale down after '{time_scale_down}' min")
+
+
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
