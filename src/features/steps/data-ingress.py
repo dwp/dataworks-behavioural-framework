@@ -39,7 +39,6 @@ def step_impl(context):
 
 @then("run sender agent task to send test data and receiver agent task")
 def step_impl(context):
-    data_ingress_helper.restart_service("sft_agent_sender", CLUSTER)
     data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
