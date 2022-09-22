@@ -22,7 +22,7 @@ def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
         context.time_scale_down = int(time_scale_down)
-        context.start_time = time.time()
+        context.time_start = time.time()
     except Exception as ex:
         console_printer.print_error_text(ex)
 
