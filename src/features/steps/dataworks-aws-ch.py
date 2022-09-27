@@ -45,8 +45,14 @@ def step_impl(context):
 
 @when("The cluster is still running")
 def step_impl(context):
-    if aws_helper.poll_emr_cluster_status(context.ch_cluster_id) not in ("WAITING", "TERMINATED", "TERMINATED_WITH_ERRORS"):
-        console_printer.print_info(f"Cluster {context.ch_cluster_id} ready for new steps")
+    if aws_helper.poll_emr_cluster_status(context.ch_cluster_id) not in (
+        "WAITING",
+        "TERMINATED",
+        "TERMINATED_WITH_ERRORS",
+    ):
+        console_printer.print_info(
+            f"Cluster {context.ch_cluster_id} ready for new steps"
+        )
 
 
 @then("Download the file that includes the etl arguments from s3 and parse it")
@@ -124,7 +130,6 @@ def step_impl(context):
 
     command = " ".join(
         [
-
             "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/etl.py",
             "--e2e True",
         ]
@@ -155,15 +160,21 @@ def step_impl(context):
         ]
     )
     step_name = "e2e"
-    step = emr_step_generator.generate_bash_step(emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name)
-    execution_state = aws_helper.poll_emr_cluster_step_status(step, context.ch_cluster_id, 2000)
+    step = emr_step_generator.generate_bash_step(
+        emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name
+    )
+    execution_state = aws_helper.poll_emr_cluster_step_status(
+        step, context.ch_cluster_id, 2000
+    )
     if execution_state != "COMPLETED":
-        raise AssertionError(f"'{step_name}' step failed with final status of '{execution_state}'")
+        raise AssertionError(
+            f"'{step_name}' step failed with final status of '{execution_state}'"
+        )
 
 
 @then("Verify that the alarms went on due to wrong file size")
 def step_impl(context):
-    if not ch_helper.did_file_size_alarm_went_on('file_size_check_failed'):
+    if not ch_helper.did_file_size_alarm_went_on("file_size_check_failed"):
         raise AssertionError("file size check did not alarm")
-    if not ch_helper.did_file_size_alarm_went_on('delta_file_size_check_failed'):
+    if not ch_helper.did_file_size_alarm_went_on("delta_file_size_check_failed"):
         raise AssertionError("delta file size check did not alarm")
