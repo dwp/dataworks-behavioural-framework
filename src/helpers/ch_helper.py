@@ -11,7 +11,6 @@ from helpers import (
 import csv
 import os
 import string
-import boto3
 import sys
 import random as rd
 from boto3.dynamodb.conditions import Key
