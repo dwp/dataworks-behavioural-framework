@@ -1,5 +1,6 @@
 import datetime
 from datetime import timedelta
+import pytz
 from configparser import ConfigParser
 from helpers import (
     console_printer,
@@ -9,13 +10,11 @@ from helpers import (
 )
 import csv
 import os
-import json
 import string
 import boto3
 import sys
 import random as rd
 from boto3.dynamodb.conditions import Key
-import subprocess
 
 
 def get_args(location: str):
@@ -31,10 +30,10 @@ def get_args(location: str):
         sys.exit(-1)
 
 
-def get_filenames(filenames_prefix, n_files, output_folder, context):
+def get_filenames(filenames_prefix, output_folder, context):
     filenames = [str(datetime.date.today())]
 
-    for i in range(1, n_files):
+    for i in [0, 31]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
     context.latest_file = filenames[-1]
     filenames = [
@@ -58,17 +57,26 @@ def get_gen_files_keys(filenames, local_output_folder, nrecords, cols):
     ]
 
 
-def generate_csv_files(filenames, nrecords, cols):
-    for i in filenames:
-        with open(i, "w+", newline="") as csvfile:
-            writer = csv.writer(csvfile, delimiter=",")
-            header_record = cols
-            writer.writerow(header_record)
-            num = 1
-            while num <= int(nrecords):
-                record_data = [gen_string() for i in cols]
-                writer.writerow(record_data)
-                num += 1
+def convert_to_gigabytes(bytes):
+    try:
+        constant = 1073741824
+        gb = round(bytes / constant, 4)
+        return gb
+    except Exception as ex:
+        console_printer.print_error_text(f"couldn't covert to gb due to {ex}")
+        sys.exit(-1)
+
+
+def generate_csv_file(filename, desired_gb, cols):
+    with open(filename, "w+", newline="") as csvfile:
+        writer = csv.writer(csvfile, delimiter=",")
+        header_record = cols
+        writer.writerow(header_record)
+        gb = 0
+        while gb <= desired_gb:
+            record_data = [gen_string() for i in cols]
+            writer.writerow(record_data)
+            gb = convert_to_gigabytes(os.stat(filename).st_size)
 
 
 def download_file(bucket, prefix, filename, local_folder):
@@ -98,7 +106,7 @@ def dynamo_table(context):
     return dynamodb.Table(context.args_ch["audit-table"]["name"])
 
 
-def filename_latest_dynamo_add(context):
+def add_latest_file(context):
     table = dynamo_table(context)
     myitem = {
         context.args_ch["audit-table"]["hash_key"]: context.args_ch["audit-table"][
@@ -113,7 +121,7 @@ def filename_latest_dynamo_add(context):
     aws_helper.insert_item_to_dynamo_db_v2(table, myitem)
 
 
-def file_latest_dynamo_fetch(context):
+def get_latest_file(context):
     console_printer.print_info("getting last imported file name from dynamo")
     try:
         table = dynamo_table(context)
@@ -133,3 +141,22 @@ def file_latest_dynamo_fetch(context):
             f"failed to fetch last filename imported due to {ex}"
         )
         sys.exit(-1)
+
+
+def did_file_size_alarm_went_on(alarm_name):
+
+    client = aws_helper.get_client('cloudwatch')
+    response = client.describe_alarm_history(
+        AlarmName=alarm_name,
+        HistoryItemType='StateUpdate',
+        StartDate=datetime.today() - timedelta(days=1),
+        MaxRecords=99,
+        ScanBy='TimestampDescending'
+    )
+    utc = pytz.UTC
+    w ='Alarm updated from INSUFFICIENT_DATA to ALARM'
+    x = utc.localize(datetime.now()-timedelta(minutes=62))
+    if len([i for i in response['AlarmHistoryItems'] if i['HistorySummary'] == w and i['Timestamp'] > x]) >= 1:
+        return True
+    else:
+        return False

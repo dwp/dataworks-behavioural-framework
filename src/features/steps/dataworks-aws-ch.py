@@ -43,6 +43,12 @@ def step_impl(context):
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
 
 
+@when("The cluster is still running")
+def step_impl(context):
+    if aws_helper.poll_emr_cluster_status(context.ch_cluster_id) not in ("WAITING", "TERMINATED", "TERMINATED_WITH_ERRORS"):
+        console_printer.print_info(f"Cluster {context.ch_cluster_id} ready for new steps")
+
+
 @then("Download the file that includes the etl arguments from s3 and parse it")
 def step_impl(context):
     if not os.path.isdir(context.temp_folder):
@@ -55,18 +61,19 @@ def step_impl(context):
     context.args_ch = args
 
 
-@then("Generate '{n_files}' files each with '{n_rows}' rows")
+@then("Generate files having expected format and size to test positive outcome")
 def step_impl(context, n_files, n_rows):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
     )
 
     context.filenames = ch_helper.get_filenames(
-        context.args_ch["args"]["filename"], int(n_files), context.temp_folder, context
+        context.args_ch["args"]["filename"], context.temp_folder, context
     )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_files(context.filenames, n_rows, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.5, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.4, cols)
     context.rows_expected = (int(n_files) - 1) * int(
         n_rows
     )  # latest processed files records not counted
@@ -75,7 +82,28 @@ def step_impl(context, n_files, n_rows):
     )  # pre-defined columns + the partitioning column
 
 
-@then("Upload the local files to s3")
+@then("Generate files having expected format and wrong size for negative negative")
+def step_impl(context, n_files, n_rows):
+    console_printer.print_info(
+        f"generating files fro the column {context.args_ch['args']['cols']}"
+    )
+
+    context.filenames = ch_helper.get_filenames(
+        context.args_ch["args"]["filename"], context.temp_folder, context
+    )
+    console_printer.print_info(f"filenames are {context.filenames}")
+    cols = ast.literal_eval(context.args_ch["args"]["cols"])
+    ch_helper.generate_csv_file(context.filenames[0], 1.5, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.2, cols)
+    context.rows_expected = (int(n_files) - 1) * int(
+        n_rows
+    )  # latest processed files records not counted
+    context.cols_expected = (
+        len(cols) + 1
+    )  # pre-defined columns + the partitioning column
+
+
+@then("Upload the local file to s3")
 def step_impl(context):
     console_printer.print_info(
         f"generated files with columns {context.args_ch['args']['cols']}"
@@ -83,12 +111,12 @@ def step_impl(context):
     for f in context.filenames:
         ch_helper.s3_upload(context, f, E2E_S3_PREFIX)
     context.filename_not_to_process = context.filenames[0]
-    context.filenames_expected = context.filenames[1:]
+    context.filename_expected = context.filenames[-1]
 
 
 @then("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
-    ch_helper.filename_latest_dynamo_add(context)
+    ch_helper.add_latest_file(context)
 
 
 @then("Add the etl step in e2e mode and wait for it to complete")
@@ -96,6 +124,7 @@ def step_impl(context):
 
     command = " ".join(
         [
+
             "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/etl.py",
             "--e2e True",
         ]
@@ -115,7 +144,6 @@ def step_impl(context):
 
 @then("Add validation step and verify it completes")
 def step_impl(context):
-
     command = " ".join(
         [
             "python3 /opt/emr/e2e.py",
@@ -127,21 +155,15 @@ def step_impl(context):
         ]
     )
     step_name = "e2e"
-    step = emr_step_generator.generate_bash_step(
-        emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name
-    )
-    execution_state = aws_helper.poll_emr_cluster_step_status(
-        step, context.ch_cluster_id, 2000
-    )
+    step = emr_step_generator.generate_bash_step(emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name)
+    execution_state = aws_helper.poll_emr_cluster_step_status(step, context.ch_cluster_id, 2000)
     if execution_state != "COMPLETED":
-        raise AssertionError(
-            f"'{step_name}' step failed with final status of '{execution_state}'"
-        )
+        raise AssertionError(f"'{step_name}' step failed with final status of '{execution_state}'")
 
 
-@then("Verify last imported file was updated on DynamoDB")
+@then("Verify that the alarms went on due to wrong file size")
 def step_impl(context):
-
-    filename = context.filenames[-1]
-    filename_suffix = ch_helper.file_latest_dynamo_fetch(context)
-    assert filename_suffix in filename, "the dynamoDB item was not updated correctly"
+    if not ch_helper.did_file_size_alarm_went_on('file_size_check_failed'):
+        raise AssertionError("file size check did not alarm")
+    if not ch_helper.did_file_size_alarm_went_on('delta_file_size_check_failed'):
+        raise AssertionError("delta file size check did not alarm")
