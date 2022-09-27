@@ -11,7 +11,6 @@ Feature: Ch etl to produce input data and verify correct output after processing
     Then Add validation step and verify it completes
     Then Verify last imported file was updated on DynamoDB
 
-  @fixture.terminate.ch.cluster
   Scenario: Ch cluster end to end test negative - wrong file size
     When The cluster is still running
     Then Generate files having expected format and wrong size for negative testing
