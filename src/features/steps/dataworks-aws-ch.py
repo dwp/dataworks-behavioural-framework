@@ -164,7 +164,6 @@ def step_impl(context):
 
 
 @then("Verify that the alarms went on due to wrong file size")
-
 def step_impl(context):
     if not ch_helper.did_file_size_alarm_went_on("file_size_check_failed"):
         raise AssertionError("file size check did not alarm")
