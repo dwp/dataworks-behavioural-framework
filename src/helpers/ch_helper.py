@@ -50,13 +50,6 @@ def gen_string():
     return rd.choice([result_str, None])
 
 
-def get_gen_files_keys(filenames, local_output_folder, nrecords, cols):
-    generate_csv_files(filenames, local_output_folder, nrecords, cols)
-    return [
-        os.path.join(local_output_folder, x) for x in os.listdir(local_output_folder)
-    ]
-
-
 def convert_to_gigabytes(bytes):
     try:
         constant = 1073741824
@@ -72,11 +65,12 @@ def generate_csv_file(filename, desired_gb, cols):
         writer = csv.writer(csvfile, delimiter=",")
         header_record = cols
         writer.writerow(header_record)
-        gb = 0
+        gb = convert_to_gigabytes(os.stat(filename).st_size)
         while gb <= desired_gb:
             record_data = [gen_string() for i in cols]
             writer.writerow(record_data)
             gb = convert_to_gigabytes(os.stat(filename).st_size)
+            console_printer.print_info(f'current file size (GB): {gb}, adding more rows to reach desired size of {desired_gb}')
 
 
 def download_file(bucket, prefix, filename, local_folder):
