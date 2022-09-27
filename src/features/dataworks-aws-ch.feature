@@ -14,7 +14,7 @@ Feature: Ch etl to produce input data and verify correct output after processing
 
   Scenario: Ch cluster end to end test negative - wrong file size
     When The cluster is still running
-    Then Generate files having expected format and wrong size for negative negative
+    Then Generate files having expected format and wrong size for negative testing
     Then Upload the local files to s3
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to complete

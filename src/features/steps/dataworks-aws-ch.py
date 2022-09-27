@@ -72,7 +72,9 @@ def step_impl(context):
     context.filenames = ch_helper.get_filenames(context.args_ch["args"]["filename"], context.temp_folder, context)
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
+    console_printer.print_info(f"generating {context.filenames[0]} ")
     ch_helper.generate_csv_file(context.filenames[0], 0.5, cols)
+    console_printer.print_info(f"generating {context.filenames[1]} ")
     ch_helper.generate_csv_file(context.filenames[1], 0.4, cols)
     file = open(context.filenames[1])
     reader = csv.reader(file)
@@ -83,8 +85,8 @@ def step_impl(context):
     )  # pre-defined columns + the partitioning column
 
 
-@then("Generate files having expected format and wrong size for negative negative")
-def step_impl(context, n_files, n_rows):
+@then("Generate files having expected format and wrong size for negative testing")
+def step_impl(context):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
     )
