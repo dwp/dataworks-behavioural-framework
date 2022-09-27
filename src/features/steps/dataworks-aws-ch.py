@@ -60,7 +60,9 @@ def step_impl(context):
 def step_impl(context):
     if not os.path.isdir(context.temp_folder):
         os.mkdir(context.temp_folder)
-    ch_helper.download_file(context.common_config_bucket, CONF_PREFIX, CONF_FILENAME, context.temp_folder)
+    ch_helper.download_file(
+        context.common_config_bucket, CONF_PREFIX, CONF_FILENAME, context.temp_folder
+    )
     print(os.listdir(context.temp_folder))
     args = ch_helper.get_args(os.path.join(context.temp_folder, CONF_FILENAME))
     context.args_ch = args
@@ -68,8 +70,12 @@ def step_impl(context):
 
 @then("Generate files having expected format and size to test positive outcome")
 def step_impl(context):
-    console_printer.print_info(f"generating files from the columns {context.args_ch['args']['cols']}")
-    context.filenames = ch_helper.get_filenames(context.args_ch["args"]["filename"], context.temp_folder, context)
+    console_printer.print_info(
+        f"generating files from the columns {context.args_ch['args']['cols']}"
+    )
+    context.filenames = ch_helper.get_filenames(
+        context.args_ch["args"]["filename"], context.temp_folder, context
+    )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     console_printer.print_info(f"generating {context.filenames[0]} ")

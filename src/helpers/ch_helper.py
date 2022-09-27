@@ -70,7 +70,9 @@ def generate_csv_file(filename, desired_gb, cols):
             record_data = [gen_string() for i in cols]
             writer.writerow(record_data)
             gb = convert_to_gigabytes(os.stat(filename).st_size)
-            console_printer.print_info(f'current file size (GB): {gb}, adding more rows to reach desired size of {desired_gb}')
+            console_printer.print_info(
+                f"current file size (GB): {gb}, adding more rows to reach desired size of {desired_gb}"
+            )
 
 
 def download_file(bucket, prefix, filename, local_folder):
