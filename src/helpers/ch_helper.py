@@ -145,18 +145,27 @@ def get_latest_file(context):
 
 def did_file_size_alarm_went_on(alarm_name):
 
-    client = aws_helper.get_client('cloudwatch')
+    client = aws_helper.get_client("cloudwatch")
     response = client.describe_alarm_history(
         AlarmName=alarm_name,
-        HistoryItemType='StateUpdate',
+        HistoryItemType="StateUpdate",
         StartDate=datetime.today() - timedelta(days=1),
         MaxRecords=99,
-        ScanBy='TimestampDescending'
+        ScanBy="TimestampDescending",
     )
     utc = pytz.UTC
-    w ='Alarm updated from INSUFFICIENT_DATA to ALARM'
-    x = utc.localize(datetime.now()-timedelta(minutes=62))
-    if len([i for i in response['AlarmHistoryItems'] if i['HistorySummary'] == w and i['Timestamp'] > x]) >= 1:
+    w = "Alarm updated from INSUFFICIENT_DATA to ALARM"
+    x = utc.localize(datetime.now() - timedelta(minutes=62))
+    if (
+        len(
+            [
+                i
+                for i in response["AlarmHistoryItems"]
+                if i["HistorySummary"] == w and i["Timestamp"] > x
+            ]
+        )
+        >= 1
+    ):
         return True
     else:
         return False
