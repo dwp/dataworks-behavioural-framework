@@ -2,6 +2,7 @@ import ast
 from behave import given, when, then
 import os
 import json
+import csv
 
 from helpers import (
     ch_helper,
@@ -62,7 +63,7 @@ def step_impl(context):
 
 
 @then("Generate files having expected format and size to test positive outcome")
-def step_impl(context, n_files, n_rows):
+def step_impl(context):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
     )
@@ -74,9 +75,10 @@ def step_impl(context, n_files, n_rows):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file(context.filenames[0], 0.5, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.4, cols)
-    context.rows_expected = (int(n_files) - 1) * int(
-        n_rows
-    )  # latest processed files records not counted
+    file = open(context.filenames[1])
+    reader = csv.reader(file)
+    lines = len(list(reader))
+    context.rows_expected = lines
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column
@@ -95,12 +97,6 @@ def step_impl(context, n_files, n_rows):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file(context.filenames[0], 1.5, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.2, cols)
-    context.rows_expected = (int(n_files) - 1) * int(
-        n_rows
-    )  # latest processed files records not counted
-    context.cols_expected = (
-        len(cols) + 1
-    )  # pre-defined columns + the partitioning column
 
 
 @then("Upload the local file to s3")
@@ -162,7 +158,7 @@ def step_impl(context):
 
 
 @then("Verify that the alarms went on due to wrong file size")
-def step_impl(context):
+def step_impl():
     if not ch_helper.did_file_size_alarm_went_on('file_size_check_failed'):
         raise AssertionError("file size check did not alarm")
     if not ch_helper.did_file_size_alarm_went_on('delta_file_size_check_failed'):
