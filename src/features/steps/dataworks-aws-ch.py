@@ -91,21 +91,6 @@ def step_impl(context):
     )  # pre-defined columns + the partitioning column
 
 
-@then("Generate files having expected format and wrong size for negative testing")
-def step_impl(context):
-    console_printer.print_info(
-        f"generating files fro the column {context.args_ch['args']['cols']}"
-    )
-
-    context.filenames = ch_helper.get_filenames(
-        context.args_ch["args"]["filename"], context.temp_folder, context
-    )
-    console_printer.print_info(f"filenames are {context.filenames}")
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
-
-
 @then("Upload the local file to s3")
 def step_impl(context):
     console_printer.print_info(
@@ -167,6 +152,21 @@ def step_impl(context):
         raise AssertionError(
             f"'{step_name}' step failed with final status of '{execution_state}'"
         )
+
+
+@then("Generate files having expected format and wrong size for negative testing")
+def step_impl(context):
+    console_printer.print_info(
+        f"generating files fro the column {context.args_ch['args']['cols']}"
+    )
+
+    context.filenames = ch_helper.get_filenames(
+        context.args_ch["args"]["filename"], context.temp_folder, context
+    )
+    console_printer.print_info(f"filenames are {context.filenames}")
+    cols = ast.literal_eval(context.args_ch["args"]["cols"])
+    ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
 
 
 @then("Verify that the alarms went on due to wrong file size")
