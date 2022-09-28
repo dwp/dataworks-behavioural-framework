@@ -38,7 +38,6 @@ def get_filenames(filenames_prefix, output_folder):
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
         for k in filenames
     ]
-    filenames.sort(reverse=False)
     return filenames
 
 
