@@ -34,7 +34,6 @@ def get_filenames(filenames_prefix, output_folder, context):
 
     for i in [0, 31]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
-    context.latest_file = filenames[-1]
     filenames = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
         for k in filenames
@@ -98,7 +97,7 @@ def dynamo_table(context):
     return dynamodb.Table(context.args_ch["audit-table"]["name"])
 
 
-def add_latest_file(context):
+def add_latest_file(context, filename):
     table = dynamo_table(context)
     myitem = {
         context.args_ch["audit-table"]["hash_key"]: context.args_ch["audit-table"][
@@ -107,7 +106,7 @@ def add_latest_file(context):
         context.args_ch["audit-table"]["range_key"]: context.args_ch["audit-table"][
             "data_product_name"
         ],
-        "Latest_File": context.latest_file,
+        "Latest_File": filename,
         "CumulativeSizeBytes": "123",
     }
     aws_helper.insert_item_to_dynamo_db_v2(table, myitem)
