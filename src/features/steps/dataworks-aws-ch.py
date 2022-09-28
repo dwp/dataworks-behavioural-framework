@@ -104,7 +104,9 @@ def step_impl(context):
 
 @then("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
-    ch_helper.add_latest_file(context, os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[0])))
+    ch_helper.add_latest_file(
+        context, os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[0]))
+    )
 
 
 @then("Add the etl step in e2e mode and wait for it to complete")
