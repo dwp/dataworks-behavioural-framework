@@ -29,10 +29,10 @@ def get_args(location: str):
         sys.exit(-1)
 
 
-def get_filenames(filenames_prefix, output_folder, context):
+def get_filenames(filenames_prefix, output_folder):
     filenames = [str(datetime.date.today())]
 
-    for i in [0, 31]:
+    for i in [31, 0]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
     filenames = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
