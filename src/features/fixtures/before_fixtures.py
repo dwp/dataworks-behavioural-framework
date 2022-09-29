@@ -782,6 +782,7 @@ def s3_clear_ch_start(context, timeout=30, **kwargs):
         context.data_ingress_stage_bucket, "e2e/data-ingress/companies", False
     )
 
+
 @fixture
 def s3_clear_kickstart_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_kickstart_adg_start' fixture")
