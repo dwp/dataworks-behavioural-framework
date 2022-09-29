@@ -193,6 +193,14 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
 
 
+@then("Verify last imported file was updated on DynamoDB")
+def step_impl(context):
+
+    filename_expected = os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[1]))
+    filename_from_table = ch_helper.get_latest_file(context)
+    assert filename_from_table == filename_expected, "the dynamoDB item was not updated correctly"
+
+
 @then("Verify that the alarms went on due to wrong file size")
 def step_impl(context):
     if not ch_helper.did_file_size_alarm_went_on("file_size_check_failed"):
