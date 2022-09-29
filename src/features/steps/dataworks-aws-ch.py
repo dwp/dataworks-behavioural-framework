@@ -85,7 +85,7 @@ def step_impl(context):
     file = open(context.filenames[1])
     reader = csv.reader(file)
     lines = len(list(reader))
-    context.rows_expected = lines-1  # do not count header
+    context.rows_expected = lines - 1  # do not count header
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column
