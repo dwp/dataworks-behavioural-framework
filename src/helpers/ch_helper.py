@@ -31,7 +31,6 @@ def get_args(location: str):
 
 def get_filenames(filenames_prefix, output_folder):
     filenames = [str(datetime.date.today())]
-
     for i in [31, 0]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
     filenames = [
