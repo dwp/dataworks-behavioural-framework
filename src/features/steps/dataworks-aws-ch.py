@@ -85,7 +85,7 @@ def step_impl(context):
     file = open(context.filenames[1])
     reader = csv.reader(file)
     lines = len(list(reader))
-    context.rows_expected = lines
+    context.rows_expected = lines-1  # do not count header
     context.cols_expected = (
         len(cols) + 1
     )  # pre-defined columns + the partitioning column
@@ -126,6 +126,28 @@ def step_impl(context):
         step, context.ch_cluster_id, 2000
     )
     if execution_state != "COMPLETED":
+        raise AssertionError(
+            f"'{step_name}' step failed with final status of '{execution_state}'"
+        )
+
+
+@then("Add the etl step in e2e mode and wait for it to fail")
+def step_impl(context):
+
+    command = " ".join(
+        [
+            "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/etl.py",
+            "--e2e True",
+        ]
+    )
+    step_name = "etl"
+    step = emr_step_generator.generate_bash_step(
+        emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name
+    )
+    execution_state = aws_helper.poll_emr_cluster_step_status(
+        step, context.ch_cluster_id, 2000
+    )
+    if execution_state != "FAILED":
         raise AssertionError(
             f"'{step_name}' step failed with final status of '{execution_state}'"
         )
