@@ -216,8 +216,4 @@ def step_impl(context):
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
     console_printer.print_info("clearning source prefix")
-    aws_helper.clear_s3_prefix(
-        context.data_ingress_stage_bucket, E2E_S3_PREFIX, False
-    )
-
-
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, E2E_S3_PREFIX, False)
