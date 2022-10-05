@@ -1,5 +1,5 @@
-import datetime
 from datetime import timedelta
+import datetime
 import pytz
 from configparser import ConfigParser
 from helpers import (
@@ -139,13 +139,13 @@ def did_alarm_trigger(alarm_name):
     response = client.describe_alarm_history(
         AlarmName=alarm_name,
         HistoryItemType="StateUpdate",
-        StartDate=datetime.today() - timedelta(days=1),
+        StartDate=datetime.datetime.today() - timedelta(days=1),
         MaxRecords=99,
         ScanBy="TimestampDescending",
     )
     utc = pytz.UTC
     w = "Alarm updated from INSUFFICIENT_DATA to ALARM"
-    x = utc.localize(datetime.now() - timedelta(minutes=62))
+    x = utc.localize(datetime.datetime.now() - timedelta(minutes=62))
     if (
         len(
             [
