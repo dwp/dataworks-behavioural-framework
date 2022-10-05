@@ -209,12 +209,11 @@ def step_impl(context):
 
     start = time.time()
     while not ch_helper.did_alarm_trigger("file_size_check_failed"):
-        if time.time()-start < TIMEOUT:
+        if time.time() - start < TIMEOUT:
             time.sleep(5)
         else:
-            raise AssertionError(
-                f"eicar test did not pass after {TIMEOUT} seconds"
-            )
+            raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
+
 
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
