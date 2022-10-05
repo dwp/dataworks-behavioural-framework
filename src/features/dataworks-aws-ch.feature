@@ -4,7 +4,7 @@ Feature: Ch etl to produce input data and verify correct output after processing
   @fixture.terminate.ch.cluster
   Scenario: Ch cluster end to end test positive
     When The cluster starts without steps
-    Then Download the file that includes the etl arguments from s3 and parse it
+    Then Download and parse conf file
     Then Generate files having expected format and size to test positive outcome
     Then Upload the local file to s3
     Then Set the dynamo db bookmark on the first filename generated

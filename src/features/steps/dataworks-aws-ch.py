@@ -3,6 +3,7 @@ from behave import given, when, then
 import os
 import json
 import csv
+import time
 
 from helpers import (
     ch_helper,
@@ -18,6 +19,7 @@ CONF_FILENAME = "e2e_test_conf.tpl"
 CONF_PREFIX = "component/dataworks-aws-ch/steps/"
 E2E_S3_PREFIX = "e2e/data-ingress/companies"
 CLUSTER_ARN = "ClusterArn"
+TIMEOUT = 300
 
 
 @when("The cluster starts without steps")
@@ -56,7 +58,7 @@ def step_impl(context):
         )
 
 
-@then("Download the file that includes the etl arguments from s3 and parse it")
+@then("Download and parse conf file")
 def step_impl(context):
     if not os.path.isdir(context.temp_folder):
         os.mkdir(context.temp_folder)
@@ -204,11 +206,15 @@ def step_impl(context):
 
 @then("Verify that the alarms went on due to wrong file size")
 def step_impl(context):
-    if not ch_helper.did_alarm_trigger("file_size_check_failed"):
-        raise AssertionError("file size check did not alarm")
-    if not ch_helper.did_alarm_trigger("delta_file_size_check_failed"):
-        raise AssertionError("delta file size check did not alarm")
 
+    start = time.time()
+    while not ch_helper.did_alarm_trigger("file_size_check_failed"):
+        if time.time()-start < TIMEOUT:
+            time.sleep(5)
+        else:
+            raise AssertionError(
+                f"eicar test did not pass after {TIMEOUT} seconds"
+            )
 
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):

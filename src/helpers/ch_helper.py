@@ -145,7 +145,7 @@ def did_alarm_trigger(alarm_name):
     )
     utc = pytz.UTC
     w = "Alarm updated from INSUFFICIENT_DATA to ALARM"
-    x = utc.localize(datetime.datetime.now() - timedelta(minutes=62))
+    x = utc.localize(datetime.datetime.now() - timedelta(minutes=63))
     if (
         len(
             [
