@@ -184,9 +184,6 @@ def step_impl(context):
         f"generating files fro the column {context.args_ch['args']['cols']}"
     )
 
-    context.filenames = ch_helper.get_filenames(
-        context.args_ch["args"]["filename"], context.temp_folder, context
-    )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
@@ -216,8 +213,6 @@ def step_impl(context):
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
     console_printer.print_info("clearning source prefix")
-    aws_helper.clear_s3_prefix(
-        context.data_ingress_stage_bucket, E2E_S3_PREFIX, False
-    )
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, E2E_S3_PREFIX, False)
 
 
