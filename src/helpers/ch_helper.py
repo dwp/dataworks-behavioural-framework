@@ -133,7 +133,7 @@ def get_latest_file(context):
         sys.exit(-1)
 
 
-def did_file_size_alarm_went_on(alarm_name):
+def did_alarm_trigger(alarm_name):
 
     client = aws_helper.get_client("cloudwatch")
     response = client.describe_alarm_history(

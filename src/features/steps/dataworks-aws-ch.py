@@ -178,7 +178,7 @@ def step_impl(context):
         )
 
 
-@then("Generate files having expected format and wrong size for negative testing")
+@then("Generate files having wrong size for negative testing")
 def step_impl(context):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
@@ -207,7 +207,17 @@ def step_impl(context):
 
 @then("Verify that the alarms went on due to wrong file size")
 def step_impl(context):
-    if not ch_helper.did_file_size_alarm_went_on("file_size_check_failed"):
+    if not ch_helper.did_alarm_trigger("file_size_check_failed"):
         raise AssertionError("file size check did not alarm")
-    if not ch_helper.did_file_size_alarm_went_on("delta_file_size_check_failed"):
+    if not ch_helper.did_alarm_trigger("delta_file_size_check_failed"):
         raise AssertionError("delta file size check did not alarm")
+
+
+@then("Clear S3 prefix where previous synthetic data is")
+def step_impl(context):
+    console_printer.print_info("clearning source prefix")
+    aws_helper.clear_s3_prefix(
+        context.data_ingress_stage_bucket, E2E_S3_PREFIX, False
+    )
+
+
