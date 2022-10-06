@@ -205,12 +205,8 @@ def step_impl(context):
         if time.time() - start < TIMEOUT:
             time.sleep(5)
         else:
-<<<<<<< HEAD
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
-=======
-            raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
->>>>>>> 4fb8348155bad5e4b49d7eb0c4d7732d6d9e291a
 
+            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
