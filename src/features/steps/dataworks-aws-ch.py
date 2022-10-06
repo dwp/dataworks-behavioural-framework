@@ -182,7 +182,9 @@ def step_impl(context):
 
 @then("Generate files having wrong size for negative testing")
 def step_impl(context):
-    console_printer.print_info(f"generating files fro the column {context.args_ch['args']['cols']}")
+    console_printer.print_info(
+        f"generating files fro the column {context.args_ch['args']['cols']}"
+    )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
@@ -192,9 +194,13 @@ def step_impl(context):
 @then("Verify last imported file was updated on DynamoDB")
 def step_impl(context):
 
-    filename_expected = os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[1]))
+    filename_expected = os.path.join(
+        E2E_S3_PREFIX, os.path.basename(context.filenames[1])
+    )
     filename_from_table = ch_helper.get_latest_file(context)
-    assert (filename_from_table == filename_expected), "the dynamoDB item was not updated correctly"
+    assert (
+        filename_from_table == filename_expected
+    ), "the dynamoDB item was not updated correctly"
 
 
 @then("Verify that the alarms went on due to wrong file size")
@@ -208,6 +214,7 @@ def step_impl(context):
 
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
+
 @then("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
     console_printer.print_info("clearning source prefix")
@@ -216,8 +223,10 @@ def step_impl(context):
 
 @then("Generate files having one extra column for negative testing")
 def step_impl(context):
-    console_printer.print_info(f"generating files from the columns {context.args_ch['args']['cols']} and add an unespected column")
+    console_printer.print_info(
+        f"generating files from the columns {context.args_ch['args']['cols']} and add an unespected column"
+    )
     console_printer.print_info(f"filenames are {context.filenames}")
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])+["extra_column"]
+    cols = ast.literal_eval(context.args_ch["args"]["cols"]) + ["extra_column"]
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
