@@ -109,7 +109,7 @@ def step_impl(
         for file in generated_files:
             edited_input_file = file[1]
             file_contents = file_helper.get_contents_of_file(edited_input_file, True)
-            db_object = json.loads(file_contents)["message"]["dbObject"]
+            db_object = json.loads(file_contents)["message"].get("dbObject", {})
             context.db_object_checksums.append(
                 hashlib.md5(json.dumps(db_object).encode("utf-8")).hexdigest()
             )
