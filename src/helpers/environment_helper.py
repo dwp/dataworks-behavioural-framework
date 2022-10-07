@@ -551,7 +551,7 @@ def set_test_run_common_variables(context):
     context.pdm_data_classification = context.config.userdata.get(
         "PDM_DATA_CLASSIFICATION"
     )
-    
+
     context.common_config_bucket = context.config.userdata.get(
         "DATAWORKS_COMMON_CONFIG_BUCKET"
     )
