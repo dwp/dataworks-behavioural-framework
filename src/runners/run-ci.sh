@@ -74,8 +74,6 @@ function set_file_locations() {
     export TF_DATAWORKS_STREAMS_KAFKA_PRODUCER_APP="${local_file_location}/dataworks-ml-streams-kafka-producer.json"
     export TF_DATAWORKS_STREAMS_KAFKA_CONSUMER_APP="${local_file_location}/dataworks-ml-streams-kafka-consumer.json"
     export TF_DATAWORKS_AWS_S3_OBJECT_TAGGER="${local_file_location}/dataworks-aws-s3-object-tagger.json"
-    export TF_DATAWORKS_HBASE_EXPORT="${local_file_location}/dataworks-hbase-export.json"
-    export TF_DATAWORKS_HBASE_IMPORT="${local_file_location}/dataworks-hbase-import.json"
 }
 
 # shellcheck disable=SC2112
@@ -277,22 +275,6 @@ function execute_behave() {
         PDM_DATA_CLASSIFICATION="$(cat ${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER} | jq -r ".pdm_object_tagger_data_classification.value")"
     else
         echo "Skipping TF_DATAWORKS_AWS_S3_OBJECT_TAGGER=${TF_DATAWORKS_AWS_S3_OBJECT_TAGGER}"
-    fi
-
-    if [[ ! -z "${TF_DATAWORKS_HBASE_EXPORT}" && "${TF_DATAWORKS_HBASE_EXPORT}" != "${NOT_SET_FLAG}" ]]; then
-        echo "Using ${TF_DATAWORKS_HBASE_EXPORT} ..."
-        HBASE_EXPORT_BUCKET="$(cat ${TF_DATAWORKS_HBASE_EXPORT} | jq -r ".hbase_export_bucket.value.id")"
-        HBASE_SNAPSHOT_EXPORTER_SCRIPT="$(cat ${TF_DATAWORKS_HBASE_EXPORT} | jq -r ".hbase_snapshot_exporter_script.value")"
-    else
-        echo "Skipping TF_DATAWORKS_HBASE_EXPORT=${TF_DATAWORKS_HBASE_EXPORT}"
-    fi
-
-    if [[ ! -z "${TF_DATAWORKS_HBASE_IMPORT}" && "${TF_DATAWORKS_HBASE_IMPORT}" != "${NOT_SET_FLAG}" ]]; then
-        echo "Using ${TF_DATAWORKS_HBASE_IMPORT} ..."
-        HBASE_SNAPSHOT_IMPORTER_SCRIPT="$(cat ${TF_DATAWORKS_HBASE_IMPORT} | jq -r ".hbase_snapshot_importer_script.value")"
-        HBASE_SNAPSHOT_RESTORER_SCRIPT="$(cat ${TF_DATAWORKS_HBASE_IMPORT} | jq -r ".hbase_snapshot_restorer_script.value")"
-    else
-        echo "Skipping TF_DATAWORKS_HBASE_IMPORT=${TF_DATAWORKS_HBASE_IMPORT}"
     fi
 
 
@@ -574,10 +556,6 @@ function execute_behave() {
     -D PDM_DATA_CLASSIFICATION_CSV_KEY="${PDM_DATA_CLASSIFICATION_CSV_KEY}" \
     -D UC_FEATURE_DATA_CLASSIFICATION="${UC_FEATURE_DATA_CLASSIFICATION}" \
     -D PDM_DATA_CLASSIFICATION="${PDM_DATA_CLASSIFICATION}" \
-    -D HBASE_EXPORT_BUCKET="${HBASE_EXPORT_BUCKET}" \
-    -D HBASE_SNAPSHOT_EXPORTER_SCRIPT="${HBASE_SNAPSHOT_EXPORTER_SCRIPT}" \
-    -D HBASE_SNAPSHOT_IMPORTER_SCRIPT="${HBASE_SNAPSHOT_IMPORTER_SCRIPT}" \
-    -D HBASE_SNAPSHOT_RESTORER_SCRIPT="${HBASE_SNAPSHOT_RESTORER_SCRIPT}" \
     -D DATAWORKS_COMMON_CONFIG_BUCKET="${DATAWORKS_COMMON_CONFIG_BUCKET}"
 
     export test_exit_code=$?
