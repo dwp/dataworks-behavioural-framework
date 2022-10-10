@@ -273,9 +273,9 @@ def step_impl(context):
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
-@then("Generate files having a row with one missing field for negative testing")
+@then("Generate files having incorrect headers for negative testing")
 def step_impl(context):
-    console_printer.print_info(f"generating files with wrong headers")
+    console_printer.print_info(f"generating files with incorrect headers")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols = cols[:-2]+["incorrect_colname_1", "incorrect_colname_2"]
     ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.09, cols)
@@ -288,9 +288,9 @@ def step_impl(context):
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
-@then("Generate files having a row with one missing field for negative testing")
+@then("Generate files having a row with string values instead of int")
 def step_impl(context):
-    console_printer.print_info(f"generating files with wrong headers")
+    console_printer.print_info(f"generating files with one missing field for negative testing")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.099, cols)
@@ -300,3 +300,19 @@ def step_impl(context):
             time.sleep(5)
         else:
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
+
+
+@then("Generate files having a row with one missing field for negative testing")
+def step_impl(context):
+    console_printer.print_info(f"generating files with one missing field for negative testing")
+    cols = ast.literal_eval(context.args_ch["args"]["cols"])
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.09, cols)
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[1], 0.099, cols)
+    start = time.time()
+    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
+        if time.time() - start < TIMEOUT:
+            time.sleep(5)
+        else:
+            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
+
+

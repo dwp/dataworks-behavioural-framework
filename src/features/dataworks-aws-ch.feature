@@ -29,14 +29,14 @@ Feature: Synthesise source file, process them and check output tables
     Then Verify that the alarms turned on due to wrong file format
     ### one column less
     Then Clear S3 prefix where previous synthetic data is
-    Then Generate files having one less column for negative testing
+    Then Generate files having one column less for negative testing
     Then Upload the local file to s3
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to fail
     Then Verify that the alarms turned on due to wrong file format
-    ### wrong headers
+    ### incorrect headers
     Then Clear S3 prefix where previous synthetic data is
-    Then Generate files having right number of columns with wrong headers for negative testing
+    Then Generate files having incorrect headers for negative testing
     Then Upload the local file to s3
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to fail
@@ -50,7 +50,7 @@ Feature: Synthesise source file, process them and check output tables
     Then Verify that the alarms turned on due to wrong file format
     ### row with string value where it should be int according to schema
     Then Clear S3 prefix where previous synthetic data is
-    Then Generate files having a row with string values for negative testing
+    Then Generate files having a row with string values instead of int
     Then Upload the local file to s3
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to fail
