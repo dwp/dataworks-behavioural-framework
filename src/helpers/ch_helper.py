@@ -48,6 +48,10 @@ def gen_string():
     return rd.choice([result_str, None])
 
 
+def gen_int():
+    return rd.randint(0, 100)
+
+
 def convert_to_gigabytes(bytes):
     try:
         constant = 1073741824
@@ -61,11 +65,11 @@ def convert_to_gigabytes(bytes):
 def generate_csv_file(filename, desired_gb, cols):
     with open(filename, "w+", newline="") as csvfile:
         writer = csv.writer(csvfile, delimiter=",")
-        header_record = cols
+        header_record = [k for k,v in cols.items()]
         writer.writerow(header_record)
         gb = convert_to_gigabytes(os.stat(filename).st_size)
         while gb <= desired_gb:
-            record_data = [gen_string() for i in cols]
+            record_data = [gen_string() if v=='string' else gen_int() for k,v in cols.items()]
             writer.writerow(record_data)
             gb = convert_to_gigabytes(os.stat(filename).st_size)
 

@@ -4,7 +4,6 @@ import os
 import json
 import csv
 import time
-
 from helpers import (
     ch_helper,
     aws_helper,
@@ -222,7 +221,6 @@ def step_impl(context):
 
 @then("Generate files having one extra column for negative testing")
 def step_impl(context):
-
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])+["extra_column"]
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
@@ -239,6 +237,7 @@ def step_impl(context):
 def step_impl(context):
     console_printer.print_info(f"generating files with one column less")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
+    cols = cols[:-1]
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
     start = time.time()

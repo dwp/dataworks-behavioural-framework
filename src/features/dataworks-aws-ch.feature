@@ -13,7 +13,6 @@ Feature: Ch etl to produce input data and verify correct output after processing
     Then Add validation step and verify it completes
     Then Verify last imported file was updated on DynamoDB
     ### wrong size
-    When The cluster is still running
     Then Clear S3 prefix where previous synthetic data is
     Then Generate files having wrong size for negative testing
     Then Upload the local file to s3
