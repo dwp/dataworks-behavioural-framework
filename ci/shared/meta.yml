@@ -8,8 +8,8 @@ meta:
           type: docker-image
           source:
             repository: ((dataworks.terraform_repository))
-            version: ((dataworks.terraform_14_version))
-            tag: ((dataworks.terraform_14_version))
+            version: ((dataworks.terraform_version))
+            tag: ((dataworks.terraform_version))
         params:
           TF_INPUT: false
           AWS_REGION: ((dataworks.aws_region))
@@ -26,8 +26,8 @@ meta:
           type: docker-image
           source:
             repository: ((dataworks.terraform_repository))
-            version: ((dataworks.terraform_14_version))
-            tag: ((dataworks.terraform_14_version))
+            version: ((dataworks.terraform_version))
+            tag: ((dataworks.terraform_version))
         run:
           path: sh
           args:
