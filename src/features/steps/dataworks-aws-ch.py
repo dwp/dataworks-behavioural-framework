@@ -236,12 +236,6 @@ def step_impl(context):
     cols.update({"extra_column": "string"})
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
 @then("Generate files having one column less for negative testing")
@@ -251,12 +245,6 @@ def step_impl(context):
     cols.pop(cols.keys()[-1])
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
 @then("Generate files having incorrect headers for negative testing")
@@ -265,15 +253,9 @@ def step_impl(context):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols.pop(cols.keys()[-1])
     cols.pop(cols.keys()[-1])
-    cols.update({"incorrect_colname_1":"string", "incorrect_colname_2":"string"})
+    cols.update({"incorrect_colname_1": "string", "incorrect_colname_2": "string"})
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
 @then("Generate files having a row with string values instead of int")
@@ -282,12 +264,6 @@ def step_impl(context):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.099, cols)
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
 @then("Generate files having a row with one missing field for negative testing")
@@ -296,11 +272,4 @@ def step_impl(context):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file_row_with_missing_field(context.filenames[1], 0.099, cols)
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
-
 
