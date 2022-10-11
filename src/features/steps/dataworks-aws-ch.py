@@ -203,7 +203,17 @@ def step_impl(context):
     ), "the dynamoDB item was not updated correctly"
 
 
-@then("Verify that the alarms turned on due to wrong file format")
+@then("Verify that the alarms turned on due to file size")
+def step_impl(context):
+    start = time.time()
+    while not ch_helper.did_alarm_trigger("file_format_check_failed"):
+        if time.time() - start < TIMEOUT:
+            time.sleep(5)
+        else:
+            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
+
+
+@then("Verify that the alarms turned on due to incorrect file format")
 def step_impl(context):
     start = time.time()
     while not ch_helper.did_alarm_trigger("file_format_check_failed"):
