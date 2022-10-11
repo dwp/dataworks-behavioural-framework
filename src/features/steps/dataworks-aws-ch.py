@@ -242,7 +242,7 @@ def step_impl(context):
 def step_impl(context):
     console_printer.print_info(f"generating files with one column less")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    cols.pop(cols.keys[-1])
+    cols.pop(list(cols.keys())[-1])
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
 
@@ -251,8 +251,8 @@ def step_impl(context):
 def step_impl(context):
     console_printer.print_info(f"generating files with wrong headers")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    cols.pop(cols.keys[-1])
-    cols.pop(cols.keys[-1])
+    cols.pop(list(cols.keys())[-1])
+    cols.pop(list(cols.keys())[-1])
     cols.update({"incorrect_colname_1": "string", "incorrect_colname_2": "string"})
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
