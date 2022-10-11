@@ -141,7 +141,7 @@ def step_impl(context):
             "--e2e True",
         ]
     )
-    step_name = "etl"
+    step_name = "etl - negative testing"
     step = emr_step_generator.generate_bash_step(
         emr_cluster_id=context.ch_cluster_id, bash_command=command, step_type=step_name
     )
@@ -233,7 +233,7 @@ def step_impl(context):
 def step_impl(context):
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    cols=cols.update({"extra_column":"string"})
+    cols.update({"extra_column": "string"})
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
     start = time.time()
@@ -265,7 +265,7 @@ def step_impl(context):
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols.pop(cols.keys()[-1])
     cols.pop(cols.keys()[-1])
-    cols = cols.update({"incorrect_colname_1":"string","incorrect_colname_2":"string"})
+    cols.update({"incorrect_colname_1":"string", "incorrect_colname_2":"string"})
     ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
     start = time.time()
