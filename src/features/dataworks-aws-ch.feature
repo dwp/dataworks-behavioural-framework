@@ -54,4 +54,4 @@ Feature: Synthesise source file, process them and check output tables
     Then Upload the local file to s3
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to fail
-    Then Verify that the alarms tuned on due to wrong file format
+    Then Verify that the alarms turned on due to wrong file format
