@@ -7,10 +7,14 @@ from helpers import (
 )
 
 
-def restart_service(service, cluster):
+def run_sft_tasks(tasks, cluster):
 
-    client = aws_helper.get_client("ecs")
-    response = client.update_service(cluster=cluster, service=service, forceNewDeployment=True)
+    for i in tasks:
+        client = aws_helper.get_client("ecs")
+        response = client.run_task(
+            cluster=cluster,
+            taskDefinition=i,
+        )
 
 
 def set_asg_instance_count(asg_name, min, max, desired):
@@ -52,4 +56,3 @@ def check_task_state(cluster, family, desired_status):
     except:
         console_printer.print_error_text(f"no {family} tasks with status {desired_status} found in cluster:")
         return False
-

@@ -12,7 +12,7 @@ from helpers import (
 ASG = 'data-ingress-ag'
 CLUSTER = 'data-ingress'
 FILENAME = 'BasicCompanyData-'
-S3_PREFIX = 'data-ingress/companies'
+S3_PREFIX = 'e2e/sft/data-ingress/companies'
 PASS_FILE_KEY = "e2e/eicar_test/not_passed.txt"
 TIMEOUT = 300
 
@@ -41,7 +41,7 @@ def step_impl(context):
 
 @then("run sender agent task to send test data and receiver agent task")
 def step_impl(context):
-    data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
+    data_ingress_helper.run_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
     sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
@@ -52,8 +52,6 @@ def step_impl(context):
                                                                     desired_status="running")
             sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender",
                                                                   desired_status="running")
-            data_ingress_helper.restart_service("sft_agent_sender", CLUSTER)
-            data_ingress_helper.restart_service("sft_agent_receiver", CLUSTER)
         else:
             raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
 

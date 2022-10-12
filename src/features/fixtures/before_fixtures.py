@@ -858,6 +858,6 @@ def clean_up_hbase_snapshot_cloned_table(context):
 @fixture
 def s3_clear_ingress_sft_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_ingress_sft_start' fixture")
-    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, "data-ingress/companies", False)
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, "e2e/sft/data-ingress/companies", False)
     aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, "e2e/eicar_test", False)
 
