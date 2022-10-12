@@ -63,7 +63,7 @@ def set_asg_instance_count(asg_name, min, max, desired):
     )
 
 
-def check_instance_count(desired_count, max_wait=120):
+def check_instance_count(desired_count, max_wait=180):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
