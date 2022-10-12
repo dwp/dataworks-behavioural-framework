@@ -45,19 +45,7 @@ def step_impl(context):
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
 
 
-@when("The cluster is still running")
-def step_impl(context):
-    if aws_helper.poll_emr_cluster_status(context.ch_cluster_id) not in (
-        "WAITING",
-        "TERMINATED",
-        "TERMINATED_WITH_ERRORS",
-    ):
-        console_printer.print_info(
-            f"Cluster {context.ch_cluster_id} ready for new steps"
-        )
-
-
-@then("Download and parse conf file")
+@when("Download and parse conf file")
 def step_impl(context):
     if not os.path.isdir(context.temp_folder):
         os.mkdir(context.temp_folder)
@@ -69,7 +57,7 @@ def step_impl(context):
     context.args_ch = args
 
 
-@then("Generate files having expected format and size to test positive outcome")
+@when("Generate files having expected format and size to test positive outcome")
 def step_impl(context):
     console_printer.print_info(
         f"generating files from the columns {context.args_ch['args']['cols']}"
@@ -92,7 +80,7 @@ def step_impl(context):
     )  # pre-defined columns + the partitioning column
 
 
-@then("Upload the local file to s3")
+@when("Upload the local file to s3")
 def step_impl(context):
     console_printer.print_info(
         f"generated files with columns {context.args_ch['args']['cols']}"
@@ -103,14 +91,14 @@ def step_impl(context):
     context.filename_expected = context.filenames[-1]
 
 
-@then("Set the dynamo db bookmark on the first filename generated")
+@when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
     ch_helper.add_latest_file(
         context, os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[0]))
     )
 
 
-@then("Add the etl step in e2e mode and wait for it to complete")
+@then("Etl step in e2e mode completes")
 def step_impl(context):
 
     command = " ".join(
@@ -132,7 +120,7 @@ def step_impl(context):
         )
 
 
-@then("Add the etl step in e2e mode and wait for it to fail")
+@then("Etl step in e2e mode fails")
 def step_impl(context):
 
     command = " ".join(
@@ -154,7 +142,7 @@ def step_impl(context):
         )
 
 
-@then("Add validation step and verify it completes")
+@then("Validation step completes")
 def step_impl(context):
     command = " ".join(
         [
@@ -179,7 +167,7 @@ def step_impl(context):
         )
 
 
-@then("Generate files having wrong size for negative testing")
+@when("Generate files having wrong size for negative testing")
 def step_impl(context):
     console_printer.print_info(
         f"generating files fro the column {context.args_ch['args']['cols']}"
@@ -190,7 +178,7 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
 
 
-@then("Verify last imported file was updated on DynamoDB")
+@then("Last imported file is updated on DynamoDB")
 def step_impl(context):
 
     filename_expected = os.path.join(
@@ -203,7 +191,7 @@ def step_impl(context):
     ), "the dynamoDB item was not updated correctly"
 
 
-@then("Verify that the alarms turned on due to file size")
+@then("File size alarm triggers")
 def step_impl(context):
     start = time.time()
     while not ch_helper.did_alarm_trigger("file_size_check_failed"):
@@ -213,7 +201,7 @@ def step_impl(context):
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
-@then("Verify that the alarms turned on due to incorrect file format")
+@then("File format alarm triggers")
 def step_impl(context):
     start = time.time()
     while not ch_helper.did_alarm_trigger("file_format_check_failed"):
@@ -223,13 +211,13 @@ def step_impl(context):
             raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
-@then("Clear S3 prefix where previous synthetic data is")
+@when("Clear S3 prefix where previous synthetic data is")
 def step_impl(context):
     console_printer.print_info("clearing source prefix")
     aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, E2E_S3_PREFIX, False)
 
 
-@then("Generate files having one extra column for negative testing")
+@when("Generate files having one extra column for negative testing")
 def step_impl(context):
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
@@ -238,7 +226,7 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
 
 
-@then("Generate files having incorrect headers for negative testing")
+@when("Generate files having incorrect headers for negative testing")
 def step_impl(context):
     console_printer.print_info(f"generating files with wrong headers")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
@@ -249,7 +237,7 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
 
 
-@then("Generate files having a row with string values instead of int")
+@when("Generate files having a row with string values instead of int")
 def step_impl(context):
     console_printer.print_info(f"generating files with one missing field for negative testing")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
@@ -257,7 +245,7 @@ def step_impl(context):
     ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.099, cols)
 
 
-@then("Generate files having a row with one missing field for negative testing")
+@when("Generate files having a row with one missing field for negative testing")
 def step_impl(context):
     console_printer.print_info(f"generating files with one missing field for negative testing")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
