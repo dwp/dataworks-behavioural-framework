@@ -17,16 +17,6 @@ def run_sft_tasks(tasks, cluster):
         )
 
 
-def stop_sft_tasks(tasks, cluster):
-
-    for i in tasks:
-        client = aws_helper.get_client("ecs")
-        response = client.stop_task(
-            cluster=cluster,
-            taskDefinition=i,
-        )
-
-
 def check_container_instance_count(cluster, desired_count, max_wait=120):
     t0 = time.time()
     t1 = t0 + max_wait
