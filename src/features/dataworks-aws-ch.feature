@@ -27,13 +27,6 @@ Feature: Synthesise source file, process them and check output tables
     Then Set the dynamo db bookmark on the first filename generated
     Then Add the etl step in e2e mode and wait for it to fail
     Then Verify that the alarms turned on due to incorrect file format
-    ### one column less
-    Then Clear S3 prefix where previous synthetic data is
-    Then Generate files having one column less for negative testing
-    Then Upload the local file to s3
-    Then Set the dynamo db bookmark on the first filename generated
-    Then Add the etl step in e2e mode and wait for it to fail
-    Then Verify that the alarms turned on due to incorrect file format
     ### incorrect headers
     Then Clear S3 prefix where previous synthetic data is
     Then Generate files having incorrect headers for negative testing

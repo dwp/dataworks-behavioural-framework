@@ -238,15 +238,6 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
 
 
-@then("Generate files having one column less for negative testing")
-def step_impl(context):
-    console_printer.print_info(f"generating files with one column less")
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    cols.pop(list(cols.keys())[-1])
-    ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
-
-
 @then("Generate files having incorrect headers for negative testing")
 def step_impl(context):
     console_printer.print_info(f"generating files with wrong headers")
