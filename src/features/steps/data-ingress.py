@@ -1,4 +1,4 @@
-from behave import given, then
+from behave import given, then, when
 from datetime import datetime
 import os
 import time
@@ -17,9 +17,7 @@ PASS_FILE_KEY = "e2e/eicar_test/not_passed.txt"
 TIMEOUT = 300
 
 
-@given("the autoscaling schedules replicas that are set to scale up after '{time_scale_up}' min and scale down after '{time_scale_down}' min")
-
-
+@given("the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min")
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
@@ -29,7 +27,7 @@ def step_impl(context, time_scale_up, time_scale_down):
         console_printer.print_error_text(ex)
 
 
-@then("wait for the instance to scale up within the expected time")
+@then("instance starts within the expected time")
 def step_impl(context):
 
     w = (context.time_scale_up*60)-100
@@ -39,7 +37,7 @@ def step_impl(context):
     console_printer.print_info("scaling successful")
 
 
-@then("run sender agent task to send test data and receiver agent task")
+@when("sender agent task and receiver agent task run")
 def step_impl(context):
     data_ingress_helper.run_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
     start = time.time()
@@ -56,7 +54,7 @@ def step_impl(context):
             raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
 
 
-@then("wait for pass file indicating that test virus file was correctly detected")
+@then("new trend micro test pass file is on s3")
 def step_wait_pass_file(context):
     start = time.time()
     while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, PASS_FILE_KEY):
@@ -68,7 +66,7 @@ def step_wait_pass_file(context):
             raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 
 
-@then("check if the test file is in s3")
+@then("new test file sent by sft sender is on s3")
 def step_impl(context):
     td = datetime.today().strftime('%Y-%m-%d')
     filename = FILENAME+td+'.csv'
@@ -81,7 +79,7 @@ def step_impl(context):
             raise AssertionError(f"sft file was not sent and received after {TIMEOUT} seconds")
 
 
-@then("wait for the instance to scale down within the expected time")
+@then("instance scales down within the expected time")
 def step_impl(context):
     time_now = time.time()
     w = (context.time_scale_down * 60) - (time_now - context.time_start)
