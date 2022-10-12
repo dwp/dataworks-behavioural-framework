@@ -17,6 +17,39 @@ def run_sft_tasks(tasks, cluster):
         )
 
 
+def stop_sft_tasks(tasks, cluster):
+
+    for i in tasks:
+        client = aws_helper.get_client("ecs")
+        response = client.stop_task(
+            cluster=cluster,
+            taskDefinition=i,
+        )
+
+
+def check_container_instance_count(cluster, desired_count, max_wait=120):
+    t0 = time.time()
+    t1 = t0 + max_wait
+    ic = "unknown"
+    while time.time() < t1:
+        ecs = aws_helper.get_client("ecs")
+        response = ecs.list_container_instances(
+            cluster=cluster
+        )
+        ic = len(response['containerInstanceArns'])
+        console_printer.print_info(f"instance count: {ic}")
+        s = t1 - time.time()
+        console_printer.print_info(f"seconds before timeout: {round(s)}")
+        if ic == desired_count:
+            console_printer.print_info(f"instances scaled up to {ic} within the time frame given")
+            break
+        time.sleep(10)
+    if ic != desired_count:
+        raise AssertionError(f"instance count: {ic} did not reach desired size: {desired_count} within the time"
+                             f" frame given")
+
+
+
 def set_asg_instance_count(asg_name, min, max, desired):
 
     client = aws_helper.get_client("autoscaling")

@@ -39,6 +39,8 @@ def step_impl(context):
 
 @when("sender agent task and receiver agent task run")
 def step_impl(context):
+    data_ingress_helper.check_container_instance_count(CLUSTER, 2)
+    data_ingress_helper.stop_sft_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
     data_ingress_helper.run_sft_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
