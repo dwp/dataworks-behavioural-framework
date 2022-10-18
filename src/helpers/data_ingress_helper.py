@@ -33,7 +33,7 @@ def check_container_instance_count(cluster, desired_count, max_wait=120):
         if ic == desired_count:
             console_printer.print_info(f"instances scaled up to {ic} within the time frame given")
             break
-        time.sleep(10)
+        time.sleep(5)
     if ic != desired_count:
         raise AssertionError(f"instance count: {ic} did not reach desired size: {desired_count} within the time"
                              f" frame given")
