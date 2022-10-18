@@ -576,3 +576,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.clean_up_hbase_export_hbase_snapshots, context)
     if tag == "fixture.terminate.datsci.cluster":
         use_fixture(after_fixtures.terminate_datsci_cluster, context)
+    if tag == "fixture.stop.data.ingress":
+        use_fixture(after_fixtures.stop_data_ingress, context)

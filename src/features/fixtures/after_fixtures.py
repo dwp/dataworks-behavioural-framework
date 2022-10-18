@@ -6,6 +6,7 @@ from helpers import (
     console_printer,
     dataworks_kafka_producer_common_helper,
     emr_step_generator,
+    data_ingress_helper,
 )
 
 
@@ -265,3 +266,15 @@ def clean_up_hbase_export_hbase_snapshots(context):
         bash_script,
         step_type,
     )
+
+
+@fixture
+def stop_data_ingress(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'stop_data_ingress' fixture")
+
+    try:
+        data_ingress_helper.set_asg_instance_count("data-ingress-ag", 0, 0, 0)
+    except Exception as error:
+        console_printer.print_warning_text(
+            f"Error occured when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
+        )

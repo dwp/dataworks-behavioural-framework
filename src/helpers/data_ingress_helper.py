@@ -17,7 +17,7 @@ def run_sft_tasks(tasks, cluster):
         )
 
 
-def check_container_instance_count(cluster, desired_count, max_wait=120):
+def check_container_instance_count(cluster, desired_count, max_wait=200):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
@@ -31,11 +31,11 @@ def check_container_instance_count(cluster, desired_count, max_wait=120):
         s = t1 - time.time()
         console_printer.print_info(f"seconds before timeout: {round(s)}")
         if ic == desired_count:
-            console_printer.print_info(f"instances scaled up to {ic} within the time frame given")
+            console_printer.print_info(f"container instances scaled up to {ic} within the time frame given")
             break
         time.sleep(5)
     if ic != desired_count:
-        raise AssertionError(f"instance count: {ic} did not reach desired size: {desired_count} within the time"
+        raise AssertionError(f"container instance count: {ic} did not reach desired size: {desired_count} within the time"
                              f" frame given")
 
 
