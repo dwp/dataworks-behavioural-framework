@@ -44,10 +44,10 @@ def step_impl(context):
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
     if not receiver_running:
-        data_ingress_helper.run_sft_tasks(["sft_agent_receiver"])
+        data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
     sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
     if not sender_running:
-        data_ingress_helper.run_sft_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
+        data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
     while not receiver_running & sender_running:
         if time.time()-start < TIMEOUT:
             time.sleep(10)
