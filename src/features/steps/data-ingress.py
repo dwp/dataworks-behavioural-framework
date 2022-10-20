@@ -40,14 +40,17 @@ def step_impl(context):
 @when("sender agent task and receiver agent task run")
 def step_impl(context):
     data_ingress_helper.check_container_instance_count(CLUSTER, 2)
-    time.sleep(5)
-    data_ingress_helper.run_sft_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
+    time.sleep(9)
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
+    if not receiver_running:
+        data_ingress_helper.run_sft_tasks(["sft_agent_receiver"])
     sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
+    if not sender_running:
+        data_ingress_helper.run_sft_tasks(["sft_agent_receiver", "sft_agent_sender"], CLUSTER)
     while not receiver_running & sender_running:
         if time.time()-start < TIMEOUT:
-            time.sleep(15)
+            time.sleep(10)
             receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver",
                                                                     desired_status="running")
             sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender",
@@ -63,7 +66,7 @@ def step_wait_pass_file(context):
         if time.time()-start < TIMEOUT:
             time.sleep(5)
             time_left = time.time() - start
-            console_printer.print_info(f"timeout in {time_left} seconds")
+            console_printer.print_info(f"timeout in {round(time_left)} seconds")
         else:
             raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 
