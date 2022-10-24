@@ -66,7 +66,8 @@ def step_wait_pass_file(context):
         if time.time()-start < TIMEOUT:
             time.sleep(5)
             time_left = time.time() - start
-            console_printer.print_info(f"timeout in {round(time_left)} seconds")
+            tl = TIMEOUT - round(time_left)
+            console_printer.print_info(f"timeout in {tl} seconds")
         else:
             raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
 
