@@ -78,11 +78,12 @@ def step_impl(context):
     filename = FILENAME+td+'.csv'
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
+    TIMEOUT_SFT = 500
     while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
-        if time.time()-start < TIMEOUT:
+        if time.time()-start < TIMEOUT_SFT:
             time.sleep(5)
         else:
-            raise AssertionError(f"sft file was not sent and received after {TIMEOUT} seconds")
+            raise AssertionError(f"sft file was not sent and received after {TIMEOUT_SFT} seconds")
 
 
 @then("instance scales down within the expected time")
