@@ -35,6 +35,7 @@ def generate_corporate_data_files(
     topic_name,
     seconds_timeout,
     timestamp_override,
+    s3_output_prefix_override=None,
 ):
     """Returns array of generated corporate data as tuples of (input s3 location, input local file, output local file).
 
@@ -49,7 +50,9 @@ def generate_corporate_data_files(
     s3_output_prefix -- the output path for the edited file in s3
     record_count -- the number of records to send
     topic_name -- the topic name which records are generated for
-    timestamp_override -- the base timestamp or None to use default of "2018-11-01T03:02:01.001"
+    timestamp_override -- the base timestamp or None to use default of "2018-11-01T03:02:01.001
+    s3_output_prefix_override -- completely override s3_output_prefix, default s3_output_prefix construction will be ignored
+        if specified, `s3_output_prefix` needs to be set to an empty string
     """
     global _base_datetime_timestamp
     timestamp_to_use = (
@@ -88,6 +91,7 @@ def generate_corporate_data_files(
                 seconds_timeout,
                 timestamp,
                 timestamp_string,
+                s3_output_prefix_override,
             )
         )
 
@@ -107,6 +111,7 @@ def _generate_corporate_data_file(
     seconds_timeout,
     timestamp,
     timestamp_string,
+    s3_output_prefix_override=None,
 ):
     """Generates corporate data input and check files, returns tuple of (input s3 location, input local file, output local file).
 
@@ -123,6 +128,8 @@ def _generate_corporate_data_file(
     seconds_timeout -- the timeout in seconds for the test
     timestamp -- the timestamp used in the file
     timestamp_string -- the formatted string of the timestamp
+    s3_output_prefix_override -- completely override s3_output_prefix, default s3_output_prefix construction will be ignored
+        if specified, `s3_output_prefix` needs to be set to an empty string
     """
     console_printer.print_debug(
         f"Generating corporate datafile for input template of {input_template_name}, output template of {output_template_name}, id of {new_uuid} and timestamp of {timestamp}"
@@ -149,6 +156,7 @@ def _generate_corporate_data_file(
         seconds_timeout,
         timestamp,
         timestamp_string,
+        s3_output_prefix_override,
     )
 
     return (
@@ -213,6 +221,7 @@ def _generate_corporate_data_output_file(
     seconds_timeout,
     timestamp,
     timestamp_string,
+    s3_output_prefix_override=None,
 ):
     """Generates a corporate data output value to check against HBase and returns tuple of local and s3 file name for edited file.
 
@@ -228,6 +237,8 @@ def _generate_corporate_data_output_file(
     seconds_timeout -- the timeout in seconds for the test
     timestamp -- the timestamp for the file
     timestamp_string -- the formatted string of the timestamp in the file
+    s3_output_prefix_override -- completely override s3_output_prefix, default s3_output_prefix construction will be ignored
+        if specified, `s3_output_prefix` needs to be set to an empty string
     """
     console_printer.print_debug(
         f"Generating corporate data output file for template of {template_file_name} and id of {new_uuid} and timestamp of {timestamp_string}"
@@ -260,6 +271,7 @@ def _generate_corporate_data_output_file(
         s3_output_prefix,
         seconds_timeout,
         timestamp,
+        s3_output_prefix_override,
     )
 
     return (full_file_path_s3, output_file_local)
@@ -274,6 +286,7 @@ def _upload_data_output_file_to_s3(
     s3_output_prefix,
     seconds_timeout,
     timestamp,
+    s3_output_prefix_override=None,
 ):
     """Uploads a gzipped version of the file to S3 and returns full S3 path.
 
@@ -286,6 +299,8 @@ def _upload_data_output_file_to_s3(
     s3_output_prefix -- the output path for the edited file in s3
     seconds_timeout -- the timeout in seconds for the test
     timestamp -- the timestamp for this file
+    s3_output_prefix_override -- completely override s3_output_prefix, default s3_output_prefix construction will be ignored
+        if specified, `s3_output_prefix` needs to be set to an empty string
     """
     output_file_local = file_helper.generate_local_output_file(
         "tmp_corporate_data", f"{str(new_uuid)}.gzip", local_files_temp_folder
@@ -312,6 +327,9 @@ def _upload_data_output_file_to_s3(
         collection,
         timestamp,
     )
+
+    if s3_output_prefix_override is not None:
+        output_file_full_path_s3 = s3_output_prefix_override
 
     full_file_path_s3 = os.path.join(output_file_full_path_s3, file_name)
     aws_helper.upload_file_to_s3_and_wait_for_consistency(
