@@ -238,6 +238,23 @@ def terminate_datsci_cluster(context, timeout=30, **kwargs):
             "No cluster id found for datasci so not terminating any cluster"
         )
 
+@fixture
+def terminate_corporate_data_ingestion_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'terminate_corporate_data_ingestion_cluster' fixture")
+
+    if "corporate_data_ingestion_cluster_id" in context and context.corporate_data_ingestion_cluster_id is not None:
+        try:
+            aws_helper.terminate_emr_cluster(context.corporate_data_ingestion_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning_text(
+                f"Error occured when terminating dataworks-aws-corporate-data-ingestion cluster with id of '{context.corporate_data_ingestion_cluster_id}' as the following error occurred: '{error}'"
+            )
+
+    else:
+        console_printer.print_info(
+            "No cluster id found for dataworks-aws-corporate-data-ingestion so not terminating any cluster"
+        )
+
 
 @fixture
 def dataworks_stop_kafka_producer_app(context):

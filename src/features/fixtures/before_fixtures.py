@@ -1,6 +1,7 @@
 import os
 import json
 import time
+from datetime import datetime
 from botocore.exceptions import ClientError
 from behave import fixture
 from helpers import (
@@ -15,8 +16,11 @@ from helpers import (
     streaming_data_helper,
     dataworks_kafka_producer_common_helper,
     emr_step_generator,
+    data_load_helper,
+    invoke_lambda
 )
 
+CLUSTER_ARN = "ClusterArn"
 
 @fixture
 def s3_clear_dlq(context, timeout=30, **kwargs):
@@ -195,6 +199,25 @@ def s3_clear_corporate_data_start(context, timeout=30, **kwargs):
         context.corporate_storage_s3_bucket_id,
         context.cdl_data_load_s3_base_prefix_tests,
         True,
+    )
+
+
+@fixture
+def s3_clear_corporate_data_ingestion_input(context, database, collection):
+    """ Location for new corporate data ingestion (HBASE bypass) """
+    corporate_data_ingestion_input_s3_prefix = data_load_helper.generate_corporate_data_s3_prefix(
+        os.path.join(
+            context.config.userdata.get("CDL_DATA_LOAD_S3_BASE_PREFIX"),
+            "ucfs_audit"
+        ),
+        database,
+        collection,
+        datetime.now(),
+    )
+    console_printer.print_info(f"{context.corporate_storage_s3_bucket_id}|{corporate_data_ingestion_input_s3_prefix}")
+    console_printer.print_info("Executing 's3_clear_corporate_data_ingestion_input' fixture")
+    aws_helper.clear_s3_prefix(
+        context.corporate_storage_s3_bucket_id, corporate_data_ingestion_input_s3_prefix, True
     )
 
 
@@ -782,6 +805,22 @@ def s3_clear_ch_start(context, timeout=30, **kwargs):
         context.data_ingress_stage_bucket, "e2e/data-ingress/companies", False
     )
 
+def s3_clear_corporate_data_ingestion_prefixes(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_corporate_data_ingestion_prefixes' fixture")
+    aws_helper.clear_s3_prefix(
+        context.published_bucket, context.s3_generated_records_input_prefix, True
+    )
+    aws_helper.clear_s3_prefix(
+        context.corporate_storage_s3_bucket_id, context.s3_output_prefix, True
+    )
+
+
+@fixture
+def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'prepare_corporate_data_ingestion_context' fixture")
+    context.s3_generated_records_input_prefix = f"corporate_storage/ucfs_audit/e2e"
+    context.s3_output_prefix = f"corporate_data_ingestion/audit_logs_transition/e2e"
+
 
 @fixture
 def s3_clear_kickstart_start(context, timeout=30, **kwargs):
@@ -844,3 +883,30 @@ def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
     # wait for a 60secs
     time.sleep(int(timeout))
     console_printer.print_info("COMPLETE:Initialising e2e tests...for dlq consumer")
+
+
+@fixture
+def start_corporate_data_ingestion_cluster(context):
+    emr_launcher_config = {
+        "s3_overrides": None,
+        "overrides": {
+            "Instances": {
+                "KeepJobFlowAliveWhenNoSteps": True,
+            },
+            "Steps": []
+        },
+        "extend": None,
+        "additional_step_args": None,
+    }
+    payload_json = json.dumps(emr_launcher_config)
+    cluster_response = invoke_lambda.invoke_corporate_data_ingestion_emr_launcher_lambda(payload_json)
+    cluster_arn = cluster_response[CLUSTER_ARN]
+    cluster_arn_arr = cluster_arn.split(":")
+    cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
+    cluster_identifier_arr = cluster_identifier.split("/")
+    cluster_id = cluster_identifier_arr[len(cluster_identifier_arr) - 1]
+    if not cluster_id:
+        raise AssertionError(f"Unable to start corporate_data_ingestion cluster")
+    else:
+        console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
+        context.corporate_data_ingestion_cluster_id = cluster_id

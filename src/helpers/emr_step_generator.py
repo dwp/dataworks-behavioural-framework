@@ -73,6 +73,39 @@ def generate_script_step(
     return generate_local_step(emr_cluster_id, bash_command, step_name)
 
 
+def generate_spark_step(
+        emr_cluster_id, script_location, step_type, command_line_arguments=None
+):
+    """Starts a step of type script and returns its id.
+
+    Keyword arguments:
+    emr_cluster_id -- the id of the cluster
+    script_location -- the location on the EMR instance (or an S3 URI) of the script to run
+    step_type -- the name of the step type being run (i.e. "major compaction")
+    command_line_arguments -- the arguments to pass to the script as a string, if any
+    """
+    arguments_array = [script_location]
+
+    if command_line_arguments is not None:
+        arguments_array.extend(command_line_arguments.split())
+
+    console_printer.print_info(
+        f"Executing script step type '{step_type}' with arguments of \"{arguments_array}\""
+    )
+
+    step_name = f"Automated Script Step - {step_type}"
+
+    step_flow = {
+        "Name": step_name,
+        "ActionOnFailure": "CONTINUE",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": ["spark-submit", "--master", "yarn", "--conf", "spark.yarn.submit.waitAppCompletion=true"] + arguments_array,
+        },
+    }
+    return aws_helper.add_step_to_emr_cluster(step_flow, emr_cluster_id)
+
+
 def generate_bash_step(emr_cluster_id, bash_command, step_type):
     """Starts a step of type bash and returns its id.
 

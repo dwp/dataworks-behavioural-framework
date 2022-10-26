@@ -392,6 +392,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_historic_data_start, context)
     if tag == "fixture.s3.clear.corporate.data.start":
         use_fixture(before_fixtures.s3_clear_corporate_data_start, context)
+    if tag == "fixture.s3.clear.corporate.data.ingestion.input":
+        use_fixture(before_fixtures.s3_clear_corporate_data_ingestion_input, context, "data", "businessAudit")
     if tag == "fixture.hbase.clear.ingest.start":
         use_fixture(before_fixtures.hbase_clear_ingest_start, context)
     if tag == "fixture.hbase.clear.ingest.equalities.start":
@@ -464,6 +466,12 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
+    if tag == "fixture.start.corporate_data_ingestion.cluster":
+        use_fixture(before_fixtures.start_corporate_data_ingestion_cluster, context)
+    if tag == "fixture.s3.clear.corporate.data.ingestion.prefixes":
+        use_fixture(before_fixtures.s3_clear_corporate_data_ingestion_prefixes, context)
+    if tag == "fixture.prepare.corporate.data.ingestion.context":
+        use_fixture(before_fixtures.prepare_corporate_data_ingestion_context, context)
 
 
 def after_all(context):
@@ -565,6 +573,8 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_cyi_cluster, context)
     if tag == "fixture.terminate.ingest_replica.cluster":
         use_fixture(after_fixtures.terminate_ingest_replica_cluster, context)
+    if tag == "fixture.terminate.corporate_data_ingestion.cluster":
+        use_fixture(after_fixtures.terminate_corporate_data_ingestion_cluster, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.producer":
         use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
