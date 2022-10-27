@@ -12,7 +12,7 @@ from helpers import (
 ASG = 'data-ingress-ag'
 CLUSTER = 'data-ingress'
 FILENAME = 'BasicCompanyData-'
-S3_PREFIX = 'e2e/sft/data-ingress/companies'
+S3_PREFIX = 'e2e/data-ingress/companies'
 PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
 TIMEOUT = 300
 
