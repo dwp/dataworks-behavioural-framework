@@ -17,7 +17,7 @@ def run_sft_tasks(tasks, cluster):
         )
 
 
-def check_container_instance_count(cluster, desired_count, max_wait=240):
+def check_container_instance_count(cluster, desired_count, max_wait=360):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
