@@ -87,7 +87,7 @@ def step_impl(context):
             raise AssertionError(f"sft file was not sent and received after {TIMEOUT_SFT} seconds")
 
 
-@then("instance scales down within the expected time")
+@then("instance stops within the expected time")
 def step_impl(context):
     time_now = time.time()
     w = (context.time_scale_down * 60) - (time_now - context.time_start)
