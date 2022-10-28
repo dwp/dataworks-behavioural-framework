@@ -14,8 +14,9 @@ CLUSTER = 'data-ingress'
 FILENAME = 'BasicCompanyData-'
 S3_PREFIX = 'e2e/data-ingress/companies'
 PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
-TIMEOUT = 300
-
+TIMEOUT_TM = 360
+TIMEOUT_SFT = 540
+TIMEOUT = 360
 
 @given("the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min")
 def step_impl(context, time_scale_up, time_scale_down):
@@ -63,13 +64,13 @@ def step_impl(context):
 def step_wait_pass_file(context):
     start = time.time()
     while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, PASS_FILE_KEY):
-        if time.time()-start < TIMEOUT:
+        if time.time()-start < TIMEOUT_TM:
             time.sleep(5)
             time_left = time.time() - start
-            tl = TIMEOUT - round(time_left)
+            tl = TIMEOUT_TM - round(time_left)
             console_printer.print_info(f"timeout in {tl} seconds")
         else:
-            raise AssertionError(f"eicar test did not pass after {TIMEOUT} seconds")
+            raise AssertionError(f"eicar test did not pass after {TIMEOUT_TM} seconds")
 
 
 @then("new test file sent by sft sender is on s3")
@@ -78,7 +79,7 @@ def step_impl(context):
     filename = FILENAME+td+'.csv'
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
-    TIMEOUT_SFT = 500
+
     while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
         if time.time()-start < TIMEOUT_SFT:
             time.sleep(5)
