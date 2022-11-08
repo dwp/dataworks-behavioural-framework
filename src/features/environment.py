@@ -464,10 +464,6 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
-    if tag == "fixture.clean.up.hbase.export.s3.bucket":
-        use_fixture(before_fixtures.clean_up_hbase_export_s3_bucket, context)
-    if tag == "fixture.clean.up.hbase.snapshot.cloned.table":
-        use_fixture(before_fixtures.clean_up_hbase_snapshot_cloned_table, context)
 
 
 def after_all(context):
