@@ -173,8 +173,8 @@ def step_impl(context):
     )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.0005, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.05, cols)
 
 
 @then("Last imported file is updated on DynamoDB")
