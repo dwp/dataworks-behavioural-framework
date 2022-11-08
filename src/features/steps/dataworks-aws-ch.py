@@ -35,7 +35,7 @@ def step_impl(context):
     payload_json = json.dumps(emr_launcher_config)
     cluster_response = invoke_lambda.invoke_ch_emr_launcher_lambda(payload_json)
     console_printer.print_info(f"response : '{cluster_response}'")
-    cluster_arn = cluster_response["clusterArn"]
+    cluster_arn = cluster_response["ClusterArn"]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
