@@ -125,6 +125,10 @@ def assume_role():
     )
 
     sts_client = boto3_session.client("sts")
+    console_printer.print_info(f"role arn {aws_role_arn}")
+    console_printer.print_info(f"session name {session_name}")
+    console_printer.print_info(f"time out {aws_session_timeout_seconds}")
+
     assume_role_dict = sts_client.assume_role(
         RoleArn=aws_role_arn,
         RoleSessionName=f"{session_name}",
@@ -239,8 +243,17 @@ def delete_item_from_dynamodb(table_name, key_dict):
     console_printer.print_info(
         f"Deleting DynamoDb item with key_dict of '{key_dict}' from table named '{table_name}'"
     )
-
     return dynamodb_client.delete_item(TableName=f"{table_name}", Key=key_dict)
+
+
+def insert_item_to_dynamo_db_v2(table, item):
+    """Puts an item in to a table in dynamodb.
+
+    Keyword arguments:
+    table -- the dynamodb table resouce
+    item -- dictionary of key/value pairs for the item
+    """
+    table.put_item(Item=item)
 
 
 def insert_item_to_dynamo_db(table_name, item_dict):
@@ -1361,6 +1374,38 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
 
     raise AssertionError(
         f"EMR job step with step id of {step_id} did not finish within '{timeout_in_seconds}' seconds"
+    )
+
+
+def poll_emr_cluster_status(cluster_id, timeout_in_seconds=None):
+    """Polls emr for the cluster status.
+
+    Keyword arguments:
+    cluster_id -- the id of the cluster
+    timeout_in_seconds -- seconds to timeout as an int (or None for no timeout)
+    """
+    client = get_client(service_name="emr")
+    time_taken = 1
+    timeout_time = (
+        None if timeout_in_seconds is None else time.time() + timeout_in_seconds
+    )
+    while timeout_time is None or time.time() < timeout_time:
+        response = client.describe_cluster(ClusterId=cluster_id)
+
+        state = response["Cluster"]["Status"]["State"]
+        if state in ("WAITING", "TERMINATED", "TERMINATED_WITH_ERRORS"):
+            console_printer.print_info(f"EMR cluster is now on status: '{state}'")
+            return state
+
+        time.sleep(1)
+        time_taken += 1
+
+        if time_taken % 600 == 0:
+            clear_session()
+            client = get_client(service_name="emr")
+
+    raise AssertionError(
+        f"EMR did not go on WAITING status within '{timeout_in_seconds}' seconds"
     )
 
 

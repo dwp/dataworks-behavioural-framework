@@ -25,14 +25,12 @@ DYNAMO_DB_TABLE_NAME = "data_pipeline_metadata"
     "The template file '{template_name}' as an input, generate '{record_count}' records per table for '{module_name}'"
 )
 def step_impl(context, template_name, record_count, module_name):
-
     console_printer.print_info(
         f"Extracting the file properties from {template_name} for module {module_name}"
     )
     context.kickstart_schema_config = kickstart_adg_helper.get_schema_config(
         context.fixture_path_local, template_name
     )[module_name]
-
     console_printer.print_info(
         f"generating the input datasets locally with {record_count} records per file for given config \n"
         f"{json.dumps(context.kickstart_schema_config)}"
@@ -40,7 +38,6 @@ def step_impl(context, template_name, record_count, module_name):
     list_of_local_files = kickstart_adg_helper.generate_data(
         module_name, record_count, context.kickstart_schema_config, context.temp_folder
     )
-
     console_printer.print_info(
         f"Adding the list of files generated for current e2e test run into context for validation steps. The list of files are \n"
         f"{list_of_local_files}"

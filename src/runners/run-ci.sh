@@ -218,6 +218,7 @@ function execute_behave() {
 
     if [[ ! -z "${TF_COMMON_OUTPUT_FILE}" && "${TF_COMMON_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
+        AWS_DATA_INGRESS_STAGE_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.data_ingress_stage_bucket.value.id')"
         AWS_PROCESSED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.processed_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
@@ -455,6 +456,7 @@ function execute_behave() {
     -D ASG_MAX_COUNT_INGESTION_ECS_CLUSTER="${ASG_MAX_COUNT_INGESTION_ECS_CLUSTER}" \
     -D AWS_DATASETS_BUCKET="${AWS_DATASETS_BUCKET}" \
     -D AWS_PUBLISHED_BUCKET="${AWS_PUBLISHED_BUCKET}" \
+    -D AWS_DATA_INGRESS_STAGE_BUCKET="${AWS_DATA_INGRESS_STAGE_BUCKET}" \
     -D AWS_PROCESSED_BUCKET="${AWS_PROCESSED_BUCKET}"  \
     -D SYNTHETIC_RAWDATA_AWS_ACC="${SYNTHETIC_RAWDATA_AWS_ACC}" \
     -D SYNTHETIC_RAWDATA_PREFIX="${SYNTHETIC_RAWDATA_PREFIX}" \

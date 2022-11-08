@@ -24,6 +24,7 @@ RUNNING_STATUS = "RUNNING"
 @given("The template file '{template_name}' as an input")
 def step_impl(context, template_name):
     context.kickstart_current_run_input_files = []
+
     console_printer.print_info(f"Extracting the file properties from {template_name}")
     context.kickstart_schema_config = kickstart_adg_helper.get_schema_config(
         context.fixture_path_local, template_name
@@ -35,6 +36,7 @@ def step_impl(context, template_name):
 )
 def step_impl(context, record_count, module_name, PII_Flag):
     schema_config = context.kickstart_schema_config[module_name]
+
     console_printer.print_info(
         f"generating the input datasets locally with {record_count} records per file for given config \n"
         f"{json.dumps(schema_config)}"
@@ -235,7 +237,6 @@ def step_impl(context, module_name, load_type):
             ) = kickstart_adg_helper.get_actual_and_expected_data(
                 context, collection, schema_config, load_type
             )
-
         elif schema_config["record_layout"].lower() == "json":
             (
                 actual_contents,
@@ -243,7 +244,6 @@ def step_impl(context, module_name, load_type):
             ) = kickstart_adg_helper.get_actual_and_expected_data(
                 context, collection, schema_config, load_type
             )
-
         console_printer.print_info(f"Check the total items in actual and expected list")
         assert len(actual_contents) == len(
             expected_contents
