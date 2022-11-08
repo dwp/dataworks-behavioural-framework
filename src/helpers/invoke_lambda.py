@@ -62,7 +62,9 @@ def invoke_corporate_data_ingestion_emr_launcher_lambda(payload):
     Keyword arguments:
     payload -- the input for the lambda invocation
     """
-    response = aws_helper.invoke_lambda_function("corporate_data_ingestion_emr_launcher", payload)
+    response = aws_helper.invoke_lambda_function(
+        "corporate_data_ingestion_emr_launcher", payload
+    )
     return json.loads(response.decode())
 
 
