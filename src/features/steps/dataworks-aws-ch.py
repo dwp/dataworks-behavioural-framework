@@ -17,7 +17,6 @@ from helpers import (
 CONF_FILENAME = "e2e_test_conf.tpl"
 CONF_PREFIX = "component/dataworks-aws-ch/steps/"
 E2E_S3_PREFIX = "e2e/data-ingress/companies"
-CLUSTER_ARN = "ClusterArn"
 TIMEOUT = 300
 
 
@@ -36,7 +35,7 @@ def step_impl(context):
     payload_json = json.dumps(emr_launcher_config)
     cluster_response = invoke_lambda.invoke_ch_emr_launcher_lambda(payload_json)
     console_printer.print_info(f"response : '{cluster_response}'")
-    cluster_arn = cluster_response[CLUSTER_ARN]
+    cluster_arn = cluster_response["ClusterArn"]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]
     cluster_identifier_arr = cluster_identifier.split("/")
@@ -68,9 +67,9 @@ def step_impl(context):
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     console_printer.print_info(f"generating {context.filenames[0]} ")
-    ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
     console_printer.print_info(f"generating {context.filenames[1]} ")
-    ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
     file = open(context.filenames[1])
     reader = csv.reader(file)
     lines = len(list(reader))
@@ -174,8 +173,8 @@ def step_impl(context):
     )
     console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file(context.filenames[0], 0.001, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.005, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.06, cols)
 
 
 @then("Last imported file is updated on DynamoDB")
@@ -222,8 +221,8 @@ def step_impl(context):
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols.update({"extra_column": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
 
 
 @when("Generate files having incorrect headers for negative testing")
@@ -233,8 +232,8 @@ def step_impl(context):
     cols.pop(list(cols.keys())[-1])
     cols.pop(list(cols.keys())[-1])
     cols.update({"incorrect_colname_1": "string", "incorrect_colname_2": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.09, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.099, cols)
+    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
+    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
 
 
 @when("Generate files having a row with string values instead of int")
@@ -243,8 +242,8 @@ def step_impl(context):
         f"generating files with one missing field for negative testing"
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.09, cols)
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.099, cols)
+    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.02, cols)
+    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.04, cols)
 
 
 @when("Generate files having a row with one missing field for negative testing")
@@ -253,7 +252,5 @@ def step_impl(context):
         f"generating files with one missing field for negative testing"
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.09, cols)
-    ch_helper.generate_csv_file_row_with_missing_field(
-        context.filenames[1], 0.099, cols
-    )
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.02, cols)
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[1], 0.04, cols)
