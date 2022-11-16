@@ -74,7 +74,7 @@ def generate_script_step(
 
 
 def generate_spark_step(
-        emr_cluster_id, script_location, step_type, command_line_arguments=None
+        emr_cluster_id, script_location, step_type, extra_python_files=None, command_line_arguments=None
 ):
     """Starts a step of type script and returns its id.
 
@@ -82,9 +82,14 @@ def generate_spark_step(
     emr_cluster_id -- the id of the cluster
     script_location -- the location on the EMR instance (or an S3 URI) of the script to run
     step_type -- the name of the step type being run (i.e. "major compaction")
+    extra_python_files -- comma-delimited list of extra python files to add to the step
     command_line_arguments -- the arguments to pass to the script as a string, if any
     """
-    arguments_array = [script_location]
+    arguments_array = []
+    if extra_python_files is not None:
+        arguments_array.extend(["--py-files", extra_python_files])
+
+    arguments_array.append(script_location)
 
     if command_line_arguments is not None:
         arguments_array.extend(command_line_arguments.split())
@@ -103,6 +108,7 @@ def generate_spark_step(
             "Args": ["spark-submit", "--master", "yarn", "--conf", "spark.yarn.submit.waitAppCompletion=true"] + arguments_array,
         },
     }
+    console_printer.print_info(step_flow)
     return aws_helper.add_step_to_emr_cluster(step_flow, emr_cluster_id)
 
 
