@@ -1,44 +1,26 @@
 [
   {
-    "journal_id": "10",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557011",
+    "response": 1
   },
   {
-    "journal_id": "20",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557012",
+    "response": 1
   },
   {
-    "journal_id": "30",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557013",
+    "response": 1
   },
   {
-    "journal_id": "40",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557014",
+    "response": 1
   },
   {
-    "journal_id": "50",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557015",
+    "response": 1
   },
   {
-    "journal_id": "60",
-    "flagged": "yes",
-    "timestamp": "01062021",
-    "modelIdentifier": "v1",
-    "modelRunDate": "01062021"
+    "journal_entry_id": "test57f2-ea2f-4735-815c-d88d2f557016",
+    "response": 1
   }
 ]

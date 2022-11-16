@@ -56,4 +56,5 @@ def step_impl(context, expected_lag):
     linux_command = "sh /home/ec2-user/kafka/utils/run_get_topic_last_offset.sh"
     response = aws_helper.execute_linux_command(instance_id, linux_command)
     actual_lag = response["StandardOutputContent"].rstrip()
-    assert actual_lag == expected_lag
+    msg = f"Mismatch in actual ({actual_lag}) and expected lag ({expected_lag})."
+    assert actual_lag == expected_lag, msg
