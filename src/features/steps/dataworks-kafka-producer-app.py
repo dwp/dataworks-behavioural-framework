@@ -16,7 +16,7 @@ def step_impl(context):
     aws_helper.execute_linux_command(instance_id, linux_command)
 
 
-@when("an encrypted json file '{file_name}' is uploaded to S3 location")
+@when("a json file '{file_name}' is uploaded to S3 location")
 def step_impl(context, file_name):
     # Read the data file
     plaintext_string = dataworks_kafka_producer_helper.read_test_data(file_name)
