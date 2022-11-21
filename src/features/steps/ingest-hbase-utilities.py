@@ -71,7 +71,7 @@ def step_impl(context, step_type):
     if step_type == "major compaction":
         script_name = "/var/ci/major_compaction_script.sh"
     elif step_type == "download scripts":
-        script_name = "/var/ci/download_scripts.sh"
+        script_name = "/var/ci/download-scripts.sh"
     elif step_type == "generate snapshots":
         script_name = "/var/ci/snapshot_tables_script.sh"
         arguments = context.ingest_hbase_snapshot_tables_override
