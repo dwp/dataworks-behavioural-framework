@@ -223,8 +223,8 @@ function execute_behave() {
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"
         ASG_MAX_COUNT_SNAPSHOT_SENDER="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.snapshot_sender_max_size.value // empty')"
-        DATAWORKS_MODEL_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_bucket.value.id')"
-        DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_published_sqs.value.name')"
+        DATAWORKS_MODEL_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_processed_bucket.value.id')"
+        DATAWORKS_MODEL_OUTPUT_SQS="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_processed_sqs.value.name')"
         DATAWORKS_DLQ_OUTPUT_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.dataworks_model_dlq_output_bucket.value.id')"
         DATAWORKS_COMMON_CONFIG_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.config_bucket.value.id')"
     else
