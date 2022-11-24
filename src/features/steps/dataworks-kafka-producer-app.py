@@ -24,7 +24,6 @@ def step_impl(context, file_name):
     # s3 object key
     object_key = f"{context.dataworks_model_output_s3_prefix}/{file_name}"
     console_printer.print_info(f"Uploading file to S3: {object_key}")
-
     aws_helper.put_object_in_s3(
         body=plaintext_string,
         s3_bucket=context.dataworks_model_output_s3_bucket,
