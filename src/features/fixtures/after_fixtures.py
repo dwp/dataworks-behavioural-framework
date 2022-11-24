@@ -296,19 +296,6 @@ def dataworks_stop_kafka_consumer_app(context):
 
 
 @fixture
-def clean_up_hbase_export_hbase_snapshots(context):
-    bash_script = (
-        f"echo \"delete_snapshot '{context.hbase_snapshot_name}'\" | hbase shell -n"
-    )
-    step_type = "Cleanup HBASE Snapshot"
-    context.ingest_hbase_emr_job_step_id = emr_step_generator.generate_bash_step(
-        context.ingest_hbase_emr_cluster_id,
-        bash_script,
-        step_type,
-    )
-
-
-@fixture
 def stop_data_ingress(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'stop_data_ingress' fixture")
 
