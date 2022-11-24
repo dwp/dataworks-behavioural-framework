@@ -6,7 +6,9 @@ from helpers import (
     console_printer,
     dataworks_kafka_producer_common_helper,
     emr_step_generator,
-    data_ingress_helper)
+    data_ingress_helper,
+)
+
 
 @fixture
 def clean_up_role_and_s3_objects(context, timeout=30, **kwargs):
