@@ -588,6 +588,8 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)
     if tag == "fixture.terminate.ch.cluster":
         use_fixture(after_fixtures.terminate_ch_cluster, context)
+    if tag == "fixture.clean.up.hbase.export.hbase.snapshots":
+        use_fixture(after_fixtures.clean_up_hbase_export_hbase_snapshots, context)
     if tag == "fixture.terminate.datsci.cluster":
         use_fixture(after_fixtures.terminate_datsci_cluster, context)
     if tag == "fixture.stop.data.ingress":
