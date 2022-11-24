@@ -49,7 +49,7 @@ def gen_string():
 
 
 def gen_int():
-    return rd.randint(0, 100)
+    return str(rd.randint(0, 100))
 
 
 def convert_to_gigabytes(bytes):
