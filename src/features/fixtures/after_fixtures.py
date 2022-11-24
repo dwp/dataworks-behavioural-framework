@@ -5,8 +5,11 @@ from helpers import (
     aws_helper,
     console_printer,
     dataworks_kafka_producer_common_helper,
+<<<<<<< HEAD
     emr_step_generator,
     data_ingress_helper,
+=======
+>>>>>>> master
 )
 
 
@@ -145,7 +148,24 @@ def terminate_kickstart_cluster(context, timeout=30, **kwargs):
             )
     else:
         console_printer.print_info(
-            f"No cluster id found for PDM so not terminating any cluster"
+            f"No cluster id found for kickstart so not terminating any cluster"
+        )
+
+
+@fixture
+def terminate_ch_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'terminate_ch_cluster' fixture")
+
+    if "ch_cluster_id" in context and context.ch_cluster_id is not None:
+        try:
+            aws_helper.terminate_emr_cluster(context.ch_cluster_id)
+        except ClientError as error:
+            console_printer.print_warning_text(
+                f"Error occured when terminating dataworks-aws-ch cluster with id of '{context.ch_cluster_id}' as the following error occurred: '{error}'"
+            )
+    else:
+        console_printer.print_info(
+            f"No cluster id found for dataworks-aws-ch so not terminating any cluster"
         )
 
 
@@ -225,6 +245,31 @@ def terminate_datsci_cluster(context, timeout=30, **kwargs):
 
 
 @fixture
+def terminate_corporate_data_ingestion_cluster(context, timeout=30, **kwargs):
+    console_printer.print_info(
+        "Executing 'terminate_corporate_data_ingestion_cluster' fixture"
+    )
+
+    if (
+        "corporate_data_ingestion_cluster_id" in context
+        and context.corporate_data_ingestion_cluster_id is not None
+    ):
+        try:
+            aws_helper.terminate_emr_cluster(
+                context.corporate_data_ingestion_cluster_id
+            )
+        except ClientError as error:
+            console_printer.print_warning_text(
+                f"Error occured when terminating dataworks-aws-corporate-data-ingestion cluster with id of '{context.corporate_data_ingestion_cluster_id}' as the following error occurred: '{error}'"
+            )
+
+    else:
+        console_printer.print_info(
+            "No cluster id found for dataworks-aws-corporate-data-ingestion so not terminating any cluster"
+        )
+
+
+@fixture
 def dataworks_stop_kafka_producer_app(context):
     dataworks_kafka_producer_common_helper.dataworks_stop_kafka_producer_app(context)
 
@@ -253,6 +298,7 @@ def dataworks_stop_kafka_consumer_app(context):
         path=context.dataworks_dlq_output_s3_prefix,
         delete_prefix=True,
     )
+<<<<<<< HEAD
 
 
 @fixture
@@ -278,3 +324,5 @@ def stop_data_ingress(context, timeout=30, **kwargs):
         console_printer.print_warning_text(
             f"Error occured when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
         )
+=======
+>>>>>>> master

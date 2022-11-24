@@ -11,6 +11,7 @@ def dataworks_init_kafka_producer(context):
 
     # Purge sqs queue
     aws_helper.purge_sqs_queue(queue_name=queue_name)
+    console_printer.print_info(f"Purged sqs queue: {queue_name}")
 
     # Execute the shell script - stop any e2e test app
     console_printer.print_info(

@@ -37,18 +37,6 @@ def step_(context):
     console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
 
 
-@then("I insert the '{step_name}' step onto the DATSCI cluster")
-def step_impl(context, step_name):
-    context.datsci_cluster_step_name = step_name
-    datsci_bash_command = f"hive -e 'SELECT * FROM site_data_csv;'"
-
-    context.datsci_cluster_step_id = emr_step_generator.generate_bash_step(
-        context.datsci_cluster_id,
-        datsci_bash_command,
-        context.datsci_cluster_step_name,
-    )
-
-
 @then("I wait '{timeout_mins}' minutes")
 def step_impl(context, timeout_mins):
     timeout_secs = int(timeout_mins) * 60

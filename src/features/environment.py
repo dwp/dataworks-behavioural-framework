@@ -392,6 +392,13 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_historic_data_start, context)
     if tag == "fixture.s3.clear.corporate.data.start":
         use_fixture(before_fixtures.s3_clear_corporate_data_start, context)
+    if tag == "fixture.s3.clear.corporate.data.ingestion.input":
+        use_fixture(
+            before_fixtures.s3_clear_corporate_data_ingestion_input,
+            context,
+            "data",
+            "businessAudit",
+        )
     if tag == "fixture.hbase.clear.ingest.start":
         use_fixture(before_fixtures.hbase_clear_ingest_start, context)
     if tag == "fixture.hbase.clear.ingest.equalities.start":
@@ -450,6 +457,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_uc_feature_output, context)
     if tag == "fixture.s3.clear.kickstart.start":
         use_fixture(before_fixtures.s3_clear_kickstart_start, context)
+    if tag == "fixture.s3.clear.ch.start":
+        use_fixture(before_fixtures.s3_clear_ch_start, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
     if tag == "fixture.init.e2e.dataworks.kafka.consumer":
@@ -462,12 +471,22 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
+<<<<<<< HEAD
     if tag == "fixture.clean.up.hbase.export.s3.bucket":
         use_fixture(before_fixtures.clean_up_hbase_export_s3_bucket, context)
     if tag == "fixture.clean.up.hbase.snapshot.cloned.table":
         use_fixture(before_fixtures.clean_up_hbase_snapshot_cloned_table, context)
     if tag == "fixture.s3.clear.ingress.sft.start":
         use_fixture(before_fixtures.s3_clear_ingress_sft_start, context)
+=======
+    if tag == "fixture.start.corporate_data_ingestion.cluster":
+        use_fixture(before_fixtures.start_corporate_data_ingestion_cluster, context)
+    if tag == "fixture.s3.clear.corporate.data.ingestion.prefixes":
+        use_fixture(before_fixtures.s3_clear_corporate_data_ingestion_prefixes, context)
+    if tag == "fixture.prepare.corporate.data.ingestion.context":
+        use_fixture(before_fixtures.prepare_corporate_data_ingestion_context, context)
+
+>>>>>>> master
 
 def after_all(context):
     global current_feature
@@ -568,10 +587,14 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_cyi_cluster, context)
     if tag == "fixture.terminate.ingest_replica.cluster":
         use_fixture(after_fixtures.terminate_ingest_replica_cluster, context)
+    if tag == "fixture.terminate.corporate_data_ingestion.cluster":
+        use_fixture(after_fixtures.terminate_corporate_data_ingestion_cluster, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.producer":
         use_fixture(after_fixtures.dataworks_stop_kafka_producer_app, context)
     if tag == "fixture.stop.e2e.dataworks.kafka.consumer":
         use_fixture(after_fixtures.dataworks_stop_kafka_consumer_app, context)
+    if tag == "fixture.terminate.ch.cluster":
+        use_fixture(after_fixtures.terminate_ch_cluster, context)
     if tag == "fixture.clean.up.hbase.export.hbase.snapshots":
         use_fixture(after_fixtures.clean_up_hbase_export_hbase_snapshots, context)
     if tag == "fixture.terminate.datsci.cluster":
