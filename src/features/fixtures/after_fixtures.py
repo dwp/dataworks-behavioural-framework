@@ -5,13 +5,8 @@ from helpers import (
     aws_helper,
     console_printer,
     dataworks_kafka_producer_common_helper,
-<<<<<<< HEAD
     emr_step_generator,
-    data_ingress_helper,
-=======
->>>>>>> master
-)
-
+    data_ingress_helper)
 
 @fixture
 def clean_up_role_and_s3_objects(context, timeout=30, **kwargs):
@@ -298,7 +293,6 @@ def dataworks_stop_kafka_consumer_app(context):
         path=context.dataworks_dlq_output_s3_prefix,
         delete_prefix=True,
     )
-<<<<<<< HEAD
 
 
 @fixture
@@ -324,5 +318,3 @@ def stop_data_ingress(context, timeout=30, **kwargs):
         console_printer.print_warning_text(
             f"Error occured when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
         )
-=======
->>>>>>> master

@@ -10,7 +10,3 @@ Feature: Data egress transfer data to S3 end to end test
     Given the data in file 'data_egress_sample_data.txt' written to 'test' directory
     Then verify content of the SFT output file
 
-
-
-
-

@@ -807,6 +807,13 @@ def s3_clear_uc_feature_output(context, timeout=30, **kwargs):
     )
 
 
+@fixture
+def s3_clear_ch_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_ch_start' fixture")
+    aws_helper.clear_s3_prefix(
+        context.data_ingress_stage_bucket, "e2e/data-ingress/companies", False
+    )
+
 
 def s3_clear_corporate_data_ingestion_prefixes(context, timeout=30, **kwargs):
     console_printer.print_info(
@@ -933,4 +940,3 @@ def start_corporate_data_ingestion_cluster(context):
     else:
         console_printer.print_info(f"Started emr cluster : '{cluster_id}'")
         context.corporate_data_ingestion_cluster_id = cluster_id
->>>>>>> master

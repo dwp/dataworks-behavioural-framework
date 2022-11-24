@@ -471,14 +471,12 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
-<<<<<<< HEAD
     if tag == "fixture.clean.up.hbase.export.s3.bucket":
         use_fixture(before_fixtures.clean_up_hbase_export_s3_bucket, context)
     if tag == "fixture.clean.up.hbase.snapshot.cloned.table":
         use_fixture(before_fixtures.clean_up_hbase_snapshot_cloned_table, context)
     if tag == "fixture.s3.clear.ingress.sft.start":
         use_fixture(before_fixtures.s3_clear_ingress_sft_start, context)
-=======
     if tag == "fixture.start.corporate_data_ingestion.cluster":
         use_fixture(before_fixtures.start_corporate_data_ingestion_cluster, context)
     if tag == "fixture.s3.clear.corporate.data.ingestion.prefixes":
@@ -486,7 +484,6 @@ def before_tag(context, tag):
     if tag == "fixture.prepare.corporate.data.ingestion.context":
         use_fixture(before_fixtures.prepare_corporate_data_ingestion_context, context)
 
->>>>>>> master
 
 def after_all(context):
     global current_feature
