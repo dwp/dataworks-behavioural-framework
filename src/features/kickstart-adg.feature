@@ -19,3 +19,4 @@ Feature: Kickstart adg process, to source data and valid final tables for expect
     And The input result matches with final output for module 'vacancy' with 'incremental' extract
     And The input result matches with final output for module 'application' with 'delta' extract
     And The input result matches with final output for module 'payment' with 'delta' extract
+
