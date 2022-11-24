@@ -817,7 +817,9 @@ def s3_clear_ch_start(context, timeout=30, **kwargs):
 
 @fixture
 def s3_clear_corporate_data_ingestion_prefixes(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 's3_clear_corporate_data_ingestion_prefixes' fixture")
+    console_printer.print_info(
+        "Executing 's3_clear_corporate_data_ingestion_prefixes' fixture"
+    )
     aws_helper.clear_s3_prefix(
         context.corporate_storage_s3_bucket_id, context.s3_source_prefix, True
     )
@@ -828,9 +830,13 @@ def s3_clear_corporate_data_ingestion_prefixes(context, timeout=30, **kwargs):
 
 @fixture
 def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 'prepare_corporate_data_ingestion_context' fixture")
+    console_printer.print_info(
+        "Executing 'prepare_corporate_data_ingestion_context' fixture"
+    )
     context.s3_source_prefix = f"corporate_storage/ucfs_audit/e2e"
-    context.s3_destination_prefix = f"corporate_data_ingestion/audit_logs_transition/automatedtests"
+    context.s3_destination_prefix = (
+        f"corporate_data_ingestion/audit_logs_transition/automatedtests"
+    )
 
 
 @fixture
@@ -904,13 +910,15 @@ def start_corporate_data_ingestion_cluster(context):
             "Instances": {
                 "KeepJobFlowAliveWhenNoSteps": True,
             },
-            "Steps": []
+            "Steps": [],
         },
         "extend": None,
         "additional_step_args": None,
     }
     payload_json = json.dumps(emr_launcher_config)
-    cluster_response = invoke_lambda.invoke_corporate_data_ingestion_emr_launcher_lambda(payload_json)
+    cluster_response = (
+        invoke_lambda.invoke_corporate_data_ingestion_emr_launcher_lambda(payload_json)
+    )
     cluster_arn = cluster_response[CLUSTER_ARN]
     cluster_arn_arr = cluster_arn.split(":")
     cluster_identifier = cluster_arn_arr[len(cluster_arn_arr) - 1]

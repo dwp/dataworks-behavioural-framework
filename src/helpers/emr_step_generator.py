@@ -74,7 +74,11 @@ def generate_script_step(
 
 
 def generate_spark_step(
-        emr_cluster_id, script_location, step_type, extra_python_files=None, command_line_arguments=None
+    emr_cluster_id,
+    script_location,
+    step_type,
+    extra_python_files=None,
+    command_line_arguments=None,
 ):
     """Starts a step of type script and returns its id.
 
@@ -105,7 +109,14 @@ def generate_spark_step(
         "ActionOnFailure": "CONTINUE",
         "HadoopJarStep": {
             "Jar": "command-runner.jar",
-            "Args": ["spark-submit", "--master", "yarn", "--conf", "spark.yarn.submit.waitAppCompletion=true"] + arguments_array,
+            "Args": [
+                "spark-submit",
+                "--master",
+                "yarn",
+                "--conf",
+                "spark.yarn.submit.waitAppCompletion=true",
+            ]
+            + arguments_array,
         },
     }
     return aws_helper.add_step_to_emr_cluster(step_flow, emr_cluster_id)
