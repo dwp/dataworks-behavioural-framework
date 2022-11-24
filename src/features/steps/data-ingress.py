@@ -2,23 +2,22 @@ from behave import given, then, when
 from datetime import datetime
 import os
 import time
-from helpers import (
-    aws_helper,
-    console_printer,
-    data_ingress_helper
-)
+from helpers import aws_helper, console_printer, data_ingress_helper
 
 
-ASG = 'data-ingress-ag'
-CLUSTER = 'data-ingress'
-FILENAME = 'BasicCompanyData-'
-S3_PREFIX = 'e2e/data-ingress/companies'
+ASG = "data-ingress-ag"
+CLUSTER = "data-ingress"
+FILENAME = "BasicCompanyData-"
+S3_PREFIX = "e2e/data-ingress/companies"
 PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
 TIMEOUT_TM = 360
 TIMEOUT_SFT = 540
 TIMEOUT = 360
 
-@given("the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min")
+
+@given(
+    "the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min"
+)
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
@@ -31,7 +30,7 @@ def step_impl(context, time_scale_up, time_scale_down):
 @then("instance starts within the expected time")
 def step_impl(context):
 
-    w = (context.time_scale_up*60)-100
+    w = (context.time_scale_up * 60) - 100
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
     data_ingress_helper.check_instance_count(desired_count=2)
@@ -43,28 +42,38 @@ def step_impl(context):
     data_ingress_helper.check_container_instance_count(CLUSTER, 2)
     time.sleep(9)
     start = time.time()
-    receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
+    receiver_running = data_ingress_helper.check_task_state(
+        CLUSTER, family="sft_agent_receiver", desired_status="running"
+    )
     if not receiver_running:
         data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
-    sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
+    sender_running = data_ingress_helper.check_task_state(
+        CLUSTER, family="sft_agent_sender", desired_status="running"
+    )
     if not sender_running:
         data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
     while not receiver_running & sender_running:
-        if time.time()-start < TIMEOUT:
+        if time.time() - start < TIMEOUT:
             time.sleep(10)
-            receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver",
-                                                                    desired_status="running")
-            sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender",
-                                                                  desired_status="running")
+            receiver_running = data_ingress_helper.check_task_state(
+                CLUSTER, family="sft_agent_receiver", desired_status="running"
+            )
+            sender_running = data_ingress_helper.check_task_state(
+                CLUSTER, family="sft_agent_sender", desired_status="running"
+            )
         else:
-            raise AssertionError(f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds")
+            raise AssertionError(
+                f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds"
+            )
 
 
 @then("new trend micro test pass file is on s3")
 def step_wait_pass_file(context):
     start = time.time()
-    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, PASS_FILE_KEY):
-        if time.time()-start < TIMEOUT_TM:
+    while not aws_helper.check_if_s3_object_exists(
+        context.data_ingress_stage_bucket, PASS_FILE_KEY
+    ):
+        if time.time() - start < TIMEOUT_TM:
             time.sleep(5)
             time_left = time.time() - start
             tl = TIMEOUT_TM - round(time_left)
@@ -75,16 +84,20 @@ def step_wait_pass_file(context):
 
 @then("new test file sent by sft sender is on s3")
 def step_impl(context):
-    td = datetime.today().strftime('%Y-%m-%d')
-    filename = FILENAME+td+'.csv'
+    td = datetime.today().strftime("%Y-%m-%d")
+    filename = FILENAME + td + ".csv"
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
 
-    while not aws_helper.check_if_s3_object_exists(context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)):
-        if time.time()-start < TIMEOUT_SFT:
+    while not aws_helper.check_if_s3_object_exists(
+        context.data_ingress_stage_bucket, os.path.join(S3_PREFIX, filename)
+    ):
+        if time.time() - start < TIMEOUT_SFT:
             time.sleep(5)
         else:
-            raise AssertionError(f"sft file was not sent and received after {TIMEOUT_SFT} seconds")
+            raise AssertionError(
+                f"sft file was not sent and received after {TIMEOUT_SFT} seconds"
+            )
 
 
 @then("instance stops within the expected time")

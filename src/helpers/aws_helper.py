@@ -1946,13 +1946,11 @@ def instance_count_by_tag(tag_name: str, tag_value: str):
     :return: number of running instances having the given tag
     """
     client = get_client("ec2")
-    custom_filter = [{
-        'Name': f'tag:{tag_name}',
-        'Values': [f'{tag_value}']}]
+    custom_filter = [{"Name": f"tag:{tag_name}", "Values": [f"{tag_value}"]}]
 
     response = client.describe_instances(Filters=custom_filter)
-    r = [i['Instances'] for i in response['Reservations']]
-    return len([j['State'] for i in r for j in i if j['State']['Name'] == 'running'])
+    r = [i["Instances"] for i in response["Reservations"]]
+    return len([j["State"] for i in r for j in i if j["State"]["Name"] == "running"])
 
 
 def execute_commands_on_ec2_by_tags_and_wait(
