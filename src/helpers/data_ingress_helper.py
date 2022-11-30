@@ -13,7 +13,7 @@ def run_sft_tasks(tasks, cluster):
         )
 
 
-def check_container_instance_count(cluster, desired_count, max_wait=540):
+def check_container_instance_count(cluster, desired_count, max_wait=600):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
@@ -50,7 +50,7 @@ def set_asg_instance_count(asg_name, min, max, desired):
     )
 
 
-def check_instance_count(desired_count, max_wait=240):
+def check_instance_count(desired_count, max_wait=300):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
@@ -84,3 +84,4 @@ def check_task_state(cluster, family, desired_status):
             f"no {family} tasks with status {desired_status} found in cluster:"
         )
         return False
+

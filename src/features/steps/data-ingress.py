@@ -12,7 +12,7 @@ S3_PREFIX = "e2e/data-ingress/companies"
 PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
 TIMEOUT_TM = 360
 TIMEOUT_SFT = 540
-TIMEOUT = 360
+TIMEOUT = 420
 
 
 @given(
@@ -45,22 +45,24 @@ def step_impl(context):
     receiver_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
     )
-    if not receiver_running:
-        data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
     sender_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
-    if not sender_running:
-        data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
+
     while not receiver_running & sender_running:
         if time.time() - start < TIMEOUT:
-            time.sleep(10)
             receiver_running = data_ingress_helper.check_task_state(
                 CLUSTER, family="sft_agent_receiver", desired_status="running"
             )
+            if not receiver_running:
+                data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
+                time.sleep(10)
+                continue
             sender_running = data_ingress_helper.check_task_state(
                 CLUSTER, family="sft_agent_sender", desired_status="running"
             )
+            if not sender_running:
+                data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
         else:
             raise AssertionError(
                 f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds"
