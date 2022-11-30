@@ -307,3 +307,15 @@ def stop_data_ingress(context, timeout=30, **kwargs):
         console_printer.print_warning_text(
             f"Error occured when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
         )
+
+
+@fixture
+def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'stop_data_ingress' fixture")
+
+    try:
+        data_ingress_helper.delete_scheduled_actions()
+    except Exception as error:
+        console_printer.print_warning_text(
+            f"Error occured when deleting scheduled actions: '{error}'"
+        )
