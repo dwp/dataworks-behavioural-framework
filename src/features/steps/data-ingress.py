@@ -40,7 +40,8 @@ def step_impl(context):
 @when("sender agent task and receiver agent task run")
 def step_impl(context):
     data_ingress_helper.check_container_instance_count(CLUSTER, 2)
-    time.sleep(9)
+    console_printer.print_info("waiting for container instances to be available")
+    time.sleep(20)
     start = time.time()
     receiver_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
