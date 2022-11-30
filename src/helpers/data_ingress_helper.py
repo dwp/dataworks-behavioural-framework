@@ -17,8 +17,8 @@ def check_container_instance_count(cluster, desired_count, max_wait=600):
     t0 = time.time()
     t1 = t0 + max_wait
     ic = "unknown"
+    ecs = aws_helper.get_client("ecs")
     while time.time() < t1:
-        ecs = aws_helper.get_client("ecs")
         response = ecs.list_container_instances(cluster=cluster)
         ic = len(response["containerInstanceArns"])
         console_printer.print_info(f"instance count: {ic}")

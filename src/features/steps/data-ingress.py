@@ -46,27 +46,33 @@ def step_impl(context):
     receiver_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
     )
+    while receiver_running == False:
+        if time.time() - start < TIMEOUT:
+            data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
+            time.sleep(10)
+            receiver_running = data_ingress_helper.check_task_state(
+                CLUSTER, family="sft_agent_receiver", desired_status="running"
+            )
+
+        else:
+            raise AssertionError(
+                f"couldn't get receiver to running state after {TIMEOUT} seconds"
+            )
     sender_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
 
-    while not receiver_running & sender_running:
+    while sender_running == False:
         if time.time() - start < TIMEOUT:
-            receiver_running = data_ingress_helper.check_task_state(
-                CLUSTER, family="sft_agent_receiver", desired_status="running"
-            )
-            if not receiver_running:
-                data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
-                time.sleep(10)
-                continue
+            data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
+            time.sleep(10)
             sender_running = data_ingress_helper.check_task_state(
                 CLUSTER, family="sft_agent_sender", desired_status="running"
             )
-            if not sender_running:
-                data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
+
         else:
             raise AssertionError(
-                f"couldn't get both sender and receiver to running state after {TIMEOUT} seconds"
+                f"couldn't get sender to running state after {TIMEOUT} seconds"
             )
 
 
