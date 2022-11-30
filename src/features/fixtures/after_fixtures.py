@@ -305,7 +305,7 @@ def stop_data_ingress(context, timeout=30, **kwargs):
         data_ingress_helper.set_asg_instance_count("data-ingress-ag", 0, 0, 0)
     except Exception as error:
         console_printer.print_warning_text(
-            f"Error occured when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
+            f"Error occurred when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
         )
 
 
@@ -317,5 +317,5 @@ def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
         data_ingress_helper.delete_scheduled_actions()
     except Exception as error:
         console_printer.print_warning_text(
-            f"Error occured when deleting scheduled actions: '{error}'"
+            f"Error occurred when deleting scheduled actions: '{error}'"
         )

@@ -112,3 +112,8 @@ def step_impl(context):
         time.sleep(w)
     data_ingress_helper.check_instance_count(desired_count=0)
     console_printer.print_info("scaling successful")
+
+
+@then("remove test scaling actions")
+def step_impl():
+    data_ingress_helper.delete_scheduled_actions()
