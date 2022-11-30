@@ -4,7 +4,7 @@ Feature: Data ingress cluster scaling schedules
   @fixture.stop.data.ingress
   @fixture.s3.clear.ingress.sft.start
   Scenario: The data ingress cluster scales in response to the test aws_autoscaling_schedule tf resources
-    Given the instance is set to start after '5' min and stop after '18' min
+    Given the instance is set to start after '5' min and stop after '22' min
     Then instance starts within the expected time
     When sender agent task and receiver agent task run
     Then new trend micro test pass file is on s3
