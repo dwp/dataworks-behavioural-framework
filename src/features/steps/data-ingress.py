@@ -12,7 +12,7 @@ S3_PREFIX = "e2e/data-ingress/companies"
 PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
 TIMEOUT_TM = 360
 TIMEOUT_SFT = 540
-TIMEOUT = 420
+TIMEOUT = 600
 
 
 @given(
@@ -46,33 +46,23 @@ def step_impl(context):
     receiver_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
     )
-    while receiver_running == False:
-        if time.time() - start < TIMEOUT:
-            data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
-            time.sleep(10)
-            receiver_running = data_ingress_helper.check_task_state(
-                CLUSTER, family="sft_agent_receiver", desired_status="running"
-            )
-
-        else:
-            raise AssertionError(
-                f"couldn't get receiver to running state after {TIMEOUT} seconds"
-            )
     sender_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
 
-    while sender_running == False:
+    while receiver_running == False or sender_running == False:
         if time.time() - start < TIMEOUT:
-            data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
-            time.sleep(10)
-            sender_running = data_ingress_helper.check_task_state(
-                CLUSTER, family="sft_agent_sender", desired_status="running"
-            )
+            if receiver_running == False:
+                data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
+                time.sleep(20)
+                receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
+            if sender_running == False:
+                data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
+                sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
 
         else:
             raise AssertionError(
-                f"couldn't get sender to running state after {TIMEOUT} seconds"
+                f"couldn't get receiver to running state after {TIMEOUT} seconds"
             )
 
 
