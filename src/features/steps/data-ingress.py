@@ -58,7 +58,7 @@ def step_impl(context):
             sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
         else:
             raise AssertionError(
-                f"couldn't get receiver to running state after {TIMEOUT} seconds"
+                f"couldn't get receiver and sender to running state after {TIMEOUT} seconds"
             )
 
 
