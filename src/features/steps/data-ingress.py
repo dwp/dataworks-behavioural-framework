@@ -15,9 +15,7 @@ TIMEOUT_SFT = 540
 TIMEOUT = 600
 
 
-@given(
-    "the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min"
-)
+@given("the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min")
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)

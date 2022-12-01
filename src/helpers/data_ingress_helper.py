@@ -78,12 +78,14 @@ def check_task_state(cluster, family, desired_status):
     ecs = aws_helper.get_client("ecs")
     tasks = ecs.list_tasks(cluster=cluster, desiredStatus=desired_status, family=family)
     try:
-        return len(tasks["taskArns"]) >= 1
+        if len(tasks["taskArns"]) == 1:
+            return True
+        else:
+            return False
     except:
         console_printer.print_error_text(
             f"no {family} tasks with status {desired_status} found in cluster"
         )
-        return False
 
 
 def delete_scheduled_actions():
