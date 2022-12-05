@@ -11,4 +11,3 @@ Feature: Data ingress cluster scaling schedules
     Then new trend micro test pass file is on s3
     Then new test file sent by sft sender is on s3
     Then instance stops within the expected time
-    Then remove test scaling actions
