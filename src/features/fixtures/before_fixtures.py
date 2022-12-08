@@ -904,14 +904,6 @@ def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
 
 
 @fixture
-def clean_up_hbase_export_s3_bucket(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 'clean_up_hbase_export_s3_bucket' fixture")
-    aws_helper.clear_s3_bucket(
-        context.hbase_export_bucket,
-    )
-
-
-@fixture
 def s3_clear_ingress_sft_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_ingress_sft_start' fixture")
     aws_helper.clear_s3_prefix(
