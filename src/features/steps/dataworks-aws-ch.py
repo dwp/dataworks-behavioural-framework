@@ -102,7 +102,7 @@ def step_impl(context):
 
     command = " ".join(
         [
-            "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/etl.py",
+            "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/steps/etl.py",
             "--e2e True",
         ]
     )
@@ -124,7 +124,7 @@ def step_impl(context):
 
     command = " ".join(
         [
-            "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/etl.py",
+            "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/steps/etl.py",
             "--e2e True",
         ]
     )
@@ -145,7 +145,7 @@ def step_impl(context):
 def step_impl(context):
     command = " ".join(
         [
-            "python3 /opt/emr/e2e.py",
+            "python3 /opt/emr/steps/e2e.py",
             f"--rows {context.rows_expected}",
             f"--cols {context.cols_expected}",
             f"--db {context.args_ch['args']['db_name']}",
