@@ -93,16 +93,14 @@ def delete_scheduled_actions():
     try:
         client.delete_scheduled_action(
             AutoScalingGroupName="data-ingress-ag",
-            ScheduledActionName="test_scaling_off"
+            ScheduledActionName="test_scaling_off",
         )
         client.delete_scheduled_action(
             AutoScalingGroupName="data-ingress-ag",
-            ScheduledActionName="test_scaling_on"
+            ScheduledActionName="test_scaling_on",
         )
 
     except Exception as e:
 
-        console_printer.print_error_text(
-            f"unable to delete autoscaling actions. {e}"
-        )
+        console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
         return False

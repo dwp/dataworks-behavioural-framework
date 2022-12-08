@@ -15,7 +15,9 @@ TIMEOUT_SFT = 540
 TIMEOUT = 600
 
 
-@given("the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min")
+@given(
+    "the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min"
+)
 def step_impl(context, time_scale_up, time_scale_down):
     try:
         context.time_scale_up = int(time_scale_up)
@@ -54,8 +56,12 @@ def step_impl(context):
     while receiver_running == False or sender_running == False:
         if time.time() - start < TIMEOUT:
             time.sleep(20)
-            receiver_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_receiver", desired_status="running")
-            sender_running = data_ingress_helper.check_task_state(CLUSTER, family="sft_agent_sender", desired_status="running")
+            receiver_running = data_ingress_helper.check_task_state(
+                CLUSTER, family="sft_agent_receiver", desired_status="running"
+            )
+            sender_running = data_ingress_helper.check_task_state(
+                CLUSTER, family="sft_agent_sender", desired_status="running"
+            )
         else:
             raise AssertionError(
                 f"couldn't get receiver and sender to running state after {TIMEOUT} seconds"
