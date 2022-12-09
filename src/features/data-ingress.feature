@@ -6,7 +6,7 @@ Feature: Data ingress cluster scaling schedules and SFT task with Trend Micro
   @fixture.delete.scheduled.action.di
   @fixture.s3.clear.ingress.sft.start
   Scenario: The data ingress cluster detects test virus and sft receives file
-    Given that the instance should start '5' min and stop '18' min after the pipeline has run
+    Given instances should start in '5' and stop in '18' min after the pipeline has run
     Then instance starts within the expected time
     When sender agent task and receiver agent task run
     Then new trend micro test pass file is on s3
