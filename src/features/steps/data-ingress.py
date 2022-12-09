@@ -15,7 +15,8 @@ TIMEOUT_SFT = 540
 TIMEOUT = 600
 
 
-@given("that the instance should start 'time_scale_up' min and stop 'time_scale_down' min after the pipeline has run"
+@given(
+    "that the instance should start 'time_scale_up' min and stop 'time_scale_down' min after the pipeline has run"
 )
 def step_impl(context, time_scale_up, time_scale_down):
     try:
