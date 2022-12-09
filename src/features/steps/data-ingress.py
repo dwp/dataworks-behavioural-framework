@@ -16,7 +16,7 @@ TIMEOUT = 600
 
 
 @given(
-    "instances should start in 'time_scale_up' and stop in 'time_scale_down' min after the pipeline has run"
+    "instances should start in '{time_scale_up}' and stop in '{time_scale_down}' min after the pipeline has run"
 )
 def step_impl(context, time_scale_up, time_scale_down):
     try:
@@ -27,7 +27,7 @@ def step_impl(context, time_scale_up, time_scale_down):
         console_printer.print_error_text(ex)
 
 
-@then("instance starts within the expected time")
+@when("instance starts within the expected time")
 def step_impl(context):
 
     w = (context.time_scale_up * 60) - 100
