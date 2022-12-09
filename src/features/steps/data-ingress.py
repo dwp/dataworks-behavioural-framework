@@ -16,7 +16,7 @@ TIMEOUT = 600
 
 
 @given(
-    "the instance is set to start after '{time_scale_up}' min and stop after '{time_scale_down}' min"
+    "that the instance should start 'time_scale_up' min and stop 'time_scale_down' min after the pipeline has run"
 )
 def step_impl(context, time_scale_up, time_scale_down):
     try:
