@@ -33,7 +33,7 @@ def step_impl(context):
     w = (context.time_scale_up * 60) - 100
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
-    aws_helper.check_instance_count(desired_count=2)
+    aws_helper.check_instance_count(desired_count=2, asg_name="data-ingress-ag")
     console_printer.print_info("scaling successful")
 
 
