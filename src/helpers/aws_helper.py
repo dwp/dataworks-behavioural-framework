@@ -1275,6 +1275,7 @@ def get_asg_desired_count(autoscaling_client, asg_prefix):
 
     return int(desired_count)
 
+
 def check_container_instance_count(cluster, desired_count, max_wait=600):
     """Checks container instances are as many as desired within given time. Failes if container instance count did not reach desired count after max_wait
 
@@ -1318,9 +1319,7 @@ def check_instance_count(desired_count, asg_name, max_wait=300):
     t1 = t0 + max_wait
     ic = "unknown"
     while time.time() < t1:
-        ic = aws_helper.instance_count_by_tag(
-            "aws:autoscaling:groupName", asg_name
-        )
+        ic = aws_helper.instance_count_by_tag("aws:autoscaling:groupName", asg_name)
         console_printer.print_info(f"instance count: {ic}")
         s = t1 - time.time()
         console_printer.print_info(f"seconds before timeout: {round(s)}")
@@ -1757,7 +1756,9 @@ def delete_scheduled_action(asg_name, action_name):
         return False
 
 
-def set_asg_instance_count(asg_name: str, min: int, max: int, desired: int, action_name: str):
+def set_asg_instance_count(
+    asg_name: str, min: int, max: int, desired: int, action_name: str
+):
     """Creates a scheduled autoscaling action that sets the desider count for an autoscaling group
     Keyword arguments:
     asg_name -- the name of the autoscaling group
