@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 import time
 from helpers import aws_helper, console_printer, data_ingress_helper
 

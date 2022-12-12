@@ -8,7 +8,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import reduce
 from typing import List
-
+from datetime import datetime, timedelta
 import boto3
 from boto3.dynamodb.conditions import Key, And
 from boto3.exceptions import S3UploadFailedError
@@ -1642,13 +1642,12 @@ def scale_ecs_service_desired_task_count(
     )
 
 
-def run_sft_tasks(tasks, cluster):
-    for i in tasks:
-        client = get_client("ecs")
-        response = client.run_task(
-            cluster=cluster,
-            taskDefinition=i,
-        )
+def run_sft_task(task, cluster):
+    client = get_client("ecs")
+    response = client.run_task(
+        cluster=cluster,
+        taskDefinition=task,
+    )
 
 
 def delete_scheduled_action(ag_name, action_name):

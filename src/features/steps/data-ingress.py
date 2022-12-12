@@ -49,9 +49,9 @@ def step_impl(context):
     sender_running = data_ingress_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
-    data_ingress_helper.run_sft_tasks(["sft_agent_receiver"], CLUSTER)
+    aws_helper.run_sft_task("sft_agent_receiver", CLUSTER)
     time.sleep(20)
-    data_ingress_helper.run_sft_tasks(["sft_agent_sender"], CLUSTER)
+    aws_helper.run_sft_task("sft_agent_sender", CLUSTER)
 
     while receiver_running == False or sender_running == False:
         if time.time() - start < TIMEOUT:
