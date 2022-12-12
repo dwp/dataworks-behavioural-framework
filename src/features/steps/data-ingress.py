@@ -2,7 +2,7 @@ from behave import given, then, when
 from datetime import datetime
 import os
 import time
-from helpers import aws_helper, console_printer, data_ingress_helper
+from helpers import aws_helper, console_printer
 
 
 ASG = "data-ingress-ag"
@@ -33,33 +33,33 @@ def step_impl(context):
     w = (context.time_scale_up * 60) - 100
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
-    data_ingress_helper.check_instance_count(desired_count=2)
+    aws_helper.check_instance_count(desired_count=2)
     console_printer.print_info("scaling successful")
 
 
 @when("sender agent task and receiver agent task run")
 def step_impl(context):
-    data_ingress_helper.check_container_instance_count(CLUSTER, 2)
+    aws_helper.check_container_instance_count(CLUSTER, 2)
     console_printer.print_info("waiting for container instances to be available")
     time.sleep(20)
     start = time.time()
-    receiver_running = data_ingress_helper.check_task_state(
+    receiver_running = aws_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
     )
-    sender_running = data_ingress_helper.check_task_state(
+    sender_running = aws_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
-    aws_helper.run_sft_task("sft_agent_receiver", CLUSTER)
+    aws_helper.run_ecs_task("sft_agent_receiver", CLUSTER)
     time.sleep(20)
-    aws_helper.run_sft_task("sft_agent_sender", CLUSTER)
+    aws_helper.run_ecs_task("sft_agent_sender", CLUSTER)
 
     while receiver_running == False or sender_running == False:
         if time.time() - start < TIMEOUT:
             time.sleep(20)
-            receiver_running = data_ingress_helper.check_task_state(
+            receiver_running = aws_helper.check_task_state(
                 CLUSTER, family="sft_agent_receiver", desired_status="running"
             )
-            sender_running = data_ingress_helper.check_task_state(
+            sender_running = aws_helper.check_task_state(
                 CLUSTER, family="sft_agent_sender", desired_status="running"
             )
         else:
@@ -108,5 +108,5 @@ def step_impl(context):
     if w > 0:
         console_printer.print_info(f"waiting {w} seconds")
         time.sleep(w)
-    data_ingress_helper.check_instance_count(desired_count=0)
+    aws_helper.check_instance_count(desired_count=0, asg_name="data-ingress-ag")
     console_printer.print_info("scaling successful")
