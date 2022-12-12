@@ -302,7 +302,7 @@ def stop_data_ingress(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'stop_data_ingress' fixture")
 
     try:
-        data_ingress_helper.set_asg_instance_count("data-ingress-ag", 0, 0, 0)
+        aws_helper.set_asg_instance_count("data-ingress-ag", 0, 0, 0, "e2e-sft")
     except Exception as error:
         console_printer.print_warning_text(
             f"Error occurred when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
@@ -312,9 +312,10 @@ def stop_data_ingress(context, timeout=30, **kwargs):
 @fixture
 def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'stop_data_ingress' fixture")
-
     try:
-        data_ingress_helper.delete_scheduled_actions()
+        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_off")
+        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_on")
+
     except Exception as error:
         console_printer.print_warning_text(
             f"Error occurred when deleting scheduled actions: '{error}'"

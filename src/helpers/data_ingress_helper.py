@@ -3,16 +3,6 @@ import time
 from helpers import aws_helper, console_printer, data_ingress_helper
 
 
-def run_sft_tasks(tasks, cluster):
-
-    for i in tasks:
-        client = aws_helper.get_client("ecs")
-        response = client.run_task(
-            cluster=cluster,
-            taskDefinition=i,
-        )
-
-
 def check_container_instance_count(cluster, desired_count, max_wait=600):
     t0 = time.time()
     t1 = t0 + max_wait
@@ -35,19 +25,6 @@ def check_container_instance_count(cluster, desired_count, max_wait=600):
             f"container instance count: {ic} did not reach desired size: {desired_count} within the time"
             f" frame given"
         )
-
-
-def set_asg_instance_count(asg_name, min, max, desired):
-
-    client = aws_helper.get_client("autoscaling")
-    response = client.put_scheduled_update_group_action(
-        ScheduledActionName="sft-e2e",
-        StartTime=datetime.today() + timedelta(hours=0, minutes=1),
-        AutoScalingGroupName=asg_name,
-        MinSize=min,
-        MaxSize=max,
-        DesiredCapacity=desired,
-    )
 
 
 def check_instance_count(desired_count, max_wait=300):
@@ -87,20 +64,3 @@ def check_task_state(cluster, family, desired_status):
             f"no {family} tasks with status {desired_status} found in cluster"
         )
 
-
-def delete_scheduled_actions():
-    client = aws_helper.get_client("autoscaling")
-    try:
-        client.delete_scheduled_action(
-            AutoScalingGroupName="data-ingress-ag",
-            ScheduledActionName="test_scaling_off",
-        )
-        client.delete_scheduled_action(
-            AutoScalingGroupName="data-ingress-ag",
-            ScheduledActionName="test_scaling_on",
-        )
-
-    except Exception as e:
-
-        console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
-        return False

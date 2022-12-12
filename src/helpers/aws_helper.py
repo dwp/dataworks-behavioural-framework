@@ -1642,6 +1642,42 @@ def scale_ecs_service_desired_task_count(
     )
 
 
+def run_sft_tasks(tasks, cluster):
+    for i in tasks:
+        client = get_client("ecs")
+        response = client.run_task(
+            cluster=cluster,
+            taskDefinition=i,
+        )
+
+
+def delete_scheduled_action(ag_name, action_name):
+    client = get_client("autoscaling")
+    try:
+        client.delete_scheduled_action(
+            AutoScalingGroupName=ag_name,
+            ScheduledActionName=action_name,
+        )
+
+    except Exception as e:
+
+        console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
+        return False
+
+
+def set_asg_instance_count(asg_name, min, max, desired, action_name):
+
+    client = get_client("autoscaling")
+    response = client.put_scheduled_update_group_action(
+        ScheduledActionName=action_name,
+        StartTime=datetime.today() + timedelta(hours=0, minutes=1),
+        AutoScalingGroupName=asg_name,
+        MinSize=min,
+        MaxSize=max,
+        DesiredCapacity=desired,
+    )
+
+
 def kms_decrypt_cipher_text(cipher_text_blob, aws_region=None):
     """Decrypts the given KMS cipher text and returns the plain text response
 
