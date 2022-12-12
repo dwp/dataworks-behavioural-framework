@@ -1347,7 +1347,7 @@ def check_task_state(cluster, family, desired_status):
     ecs = get_client("ecs")
     tasks = ecs.list_tasks(cluster=cluster, desiredStatus=desired_status, family=family)
     try:
-        if len(tasks["taskArns"]) == 1:
+        if len(tasks["taskArns"]) >= 1:
             return True
         else:
             return False
