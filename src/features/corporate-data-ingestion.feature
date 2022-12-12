@@ -12,7 +12,7 @@ Feature: Corporate data ingestion end to end test
         Given UCFS send '2' messages of type 'kafka_main' with the given template files, encryption setting of 'true' and wait setting of 'true' with key method of 'message'
             | input-file-name-kafka          | output-file-name-kafka         | snapshot-record-file-name-kafka  |
             | current_valid_file_input.json  | current_valid_file_output.json | None                             |
-        When a step 'ingest-valid-record' is triggered on the EMR cluster corporate-data-ingestion
+        When a step 'ingest-valid-records' is triggered on the EMR cluster corporate-data-ingestion
         Then confirm that the EMR step status is 'COMPLETED'
         Then confirm that '2' messages have been ingested
 

@@ -190,3 +190,20 @@ def step_(context):
     aws_helper.put_object_in_s3(
         message_compressed, context.corporate_storage_s3_bucket_id, response
     )
+
+
+@when("Hive table dumped into S3")
+def step_(context):
+    # retrieve export-date and use it as partition name
+    # step should overwrite data, we should be runnable more than once
+    file_name = f"{context.test_run_name}.csv"
+    hive_export_bash_command = (
+            f"hive -e 'SELECT * FROM managed-table;' >> ~/{file_name} && "
+            + f"aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.s3_destination_prefix}/"
+            + f" &>> /var/log/corporate-data-ingestion/e2e.log"
+    )
+    emr_step_generator.generate_bash_step(
+        context.corporate_data_ingestion_cluster_id,
+        hive_export_bash_command,
+        f"automatedtests: hive-table-to-s3",
+    )
