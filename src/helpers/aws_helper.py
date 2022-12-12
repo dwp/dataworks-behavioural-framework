@@ -1319,7 +1319,7 @@ def check_instance_count(desired_count, asg_name, max_wait=300):
     t1 = t0 + max_wait
     ic = "unknown"
     while time.time() < t1:
-        ic = aws_helper.instance_count_by_tag("aws:autoscaling:groupName", asg_name)
+        ic = instance_count_by_tag("aws:autoscaling:groupName", asg_name)
         console_printer.print_info(f"instance count: {ic}")
         s = t1 - time.time()
         console_printer.print_info(f"seconds before timeout: {round(s)}")
