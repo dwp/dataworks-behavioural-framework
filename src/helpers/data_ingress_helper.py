@@ -62,4 +62,3 @@ def check_task_state(cluster, family, desired_status):
         console_printer.print_error_text(
             f"no {family} tasks with status {desired_status} found in cluster"
         )
-
