@@ -93,10 +93,10 @@ def step_impl(context, step_type):
         script_location="/opt/emr/steps/corporate-data-ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
         command_line_arguments=f"""--correlation_id {context.correlation_id} """
-                               f"""--source_s3_prefix {context.s3_source_prefix} """
-                               f"""--destination_s3_prefix {context.s3_destination_prefix} """
-                               f"""--transition_db_name foo """
-                               f"""--db_name bar """,
+        f"""--source_s3_prefix {context.s3_source_prefix} """
+        f"""--destination_s3_prefix {context.s3_destination_prefix} """
+        f"""--transition_db_name foo """
+        f"""--db_name bar """,
     )
     context.execution_state = aws_helper.poll_emr_cluster_step_status(
         step_id, context.corporate_data_ingestion_cluster_id
@@ -205,7 +205,9 @@ def step_impl(context):
       ( hive -e "SELECT * FROM foo.auditlog_raw where date_str='{date_str}';" > ~/{file_name} ) &&
       aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.results_file_key}
     ) &>> /var/log/dataworks-aws-corporate-data-ingestion/e2e.log
-    """.replace("\n", "")
+    """.replace(
+        "\n", ""
+    )
 
     step_id = emr_step_generator.generate_bash_step(
         context.corporate_data_ingestion_cluster_id,
@@ -213,7 +215,9 @@ def step_impl(context):
         f"automatedtests: hive-table-to-s3",
     )
 
-    step_status = aws_helper.poll_emr_cluster_step_status(step_id, context.corporate_data_ingestion_cluster_id, 300)
+    step_status = aws_helper.poll_emr_cluster_step_status(
+        step_id, context.corporate_data_ingestion_cluster_id, 300
+    )
 
     if step_status != "COMPLETED":
         raise AssertionError(
@@ -221,7 +225,9 @@ def step_impl(context):
         )
 
 
-@then("'{generated_record_count}' records are available in exported data from the hive table")
+@then(
+    "'{generated_record_count}' records are available in exported data from the hive table"
+)
 def step_impl(context, generated_record_count):
     """Match the number of records generated"""
     key = context.results_file_key
@@ -232,10 +238,12 @@ def step_impl(context, generated_record_count):
     )
 
     if exported_hive_data:
-        exported_rows = exported_hive_data.decode().rstrip("\n").split('\n')
+        exported_rows = exported_hive_data.decode().rstrip("\n").split("\n")
         num_records = len(exported_rows)
         if num_records != int(generated_record_count):
-            raise AssertionError(f"The number of rows retrieved from Hive ({num_records})does"
-                                 f" not match the number generated ({generated_record_count})")
+            raise AssertionError(
+                f"The number of rows retrieved from Hive ({num_records})does"
+                f" not match the number generated ({generated_record_count})"
+            )
     else:
         raise FileNotFoundError("Couldn't retrieve results from S3")
