@@ -1282,7 +1282,6 @@ def check_container_instance_count(cluster, desired_count, max_wait=600):
     Keyword arguments:
     cluster -- ECS cluster name
     desired_count -- desired instance count
-    asg_name -- name of autoscaling group
     """
 
     t0 = time.time()
@@ -1738,7 +1737,7 @@ def run_ecs_task(task, cluster):
 
 
 def delete_scheduled_action(asg_name, action_name):
-    """Deleted an autoscaling action
+    """Deletes an autoscaling action in autoscaling group
     Keyword arguments:
     asg_name -- the name of the autoscaling group
     action_name -- name of the autoscaling action
@@ -1759,7 +1758,7 @@ def delete_scheduled_action(asg_name, action_name):
 def set_asg_instance_count(
     asg_name: str, min: int, max: int, desired: int, action_name: str
 ):
-    """Creates a scheduled autoscaling action that sets the desider count for an autoscaling group
+    """Creates a scheduled autoscaling action that sets min, max and desired instance count of an autoscaling group
     Keyword arguments:
     asg_name -- the name of the autoscaling group
     min -- minimum number of instances
