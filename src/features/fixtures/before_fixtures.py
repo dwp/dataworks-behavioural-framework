@@ -904,6 +904,16 @@ def dataworks_init_kafka_consumer(context, timeout=60, **kwargs):
 
 
 @fixture
+def s3_clear_ingress_sft_start(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 's3_clear_ingress_sft_start' fixture")
+    aws_helper.clear_s3_prefix(
+        context.data_ingress_stage_bucket, "e2e/data-ingress/companies", False
+    )
+    aws_helper.clear_s3_prefix(
+        context.data_ingress_stage_bucket, "e2e/eicar_test", False
+    )
+
+
 def start_corporate_data_ingestion_cluster(context):
     emr_launcher_config = {
         "s3_overrides": None,

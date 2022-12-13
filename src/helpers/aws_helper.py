@@ -8,7 +8,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import reduce
 from typing import List
-
+from datetime import datetime, timedelta
 import boto3
 from boto3.dynamodb.conditions import Key, And
 from boto3.exceptions import S3UploadFailedError
@@ -1276,6 +1276,86 @@ def get_asg_desired_count(autoscaling_client, asg_prefix):
     return int(desired_count)
 
 
+def check_container_instance_count(cluster, desired_count, max_wait=600):
+    """Checks container instances are as many as desired within given time. Failes if container instance count did not reach desired count after max_wait
+
+    Keyword arguments:
+    cluster -- ECS cluster name
+    desired_count -- desired instance count
+    """
+
+    t0 = time.time()
+    t1 = t0 + max_wait
+    ic = "unknown"
+    ecs = get_client("ecs")
+    while time.time() < t1:
+        response = ecs.list_container_instances(cluster=cluster)
+        ic = len(response["containerInstanceArns"])
+        console_printer.print_info(f"instance count: {ic}")
+        s = t1 - time.time()
+        console_printer.print_info(f"seconds before timeout: {round(s)}")
+        if ic == desired_count:
+            console_printer.print_info(
+                f"container instances scaled up to {ic} within the time frame given"
+            )
+            break
+        time.sleep(5)
+    if ic != desired_count:
+        raise AssertionError(
+            f"container instance count: {ic} did not reach desired size: {desired_count} within the time"
+            f" frame given"
+        )
+
+
+def check_instance_count(desired_count, asg_name, max_wait=300):
+    """Checks instances are as many as desired within given tim. Failes if instance count did not reach desired count after max_wait
+
+    Keyword arguments:
+    desired_count -- desired instance count
+    asg_name -- name of autoscaling group
+    """
+    t0 = time.time()
+    t1 = t0 + max_wait
+    ic = "unknown"
+    while time.time() < t1:
+        ic = instance_count_by_tag("aws:autoscaling:groupName", asg_name)
+        console_printer.print_info(f"instance count: {ic}")
+        s = t1 - time.time()
+        console_printer.print_info(f"seconds before timeout: {round(s)}")
+        if ic == desired_count:
+            console_printer.print_info(
+                f"instances scaled up to {ic} within the time frame given"
+            )
+            break
+        time.sleep(10)
+    if ic != desired_count:
+        raise AssertionError(
+            f"instance count: {ic} did not reach desired size: {desired_count} within the time"
+            f" frame given"
+        )
+
+
+def check_task_state(cluster, family, desired_status):
+    """Checks that task state. Failes if no tasks with desired state is found
+
+    Keyword arguments:
+    cluster -- ECS cluster name
+    family -- family of the task
+    desired_status -- desired task status
+    """
+    ecs = get_client("ecs")
+    tasks = ecs.list_tasks(cluster=cluster, desiredStatus=desired_status, family=family)
+    try:
+        if len(tasks["taskArns"]) >= 1:
+            return True
+        else:
+            return False
+    except:
+        console_printer.print_error_text(
+            f"no {family} tasks with status {desired_status} found in cluster"
+        )
+
+
 def scale_asg_if_desired_count_is_not_already_set(asg_prefix, desired_count):
     """Scales the given ASG if it needs to be scaled
 
@@ -1642,6 +1722,61 @@ def scale_ecs_service_desired_task_count(
     )
 
 
+def run_ecs_task(task, cluster):
+
+    """Starts an ecs task
+    Keyword arguments:
+    task -- the name of the task
+    cluster -- name of the ECS cluster
+    """
+    client = get_client("ecs")
+    response = client.run_task(
+        cluster=cluster,
+        taskDefinition=task,
+    )
+
+
+def delete_scheduled_action(asg_name, action_name):
+    """Deletes an autoscaling action in autoscaling group
+    Keyword arguments:
+    asg_name -- the name of the autoscaling group
+    action_name -- name of the autoscaling action
+    """
+    client = get_client("autoscaling")
+    try:
+        client.delete_scheduled_action(
+            AutoScalingGroupName=asg_name,
+            ScheduledActionName=action_name,
+        )
+
+    except Exception as e:
+
+        console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
+        return False
+
+
+def set_asg_instance_count(
+    asg_name: str, min: int, max: int, desired: int, action_name: str
+):
+    """Creates a scheduled autoscaling action that sets min, max and desired instance count of an autoscaling group
+    Keyword arguments:
+    asg_name -- the name of the autoscaling group
+    min -- minimum number of instances
+    max -- maximum number of instances
+    desired -- desired number of instances
+    action_name -- name for the autoscaling action
+    """
+    client = get_client("autoscaling")
+    response = client.put_scheduled_update_group_action(
+        ScheduledActionName=action_name,
+        StartTime=datetime.today() + timedelta(hours=0, minutes=1),
+        AutoScalingGroupName=asg_name,
+        MinSize=min,
+        MaxSize=max,
+        DesiredCapacity=desired,
+    )
+
+
 def kms_decrypt_cipher_text(cipher_text_blob, aws_region=None):
     """Decrypts the given KMS cipher text and returns the plain text response
 
@@ -1939,6 +2074,18 @@ def check_if_s3_object_exists(bucket, key, s3_client=None):
             return True
 
     return False
+
+
+def instance_count_by_tag(tag_name: str, tag_value: str):
+    """
+    :return: number of running instances having the given tag
+    """
+    client = get_client("ec2")
+    custom_filter = [{"Name": f"tag:{tag_name}", "Values": [f"{tag_value}"]}]
+
+    response = client.describe_instances(Filters=custom_filter)
+    r = [i["Instances"] for i in response["Reservations"]]
+    return len([j["State"] for i in r for j in i if j["State"]["Name"] == "running"])
 
 
 def execute_commands_on_ec2_by_tags_and_wait(

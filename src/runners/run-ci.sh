@@ -218,7 +218,7 @@ function execute_behave() {
 
     if [[ ! -z "${TF_COMMON_OUTPUT_FILE}" && "${TF_COMMON_OUTPUT_FILE}" != "NOT_SET"  ]]; then
         AWS_PUBLISHED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.published_bucket.value.id')"
-        AWS_DATA_INGRESS_STAGE_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.data_ingress_stage_bucket.value.id')"
+        AWS_DATA_INGRESS_STAGE_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} | jq -r '.data_ingress_stage_bucket.value.id')"
         AWS_PROCESSED_BUCKET="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.processed_bucket.value.id')"
         AWS_REGION_MAIN="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.london')"
         AWS_REGION_ALTERNATIVE="$(cat ${TF_COMMON_OUTPUT_FILE} |  jq -r '.region_names.value.ireland')"

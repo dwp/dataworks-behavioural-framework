@@ -331,7 +331,6 @@ def set_test_run_common_variables(context):
     context.data_ingress_stage_bucket = context.config.userdata.get(
         "AWS_DATA_INGRESS_STAGE_BUCKET"
     )
-
     context.processed_bucket = context.config.userdata.get("AWS_PROCESSED_BUCKET")
 
     context.ingest_hbase_emr_cluster_id = context.config.userdata.get(

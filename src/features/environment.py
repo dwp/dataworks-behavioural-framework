@@ -471,6 +471,8 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_cyi_test_output, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer.perf.test":
         use_fixture(before_fixtures.dataworks_init_kafka_producer, context)
+    if tag == "fixture.s3.clear.ingress.sft.start":
+        use_fixture(before_fixtures.s3_clear_ingress_sft_start, context)
     if tag == "fixture.start.corporate_data_ingestion.cluster":
         use_fixture(before_fixtures.start_corporate_data_ingestion_cluster, context)
     if tag == "fixture.s3.clear.corporate.data.ingestion.prefixes":
@@ -590,3 +592,7 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.clean_up_hbase_export_hbase_snapshots, context)
     if tag == "fixture.terminate.datsci.cluster":
         use_fixture(after_fixtures.terminate_datsci_cluster, context)
+    if tag == "fixture.stop.data.ingress":
+        use_fixture(after_fixtures.stop_data_ingress, context)
+    if tag == "fixture.delete.scheduled.action.di":
+        use_fixture(after_fixtures.delete_scheduled_action_data_ingress, context)

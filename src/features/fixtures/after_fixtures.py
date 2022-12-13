@@ -5,6 +5,7 @@ from helpers import (
     aws_helper,
     console_printer,
     dataworks_kafka_producer_common_helper,
+    emr_step_generator,
 )
 
 
@@ -293,3 +294,28 @@ def dataworks_stop_kafka_consumer_app(context):
         path=context.dataworks_dlq_output_s3_prefix,
         delete_prefix=True,
     )
+
+
+@fixture
+def stop_data_ingress(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'stop_data_ingress' fixture")
+
+    try:
+        aws_helper.set_asg_instance_count("data-ingress-ag", 0, 0, 0, "e2e-sft")
+    except Exception as error:
+        console_printer.print_warning_text(
+            f"Error occurred when shutting down instances in data-ingress-ag as the following error occurred: '{error}'"
+        )
+
+
+@fixture
+def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
+    console_printer.print_info("Executing 'stop_data_ingress' fixture")
+    try:
+        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_off")
+        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_on")
+
+    except Exception as error:
+        console_printer.print_warning_text(
+            f"Error occurred when deleting scheduled actions: '{error}'"
+        )
