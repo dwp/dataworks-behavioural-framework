@@ -1336,7 +1336,7 @@ def check_instance_count(desired_count, asg_name, max_wait=300):
 
 
 def check_task_state(cluster, family, desired_status):
-    """Checks that task is on desired status. Failes if no tasks with desired state is found
+    """Checks that task state. Failes if no tasks with desired state is found
 
     Keyword arguments:
     cluster -- ECS cluster name
