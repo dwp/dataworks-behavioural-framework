@@ -29,7 +29,7 @@ SNAPSHOT_TYPE = "snapshot_type"
 
 
 @given("clean s3 '{type}' prefix")
-def step_(context, type):
+def step_impl(context, type):
     if type == "source":
         aws_helper.clear_s3_prefix(
             context.corporate_storage_s3_bucket_id, context.s3_source_prefix, True
@@ -45,12 +45,12 @@ def step_(context, type):
 
 
 @given("s3 source prefix set to k2hb landing place in corporate bucket")
-def step_(context):
+def step_impl(context):
     context.s3_source_prefix = f"corporate_storage/ucfs_main/{datetime.now().strftime('%Y/%m/%d')}/automatedtests/{context.test_run_name}_1"
 
 
 @given("s3 '{location_type}' prefix replaced by unauthorised location")
-def step_(context, location_type):
+def step_impl(context, location_type):
     if location_type == "source":
         context.s3_source_prefix = "unauthorised_location/e2e"
         aws_helper.put_object_in_s3(
@@ -69,7 +69,7 @@ def step_(context, location_type):
 @given(
     "we generate a corrupted archive and store it in the Corporate Storage S3 bucket"
 )
-def step_(context):
+def step_impl(context):
     filename = f"corrupted_archive.jsonl.gz"
     aws_helper.upload_file_to_s3_and_wait_for_consistency(
         file_location=os.path.join(
@@ -82,7 +82,7 @@ def step_(context):
 
 
 @when("a step '{step_type}' is triggered on the EMR cluster corporate-data-ingestion")
-def step_(context, step_type):
+def step_impl(context, step_type):
     context.step_type = step_type
     context.s3_destination_prefix = os.path.join(
         context.s3_destination_prefix, step_type
@@ -92,10 +92,11 @@ def step_(context, step_type):
         emr_cluster_id=context.corporate_data_ingestion_cluster_id,
         script_location="/opt/emr/steps/corporate-data-ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
-        extra_python_files="/opt/emr/steps/dks.py,/opt/emr/steps/data.py,/opt/emr/steps/logger.py",
         command_line_arguments=f"""--correlation_id {context.correlation_id} """
         f"""--source_s3_prefix {context.s3_source_prefix} """
-        f"""--destination_s3_prefix {context.s3_destination_prefix}""",
+        f"""--destination_s3_prefix {context.s3_destination_prefix} """
+        f"""--transition_db_name foo """
+        f"""--db_name bar """,
     )
     context.execution_state = aws_helper.poll_emr_cluster_step_status(
         step_id, context.corporate_data_ingestion_cluster_id
@@ -103,7 +104,7 @@ def step_(context, step_type):
 
 
 @then("confirm that the EMR step status is '{status}'")
-def step_(context, status):
+def step_impl(context, status):
     if context.execution_state != status:
         raise AssertionError(
             f"""automatedtests: {context.step_type} step failed with final status of '{context.execution_state}'"""
@@ -111,7 +112,7 @@ def step_(context, status):
 
 
 @then("confirm that '{record_count}' messages have been ingested")
-def step_(context, record_count):
+def step_impl(context, record_count):
     result = aws_helper.get_s3_object(
         s3_client=None,
         bucket=context.published_bucket,
@@ -133,14 +134,14 @@ def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
         if count >= retries:
             break
         time.sleep(sleep)
-    return response[0] if len(response) > 0 else []
+    return response
 
 
 @when("remove key '{key}' from existing file in s3 source prefix")
-def step_(context, key):
+def step_impl(context, key):
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id, context.s3_source_prefix
-    )
+    )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
     message = aws_helper.get_s3_object(
@@ -156,11 +157,11 @@ def step_(context, key):
 
 
 @when("replace value of '{key}' by '{value}' from existing file in s3 source prefix")
-def step_(context, key, value):
+def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id, context.s3_source_prefix
-    )
+    )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
     message = aws_helper.get_s3_object(
@@ -176,10 +177,10 @@ def step_(context, key, value):
 
 
 @when("invalidate JSON from existing file in s3 source prefix")
-def step_(context):
+def step_impl(context):
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id, context.s3_source_prefix
-    )
+    )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
     message = aws_helper.get_s3_object(
@@ -190,3 +191,59 @@ def step_(context):
     aws_helper.put_object_in_s3(
         message_compressed, context.corporate_storage_s3_bucket_id, response
     )
+
+
+@when("Hive table dumped into S3")
+def step_impl(context):
+    # retrieve export-date and use it as partition name
+    # step should overwrite data, we should be runnable more than once
+    file_name = f"{context.test_run_name}.csv"
+    context.results_file_key = "{}/{}".format(context.s3_destination_prefix, file_name)
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    hive_export_bash_command = f"""
+    ( 
+      ( hive -e "SELECT * FROM foo.auditlog_raw where date_str='{date_str}';" > ~/{file_name} ) &&
+      aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.results_file_key}
+    ) &>> /var/log/dataworks-aws-corporate-data-ingestion/e2e.log
+    """.replace(
+        "\n", ""
+    )
+
+    step_id = emr_step_generator.generate_bash_step(
+        context.corporate_data_ingestion_cluster_id,
+        hive_export_bash_command,
+        f"automatedtests: hive-table-to-s3",
+    )
+
+    step_status = aws_helper.poll_emr_cluster_step_status(
+        step_id, context.corporate_data_ingestion_cluster_id, 300
+    )
+
+    if step_status != "COMPLETED":
+        raise AssertionError(
+            f"'automatedtests: hive-table-to-s3' step failed with final status of '{step_status}'"
+        )
+
+
+@then(
+    "'{generated_record_count}' records are available in exported data from the hive table"
+)
+def step_impl(context, generated_record_count):
+    """Match the number of records generated"""
+    key = context.results_file_key
+    exported_hive_data = aws_helper.get_s3_object(
+        bucket=context.published_bucket,
+        key=key,
+        s3_client=None,
+    )
+
+    if exported_hive_data:
+        exported_rows = exported_hive_data.decode().rstrip("\n").split("\n")
+        num_records = len(exported_rows)
+        if num_records != int(generated_record_count):
+            raise AssertionError(
+                f"The number of rows retrieved from Hive ({num_records})does"
+                f" not match the number generated ({generated_record_count})"
+            )
+    else:
+        raise FileNotFoundError("Couldn't retrieve results from S3")
