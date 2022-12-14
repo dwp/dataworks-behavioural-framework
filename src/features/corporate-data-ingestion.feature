@@ -128,7 +128,10 @@ Feature: Corporate data ingestion end to end test
             | current_valid_file_input.json  | current_valid_file_output.json | None                             |
         When remove key '_lastModifiedDateTime' from existing file in s3 source prefix
         And a step 'ingest-record-without-lastModifiedDateTime' is triggered on the EMR cluster corporate-data-ingestion
-        Then confirm that the EMR step status is 'FAILED'
+        Then confirm that the EMR step status is 'COMPLETED'
+        And confirm that '1' messages have been ingested
+        When Hive table dumped into S3
+        Then '1' records are available in exported data from the hive table
 
     @fixture.prepare.corporate.data.ingestion.context
     @fixture.s3.clear.corporate.data.ingestion.prefixes
@@ -140,7 +143,10 @@ Feature: Corporate data ingestion end to end test
             | current_valid_file_input.json  | current_valid_file_output.json | None                             |
         When replace value of '_lastModifiedDateTime' by 'None' from existing file in s3 source prefix
         And a step 'ingest-record-with-empty-lastModifiedDateTime' is triggered on the EMR cluster corporate-data-ingestion
-        Then confirm that the EMR step status is 'FAILED'
+        Then confirm that the EMR step status is 'COMPLETED'
+        And confirm that '1' messages have been ingested
+        When Hive table dumped into S3
+        Then '1' records are available in exported data from the hive table
 
     @fixture.prepare.corporate.data.ingestion.context
     @fixture.s3.clear.corporate.data.ingestion.prefixes
