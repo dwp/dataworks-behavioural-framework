@@ -28,7 +28,7 @@ EXPORT_DATE = "export_date"
 SNAPSHOT_TYPE = "snapshot_type"
 
 
-@given("clean s3 '{type}' prefix")
+@given("the s3 '{type}' prefix is cleared")
 def step_impl(context, type):
     if type == "source":
         aws_helper.clear_s3_prefix(
@@ -44,12 +44,12 @@ def step_impl(context, type):
         )
 
 
-@given("s3 source prefix set to k2hb landing place in corporate bucket")
+@given("the s3 source prefix is set to k2hb landing place in corporate bucket")
 def step_impl(context):
     context.s3_source_prefix = f"corporate_storage/ucfs_main/{datetime.now().strftime('%Y/%m/%d')}/automatedtests/{context.test_run_name}_1"
 
 
-@given("s3 '{location_type}' prefix replaced by unauthorised location")
+@given("the s3 '{location_type}' prefix replaced by unauthorised location")
 def step_impl(context, location_type):
     if location_type == "source":
         context.s3_source_prefix = "unauthorised_location/e2e"
@@ -157,7 +157,7 @@ def step_impl(context, key):
     )
 
 
-@when("replace value of '{key}' by '{value}' from existing file in s3 source prefix")
+@when("the value of '{key}' is replaced with '{value}' from existing file in s3 source prefix")
 def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
