@@ -111,7 +111,8 @@ def step_impl(context, step_type):
 @then("confirm that the EMR step status is '{expected_status}'")
 def step_impl(context, expected_status):
     step_status = aws_helper.poll_emr_cluster_step_status(
-        context.step_id, context.corporate_data_ingestion_cluster_id,
+        context.step_id,
+        context.corporate_data_ingestion_cluster_id,
         timeout_in_seconds=600,
     )
 
@@ -166,7 +167,9 @@ def step_impl(context, key):
     )
 
 
-@when("the value of '{key}' is replaced with '{value}' from existing file in s3 source prefix")
+@when(
+    "the value of '{key}' is replaced with '{value}' from existing file in s3 source prefix"
+)
 def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
