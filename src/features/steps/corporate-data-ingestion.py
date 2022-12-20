@@ -83,6 +83,14 @@ def step_impl(context):
 
 @when("a step '{step_type}' is triggered on the EMR cluster corporate-data-ingestion")
 def step_impl(context, step_type):
+    cluster_state = aws_helper.poll_emr_cluster_status(
+        cluster_id=context.corporate_data_ingestion_cluster_id,
+        timeout_in_seconds=720,
+    )
+
+    if cluster_state != "WAITING":
+        raise AssertionError("Cluster not in 'WAITING' state before timeout")
+
     context.step_type = step_type
     context.s3_destination_prefix = os.path.join(
         context.s3_destination_prefix, step_type
@@ -103,12 +111,13 @@ def step_impl(context, step_type):
 @then("confirm that the EMR step status is '{expected_status}'")
 def step_impl(context, expected_status):
     step_status = aws_helper.poll_emr_cluster_step_status(
-        context.step_id, context.corporate_data_ingestion_cluster_id
+        context.step_id, context.corporate_data_ingestion_cluster_id,
+        timeout_in_seconds=600,
     )
 
     if step_status != expected_status:
         raise AssertionError(
-            f"""automatedtests: {context.step_type} step failed with final status of '{context.execution_state}'"""
+            f"""automatedtests: {context.step_type} step failed with final status of '{step_status}'"""
         )
 
 
