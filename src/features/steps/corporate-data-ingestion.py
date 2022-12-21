@@ -28,7 +28,7 @@ EXPORT_DATE = "export_date"
 SNAPSHOT_TYPE = "snapshot_type"
 
 
-@given("clean s3 '{type}' prefix")
+@given("the s3 '{type}' prefix is cleared")
 def step_impl(context, type):
     if type == "source":
         aws_helper.clear_s3_prefix(
@@ -44,12 +44,12 @@ def step_impl(context, type):
         )
 
 
-@given("s3 source prefix set to k2hb landing place in corporate bucket")
+@given("the s3 source prefix is set to k2hb landing place in corporate bucket")
 def step_impl(context):
     context.s3_source_prefix = f"corporate_storage/ucfs_main/{datetime.now().strftime('%Y/%m/%d')}/automatedtests/{context.test_run_name}_1"
 
 
-@given("s3 '{location_type}' prefix replaced by unauthorised location")
+@given("the s3 '{location_type}' prefix replaced by unauthorised location")
 def step_impl(context, location_type):
     if location_type == "source":
         context.s3_source_prefix = "unauthorised_location/e2e"
@@ -83,12 +83,20 @@ def step_impl(context):
 
 @when("a step '{step_type}' is triggered on the EMR cluster corporate-data-ingestion")
 def step_impl(context, step_type):
+    cluster_state = aws_helper.poll_emr_cluster_status(
+        cluster_id=context.corporate_data_ingestion_cluster_id,
+        timeout_in_seconds=720,
+    )
+
+    if cluster_state != "WAITING":
+        raise AssertionError("Cluster not in 'WAITING' state before timeout")
+
     context.step_type = step_type
     context.s3_destination_prefix = os.path.join(
         context.s3_destination_prefix, step_type
     )
     context.correlation_id = f"corporate_data_ingestion_{uuid.uuid4()}"
-    step_id = emr_step_generator.generate_spark_step(
+    context.step_id = emr_step_generator.generate_spark_step(
         emr_cluster_id=context.corporate_data_ingestion_cluster_id,
         script_location="/opt/emr/steps/corporate-data-ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
@@ -98,16 +106,19 @@ def step_impl(context, step_type):
         f"""--transition_db_name foo """
         f"""--db_name bar """,
     )
-    context.execution_state = aws_helper.poll_emr_cluster_step_status(
-        step_id, context.corporate_data_ingestion_cluster_id
+
+
+@then("confirm that the EMR step status is '{expected_status}'")
+def step_impl(context, expected_status):
+    step_status = aws_helper.poll_emr_cluster_step_status(
+        context.step_id,
+        context.corporate_data_ingestion_cluster_id,
+        timeout_in_seconds=600,
     )
 
-
-@then("confirm that the EMR step status is '{status}'")
-def step_impl(context, status):
-    if context.execution_state != status:
+    if step_status != expected_status:
         raise AssertionError(
-            f"""automatedtests: {context.step_type} step failed with final status of '{context.execution_state}'"""
+            f"""automatedtests: {context.step_type} step failed with final status of '{step_status}'"""
         )
 
 
@@ -122,7 +133,7 @@ def step_impl(context, record_count):
         result_json = json.loads(result)
         assert int(result_json["record_ingested_count"]) == int(record_count)
     else:
-        raise AssertionError(f"""Unable to read cluster result file""")
+        raise AssertionError("Unable to read cluster result file")
 
 
 def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
@@ -156,7 +167,9 @@ def step_impl(context, key):
     )
 
 
-@when("replace value of '{key}' by '{value}' from existing file in s3 source prefix")
+@when(
+    "the value of '{key}' is replaced with '{value}' from existing file in s3 source prefix"
+)
 def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
@@ -198,6 +211,7 @@ def step_impl(context):
     # retrieve export-date and use it as partition name
     # step should overwrite data, we should be runnable more than once
     file_name = f"{context.test_run_name}.csv"
+    step_name = "automatedtests: hive-table-to-s3"
     context.results_file_key = "{}/{}".format(context.s3_destination_prefix, file_name)
     date_str = datetime.now().strftime("%Y-%m-%d")
     hive_export_bash_command = f"""
@@ -212,7 +226,7 @@ def step_impl(context):
     step_id = emr_step_generator.generate_bash_step(
         context.corporate_data_ingestion_cluster_id,
         hive_export_bash_command,
-        f"automatedtests: hive-table-to-s3",
+        step_name,
     )
 
     step_status = aws_helper.poll_emr_cluster_step_status(
@@ -221,7 +235,7 @@ def step_impl(context):
 
     if step_status != "COMPLETED":
         raise AssertionError(
-            f"'automatedtests: hive-table-to-s3' step failed with final status of '{step_status}'"
+            f"'{step_name}' step failed with final status of '{step_status}'"
         )
 
 
