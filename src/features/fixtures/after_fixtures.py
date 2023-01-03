@@ -128,25 +128,6 @@ def terminate_pdm_cluster(context, timeout=30, **kwargs):
         )
 
 
-@fixture
-def terminate_kickstart_cluster(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 'terminate_kickstart_adg_cluster' fixture")
-
-    if (
-        "kickstart_adg_cluster_id" in context
-        and context.kickstart_adg_cluster_id is not None
-    ):
-        try:
-            aws_helper.terminate_emr_cluster(context.kickstart_adg_cluster_id)
-        except ClientError as error:
-            console_printer.print_warning_text(
-                f"Error occured when terminating kickstart cluster with id of '{context.kickstart_adg_cluster_id}' as the following error occurred: '{error}'"
-            )
-    else:
-        console_printer.print_info(
-            f"No cluster id found for kickstart so not terminating any cluster"
-        )
-
 
 @fixture
 def terminate_ch_cluster(context, timeout=30, **kwargs):

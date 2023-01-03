@@ -841,12 +841,6 @@ def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
 
 
 @fixture
-def s3_clear_kickstart_start(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 's3_clear_kickstart_adg_start' fixture")
-    aws_helper.clear_s3_prefix(context.published_bucket, "kickstart-e2e-tests", False)
-
-
-@fixture
 def dataworks_init_kafka_producer(context, timeout=60, **kwargs):
     dataworks_kafka_producer_common_helper.dataworks_init_kafka_producer(context)
 

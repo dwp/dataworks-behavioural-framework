@@ -455,8 +455,6 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_clive_output, context)
     if tag == "fixture.s3.clear.uc.feature.output":
         use_fixture(before_fixtures.s3_clear_uc_feature_output, context)
-    if tag == "fixture.s3.clear.kickstart.start":
-        use_fixture(before_fixtures.s3_clear_kickstart_start, context)
     if tag == "fixture.s3.clear.ch.start":
         use_fixture(before_fixtures.s3_clear_ch_start, context)
     if tag == "fixture.init.e2e.dataworks.kafka.producer":
@@ -572,8 +570,6 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_uc_feature_cluster, context)
     if tag == "fixture.terminate.pdm.cluster":
         use_fixture(after_fixtures.terminate_pdm_cluster, context)
-    if tag == "fixture.terminate.kickstart.cluster":
-        use_fixture(after_fixtures.terminate_kickstart_cluster, context)
     if tag == "fixture.terminate.mongo_latest.cluster":
         use_fixture(after_fixtures.terminate_mongo_latest_cluster, context)
     if tag == "fixture.terminate.cyi.cluster":
