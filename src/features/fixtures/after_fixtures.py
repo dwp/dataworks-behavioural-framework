@@ -128,7 +128,6 @@ def terminate_pdm_cluster(context, timeout=30, **kwargs):
         )
 
 
-
 @fixture
 def terminate_ch_cluster(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 'terminate_ch_cluster' fixture")
