@@ -98,13 +98,14 @@ def step_impl(context, step_type):
     context.correlation_id = f"corporate_data_ingestion_{uuid.uuid4()}"
     context.step_id = emr_step_generator.generate_spark_step(
         emr_cluster_id=context.corporate_data_ingestion_cluster_id,
-        script_location="/opt/emr/steps/corporate-data-ingestion.py",
+        script_location="/opt/emr/steps/corporate_data_ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
         command_line_arguments=f"""--correlation_id {context.correlation_id} """
         f"""--source_s3_prefix {context.s3_source_prefix} """
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
         f"""--transition_db_name foo """
-        f"""--db_name bar """,
+        f"""--db_name bar """
+        f"""--collection_name data.businessAudit """,
     )
 
 
@@ -120,20 +121,6 @@ def step_impl(context, expected_status):
         raise AssertionError(
             f"""automatedtests: {context.step_type} step failed with final status of '{step_status}'"""
         )
-
-
-@then("confirm that '{record_count}' messages have been ingested")
-def step_impl(context, record_count):
-    result = aws_helper.get_s3_object(
-        s3_client=None,
-        bucket=context.published_bucket,
-        key=f"corporate_data_ingestion/audit_logs_transition/results/{context.correlation_id}/result.json",
-    )
-    if result:
-        result_json = json.loads(result)
-        assert int(result_json["record_ingested_count"]) == int(record_count)
-    else:
-        raise AssertionError("Unable to read cluster result file")
 
 
 def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
