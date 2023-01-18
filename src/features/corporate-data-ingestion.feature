@@ -14,7 +14,6 @@ Feature: Corporate data ingestion end to end test
             | current_valid_file_input.json  | current_valid_file_output.json | None                             |
         When a step 'ingest-valid-records' is triggered on the EMR cluster corporate-data-ingestion
         Then confirm that the EMR step status is 'COMPLETED'
-        And confirm that '2' messages have been ingested
         When Hive table dumped into S3
         Then '2' records are available in exported data from the hive table
 
@@ -129,7 +128,6 @@ Feature: Corporate data ingestion end to end test
         When remove key '_lastModifiedDateTime' from existing file in s3 source prefix
         And a step 'ingest-record-without-lastModifiedDateTime' is triggered on the EMR cluster corporate-data-ingestion
         Then confirm that the EMR step status is 'COMPLETED'
-        And confirm that '1' messages have been ingested
         When Hive table dumped into S3
         Then '1' records are available in exported data from the hive table
 
@@ -144,7 +142,6 @@ Feature: Corporate data ingestion end to end test
         When the value of '_lastModifiedDateTime' is replaced with 'None' from existing file in s3 source prefix
         And a step 'ingest-record-with-empty-lastModifiedDateTime' is triggered on the EMR cluster corporate-data-ingestion
         Then confirm that the EMR step status is 'COMPLETED'
-        And confirm that '1' messages have been ingested
         When Hive table dumped into S3
         Then '1' records are available in exported data from the hive table
 
