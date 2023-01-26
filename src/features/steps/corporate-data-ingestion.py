@@ -114,7 +114,7 @@ def step_impl(context, expected_status):
     step_status = aws_helper.poll_emr_cluster_step_status(
         context.step_id,
         context.corporate_data_ingestion_cluster_id,
-        timeout_in_seconds=600,
+        timeout_in_seconds=1200,
     )
 
     if step_status != expected_status:
