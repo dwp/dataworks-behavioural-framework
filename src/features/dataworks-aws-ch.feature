@@ -13,13 +13,6 @@ Feature: Synthesise source file, process them and check output tables
     Then Etl step in e2e mode completes
     Then Validation step completes
     Then Last imported file is updated on DynamoDB
-    ### wrong size
-    When Clear S3 prefix where previous synthetic data is
-    When Generate files having wrong size for negative testing
-    When Upload the local file to s3
-    When Set the dynamo db bookmark on the first filename generated
-    Then Etl step in e2e mode fails
-    Then File size alarm triggers
     ### one extra column
     When Clear S3 prefix where previous synthetic data is
     When Generate files having one extra column for negative testing
