@@ -166,17 +166,6 @@ def step_impl(context):
         )
 
 
-@when("Generate files having wrong size for negative testing")
-def step_impl(context):
-    console_printer.print_info(
-        f"generating files fro the column {context.args_ch['args']['cols']}"
-    )
-    console_printer.print_info(f"filenames are {context.filenames}")
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file(context.filenames[0], 0.005, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.06, cols)
-
-
 @then("Last imported file is updated on DynamoDB")
 def step_impl(context):
 
@@ -189,15 +178,6 @@ def step_impl(context):
         filename_from_table == filename_expected
     ), "the dynamoDB item was not updated correctly"
 
-
-@then("File size alarm triggers")
-def step_impl(context):
-    start = time.time()
-    while not ch_helper.did_alarm_trigger("file_size_check_failed"):
-        if time.time() - start < TIMEOUT:
-            time.sleep(5)
-        else:
-            raise AssertionError(f"alarm did not trigger after {TIMEOUT} seconds")
 
 
 @then("File format alarm triggers")
