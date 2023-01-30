@@ -179,7 +179,6 @@ def step_impl(context):
     ), "the dynamoDB item was not updated correctly"
 
 
-
 @then("File format alarm triggers")
 def step_impl(context):
     start = time.time()
