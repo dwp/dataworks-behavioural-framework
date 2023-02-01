@@ -91,10 +91,10 @@ def step_impl(context):
     zip_f2 = zipfile.ZipFile(context.filenames[1], "w", zipfile.ZIP_DEFLATED)
     zip_f2.write("file2.csv")
     zip_f2.close()
-    ch_helper.s3_upload(context, context.filenames[1], E2E_S3_PREFIX)
-    ch_helper.s3_upload(context, context.filenames[0], E2E_S3_PREFIX)
+    ch_helper.s3_upload(context, "file1.csv", E2E_S3_PREFIX, context.filenames[0])
+    ch_helper.s3_upload(context, "file2.csv", E2E_S3_PREFIX, context.filenames[1])
     context.filename_not_to_process = context.filenames[0]
-    context.filename_expected = context.filenames[-1]
+    context.filename_expected = context.filenames[1]
 
 
 @when("Set the dynamo db bookmark on the first filename generated")

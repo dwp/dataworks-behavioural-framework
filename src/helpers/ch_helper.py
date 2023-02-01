@@ -111,14 +111,11 @@ def download_file(bucket, prefix, filename, local_folder):
     )
 
 
-def s3_upload(context, filename, prefix):
-    console_printer.print_info(f"The file name is {filename}")
-    file_name = os.path.basename(filename)
-    input_file = file_helper.get_contents_of_file(filename, False)
-    inputs_s3_key = os.path.join(prefix, file_name)
+def s3_upload(context, local_filename, prefix, bucket_filename):
+    input_file = file_helper.get_contents_of_file(local_filename, False)
+    inputs_s3_key = os.path.join(prefix, bucket_filename)
     console_printer.print_info(
-        f"Uploading the local file {filename} with basename as {file_name} into s3 bucket {context.published_bucket} "
-        f"using key name as {inputs_s3_key}"
+        f"Uploading the local file {local_filename} as {bucket_filename} into s3 bucket {context.data_ingress_stage_bucket} "
     )
     aws_helper.put_object_in_s3(
         input_file, context.data_ingress_stage_bucket, inputs_s3_key
