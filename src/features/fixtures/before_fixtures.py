@@ -836,7 +836,7 @@ def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
     )
     context.s3_source_prefix = f"corporate_storage/ucfs_audit/e2e"
     context.s3_destination_prefix = (
-        f"corporate_data_ingestion/audit_logs_transition/automatedtests"
+        f"corporate_data_ingestion/automatedtests/"
     )
 
 
