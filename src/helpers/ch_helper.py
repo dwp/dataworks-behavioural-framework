@@ -30,12 +30,12 @@ def get_args(location: str):
         sys.exit(-1)
 
 
-def get_filenames(filenames_prefix, output_folder):
+def get_filenames(filenames_prefix):
     filenames = [str(datetime.date.today())]
     for i in [31, 0]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
     filenames = [
-        os.path.join(output_folder, filenames_prefix + "-" + k + ".zip")
+        filenames_prefix + "-" + k + ".zip"
         for k in filenames
     ]
     filenames.sort(reverse=False)

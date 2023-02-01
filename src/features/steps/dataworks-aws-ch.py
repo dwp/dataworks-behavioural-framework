@@ -63,7 +63,7 @@ def step_impl(context):
         f"generating files from the columns {context.args_ch['args']['cols']}"
     )
     context.filenames = ch_helper.get_filenames(
-        context.args_ch["args"]["filename"], context.temp_folder
+        context.args_ch["args"]["filename"]
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     console_printer.print_info(f"generating file1.csv ")
