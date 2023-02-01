@@ -93,7 +93,6 @@ ADG_INCREMENTAL_TOPICS_DATED = [
     "the data of the format in the template file '{template_name}' for '{snapshot_type}' as an input to analytical data set generation emr"
 )
 def step_(context, template_name, snapshot_type):
-
     if snapshot_type == "full":
         ADG_TOPICS = ADG_FULL_TOPICS
     else:

@@ -135,7 +135,7 @@ def step_impl(
 
     context.local_generated_claimant_api_kafka_files = []
 
-    for (id_field_name, generated_files) in kafka_input_file_data:
+    for id_field_name, generated_files in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
         context.local_generated_claimant_api_kafka_files.extend(
             [db_object_tuple[1] for db_object_tuple in generated_files]
@@ -196,7 +196,7 @@ def step_impl(
 
     context.local_generated_claimant_api_kafka_files = []
 
-    for (id_field_name, generated_files) in kafka_input_file_data:
+    for id_field_name, generated_files in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
         context.local_generated_claimant_api_kafka_files.extend(
             [db_object_tuple[1] for db_object_tuple in generated_files]
@@ -255,7 +255,7 @@ def step_impl(
 
     context.local_generated_claimant_api_kafka_files = []
 
-    for (id_field_name, generated_files) in kafka_input_file_data:
+    for id_field_name, generated_files in kafka_input_file_data:
         files_to_send = [db_object_tuple[0] for db_object_tuple in generated_files]
         context.local_generated_claimant_api_kafka_files.extend(
             [db_object_tuple[1] for db_object_tuple in generated_files]

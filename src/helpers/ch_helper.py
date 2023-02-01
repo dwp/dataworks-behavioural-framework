@@ -169,7 +169,6 @@ def get_latest_file(context):
 
 
 def did_alarm_trigger(alarm_name):
-
     client = aws_helper.get_client("cloudwatch")
     response = client.describe_alarm_history(
         AlarmName=alarm_name,

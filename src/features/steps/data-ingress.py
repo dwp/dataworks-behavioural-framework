@@ -29,7 +29,6 @@ def step_impl(context, time_scale_up, time_scale_down):
 
 @when("instance starts within the expected time")
 def step_impl(context):
-
     w = (context.time_scale_up * 60) - 100
     console_printer.print_info(f"waiting {w} seconds")
     time.sleep(w)
