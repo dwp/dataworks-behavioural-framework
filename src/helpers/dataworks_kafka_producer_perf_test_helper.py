@@ -29,7 +29,10 @@ def json_element(journal_id):
 
 def upload_file_to_s3(context, data_obj, data_key, file_counter):
     # Encrypt the data
-    (encrypted_data, iv,) = dataworks_kafka_producer_helper.encrypt_data_aes_ctr(
+    (
+        encrypted_data,
+        iv,
+    ) = dataworks_kafka_producer_helper.encrypt_data_aes_ctr(
         plaintext_string=str(data_obj), data_key=data_key
     )
 

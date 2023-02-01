@@ -251,10 +251,10 @@ def generate_return_data(
     """
     return_data = []
 
-    for (id_field_name, db_object_array) in kafka_input_file_data:
+    for id_field_name, db_object_array in kafka_input_file_data:
         count = 0
         generated_files = []
-        for (key, file_timestamp, db_object) in db_object_array:
+        for key, file_timestamp, db_object in db_object_array:
             count += 1
             local_file_name = f"{id_field_name.lower()}_{count}_{input_template_name}"
             generated_files.append(

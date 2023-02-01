@@ -835,9 +835,7 @@ def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
         "Executing 'prepare_corporate_data_ingestion_context' fixture"
     )
     context.s3_source_prefix = f"corporate_storage/ucfs_audit/e2e"
-    context.s3_destination_prefix = (
-        f"corporate_data_ingestion/automatedtests/"
-    )
+    context.s3_destination_prefix = f"corporate_data_ingestion/automatedtests/"
 
 
 @fixture
