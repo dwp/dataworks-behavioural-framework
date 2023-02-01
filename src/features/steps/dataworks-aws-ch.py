@@ -2,6 +2,7 @@ import ast
 from behave import given, when, then
 import os
 import json
+import zipfile
 import csv
 import time
 from helpers import (
@@ -64,13 +65,12 @@ def step_impl(context):
     context.filenames = ch_helper.get_filenames(
         context.args_ch["args"]["filename"], context.temp_folder
     )
-    console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    console_printer.print_info(f"generating {context.filenames[0]} ")
-    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
-    console_printer.print_info(f"generating {context.filenames[1]} ")
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
-    file = open(context.filenames[1])
+    console_printer.print_info(f"generating file1.csv ")
+    ch_helper.generate_csv_file("file1.csv", 0.02, cols)
+    console_printer.print_info(f"generating file2.csv")
+    ch_helper.generate_csv_file("file2.csv", 0.04, cols)
+    file = open("file2.csv")
     reader = csv.reader(file)
     lines = len(list(reader))
     context.rows_expected = lines - 1  # do not count header
@@ -79,13 +79,20 @@ def step_impl(context):
     )  # pre-defined columns + the partitioning column
 
 
-@when("Upload the local file to s3")
+@when("Zip and upload the local file to s3")
 def step_impl(context):
     console_printer.print_info(
         f"generated files with columns {context.args_ch['args']['cols']}"
     )
-    for f in context.filenames:
-        ch_helper.s3_upload(context, f, E2E_S3_PREFIX)
+
+    zip_f1 = zipfile.ZipFile(context.filenames[0], "w", zipfile.ZIP_DEFLATED)
+    zip_f1.write("file1.csv")
+    zip_f1.close()
+    zip_f2 = zipfile.ZipFile(context.filenames[1], "w", zipfile.ZIP_DEFLATED)
+    zip_f2.write("file2.csv")
+    zip_f2.close()
+    ch_helper.s3_upload(context, context.filenames[1], E2E_S3_PREFIX)
+    ch_helper.s3_upload(context, context.filenames[0], E2E_S3_PREFIX)
     context.filename_not_to_process = context.filenames[0]
     context.filename_expected = context.filenames[-1]
 
@@ -93,8 +100,7 @@ def step_impl(context):
 @when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
     ch_helper.add_latest_file(
-        context, os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[0]))
-    )
+        context, os.path.basename(context.filenames[0].replace(".csv", ".zip")))
 
 
 @then("Etl step in e2e mode completes")

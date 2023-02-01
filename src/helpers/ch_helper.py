@@ -35,7 +35,7 @@ def get_filenames(filenames_prefix, output_folder):
     for i in [31, 0]:
         filenames.append(str(datetime.date.today() - timedelta(i)))
     filenames = [
-        os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
+        os.path.join(output_folder, filenames_prefix + "-" + k + ".zip")
         for k in filenames
     ]
     filenames.sort(reverse=False)
