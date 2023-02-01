@@ -16,28 +16,28 @@ Feature: Synthesise source file, process them and check output tables
     ### one extra column
     When Clear S3 prefix where previous synthetic data is
     When Generate files having one extra column for negative testing
-    When Upload the local file to s3
+    When Zip and upload the local file to s3
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode fails
     Then File format alarm triggers
     ### incorrect headers
     When Clear S3 prefix where previous synthetic data is
     When Generate files having incorrect headers for negative testing
-    When Upload the local file to s3
+    When Zip and upload the local file to s3
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode fails
     Then File format alarm triggers
     ### row with one missing field
     When Clear S3 prefix where previous synthetic data is
     When Generate files having a row with one missing field for negative testing
-    When Upload the local file to s3
+    When Zip and upload the local file to s3
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode fails
     Then File format alarm triggers
     ### row with string value where it should be int according to schema
     When Clear S3 prefix where previous synthetic data is
     When Generate files having a row with string values instead of int
-    When Upload the local file to s3
+    When Zip and upload the local file to s3
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode fails
     Then File format alarm triggers
