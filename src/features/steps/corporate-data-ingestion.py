@@ -101,8 +101,8 @@ def step_impl(context, step_type):
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
         f"""--source_s3_prefix {context.s3_source_prefix} """
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
-        f"""--transition_db_name foo """
-        f"""--db_name bar """
+        f"""--intermediate_db_name foo """
+        f"""--user_db_name bar """
         f"""--collection_name data.businessAudit """,
     )
 
