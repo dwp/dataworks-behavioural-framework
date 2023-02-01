@@ -101,8 +101,8 @@ def step_impl(context, step_type):
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
         f"""--source_s3_prefix {context.s3_source_prefix} """
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
-        f"""--intermediate_db_name foo """
-        f"""--user_db_name bar """
+        f"""--intermediate_db_name uc_dw_auditlog """
+        f"""--user_db_name uc_auditlog """
         f"""--collection_name data.businessAudit """,
     )
 
@@ -201,7 +201,7 @@ def step_impl(context):
     date_str = datetime.now().strftime("%Y-%m-%d")
     hive_export_bash_command = f"""
     ( 
-      ( hive -e "SELECT * FROM foo.auditlog_raw where date_str='{date_str}';" > ~/{file_name} ) &&
+      ( hive -e "SELECT * FROM uc_dw_auditlog.auditlog_raw where date_str='{date_str}';" > ~/{file_name} ) &&
       aws s3 cp ~/{file_name} s3://{context.published_bucket}/{context.results_file_key}
     ) &>> /var/log/dataworks-aws-corporate-data-ingestion/e2e.log
     """.replace(
