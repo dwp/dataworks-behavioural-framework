@@ -8,7 +8,7 @@ Feature: Synthesise source file, process them and check output tables
     When The cluster starts without steps
     When Download and parse conf file
     When Generate files having expected format and size to test positive outcome
-    When Upload the local file to s3
+    When Zip and upload the local file to s3
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode completes
     Then Validation step completes
