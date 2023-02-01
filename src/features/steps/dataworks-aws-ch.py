@@ -70,7 +70,7 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames_local[0], 0.01, cols)
     console_printer.print_info(f"generating file 2")
     ch_helper.generate_csv_file(context.filenames_local[1], 0.02, cols)
-    file = open("file2.csv")
+    file = open(context.filenames_local[1])
     reader = csv.reader(file)
     lines = len(list(reader))
     context.rows_expected = lines - 1  # do not count header
