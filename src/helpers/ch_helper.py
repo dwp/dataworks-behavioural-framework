@@ -48,6 +48,8 @@ def get_filenames(filenames_prefix, output_folder):
         for k in filenames
     ]
     filenames_local.sort(reverse=False)
+    filenames_zip.sort(reverse=False)
+
     return filenames, filenames_local, filenames_zip
 
 
@@ -122,14 +124,10 @@ def download_file(bucket, prefix, filename, local_folder):
 
 
 def s3_upload(context, local_filename, prefix, bucket_filename):
-    input_file = file_helper.get_contents_of_file(local_filename, False)
-    inputs_s3_key = os.path.join(prefix, bucket_filename)
     console_printer.print_info(
         f"Uploading the local file {local_filename} as {bucket_filename} into s3 bucket {context.data_ingress_stage_bucket} "
     )
-    aws_helper.put_object_in_s3(
-        input_file, context.data_ingress_stage_bucket, inputs_s3_key
-    )
+    aws_helper.upload_file_to_s3_and_wait_for_consistency(local_filename, context.data_ingress_stage_bucket, 60, os.path.join(prefix, bucket_filename))
 
 
 def dynamo_table(context):
