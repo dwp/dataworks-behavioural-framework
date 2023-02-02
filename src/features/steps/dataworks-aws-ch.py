@@ -85,14 +85,14 @@ def step_impl(context):
         f"generated files with columns {context.args_ch['args']['cols']}"
     )
 
-    zip_f1 = zipfile.ZipFile(context.filenames[0], "w", zipfile.ZIP_DEFLATED)
+    zip_f1 = zipfile.ZipFile(context.filenames_zip[0], "w", zipfile.ZIP_DEFLATED)
     zip_f1.write(context.filenames_local[0])
     zip_f1.close()
-    zip_f2 = zipfile.ZipFile(context.filenames[1], "w", zipfile.ZIP_DEFLATED)
+    zip_f2 = zipfile.ZipFile(context.filenames_zip[1], "w", zipfile.ZIP_DEFLATED)
     zip_f2.write(context.filenames_local[1])
     zip_f2.close()
-    ch_helper.s3_upload(context, context.filenames_local[0], E2E_S3_PREFIX, context.filenames[0])
-    ch_helper.s3_upload(context, context.filenames_local[1], E2E_S3_PREFIX, context.filenames[1])
+    ch_helper.s3_upload(context, context.filenames_local_zip[0], E2E_S3_PREFIX, context.filenames[0])
+    ch_helper.s3_upload(context, context.filenames_local_zip[1], E2E_S3_PREFIX, context.filenames[1])
     context.filename_not_to_process = context.filenames[0]
     context.filename_expected = context.filenames[-1]
 
