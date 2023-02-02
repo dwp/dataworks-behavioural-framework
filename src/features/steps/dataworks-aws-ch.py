@@ -62,7 +62,7 @@ def step_impl(context):
     console_printer.print_info(
         f"generating files from the columns {context.args_ch['args']['cols']}"
     )
-    context.filenames, context.filenames_local = ch_helper.get_filenames(
+    context.filenames, context.filenames_local, context.filenames_local_zip = ch_helper.get_filenames(
         context.args_ch["args"]["filename"], context.temp_folder
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
