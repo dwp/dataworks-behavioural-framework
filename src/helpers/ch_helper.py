@@ -43,12 +43,12 @@ def get_filenames(filenames_prefix, output_folder):
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
         for k in filenames
     ]
-    filenames_local_zip = [
+    filenames_zip = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".zip")
         for k in filenames
     ]
     filenames_local.sort(reverse=False)
-    return filenames, filenames_local, filenames_local_zip
+    return filenames, filenames_local, filenames_zip
 
 
 
