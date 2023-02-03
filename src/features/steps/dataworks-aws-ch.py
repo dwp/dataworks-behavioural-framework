@@ -102,7 +102,7 @@ def step_impl(context):
 @when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
     ch_helper.add_latest_file(
-        context, os.path.basename(context.filenames[0]))
+        context, os.path.basename(context.filenames_zip_s3[0]))
 
 
 @then("Etl step in e2e mode completes")
@@ -179,7 +179,7 @@ def step_impl(context):
 
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
-        filename_from_table == context.filenames[1]
+        filename_from_table == context.filenames_zip_s3[1]
     ), "the dynamoDB item was not updated correctly"
 
 
@@ -204,8 +204,8 @@ def step_impl(context):
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols.update({"extra_column": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.01, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.02, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
 
 
 @when("Generate files having incorrect headers for negative testing")
@@ -215,8 +215,8 @@ def step_impl(context):
     cols.pop(list(cols.keys())[-1])
     cols.pop(list(cols.keys())[-1])
     cols.update({"incorrect_colname_1": "string", "incorrect_colname_2": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.01, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.02, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
 
 
 @when("Generate files having a row with string values instead of int")
@@ -225,8 +225,8 @@ def step_impl(context):
         f"generating files with one missing field for negative testing"
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.01, cols)
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.02, cols)
+    ch_helper.generate_csv_file_string_instead_of_int(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file_string_instead_of_int(context.filenames_csv_local[1], 0.02, cols)
 
 
 @when("Generate files having a row with one missing field for negative testing")
@@ -235,5 +235,5 @@ def step_impl(context):
         f"generating files with one missing field for negative testing"
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.01, cols)
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[1], 0.02, cols)
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file_row_with_missing_field(context.filenames_csv_local[1], 0.02, cols)
