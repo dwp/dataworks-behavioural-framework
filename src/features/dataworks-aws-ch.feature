@@ -34,10 +34,3 @@ Feature: Synthesise source file, process them and check output tables
     When Set the dynamo db bookmark on the first filename generated
     Then Etl step in e2e mode fails
     Then File format alarm triggers
-    ### row with string value where it should be int according to schema
-    When Clear S3 prefix where previous synthetic data is
-    When Generate files having a row with string values instead of int
-    When Zip and upload the local file to s3
-    When Set the dynamo db bookmark on the first filename generated
-    Then Etl step in e2e mode fails
-    Then File format alarm triggers

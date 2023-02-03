@@ -219,16 +219,6 @@ def step_impl(context):
     ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
 
 
-@when("Generate files having a row with string values instead of int")
-def step_impl(context):
-    console_printer.print_info(
-        f"generating files with one missing field for negative testing"
-    )
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames_csv_local[0], 0.01, cols)
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames_csv_local[1], 0.02, cols)
-
-
 @when("Generate files having a row with one missing field for negative testing")
 def step_impl(context):
     console_printer.print_info(

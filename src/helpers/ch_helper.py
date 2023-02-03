@@ -100,18 +100,6 @@ def generate_csv_file_row_with_missing_field(filename, desired_gb, cols):
             gb = convert_to_gigabytes(os.stat(filename).st_size)
 
 
-def generate_csv_file_string_instead_of_int(filename, desired_gb, cols):
-    with open(filename, "w+", newline="") as csvfile:
-        writer = csv.writer(csvfile, delimiter=",")
-        header_record = [k for k, v in cols.items()]
-        writer.writerow(header_record)
-        gb = convert_to_gigabytes(os.stat(filename).st_size)
-        while gb <= desired_gb:
-            record_data = [gen_string() for k, v in cols.items()]
-            writer.writerow(record_data)
-            gb = convert_to_gigabytes(os.stat(filename).st_size)
-
-
 def download_file(bucket, prefix, filename, local_folder):
     s3 = aws_helper.get_client("s3")
     s3.download_file(
