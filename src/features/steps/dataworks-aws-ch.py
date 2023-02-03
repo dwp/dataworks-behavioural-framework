@@ -62,14 +62,14 @@ def step_impl(context):
     console_printer.print_info(
         f"generating files from the columns {context.args_ch['args']['cols']}"
     )
-    context.filenames, context.filenames_local, context.filenames_zip = ch_helper.get_filenames(
+    context.filenames_zip_s3, context.filenames_csv_local, context.filenames_zip_local = ch_helper.get_filenames(
         context.args_ch["args"]["filename"], context.temp_folder
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     console_printer.print_info(f"generating file 1 ")
-    ch_helper.generate_csv_file(context.filenames_local[0], 0.01, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
     console_printer.print_info(f"generating file 2")
-    ch_helper.generate_csv_file(context.filenames_local[1], 0.02, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
     file = open(context.filenames_local[1])
     reader = csv.reader(file)
     lines = len(list(reader))
@@ -84,17 +84,17 @@ def step_impl(context):
     console_printer.print_info(
         f"generated files with columns {context.args_ch['args']['cols']}"
     )
-    zip_f1 = zipfile.ZipFile(context.filenames_zip[0], "w", zipfile.ZIP_DEFLATED)
-    zip_f1.write(context.filenames_local[0])
+    zip_f1 = zipfile.ZipFile(context.filenames_zip_local[0], "w", zipfile.ZIP_DEFLATED)
+    zip_f1.write(context.filenames_csv_local[0])
     zip_f1.close()
-    zip_f2 = zipfile.ZipFile(context.filenames_zip[1], "w", zipfile.ZIP_DEFLATED)
-    zip_f2.write(context.filenames_local[1])
+    zip_f2 = zipfile.ZipFile(context.filenames_zip_local[1], "w", zipfile.ZIP_DEFLATED)
+    zip_f2.write(context.filenames_csv_local[1])
     zip_f2.close()
-    ch_helper.s3_upload(context, context.filenames_zip[0], E2E_S3_PREFIX, context.filenames[0])
-    ch_helper.s3_upload(context, context.filenames_zip[1], E2E_S3_PREFIX, context.filenames[1])
-    context.filename_not_to_process = context.filenames[0]
-    context.filename_expected = context.filenames[-1]
-    for i in [context.filenames_zip[0], context.filenames_zip[1], context.filenames_local[0], context.filenames_local[1]]:
+    ch_helper.s3_upload(context, context.filenames_zip_local[0], E2E_S3_PREFIX, context.filenames_zip_s3[0])
+    ch_helper.s3_upload(context, context.filenames_zip_local[1], E2E_S3_PREFIX, context.filenames_zip_s3[1])
+    context.filename_not_to_process = context.filenames_zip_s3[0]
+    context.filename_expected = context.filenames_zip_s3[-1]
+    for i in [context.filenames_zip_local[0], context.filenames_zip_local[1], context.filenames_csv_local[0], context.filenames_csv_local[1]]:
         if os.path.exists(i):
             os.remove(i)
 

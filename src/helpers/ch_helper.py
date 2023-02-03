@@ -46,7 +46,7 @@ def get_filenames(filenames_prefix, output_folder):
     filenames_csv_local.sort(reverse=False)
     filenames_zip_local.sort(reverse=False)
 
-    return filenames, filenames_local, filenames_zip
+    return filenames_zip_s3, filenames_csv_local, filenames_zip_local
 
 
 
