@@ -2,7 +2,7 @@
 Feature: Synthesise source file, process them and check output tables
 
   @fixture.s3.clear.ch.start
-#  @fixture.terminate.ch.cluster
+  @fixture.terminate.ch.cluster
   Scenario: Cluster completes if the file conforms to size and format expectations; it fails and triggers alarms otherwise.
     ### file is as expected
     When The cluster starts without steps
