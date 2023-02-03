@@ -95,6 +95,10 @@ def step_impl(context):
     ch_helper.s3_upload(context, context.filenames_zip[1], E2E_S3_PREFIX, context.filenames[1])
     context.filename_not_to_process = context.filenames[0]
     context.filename_expected = context.filenames[-1]
+    os.remove(context.filenames_zip[0])
+    os.remove(context.filenames_zip[1])
+    os.remove(context.filenames_local[0])
+    os.remove(context.filenames_local[1])
 
 
 @when("Set the dynamo db bookmark on the first filename generated")
