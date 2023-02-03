@@ -100,7 +100,7 @@ def step_impl(context):
 @when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
     ch_helper.add_latest_file(
-        context, context.filenames[0])
+        context, os.path.basename(context.filenames[0]))
 
 
 @then("Etl step in e2e mode completes")
@@ -177,7 +177,7 @@ def step_impl(context):
 
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
-        filename_from_table == os.path.basename(context.filenames[1])
+        filename_from_table == context.filenames[1]
     ), "the dynamoDB item was not updated correctly"
 
 
