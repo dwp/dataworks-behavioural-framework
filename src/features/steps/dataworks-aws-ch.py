@@ -97,9 +97,6 @@ def step_impl(context):
     context.filename_expected = context.filenames[-1]
     os.remove(context.filenames_zip[0])
     os.remove(context.filenames_zip[1])
-    os.remove(context.filenames_local[0])
-    os.remove(context.filenames_local[1])
-
 
 @when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
