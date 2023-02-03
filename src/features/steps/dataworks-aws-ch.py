@@ -175,13 +175,9 @@ def step_impl(context):
 @then("Last imported file is updated on DynamoDB")
 def step_impl(context):
 
-    filename_expected = os.path.join(
-        E2E_S3_PREFIX, os.path.basename(context.filenames[1])
-    )
-
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
-        filename_from_table == filename_expected
+        filename_from_table == basename(context.filenames[1])
     ), "the dynamoDB item was not updated correctly"
 
 
