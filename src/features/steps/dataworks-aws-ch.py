@@ -177,7 +177,7 @@ def step_impl(context):
 
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
-        filename_from_table == basename(context.filenames[1])
+        filename_from_table == os.path.basename(context.filenames[1])
     ), "the dynamoDB item was not updated correctly"
 
 
