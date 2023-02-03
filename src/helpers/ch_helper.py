@@ -33,18 +33,18 @@ def get_args(location: str):
 def get_filenames(filenames_prefix, output_folder):
     filenames = [str(datetime.date.today())]
     filenames.append(str(datetime.date.today() - timedelta(31)))
-    filenames = [filenames_prefix + "-" + k + ".zip" for k in filenames]
-    filenames.sort(reverse=False)
-    filenames_local = [
+    filenames_zip_s3 = [filenames_prefix + "-" + k + ".zip" for k in filenames]
+    filenames_zip_s3.sort(reverse=False)
+    filenames_csv_local = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
         for k in filenames
     ]
-    filenames_zip = [
+    filenames_zip_local = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".zip")
         for k in filenames
     ]
-    filenames_local.sort(reverse=False)
-    filenames_zip.sort(reverse=False)
+    filenames_csv_local.sort(reverse=False)
+    filenames_zip_local.sort(reverse=False)
 
     return filenames, filenames_local, filenames_zip
 
