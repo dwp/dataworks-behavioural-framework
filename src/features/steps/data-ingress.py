@@ -85,7 +85,7 @@ def step_wait_pass_file(context):
 @then("new test file sent by sft sender is on s3")
 def step_impl(context):
     td = datetime.today().strftime("%Y-%m-%d")
-    filename = FILENAME + td + ".csv"
+    filename = FILENAME + td + ".zip"
     console_printer.print_info(f"checking if file {filename} is present on s3 bucket")
     start = time.time()
 
