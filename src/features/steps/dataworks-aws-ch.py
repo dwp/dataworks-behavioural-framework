@@ -2,6 +2,7 @@ import ast
 from behave import given, when, then
 import os
 import json
+import zipfile
 import csv
 import time
 from helpers import (
@@ -61,16 +62,19 @@ def step_impl(context):
     console_printer.print_info(
         f"generating files from the columns {context.args_ch['args']['cols']}"
     )
-    context.filenames = ch_helper.get_filenames(
+    (
+        context.filenames_zip_s3,
+        context.filenames_csv_local,
+        context.filenames_zip_local,
+    ) = ch_helper.get_filenames(
         context.args_ch["args"]["filename"], context.temp_folder
     )
-    console_printer.print_info(f"filenames are {context.filenames}")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    console_printer.print_info(f"generating {context.filenames[0]} ")
-    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
-    console_printer.print_info(f"generating {context.filenames[1]} ")
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
-    file = open(context.filenames[1])
+    console_printer.print_info(f"generating file 1 ")
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
+    console_printer.print_info(f"generating file 2")
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
+    file = open(context.filenames_csv_local[1])
     reader = csv.reader(file)
     lines = len(list(reader))
     context.rows_expected = lines - 1  # do not count header
@@ -79,22 +83,44 @@ def step_impl(context):
     )  # pre-defined columns + the partitioning column
 
 
-@when("Upload the local file to s3")
+@when("Zip and upload the local file to s3")
 def step_impl(context):
     console_printer.print_info(
         f"generated files with columns {context.args_ch['args']['cols']}"
     )
-    for f in context.filenames:
-        ch_helper.s3_upload(context, f, E2E_S3_PREFIX)
-    context.filename_not_to_process = context.filenames[0]
-    context.filename_expected = context.filenames[-1]
+    zip_f1 = zipfile.ZipFile(context.filenames_zip_local[0], "w", zipfile.ZIP_DEFLATED)
+    zip_f1.write(context.filenames_csv_local[0])
+    zip_f1.close()
+    zip_f2 = zipfile.ZipFile(context.filenames_zip_local[1], "w", zipfile.ZIP_DEFLATED)
+    zip_f2.write(context.filenames_csv_local[1])
+    zip_f2.close()
+    ch_helper.s3_upload(
+        context,
+        context.filenames_zip_local[0],
+        E2E_S3_PREFIX,
+        context.filenames_zip_s3[0],
+    )
+    ch_helper.s3_upload(
+        context,
+        context.filenames_zip_local[1],
+        E2E_S3_PREFIX,
+        context.filenames_zip_s3[1],
+    )
+    context.filename_not_to_process = context.filenames_zip_s3[0]
+    context.filename_expected = context.filenames_zip_s3[-1]
+    for i in [
+        context.filenames_zip_local[0],
+        context.filenames_zip_local[1],
+        context.filenames_csv_local[0],
+        context.filenames_csv_local[1],
+    ]:
+        if os.path.exists(i):
+            os.remove(i)
 
 
 @when("Set the dynamo db bookmark on the first filename generated")
 def step_impl(context):
-    ch_helper.add_latest_file(
-        context, os.path.join(E2E_S3_PREFIX, os.path.basename(context.filenames[0]))
-    )
+    ch_helper.add_latest_file(context, os.path.basename(context.filenames_zip_s3[0]))
 
 
 @then("Etl step in e2e mode completes")
@@ -166,13 +192,9 @@ def step_impl(context):
 
 @then("Last imported file is updated on DynamoDB")
 def step_impl(context):
-    filename_expected = os.path.join(
-        E2E_S3_PREFIX, os.path.basename(context.filenames[1])
-    )
-
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
-        filename_from_table == filename_expected
+        filename_from_table == context.filenames_zip_s3[1]
     ), "the dynamoDB item was not updated correctly"
 
 
@@ -197,8 +219,8 @@ def step_impl(context):
     console_printer.print_info(f"generating files with one extra column")
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
     cols.update({"extra_column": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)
 
 
 @when("Generate files having incorrect headers for negative testing")
@@ -208,25 +230,5 @@ def step_impl(context):
     cols.pop(list(cols.keys())[-1])
     cols.pop(list(cols.keys())[-1])
     cols.update({"incorrect_colname_1": "string", "incorrect_colname_2": "string"})
-    ch_helper.generate_csv_file(context.filenames[0], 0.02, cols)
-    ch_helper.generate_csv_file(context.filenames[1], 0.04, cols)
-
-
-@when("Generate files having a row with string values instead of int")
-def step_impl(context):
-    console_printer.print_info(
-        f"generating files with one missing field for negative testing"
-    )
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[0], 0.02, cols)
-    ch_helper.generate_csv_file_string_instead_of_int(context.filenames[1], 0.04, cols)
-
-
-@when("Generate files having a row with one missing field for negative testing")
-def step_impl(context):
-    console_printer.print_info(
-        f"generating files with one missing field for negative testing"
-    )
-    cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[0], 0.02, cols)
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames[1], 0.04, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[0], 0.01, cols)
+    ch_helper.generate_csv_file(context.filenames_csv_local[1], 0.02, cols)

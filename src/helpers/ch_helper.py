@@ -32,14 +32,21 @@ def get_args(location: str):
 
 def get_filenames(filenames_prefix, output_folder):
     filenames = [str(datetime.date.today())]
-    for i in [31, 0]:
-        filenames.append(str(datetime.date.today() - timedelta(i)))
-    filenames = [
+    filenames.append(str(datetime.date.today() - timedelta(31)))
+    filenames_zip_s3 = [filenames_prefix + "-" + k + ".zip" for k in filenames]
+    filenames_zip_s3.sort(reverse=False)
+    filenames_csv_local = [
         os.path.join(output_folder, filenames_prefix + "-" + k + ".csv")
         for k in filenames
     ]
-    filenames.sort(reverse=False)
-    return filenames
+    filenames_zip_local = [
+        os.path.join(output_folder, filenames_prefix + "-" + k + ".zip")
+        for k in filenames
+    ]
+    filenames_csv_local.sort(reverse=False)
+    filenames_zip_local.sort(reverse=False)
+
+    return filenames_zip_s3, filenames_csv_local, filenames_zip_local
 
 
 def gen_string():
@@ -92,18 +99,6 @@ def generate_csv_file_row_with_missing_field(filename, desired_gb, cols):
             gb = convert_to_gigabytes(os.stat(filename).st_size)
 
 
-def generate_csv_file_string_instead_of_int(filename, desired_gb, cols):
-    with open(filename, "w+", newline="") as csvfile:
-        writer = csv.writer(csvfile, delimiter=",")
-        header_record = [k for k, v in cols.items()]
-        writer.writerow(header_record)
-        gb = convert_to_gigabytes(os.stat(filename).st_size)
-        while gb <= desired_gb:
-            record_data = [gen_string() for k, v in cols.items()]
-            writer.writerow(record_data)
-            gb = convert_to_gigabytes(os.stat(filename).st_size)
-
-
 def download_file(bucket, prefix, filename, local_folder):
     s3 = aws_helper.get_client("s3")
     s3.download_file(
@@ -111,17 +106,15 @@ def download_file(bucket, prefix, filename, local_folder):
     )
 
 
-def s3_upload(context, filename, prefix):
-    console_printer.print_info(f"The file name is {filename}")
-    file_name = os.path.basename(filename)
-    input_file = file_helper.get_contents_of_file(filename, False)
-    inputs_s3_key = os.path.join(prefix, file_name)
+def s3_upload(context, local_filename, prefix, bucket_filename):
     console_printer.print_info(
-        f"Uploading the local file {filename} with basename as {file_name} into s3 bucket {context.published_bucket} "
-        f"using key name as {inputs_s3_key}"
+        f"Uploading the local file {local_filename} as {bucket_filename} into s3 bucket {context.data_ingress_stage_bucket} "
     )
-    aws_helper.put_object_in_s3(
-        input_file, context.data_ingress_stage_bucket, inputs_s3_key
+    aws_helper.upload_file_to_s3_and_wait_for_consistency(
+        local_filename,
+        context.data_ingress_stage_bucket,
+        60,
+        os.path.join(prefix, bucket_filename),
     )
 
 
