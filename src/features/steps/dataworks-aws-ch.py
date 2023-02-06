@@ -240,5 +240,9 @@ def step_impl(context):
         f"generating files with one missing field for negative testing"
     )
     cols = ast.literal_eval(context.args_ch["args"]["cols"])
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames_csv_local[0], 0.02, cols)
-    ch_helper.generate_csv_file_row_with_missing_field(context.filenames_csv_local[0], 0.04, cols)
+    ch_helper.generate_csv_file_row_with_missing_field(
+        context.filenames_csv_local[0], 0.02, cols
+    )
+    ch_helper.generate_csv_file_row_with_missing_field(
+        context.filenames_csv_local[0], 0.04, cols
+    )
