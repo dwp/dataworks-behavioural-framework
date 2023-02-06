@@ -244,5 +244,5 @@ def step_impl(context):
         context.filenames_csv_local[0], 0.02, cols
     )
     ch_helper.generate_csv_file_row_with_missing_field(
-        context.filenames_csv_local[0], 0.04, cols
+        context.filenames_csv_local[1], 0.04, cols
     )
