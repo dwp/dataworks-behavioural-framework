@@ -49,7 +49,6 @@ def get_filenames(filenames_prefix, output_folder):
     return filenames_zip_s3, filenames_csv_local, filenames_zip_local
 
 
-
 def gen_string():
     letters = string.ascii_letters
     result_str = "".join(rd.choice(letters) for i in range(8))
@@ -111,7 +110,12 @@ def s3_upload(context, local_filename, prefix, bucket_filename):
     console_printer.print_info(
         f"Uploading the local file {local_filename} as {bucket_filename} into s3 bucket {context.data_ingress_stage_bucket} "
     )
-    aws_helper.upload_file_to_s3_and_wait_for_consistency(local_filename, context.data_ingress_stage_bucket, 60, os.path.join(prefix, bucket_filename))
+    aws_helper.upload_file_to_s3_and_wait_for_consistency(
+        local_filename,
+        context.data_ingress_stage_bucket,
+        60,
+        os.path.join(prefix, bucket_filename),
+    )
 
 
 def dynamo_table(context):
