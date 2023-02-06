@@ -107,7 +107,6 @@ def step_impl(context):
 
 @then("Etl step in e2e mode completes")
 def step_impl(context):
-
     command = " ".join(
         [
             "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/steps/etl.py",
@@ -129,7 +128,6 @@ def step_impl(context):
 
 @then("Etl step in e2e mode fails")
 def step_impl(context):
-
     command = " ".join(
         [
             "spark-submit --master yarn --conf spark.yarn.submit.waitAppCompletion=true /opt/emr/steps/etl.py",
@@ -176,7 +174,6 @@ def step_impl(context):
 
 @then("Last imported file is updated on DynamoDB")
 def step_impl(context):
-
     filename_from_table = ch_helper.get_latest_file(context)
     assert (
         filename_from_table == context.filenames_zip_s3[1]

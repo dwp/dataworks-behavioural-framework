@@ -22,6 +22,7 @@ aws_profile = None
 aws_session_timeout_seconds = None
 boto3_session = None
 
+
 # Helper class to convert a DynamoDB item to JSON.
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -1723,7 +1724,6 @@ def scale_ecs_service_desired_task_count(
 
 
 def run_ecs_task(task, cluster):
-
     """Starts an ecs task
     Keyword arguments:
     task -- the name of the task
@@ -1750,7 +1750,6 @@ def delete_scheduled_action(asg_name, action_name):
         )
 
     except Exception as e:
-
         console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
         return False
 
@@ -2175,7 +2174,6 @@ def poll_batch_queue_for_job(
     job_queue_name: str,
     timeout_in_seconds=None,
 ):
-
     statuses = [
         "SUBMITTED",
         "PENDING",
