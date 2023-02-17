@@ -30,7 +30,11 @@ SNAPSHOT_TYPE = "snapshot_type"
 @given("the s3 '{type}' prefix is cleared")
 def step_impl(context, type):
     if type == "source":
-        s3_source_prefix = os.path.join(context.s3_source_prefix, datetime.now().strftime('%Y/%m/%d'), "automatedtests")
+        s3_source_prefix = os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            "automatedtests",
+        )
         aws_helper.clear_s3_prefix(
             context.corporate_storage_s3_bucket_id, s3_source_prefix, True
         )
@@ -140,7 +144,12 @@ def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
 @when("remove key '{key}' from existing file in s3 source prefix")
 def step_impl(context, key):
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, os.path.join(context.s3_source_prefix, datetime.now().strftime("%Y/%m/%d"), f"automatedtests/{context.test_run_name}_1")
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
@@ -162,7 +171,12 @@ def step_impl(context, key):
 def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, os.path.join(context.s3_source_prefix, datetime.now().strftime("%Y/%m/%d"), f"automatedtests/{context.test_run_name}_1")
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
@@ -181,7 +195,12 @@ def step_impl(context, key, value):
 @when("invalidate JSON from existing file in s3 source prefix")
 def step_impl(context):
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, os.path.join(context.s3_source_prefix, datetime.now().strftime("%Y/%m/%d"), f"automatedtests/{context.test_run_name}_1")
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
