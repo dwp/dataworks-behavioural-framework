@@ -17,7 +17,7 @@ from helpers import (
     data_load_helper,
     json_helper,
 )
-from datetime import datetime
+from datetime import datetime, timedelta
 
 CLUSTER_ARN = "ClusterArn"
 COMPLETED_STATUS = "COMPLETED"
@@ -30,8 +30,13 @@ SNAPSHOT_TYPE = "snapshot_type"
 @given("the s3 '{type}' prefix is cleared")
 def step_impl(context, type):
     if type == "source":
+        s3_source_prefix = os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            "automatedtests",
+        )
         aws_helper.clear_s3_prefix(
-            context.corporate_storage_s3_bucket_id, context.s3_source_prefix, True
+            context.corporate_storage_s3_bucket_id, s3_source_prefix, True
         )
     elif type == "destination":
         aws_helper.clear_s3_prefix(
@@ -45,7 +50,7 @@ def step_impl(context, type):
 
 @given("the s3 source prefix is set to k2hb landing place in corporate bucket")
 def step_impl(context):
-    context.s3_source_prefix = f"corporate_storage/ucfs_main/{datetime.now().strftime('%Y/%m/%d')}/automatedtests/{context.test_run_name}_1"
+    context.s3_source_prefix = f"corporate_storage/ucfs_main"
 
 
 @given("the s3 '{location_type}' prefix replaced by unauthorised location")
@@ -91,11 +96,10 @@ def step_impl(context, step_type):
         raise AssertionError("Cluster not in 'WAITING' state before timeout")
 
     context.step_type = step_type
-    context.s3_destination_prefix = os.path.join(
-        context.s3_destination_prefix,
-        "e2e",
-        context.test_run_name,
-    )
+    # Increments current date by one day because the step will retrieve data
+    # for the previous day but test data is generated for the current day
+    start_date = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
+    end_date = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
     context.step_id = emr_step_generator.generate_spark_step(
         emr_cluster_id=context.corporate_data_ingestion_cluster_id,
         script_location="/opt/emr/steps/corporate_data_ingestion.py",
@@ -103,9 +107,11 @@ def step_impl(context, step_type):
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
         f"""--source_s3_prefix {context.s3_source_prefix} """
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
-        f"""--intermediate_db_name uc_dw_auditlog """
-        f"""--user_db_name uc_auditlog """
-        f"""--collection_name data.businessAudit """,
+        f"""--start_date {start_date} """
+        f"""--end_date {end_date} """
+        f"""--collection_names automatedtests:{context.test_run_name}_1 """
+        f"""--concurrency 1 """
+        f"""--override_ingestion_class data:businessAudit """,
     )
 
 
@@ -138,7 +144,12 @@ def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
 @when("remove key '{key}' from existing file in s3 source prefix")
 def step_impl(context, key):
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, context.s3_source_prefix
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
@@ -160,7 +171,12 @@ def step_impl(context, key):
 def step_impl(context, key, value):
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, context.s3_source_prefix
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
@@ -179,7 +195,12 @@ def step_impl(context, key, value):
 @when("invalidate JSON from existing file in s3 source prefix")
 def step_impl(context):
     response = list_objects_from_s3_with_retries(
-        context.corporate_storage_s3_bucket_id, context.s3_source_prefix
+        context.corporate_storage_s3_bucket_id,
+        os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            f"automatedtests/{context.test_run_name}_1",
+        ),
     )[0]
     if len(response) == 0:
         AssertionError("Unable to retrieve file from S3")
@@ -200,7 +221,7 @@ def step_impl(context):
     file_name = f"{context.test_run_name}.csv"
     step_name = "automatedtests: hive-table-to-s3"
     context.results_file_key = "{}/{}".format(context.s3_destination_prefix, file_name)
-    date_str = datetime.now().strftime("%Y-%m-%d")
+    date_str = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
     hive_export_bash_command = f"""
     ( 
       ( hive -e "SELECT * FROM uc_dw_auditlog.auditlog_raw where date_str='{date_str}';" > ~/{file_name} ) &&
