@@ -204,33 +204,6 @@ def s3_clear_corporate_data_start(context, timeout=30, **kwargs):
 
 
 @fixture
-def s3_clear_corporate_data_ingestion_input(context, database, collection):
-    """Location for new corporate data ingestion (HBASE bypass)"""
-    corporate_data_ingestion_input_s3_prefix = (
-        data_load_helper.generate_corporate_data_s3_prefix(
-            os.path.join(
-                context.config.userdata.get("CDL_DATA_LOAD_S3_BASE_PREFIX"),
-                "ucfs_audit",
-            ),
-            database,
-            collection,
-            datetime.now(),
-        )
-    )
-    console_printer.print_info(
-        f"{context.corporate_storage_s3_bucket_id}|{corporate_data_ingestion_input_s3_prefix}"
-    )
-    console_printer.print_info(
-        "Executing 's3_clear_corporate_data_ingestion_input' fixture"
-    )
-    aws_helper.clear_s3_prefix(
-        context.corporate_storage_s3_bucket_id,
-        corporate_data_ingestion_input_s3_prefix,
-        True,
-    )
-
-
-@fixture
 def s3_clear_pdm_start(context, timeout=30, **kwargs):
     console_printer.print_info("Executing 's3_clear_pdm_start' fixture")
     aws_helper.clear_s3_prefix(
@@ -822,9 +795,6 @@ def s3_clear_corporate_data_ingestion_prefixes(context, timeout=30, **kwargs):
         "Executing 's3_clear_corporate_data_ingestion_prefixes' fixture"
     )
     aws_helper.clear_s3_prefix(
-        context.corporate_storage_s3_bucket_id, context.s3_source_prefix, True
-    )
-    aws_helper.clear_s3_prefix(
         context.published_bucket, context.s3_destination_prefix, True
     )
 
@@ -834,8 +804,8 @@ def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
     console_printer.print_info(
         "Executing 'prepare_corporate_data_ingestion_context' fixture"
     )
-    context.s3_source_prefix = f"corporate_storage/ucfs_audit/e2e"
-    context.s3_destination_prefix = f"corporate_data_ingestion/automatedtests/"
+    context.s3_source_prefix = f"corporate_storage/ucfs_audit/"
+    context.s3_destination_prefix = f"corporate_data_ingestion/"
 
 
 @fixture

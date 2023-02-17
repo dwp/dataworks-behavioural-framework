@@ -392,13 +392,6 @@ def before_tag(context, tag):
         use_fixture(before_fixtures.s3_clear_historic_data_start, context)
     if tag == "fixture.s3.clear.corporate.data.start":
         use_fixture(before_fixtures.s3_clear_corporate_data_start, context)
-    if tag == "fixture.s3.clear.corporate.data.ingestion.input":
-        use_fixture(
-            before_fixtures.s3_clear_corporate_data_ingestion_input,
-            context,
-            "data",
-            "businessAudit",
-        )
     if tag == "fixture.hbase.clear.ingest.start":
         use_fixture(before_fixtures.hbase_clear_ingest_start, context)
     if tag == "fixture.hbase.clear.ingest.equalities.start":
