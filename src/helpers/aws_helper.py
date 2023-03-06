@@ -1431,10 +1431,15 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
     """
     client = get_client(service_name="emr")
 
-    time_taken = 1
+    time_taken = 0
     timeout_time = (
         None if timeout_in_seconds is None else time.time() + timeout_in_seconds
     )
+
+    # Values for retry loop
+    retry_interval = 60
+    session_time = time.time()
+    session_ttl = 600
 
     while timeout_time is None or time.time() < timeout_time:
         response = client.describe_step(ClusterId=cluster_id, StepId=step_id)
@@ -1446,10 +1451,11 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
             )
             return state
 
-        time.sleep(1)
-        time_taken += 1
+        time.sleep(retry_interval)
+        time_taken += retry_interval
 
-        if time_taken % 600 == 0:
+        if time.time() - session_time > session_ttl:
+            session_time = time.time()
             clear_session()
             client = get_client(service_name="emr")
 
