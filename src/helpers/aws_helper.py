@@ -1446,7 +1446,7 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
             )
             return state
 
-        time.sleep(60)
+        time.sleep(30)
         time_taken += 1
 
         if time_taken % 600 == 0:
