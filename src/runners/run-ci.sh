@@ -317,7 +317,7 @@ function execute_behave() {
     fi
 
     if [[ -z "${AWS_SESSION_TIMEOUT_SECONDS}" ]]; then
-        AWS_SESSION_TIMEOUT_SECONDS=3600
+        AWS_SESSION_TIMEOUT_SECONDS=7200
     fi
 
     FIXTURE_PATH_REMOTE="fixture-data/business-data/kafka/functional-tests"
