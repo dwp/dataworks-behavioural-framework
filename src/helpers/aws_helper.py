@@ -1454,7 +1454,6 @@ def poll_emr_cluster_step_status(step_id, cluster_id, timeout_in_seconds=None):
         time.sleep(retry_interval)
         time_taken += retry_interval
 
-        # Refresh AWS session after 10 minutes
         if time.time() - session_time > session_ttl:
             session_time = time.time()
             clear_session()
