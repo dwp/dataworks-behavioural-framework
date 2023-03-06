@@ -1,7 +1,7 @@
 boto3 >= 1.9.160,<2.0.0
 behave >= 1.2.6,<2.0.0
 pycryptodome >= 3.8.1
-cryptography >= 3.3.1
+cryptography >= 3.3.2
 aws-requests-auth >= 0.4.3
 requests >= 2.25.1
 pytz >= 2022.6
