@@ -2112,7 +2112,7 @@ def execute_commands_on_ec2_by_tags_and_wait(
         DocumentName="AWS-RunShellScript",
         Parameters={"commands": commands},
         TimeoutSeconds=30,
-        Targets=[{"Key": "tag:Application", "Values": ec2_tags}],
+        Targets=[{"Key": "tag:DWX_Application", "Values": ec2_tags}],
     )
 
     console_printer.print_info(f"Response from ssm {resp}")
