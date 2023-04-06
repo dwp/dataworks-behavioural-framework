@@ -239,7 +239,7 @@ def step_impl(context):
         os.path.join(
             context.s3_source_prefix,
             datetime.now().strftime("%Y/%m/%d"),
-            f"automatedtests/{context.test_run_name}_1",
+            f"data/businessAudit",
         ),
     )[0]
     if len(response) == 0:
