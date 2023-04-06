@@ -348,7 +348,7 @@ def replicate_file_in_s3(source_bucket, dest_bucket, source_key, dest_key):
     s3_client.copy_object(
         Bucket=dest_bucket,
         Key=dest_key,
-        CopySource={"Bucket": source_bucket, "Key": source_key}
+        CopySource={"Bucket": source_bucket, "Key": source_key},
     )
 
 

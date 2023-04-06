@@ -48,6 +48,7 @@ def step_impl(context, type):
             f"Executing: clean s3 '{type}' prefix. Unknown type."
         )
 
+
 @given("the files are moved to a restricted location")
 def step_impl(context):
     # Clear the 'unauthorised' prefix
@@ -65,7 +66,7 @@ def step_impl(context):
                 context.s3_source_prefix,
                 datetime.now().strftime("%Y/%m/%d"),
                 "data/businessAudit",
-            )
+            ),
         )
     except KeyError:
         raise KeyError("Files Not Found in S3")
@@ -73,8 +74,7 @@ def step_impl(context):
     for file in files:
         old_key: str = file["Key"]
         new_key = os.path.join(
-            "unauthorised_location",
-            old_key.replace(context.s3_source_prefix, "")
+            "unauthorised_location", old_key.replace(context.s3_source_prefix, "")
         )
         print(f"{old_key}\t\t{new_key}")
         aws_helper.replicate_file_in_s3(
@@ -149,7 +149,7 @@ def step_impl(context, step_type):
         f"""--start_date {start_date} """
         f"""--end_date {end_date} """
         f"""--collection_names data:businessAudit """
-        f"""--concurrency 1 """
+        f"""--concurrency 1 """,
     )
 
 
