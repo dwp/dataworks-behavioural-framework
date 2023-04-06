@@ -233,6 +233,7 @@ def step_impl(context, key, value):
 
 @when("invalidate JSON from existing file in s3 source prefix")
 def step_impl(context):
+    time.sleep(10)
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id,
         os.path.join(
