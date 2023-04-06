@@ -28,12 +28,13 @@ SNAPSHOT_TYPE = "snapshot_type"
 
 
 @given("the s3 '{type}' prefix is cleared")
+@then("the s3 '{type}' prefix is cleared")
 def step_impl(context, type):
     if type == "source":
         s3_source_prefix = os.path.join(
             context.s3_source_prefix,
             datetime.now().strftime("%Y/%m/%d"),
-            "automatedtests",
+            "data/businessAudit",
         )
         aws_helper.clear_s3_prefix(
             context.corporate_storage_s3_bucket_id, s3_source_prefix, True
@@ -48,9 +49,42 @@ def step_impl(context, type):
         )
 
 
-@given("the s3 source prefix is set to k2hb landing place in corporate bucket")
+@given("the files are moved to a restricted location")
 def step_impl(context):
-    context.s3_source_prefix = f"corporate_storage/ucfs_main"
+    # Clear the 'unauthorised' prefix
+    aws_helper.clear_s3_prefix(
+        context.corporate_storage_s3_bucket_id, "unauthorised_location", True
+    )
+
+    # Give time for k2hb, ad retrieve generated kafka files from normal location
+    time.sleep(10)
+    try:
+        files = aws_helper.retrieve_files_from_s3_with_bucket_and_path(
+            s3_client=None,
+            bucket=context.corporate_storage_s3_bucket_id,
+            prefix=os.path.join(
+                context.s3_source_prefix,
+                datetime.now().strftime("%Y/%m/%d"),
+                "data/businessAudit",
+            ),
+        )
+    except KeyError:
+        raise KeyError("Files Not Found in S3")
+
+    for file in files:
+        old_key: str = file["Key"]
+        new_key = os.path.join(
+            "unauthorised_location", old_key.replace(context.s3_source_prefix, "")
+        )
+        print(f"{old_key}\t\t{new_key}")
+        aws_helper.replicate_file_in_s3(
+            source_bucket=context.corporate_storage_s3_bucket_id,
+            dest_bucket=context.corporate_storage_s3_bucket_id,
+            source_key=old_key,
+            dest_key=new_key,
+        )
+
+        context.s3_source_prefix = "unauthorised_location/"
 
 
 @given("the s3 '{location_type}' prefix replaced by unauthorised location")
@@ -81,7 +115,12 @@ def step_impl(context):
         ),
         s3_bucket=context.corporate_storage_s3_bucket_id,
         seconds_timeout=context.timeout,
-        s3_key=os.path.join(context.s3_source_prefix, filename),
+        s3_key=os.path.join(
+            context.s3_source_prefix,
+            datetime.now().strftime("%Y/%m/%d"),
+            "data/businessAudit",
+            filename,
+        ),
     )
 
 
@@ -109,9 +148,8 @@ def step_impl(context, step_type):
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
         f"""--start_date {start_date} """
         f"""--end_date {end_date} """
-        f"""--collection_names automatedtests:{context.test_run_name}_1 """
-        f"""--concurrency 1 """
-        f"""--override_ingestion_class data:businessAudit """,
+        f"""--collection_names data:businessAudit """
+        f"""--concurrency 1 """,
     )
 
 
@@ -129,26 +167,26 @@ def step_impl(context, expected_status):
         )
 
 
-def list_objects_from_s3_with_retries(bucket, prefix, retries=3, sleep=5):
+def list_objects_from_s3_with_retries(bucket, prefix, retries=10, sleep=5):
     response = []
     count = 0
     while len(response) == 0:
         response = aws_helper.get_s3_file_object_keys_matching_pattern(bucket, prefix)
         count += 1
         if count >= retries:
-            break
+            raise FileNotFoundError("No s3 files matching pattern")
         time.sleep(sleep)
     return response
 
 
-@when("remove key '{key}' from existing file in s3 source prefix")
+@when("Key '{key}' is removed from existing file in s3 source prefix")
 def step_impl(context, key):
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id,
         os.path.join(
             context.s3_source_prefix,
             datetime.now().strftime("%Y/%m/%d"),
-            f"automatedtests/{context.test_run_name}_1",
+            "data/businessAudit",
         ),
     )[0]
     if len(response) == 0:
@@ -169,13 +207,14 @@ def step_impl(context, key):
     "the value of '{key}' is replaced with '{value}' from existing file in s3 source prefix"
 )
 def step_impl(context, key, value):
+    time.sleep(15)
     value = "" if value == "None" else value
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id,
         os.path.join(
             context.s3_source_prefix,
             datetime.now().strftime("%Y/%m/%d"),
-            f"automatedtests/{context.test_run_name}_1",
+            "data/businessAudit",
         ),
     )[0]
     if len(response) == 0:
@@ -194,6 +233,7 @@ def step_impl(context, key, value):
 
 @when("invalidate JSON from existing file in s3 source prefix")
 def step_impl(context):
+    time.sleep(10)
     response = list_objects_from_s3_with_retries(
         context.corporate_storage_s3_bucket_id,
         os.path.join(

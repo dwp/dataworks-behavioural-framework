@@ -7,7 +7,6 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, wait
 from functools import reduce
-from typing import List
 from datetime import datetime, timedelta
 import boto3
 from boto3.dynamodb.conditions import Key, And
@@ -342,6 +341,15 @@ def resize_auto_scaling_group(service, size):
     payload_dict = {"Records": [{"Sns": {"Message": message}}]}
     payload_json = json.dumps(payload_dict)
     return invoke_lambda.invoke_asg_resizer(payload_json)
+
+
+def replicate_file_in_s3(source_bucket, dest_bucket, source_key, dest_key):
+    s3_client = get_client(service_name="s3")
+    s3_client.copy_object(
+        Bucket=dest_bucket,
+        Key=dest_key,
+        CopySource={"Bucket": source_bucket, "Key": source_key},
+    )
 
 
 def retrieve_files_from_s3(s3_bucket, path, pattern=None, remove_whitespace=False):
