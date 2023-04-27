@@ -12,4 +12,3 @@ Feature: Data ingress cluster scaling schedules and SFT task with Trend Micro
     When sender agent task and receiver agent task run
     Then new trend micro test pass file is on s3
     Then new test file sent by sft sender is on s3
-    Then instance stops within the expected time

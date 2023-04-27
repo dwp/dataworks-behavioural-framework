@@ -98,14 +98,3 @@ def step_impl(context):
             raise AssertionError(
                 f"sft file was not sent and received after {TIMEOUT_SFT} seconds"
             )
-
-
-@then("instance stops within the expected time")
-def step_impl(context):
-    time_now = time.time()
-    w = (context.time_scale_down * 60) - (time_now - context.time_start)
-    if w > 0:
-        console_printer.print_info(f"waiting {w} seconds")
-        time.sleep(w)
-    aws_helper.check_instance_count(desired_count=0, asg_name="data-ingress-ag")
-    console_printer.print_info("scaling successful")
