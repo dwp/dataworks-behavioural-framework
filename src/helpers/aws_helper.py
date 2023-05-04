@@ -1286,7 +1286,7 @@ def get_asg_desired_count(autoscaling_client, asg_prefix):
 
 
 def check_container_instance_count(cluster, desired_count, max_wait=600):
-    """Checks container instances are as many as desired within given time. Failes if container instance count did not reach desired count after max_wait
+    """Checks container instances are as many as desired within given time. Fails if container instance count did not reach desired count after max_wait
 
     Keyword arguments:
     cluster -- ECS cluster name
