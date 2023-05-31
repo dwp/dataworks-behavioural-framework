@@ -148,7 +148,8 @@ def step_impl(context, step_type):
         f"""--destination_s3_prefix {context.s3_destination_prefix} """
         f"""--start_date {start_date} """
         f"""--end_date {end_date} """
-        f"""--collection_names data:businessAudit """
+        f"""--db data """
+        f"""--collection businessAudit """
         f"""--concurrency 1 """,
     )
 
