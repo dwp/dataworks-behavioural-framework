@@ -111,8 +111,16 @@ def step_impl(context, step_type):
         + f"""--start_date {start_date} """
         + f"""--end_date {end_date} """
         + f"""--db data """
-        + (f"""--source_prefix {context.override_s3_source_prefix} """ if context.override_s3_source_prefix else "")
-        + (f"""--destination_prefix {context.override_s3_destination_prefix} """ if context.override_s3_destination_prefix else "")
+        + (
+            f"""--source_prefix {context.override_s3_source_prefix} """
+            if context.override_s3_source_prefix
+            else ""
+        )
+        + (
+            f"""--destination_prefix {context.override_s3_destination_prefix} """
+            if context.override_s3_destination_prefix
+            else ""
+        )
         + f"""--collection businessAudit """
         + f"""--concurrency 1 """,
     )
