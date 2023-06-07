@@ -49,48 +49,11 @@ def step_impl(context, type):
         )
 
 
-@given("the files are moved to a restricted location")
-def step_impl(context):
-    # Clear the 'unauthorised' prefix
-    aws_helper.clear_s3_prefix(
-        context.corporate_storage_s3_bucket_id, "unauthorised_location", True
-    )
-
-    # Give time for k2hb, ad retrieve generated kafka files from normal location
-    time.sleep(10)
-    try:
-        files = aws_helper.retrieve_files_from_s3_with_bucket_and_path(
-            s3_client=None,
-            bucket=context.corporate_storage_s3_bucket_id,
-            prefix=os.path.join(
-                context.s3_source_prefix,
-                datetime.now().strftime("%Y/%m/%d"),
-                "data/businessAudit",
-            ),
-        )
-    except KeyError:
-        raise KeyError("Files Not Found in S3")
-
-    for file in files:
-        old_key: str = file["Key"]
-        new_key = os.path.join(
-            "unauthorised_location", old_key.replace(context.s3_source_prefix, "")
-        )
-        print(f"{old_key}\t\t{new_key}")
-        aws_helper.replicate_file_in_s3(
-            source_bucket=context.corporate_storage_s3_bucket_id,
-            dest_bucket=context.corporate_storage_s3_bucket_id,
-            source_key=old_key,
-            dest_key=new_key,
-        )
-
-        context.s3_source_prefix = "unauthorised_location/"
-
-
 @given("the s3 '{location_type}' prefix replaced by unauthorised location")
 def step_impl(context, location_type):
     if location_type == "source":
         context.s3_source_prefix = "unauthorised_location/e2e"
+        context.override_s3_source_prefix = context.s3_source_prefix
         aws_helper.put_object_in_s3(
             "foobar",
             context.corporate_storage_s3_bucket_id,
@@ -98,6 +61,7 @@ def step_impl(context, location_type):
         )
     elif location_type == "destination":
         context.s3_destination_prefix = "unauthorised_location/e2e"
+        context.override_s3_destination_prefix = context.s3_destination_prefix
     else:
         raise AttributeError(
             "Parameter 'location_type' must be one of two values: 'source' or 'destination'"
@@ -144,11 +108,21 @@ def step_impl(context, step_type):
         script_location="/opt/emr/steps/corporate_data_ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
-        f"""--start_date {start_date} """
-        f"""--end_date {end_date} """
-        f"""--db data """
-        f"""--collection businessAudit """
-        f"""--concurrency 1 """,
+        + f"""--start_date {start_date} """
+        + f"""--end_date {end_date} """
+        + f"""--db data """
+        + (
+            f"""--source_prefix {context.override_s3_source_prefix} """
+            if context.override_s3_source_prefix
+            else ""
+        )
+        + (
+            f"""--destination_prefix {context.override_s3_destination_prefix} """
+            if context.override_s3_destination_prefix
+            else ""
+        )
+        + f"""--collection businessAudit """
+        + f"""--concurrency 1 """,
     )
 
 
