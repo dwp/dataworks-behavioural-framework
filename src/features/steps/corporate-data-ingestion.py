@@ -144,8 +144,6 @@ def step_impl(context, step_type):
         script_location="/opt/emr/steps/corporate_data_ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
-        f"""--source_s3_prefix {context.s3_source_prefix} """
-        f"""--destination_s3_prefix {context.s3_destination_prefix} """
         f"""--start_date {start_date} """
         f"""--end_date {end_date} """
         f"""--db data """
