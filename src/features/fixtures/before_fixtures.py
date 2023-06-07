@@ -806,6 +806,8 @@ def prepare_corporate_data_ingestion_context(context, timeout=30, **kwargs):
     )
     context.s3_source_prefix = f"corporate_storage/ucfs_audit/"
     context.s3_destination_prefix = f"corporate_data_ingestion/"
+    context.override_s3_source_prefix = None
+    context.override_s3_destination_prefix = None
 
 
 @fixture

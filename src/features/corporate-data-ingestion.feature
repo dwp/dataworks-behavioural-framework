@@ -30,10 +30,7 @@ Feature: Corporate data ingestion end to end test
     Scenario: Cluster fails to read directory without permissions
         Given The s3 'source' prefix is cleared
         And The 'kafka_audit' topic override is used for this test
-        And UCFS send '2' messages of type 'kafka_audit' with the given template files, encryption setting of 'true' and wait setting of 'true' with key method of 'message'
-            | input-file-name-kafka                       | output-file-name-kafka                     | snapshot-record-file-name-kafka  |
-            | current_valid_file_input_with_context.json  | current_valid_file_input_with_context.json | None                             |
-        Given the files are moved to a restricted location
+        And the s3 'source' prefix replaced by unauthorised location
         When a step 'no-read-permission-to-source' is triggered on the EMR cluster corporate-data-ingestion
         Then confirm that the EMR step status is 'FAILED'
         Then The s3 'source' prefix is cleared
