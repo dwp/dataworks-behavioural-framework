@@ -67,19 +67,18 @@ def step_impl(context):
 @when("the test file is submitted to the sender SFT agent")
 def step_impl(context):
     # remove all sft files currently in the stub nifi output bucket
-    aws_helper.clear_s3_prefix(
-        context.data_ingress_stage_bucket, S3_PREFIX, False
-    )
+    aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, S3_PREFIX, False)
 
     console_printer.print_info(f"Executing commands on Ec2")
     commands = [
         "sudo su",
         f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
-        f"echo \"ab,c,de\" >> /mnt/send_point/prod217.csv",
+        f'echo "ab,c,de" >> /mnt/send_point/prod217.csv',
     ]
     aws_helper.execute_commands_on_ec2_by_tags_and_wait(
         commands, ["dataworks-aws-data-egress"], 30
     )
+
 
 @then("new test file sent by sft sender is on s3")
 def step_impl(context):
