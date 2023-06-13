@@ -9,7 +9,7 @@ ASG = "data-ingress-ag"
 CLUSTER = "data-ingress"
 FILENAME = "BasicCompanyData-"
 S3_PREFIX = "e2e/data-ingress/companies"
-PASS_FILE_KEY = "e2e/eicar_test/pass.txt"
+TEST_FILE_KEY = "e2e/eicar_test/pass.txt"
 TIMEOUT_TM = 360
 TIMEOUT_SFT = 540
 TIMEOUT = 600
@@ -27,20 +27,20 @@ def step_impl(context, time_scale_up, time_scale_down):
         console_printer.print_error_text(ex)
 
 
-@when("instance starts within the expected time")
+@given("ASG instances are running")
 def step_impl(context):
-    w = (context.time_scale_up * 60) - 100
-    console_printer.print_info(f"waiting {w} seconds")
-    time.sleep(w)
     aws_helper.check_instance_count(desired_count=2, asg_name="data-ingress-ag")
-    console_printer.print_info("scaling successful")
+    console_printer.print_info("data-ingress-ag is running")
 
 
-@when("sender agent task and receiver agent task run")
+@given("ECS cluster has instances attached")
 def step_impl(context):
     aws_helper.check_container_instance_count(CLUSTER, 2)
     console_printer.print_info("waiting for container instances to be available")
-    time.sleep(20)
+
+
+@given("sender agent task and receiver agent task are running")
+def step_impl(context):
     start = time.time()
     receiver_running = aws_helper.check_task_state(
         CLUSTER, family="sft_agent_receiver", desired_status="running"
@@ -48,9 +48,6 @@ def step_impl(context):
     sender_running = aws_helper.check_task_state(
         CLUSTER, family="sft_agent_sender", desired_status="running"
     )
-    aws_helper.run_ecs_task("sft_agent_receiver", CLUSTER)
-    time.sleep(20)
-    aws_helper.run_ecs_task("sft_agent_sender", CLUSTER)
 
     while receiver_running == False or sender_running == False:
         if time.time() - start < TIMEOUT:
@@ -67,20 +64,22 @@ def step_impl(context):
             )
 
 
-@then("new trend micro test pass file is on s3")
-def step_wait_pass_file(context):
-    start = time.time()
-    while not aws_helper.check_if_s3_object_exists(
-        context.data_ingress_stage_bucket, PASS_FILE_KEY
-    ):
-        if time.time() - start < TIMEOUT_TM:
-            time.sleep(5)
-            time_left = time.time() - start
-            tl = TIMEOUT_TM - round(time_left)
-            console_printer.print_info(f"timeout in {tl} seconds")
-        else:
-            raise AssertionError(f"eicar test did not pass after {TIMEOUT_TM} seconds")
+@when("the test file is submitted to the sender SFT agent")
+def step_impl(context):
+    # remove all sft files currently in the stub nifi output bucket
+    aws_helper.clear_s3_prefix(
+        context.data_ingress_stage_bucket, S3_PREFIX, False
+    )
 
+    console_printer.print_info(f"Executing commands on Ec2")
+    commands = [
+        "sudo su",
+        f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
+        f"echo \"ab,c,de\" >> /mnt/send_point/prod217.csv",
+    ]
+    aws_helper.execute_commands_on_ec2_by_tags_and_wait(
+        commands, ["dataworks-aws-data-egress"], 30
+    )
 
 @then("new test file sent by sft sender is on s3")
 def step_impl(context):
