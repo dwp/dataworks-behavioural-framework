@@ -288,14 +288,14 @@ def stop_data_ingress(context, timeout=30, **kwargs):
         )
 
 
-@fixture
-def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
-    console_printer.print_info("Executing 'stop_data_ingress' fixture")
-    try:
-        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_off")
-        aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_on")
+# @fixture
+# def delete_scheduled_action_data_ingress(context, timeout=30, **kwargs):
+#     console_printer.print_info("Executing 'stop_data_ingress' fixture")
+#     try:
+#         aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_off")
+#         aws_helper.delete_scheduled_action("data-ingress-ag", "test_scaling_on")
 
-    except Exception as error:
-        console_printer.print_warning_text(
-            f"Error occurred when deleting scheduled actions: '{error}'"
-        )
+#     except Exception as error:
+#         console_printer.print_warning_text(
+#             f"Error occurred when deleting scheduled actions: '{error}'"
+#         )
