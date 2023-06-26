@@ -1750,22 +1750,22 @@ def run_ecs_task(task, cluster):
     )
 
 
-def delete_scheduled_action(asg_name, action_name):
-    """Deletes an autoscaling action in autoscaling group
-    Keyword arguments:
-    asg_name -- the name of the autoscaling group
-    action_name -- name of the autoscaling action
-    """
-    client = get_client("autoscaling")
-    try:
-        client.delete_scheduled_action(
-            AutoScalingGroupName=asg_name,
-            ScheduledActionName=action_name,
-        )
+# def delete_scheduled_action(asg_name, action_name):
+#     """Deletes an autoscaling action in autoscaling group
+#     Keyword arguments:
+#     asg_name -- the name of the autoscaling group
+#     action_name -- name of the autoscaling action
+#     """
+#     client = get_client("autoscaling")
+#     try:
+#         client.delete_scheduled_action(
+#             AutoScalingGroupName=asg_name,
+#             ScheduledActionName=action_name,
+#         )
 
-    except Exception as e:
-        console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
-        return False
+#     except Exception as e:
+#         console_printer.print_error_text(f"unable to delete autoscaling actions. {e}")
+#         return False
 
 
 def set_asg_instance_count(
