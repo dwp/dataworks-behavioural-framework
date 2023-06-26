@@ -583,5 +583,5 @@ def after_tag(context, tag):
         use_fixture(after_fixtures.terminate_datsci_cluster, context)
     if tag == "fixture.stop.data.ingress":
         use_fixture(after_fixtures.stop_data_ingress, context)
-    if tag == "fixture.delete.scheduled.action.di":
-        use_fixture(after_fixtures.delete_scheduled_action_data_ingress, context)
+    # if tag == "fixture.delete.scheduled.action.di":
+    #     use_fixture(after_fixtures.delete_scheduled_action_data_ingress, context)
