@@ -15,18 +15,6 @@ TIMEOUT_SFT = 540
 TIMEOUT = 600
 
 
-@given(
-    "instances should start in '{time_scale_up}' and stop in '{time_scale_down}' min after the pipeline has run"
-)
-def step_impl(context, time_scale_up, time_scale_down):
-    try:
-        context.time_scale_up = int(time_scale_up)
-        context.time_scale_down = int(time_scale_down)
-        context.time_start = time.time()
-    except Exception as ex:
-        console_printer.print_error_text(ex)
-
-
 @given("ASG instances are running")
 def step_impl(context):
     aws_helper.check_instance_count(desired_count=2, asg_name="data-ingress-ag")

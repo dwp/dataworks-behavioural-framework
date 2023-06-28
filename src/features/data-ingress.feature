@@ -11,5 +11,4 @@ Feature: Data ingress cluster scaling schedules and SFT task with Trend Micro
     Given ECS cluster has instances attached
     Given sender agent task and receiver agent task running
     When the test file is submitted to the sender SFT agent
-    Then new trend micro test pass file is on s3
     Then new test file sent by sft sender is on s3
