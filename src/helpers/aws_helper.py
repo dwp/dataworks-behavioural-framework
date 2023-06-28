@@ -2139,17 +2139,21 @@ def retrieve_ecs_task_instance_ids(cluster: list, family: str):
 
     ecs = get_client("ecs")
     tasks = ecs.list_tasks(cluster=cluster, desiredStatus="running", family=family)
-    resp = ecs.describe_tasks(cluster=cluster, tasks=tasks['taskArns'])
+    resp = ecs.describe_tasks(cluster=cluster, tasks=tasks["taskArns"])
 
     if len(resp["failures"]) > 0:
         for error in resp.failures:
-            console_printer.print_error_text(f"Failures describing task {error['arn']}, reason: {error['reason']}")
+            console_printer.print_error_text(
+                f"Failures describing task {error['arn']}, reason: {error['reason']}"
+            )
 
     for task in resp["tasks"]:
         instance_id = task["containerInstanceArn"]
         ecs_container_instance_ids.append(instance_id)
 
-    resp = ecs.describe_container_instances(cluster=cluster, containerInstances=ecs_container_instance_ids)
+    resp = ecs.describe_container_instances(
+        cluster=cluster, containerInstances=ecs_container_instance_ids
+    )
     for instance in resp["containerInstances"]:
         ec2_instance_ids.append(instance["ec2InstanceId"])
 
