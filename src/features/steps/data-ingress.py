@@ -60,11 +60,14 @@ def step_impl(context):
     console_printer.print_info(f"Executing commands on Ec2")
     commands = [
         "sudo su",
-        f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
-        f'echo "ab,c,de" >> /mnt/send_point/prod217.csv',
+        f"cd /mnt/point/",
+        f'echo "ab,c,de" >> /mnt/point/prod217.csv',
     ]
-    aws_helper.execute_commands_on_ec2_by_tags_and_wait(
-        commands, ["dataworks-aws-data-egress"], 30
+    instance_ids = aws_helper.retrieve_ecs_task_instance_ids(
+        cluster=CLUSTER, family="sft_agent_sender"
+    )
+    aws_helper.execute_commands_on_ec2_by_instance_id_and_wait(
+        commands=commands, instance_ids=instance_ids, timeout=30
     )
 
 

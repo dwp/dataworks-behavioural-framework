@@ -2127,6 +2127,60 @@ def execute_commands_on_ec2_by_tags_and_wait(
     time.sleep(timeout)
 
 
+def retrieve_ecs_task_instance_ids(cluster: list, family: str):
+    """Uses ECS task name and cluster to retrieve EC2 instance Ids.
+
+    Keyword arguments:
+        cluster -- ECS Cluster name
+        family -- ECS family name
+    """
+    ecs_container_instance_ids = []
+    ec2_instance_ids = []
+
+    ecs = get_client("ecs")
+    tasks = ecs.list_tasks(cluster=cluster, desiredStatus="running", family=family)
+    resp = ecs.describe_tasks(cluster=cluster, tasks=tasks['taskArns'])
+
+    if len(resp["failures"]) > 0:
+        for error in resp.failures:
+            console_printer.print_error_text(f"Failures describing task {error['arn']}, reason: {error['reason']}")
+
+    for task in resp["tasks"]:
+        instance_id = task["containerInstanceArn"]
+        ecs_container_instance_ids.append(instance_id)
+
+    resp = ecs.describe_container_instances(cluster=cluster, containerInstances=ecs_container_instance_ids)
+    for instance in resp["containerInstances"]:
+        ec2_instance_ids.append(instance["ec2InstanceId"])
+
+    return ec2_instance_ids
+
+
+def execute_commands_on_ec2_by_instance_id_and_wait(
+    commands: list, instance_ids: list, timeout: int, ssm_client=None
+):
+    """Executes command on ec2 instances.
+
+    Keyword arguments:
+        commands -- Array of string commands to run
+        instance_ids -- list of EC2 instance ids to run commands on
+        timeout -- The time in seconds to wait for the commands to be run
+        ssm_client -- an established ssm client (optional)
+    """
+    if not ssm_client:
+        ssm_client = get_client("ssm")
+
+    resp = ssm_client.send_command(
+        DocumentName="AWS-RunShellScript",
+        Parameters={"commands": commands},
+        TimeoutSeconds=30,
+        Targets=[{"Key": "InstanceIds", "Values": instance_ids}],
+    )
+
+    console_printer.print_info(f"Response from ssm {resp}")
+    time.sleep(timeout)
+
+
 def purge_sqs_queue(queue_name, aws_region="eu-west-2"):
     console_printer.print_info(f"Purging queue: {queue_name}")
     service_name = "sqs"
