@@ -1317,7 +1317,7 @@ def check_container_instance_count(cluster, desired_count, max_wait=600):
 
 
 def check_instance_count(desired_count, asg_name, max_wait=300):
-    """Checks instances are as many as desired within given tim. Failes if instance count did not reach desired count after max_wait
+    """Checks instances are as many as desired within given tim. Fails if instance count did not reach desired count after max_wait
 
     Keyword arguments:
     desired_count -- desired instance count

@@ -4,8 +4,6 @@
 Feature: Data ingress cluster scaling schedules and SFT task with Trend Micro
 
   @fixture.s3.clear.ingress.sft.start
-  # @fixture.stop.data.ingress
-  # @fixture.delete.scheduled.action.di
   Scenario: The data ingress cluster detects test virus and sft receives file
     Given ASG instances are running
     Given ECS cluster has instances attached
