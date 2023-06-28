@@ -1286,7 +1286,7 @@ def get_asg_desired_count(autoscaling_client, asg_prefix):
 
 
 def check_container_instance_count(cluster, desired_count, max_wait=600):
-    """Checks container instances are as many as desired within given time. Failes if container instance count did not reach desired count after max_wait
+    """Checks container instances are as many as desired within given time. Fails if container instance count did not reach desired count after max_wait
 
     Keyword arguments:
     cluster -- ECS cluster name
@@ -1317,7 +1317,7 @@ def check_container_instance_count(cluster, desired_count, max_wait=600):
 
 
 def check_instance_count(desired_count, asg_name, max_wait=300):
-    """Checks instances are as many as desired within given tim. Failes if instance count did not reach desired count after max_wait
+    """Checks instances are as many as desired within given tim. Fails if instance count did not reach desired count after max_wait
 
     Keyword arguments:
     desired_count -- desired instance count
@@ -2121,6 +2121,64 @@ def execute_commands_on_ec2_by_tags_and_wait(
         Parameters={"commands": commands},
         TimeoutSeconds=30,
         Targets=[{"Key": "tag:DWX_Application", "Values": ec2_tags}],
+    )
+
+    console_printer.print_info(f"Response from ssm {resp}")
+    time.sleep(timeout)
+
+
+def retrieve_ecs_task_instance_ids(cluster: list, family: str):
+    """Uses ECS task name and cluster to retrieve EC2 instance Ids.
+
+    Keyword arguments:
+        cluster -- ECS Cluster name
+        family -- ECS family name
+    """
+    ecs_container_instance_ids = []
+    ec2_instance_ids = []
+
+    ecs = get_client("ecs")
+    tasks = ecs.list_tasks(cluster=cluster, desiredStatus="running", family=family)
+    resp = ecs.describe_tasks(cluster=cluster, tasks=tasks["taskArns"])
+
+    if len(resp["failures"]) > 0:
+        for error in resp.failures:
+            console_printer.print_error_text(
+                f"Failures describing task {error['arn']}, reason: {error['reason']}"
+            )
+
+    for task in resp["tasks"]:
+        instance_id = task["containerInstanceArn"]
+        ecs_container_instance_ids.append(instance_id)
+
+    resp = ecs.describe_container_instances(
+        cluster=cluster, containerInstances=ecs_container_instance_ids
+    )
+    for instance in resp["containerInstances"]:
+        ec2_instance_ids.append(instance["ec2InstanceId"])
+
+    return ec2_instance_ids
+
+
+def execute_commands_on_ec2_by_instance_id_and_wait(
+    commands: list, instance_ids: list, timeout: int, ssm_client=None
+):
+    """Executes command on ec2 instances.
+
+    Keyword arguments:
+        commands -- Array of string commands to run
+        instance_ids -- list of EC2 instance ids to run commands on
+        timeout -- The time in seconds to wait for the commands to be run
+        ssm_client -- an established ssm client (optional)
+    """
+    if not ssm_client:
+        ssm_client = get_client("ssm")
+
+    resp = ssm_client.send_command(
+        DocumentName="AWS-RunShellScript",
+        Parameters={"commands": commands},
+        TimeoutSeconds=30,
+        Targets=[{"Key": "InstanceIds", "Values": instance_ids}],
     )
 
     console_printer.print_info(f"Response from ssm {resp}")
