@@ -57,15 +57,17 @@ def step_impl(context):
     # remove all sft files currently in the stub nifi output bucket
     aws_helper.clear_s3_prefix(context.data_ingress_stage_bucket, S3_PREFIX, False)
 
-    console_printer.print_info(f"Executing commands on Ec2")
+    console_printer.print_info(f"Retrieving EC2 instance Ids of sft_agent_sender task")
+    instance_ids = aws_helper.retrieve_ecs_task_instance_ids(
+        cluster=CLUSTER, family="sft_agent_sender"
+    )
+
+    console_printer.print_info(f"Executing commands on EC2")
     commands = [
         "sudo su",
         f"cd /mnt/point/",
         f'echo "ab,c,de" >> /mnt/point/prod217.csv',
     ]
-    instance_ids = aws_helper.retrieve_ecs_task_instance_ids(
-        cluster=CLUSTER, family="sft_agent_sender"
-    )
     aws_helper.execute_commands_on_ec2_by_instance_id_and_wait(
         commands=commands, instance_ids=instance_ids, timeout=30
     )
