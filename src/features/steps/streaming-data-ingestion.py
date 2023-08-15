@@ -455,17 +455,31 @@ def step_impl(context, streaming_type, id_format, message_type):
 @given(
     "UCFS send '{record_count}' messages of type '{message_type}' with the given template files, encryption setting of '{encrypt_in_sender}' and wait setting of '{wait_for_sending}' with key method of '{key_method}' with the same Ids"
 )
-def step_impl(context, record_count, message_type, encrypt_in_sender, wait_for_sending, key_method):
+def step_impl(
+    context, record_count, message_type, encrypt_in_sender, wait_for_sending, key_method
+):
     """Sends each template in the table with the same Id, so that a record can be 'updated'.
-     Repeats `record_count` times"""
+    Repeats `record_count` times"""
 
-    for _ in range(int(record_count)//2):
+    for _ in range(int(record_count) // 2):
         context.uploaded_id = uuid.uuid4()
 
         for row in context.table:
-            input_file_name = None if row['input-file-name-kafka'] == "None" else row['input-file-name-kafka']
-            output_file_name = None if row['output-file-name-kafka'] == "None" else row['output-file-name-kafka']
-            snapshot_record_file_name = None if row['snapshot-record-file-name-kafka'] == "None" else row['snapshot-record-file-name-kafka']
+            input_file_name = (
+                None
+                if row["input-file-name-kafka"] == "None"
+                else row["input-file-name-kafka"]
+            )
+            output_file_name = (
+                None
+                if row["output-file-name-kafka"] == "None"
+                else row["output-file-name-kafka"]
+            )
+            snapshot_record_file_name = (
+                None
+                if row["snapshot-record-file-name-kafka"] == "None"
+                else row["snapshot-record-file-name-kafka"]
+            )
             dlq_file_name = "None"
 
             folder = streaming_data_helper.generate_fixture_data_folder(message_type)
@@ -475,14 +489,18 @@ def step_impl(context, record_count, message_type, encrypt_in_sender, wait_for_s
             output_template = None if output_file_name == "None" else output_file_name
             dlq_template = None if dlq_file_name == "None" else dlq_file_name
             snapshot_record_file_name = (
-                None if snapshot_record_file_name == "None" else snapshot_record_file_name
+                None
+                if snapshot_record_file_name == "None"
+                else snapshot_record_file_name
             )
             wait_for_sending_bool = wait_for_sending.lower() == "true"
 
             message_volume = (
                 context.kafka_message_volume if context.kafka_message_volume else "1"
             )
-            random_keys = context.kafka_random_key if context.kafka_random_key else "false"
+            random_keys = (
+                context.kafka_random_key if context.kafka_random_key else "false"
+            )
 
             context.kafka_generated_dlq_output_files = []
 
@@ -501,7 +519,9 @@ def step_impl(context, record_count, message_type, encrypt_in_sender, wait_for_s
                     input_template_name=input_file_name,
                     output_template_name=output_template,
                     new_uuid=key,
-                    local_files_temp_folder=os.path.join(context.temp_folder, topic_name),
+                    local_files_temp_folder=os.path.join(
+                        context.temp_folder, topic_name
+                    ),
                     fixture_files_root=context.fixture_path_local,
                     s3_output_prefix=context.s3_temp_output_path,
                     record_count=1,

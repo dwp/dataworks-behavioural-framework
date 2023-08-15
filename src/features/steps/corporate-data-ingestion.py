@@ -40,22 +40,21 @@ def step_impl(context, prefix_type):
         "corporate_storage",
         ucfs_folder,
         datetime.now().strftime("%Y/%m/%d"),
-        collection_folder
+        collection_folder,
     )
 
     context.s3_destination_prefix = os.path.join(
-        "corporate_data_ingestion/orc/daily",
-        collection_folder
+        "corporate_data_ingestion/orc/daily", collection_folder
     )
 
     context.s3_export_destination_prefix = os.path.join(
         "corporate_data_ingestion/exports/",
         collection_folder,
-        (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+        (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
     )
 
 
-@given('the source and destination prefixes are cleared')
+@given("the source and destination prefixes are cleared")
 def step_impl(context):
     for bucket, prefix in [
         (context.corporate_storage_s3_bucket_id, context.s3_source_prefix),
@@ -64,13 +63,16 @@ def step_impl(context):
         aws_helper.clear_s3_prefix(bucket, prefix, True)
 
 
-@given('Empty orc snapshot placed in S3')
+@given("Empty orc snapshot placed in S3")
 def step_impl(context):
     # get expected previous snapshot prefix from dynamodb
-    response = aws_helper.scan_dynamodb_with_filters(table_name="data_pipeline_metadata", filters={
-        "DataProduct": "CDI-calculator:calculationParts",
-        "Status": "COMPLETED",
-    })
+    response = aws_helper.scan_dynamodb_with_filters(
+        table_name="data_pipeline_metadata",
+        filters={
+            "DataProduct": "CDI-calculator:calculationParts",
+            "Status": "COMPLETED",
+        },
+    )
 
     response_items = [item for item in response if "S3_Prefix_CDI_Export" in item]
 
@@ -84,7 +86,11 @@ def step_impl(context):
             if item["Date"] == max_date:
                 prefix = item["S3_Prefix_CDI_Export"]
 
-    prefix = prefix if prefix else "corporate_data_ingestion/exports/calculator/calculationParts/2023-05-17/"
+    prefix = (
+        prefix
+        if prefix
+        else "corporate_data_ingestion/exports/calculator/calculationParts/2023-05-17/"
+    )
 
     aws_helper.clear_s3_prefix(
         s3_bucket=context.published_bucket,
@@ -112,12 +118,12 @@ def step_impl(context):
         "bash step",
     )
 
-    step_state = aws_helper.poll_emr_cluster_step_status(step_id, context.corporate_data_ingestion_cluster_id, 1200)
+    step_state = aws_helper.poll_emr_cluster_step_status(
+        step_id, context.corporate_data_ingestion_cluster_id, 1200
+    )
 
     if step_state != "COMPLETED":
-        raise AssertionError(
-            f"ORC Snapshot step failed"
-        )
+        raise AssertionError(f"ORC Snapshot step failed")
 
 
 @given("the s3 '{type}' prefix is cleared")
@@ -181,8 +187,10 @@ def step_impl(context):
     )
 
 
-@when("a step '{step_type}' is triggered on the EMR cluster corporate-data-ingestion with '{ingestion_class}' "
-      "ingestion class with additional parameters '{additional_parameters}'")
+@when(
+    "a step '{step_type}' is triggered on the EMR cluster corporate-data-ingestion with '{ingestion_class}' "
+    "ingestion class with additional parameters '{additional_parameters}'"
+)
 def step_impl(context, step_type, ingestion_class, additional_parameters):
     cluster_state = aws_helper.poll_emr_cluster_status(
         cluster_id=context.corporate_data_ingestion_cluster_id,
@@ -206,15 +214,18 @@ def step_impl(context, step_type, ingestion_class, additional_parameters):
         script_location="/opt/emr/steps/corporate_data_ingestion.py",
         step_type=f"""automatedtests: {step_type}""",
         command_line_arguments=f"""--correlation_id {context.test_run_name} """
-                               + f"""--start_date {start_date} """
-                               + f"""--end_date {end_date} """
-                               + f"""--db {db} """
-                               + f"""--collection {collection} """
-                               + f"""--concurrency 1 """
-                               + (f"""--ingestion_class {ingestion_class} """ if ingestion_class != "None" else "")
-                               + (additional_parameters if additional_parameters != "None" else ""),
+        + f"""--start_date {start_date} """
+        + f"""--end_date {end_date} """
+        + f"""--db {db} """
+        + f"""--collection {collection} """
+        + f"""--concurrency 1 """
+        + (
+            f"""--ingestion_class {ingestion_class} """
+            if ingestion_class != "None"
+            else ""
+        )
+        + (additional_parameters if additional_parameters != "None" else ""),
     )
-
 
 
 @then("confirm that the EMR step status is '{expected_status}'")
@@ -252,15 +263,21 @@ def step_impl(context, key):
 
     object_key = response[0]
 
-    message = aws_helper.get_s3_object(None, context.corporate_storage_s3_bucket_id, object_key)
+    message = aws_helper.get_s3_object(
+        None, context.corporate_storage_s3_bucket_id, object_key
+    )
     message_decompressed = bytes(gzip.decompress(message)).decode()
-    message_dicts = [json.loads(message) for message in message_decompressed.split("\n") if message]
+    message_dicts = [
+        json.loads(message) for message in message_decompressed.split("\n") if message
+    ]
 
     for message in message_dicts:
         json_helper.remove_key_from_dict(message, key)
 
     altered_message_lines = [json.dumps(message) for message in message_dicts]
-    compressed_altered_messages = gzip.compress(str.encode("\n".join(altered_message_lines)))
+    compressed_altered_messages = gzip.compress(
+        str.encode("\n".join(altered_message_lines))
+    )
 
     aws_helper.put_object_in_s3(
         compressed_altered_messages, context.corporate_storage_s3_bucket_id, object_key
@@ -279,15 +296,21 @@ def step_impl(context, key, value):
     )
     object_key = response[0]
 
-    message = aws_helper.get_s3_object(None, context.corporate_storage_s3_bucket_id, object_key)
+    message = aws_helper.get_s3_object(
+        None, context.corporate_storage_s3_bucket_id, object_key
+    )
     message_decompressed = bytes(gzip.decompress(message)).decode()
-    message_dicts = [json.loads(message) for message in message_decompressed.split("\n") if message]
+    message_dicts = [
+        json.loads(message) for message in message_decompressed.split("\n") if message
+    ]
 
     for message in message_dicts:
         json_helper.replace_value_from_dict_using_key(message, key, value)
 
     altered_message_lines = [json.dumps(message) for message in message_dicts]
-    compressed_altered_messages = gzip.compress(str.encode("\n".join(altered_message_lines)))
+    compressed_altered_messages = gzip.compress(
+        str.encode("\n".join(altered_message_lines))
+    )
 
     aws_helper.put_object_in_s3(
         compressed_altered_messages, context.corporate_storage_s3_bucket_id, object_key
@@ -319,13 +342,19 @@ def step_impl(context):
 def step_impl(context):
     file_name = f"{context.test_run_name}.csv"
     step_name = "automatedtests: check-daily-data"
-    context.results_file_key = os.path.join(*context.s3_destination_prefix.split("/")[:-1], file_name)
+    context.results_file_key = os.path.join(
+        *context.s3_destination_prefix.split("/")[:-1], file_name
+    )
 
     topic = context.topics_for_test[0]["topic"]
     db, collection = topic.split(".")[-2:]
 
-    export_location = os.path.join("s3://", context.published_bucket, context.s3_destination_prefix)
-    output_file = os.path.join("s3://", context.published_bucket, context.results_file_key)
+    export_location = os.path.join(
+        "s3://", context.published_bucket, context.s3_destination_prefix
+    )
+    output_file = os.path.join(
+        "s3://", context.published_bucket, context.results_file_key
+    )
     hive_export_bash_command = f"""
     ( 
       ( hive -e "drop table if exists export_table_{collection}" ) &&
@@ -357,13 +386,19 @@ def step_impl(context):
 def step_impl(context):
     file_name = f"{context.test_run_name}.csv"
     step_name = "automatedtests: check-daily-data"
-    context.results_file_key = os.path.join(*context.s3_export_destination_prefix.split("/")[:-1], file_name)
+    context.results_file_key = os.path.join(
+        *context.s3_export_destination_prefix.split("/")[:-1], file_name
+    )
 
     topic = context.topics_for_test[0]["topic"]
     db, collection = topic.split(".")[-2:]
 
-    export_location = os.path.join("s3://", context.published_bucket, context.s3_export_destination_prefix)
-    output_file = os.path.join("s3://", context.published_bucket, context.results_file_key)
+    export_location = os.path.join(
+        "s3://", context.published_bucket, context.s3_export_destination_prefix
+    )
+    output_file = os.path.join(
+        "s3://", context.published_bucket, context.results_file_key
+    )
     hive_export_bash_command = f"""
     ( 
       ( hive -e "drop table if exists export_table_{collection}" ) &&
@@ -397,7 +432,9 @@ def step_impl(context):
     # step should overwrite data, we should be runnable more than once
     file_name = f"{context.test_run_name}.csv"
     step_name = "automatedtests: hive-table-to-s3"
-    context.results_file_key = os.path.join(*context.s3_destination_prefix.split("/")[:-1], file_name)
+    context.results_file_key = os.path.join(
+        *context.s3_destination_prefix.split("/")[:-1], file_name
+    )
     date_str = (datetime.now().date() + timedelta(days=1)).strftime("%Y-%m-%d")
     hive_export_bash_command = f"""
     ( 
