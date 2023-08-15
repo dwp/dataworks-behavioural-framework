@@ -16,6 +16,8 @@ def generate_fixture_data_folder(message_type):
         return os.path.join("kafka_data", "audit")
     elif message_type.lower() == "claimant_api":
         return os.path.join("kafka_data", "claimant_api")
+    elif message_type.lower() == "calculation_parts":
+        return os.path.join("kafka_data", "calculation_parts")
 
     return "corporate_data"
 
