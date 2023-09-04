@@ -450,3 +450,113 @@ def step_impl(context, streaming_type, id_format, message_type):
         console_printer.print_info(f"Actual manifest lines were '{manifest_lines}'")
 
         assert expected in manifest_lines
+
+
+@given(
+    "UCFS send '{record_count}' messages of type '{message_type}' with the given template files, encryption setting of '{encrypt_in_sender}' and wait setting of '{wait_for_sending}' with key method of '{key_method}' with the same Ids"
+)
+def step_impl(
+    context, record_count, message_type, encrypt_in_sender, wait_for_sending, key_method
+):
+    """Sends each template in the table with the same Id, so that a record can be 'updated'.
+    Repeats `record_count` times"""
+
+    for _ in range(int(record_count) // 2):
+        context.uploaded_id = uuid.uuid4()
+
+        for row in context.table:
+            input_file_name = (
+                None
+                if row["input-file-name-kafka"] == "None"
+                else row["input-file-name-kafka"]
+            )
+            output_file_name = (
+                None
+                if row["output-file-name-kafka"] == "None"
+                else row["output-file-name-kafka"]
+            )
+            snapshot_record_file_name = (
+                None
+                if row["snapshot-record-file-name-kafka"] == "None"
+                else row["snapshot-record-file-name-kafka"]
+            )
+            dlq_file_name = "None"
+
+            folder = streaming_data_helper.generate_fixture_data_folder(message_type)
+            topic_prefix = streaming_data_helper.generate_topic_prefix(message_type)
+
+            skip_encryption = "true" if encrypt_in_sender == "false" else "false"
+            output_template = None if output_file_name == "None" else output_file_name
+            dlq_template = None if dlq_file_name == "None" else dlq_file_name
+            snapshot_record_file_name = (
+                None
+                if snapshot_record_file_name == "None"
+                else snapshot_record_file_name
+            )
+            wait_for_sending_bool = wait_for_sending.lower() == "true"
+
+            message_volume = (
+                context.kafka_message_volume if context.kafka_message_volume else "1"
+            )
+            random_keys = (
+                context.kafka_random_key if context.kafka_random_key else "false"
+            )
+
+            context.kafka_generated_dlq_output_files = []
+
+            for topic in context.topics_for_test:
+                key = None
+                if key_method.lower() == "static":
+                    key = context.uploaded_id
+                elif key_method.lower() == "topic":
+                    key = uuid.uuid4()
+
+                topic_name = template_helper.get_topic_name(topic["topic"])
+
+                generated_files = kafka_data_generator.generate_kafka_files(
+                    test_run_name=context.test_run_name,
+                    s3_input_bucket=context.s3_ingest_bucket,
+                    input_template_name=input_file_name,
+                    output_template_name=output_template,
+                    new_uuid=key,
+                    local_files_temp_folder=os.path.join(
+                        context.temp_folder, topic_name
+                    ),
+                    fixture_files_root=context.fixture_path_local,
+                    s3_output_prefix=context.s3_temp_output_path,
+                    record_count=1,
+                    topic_name=topic["topic"],
+                    snapshots_output_folder=context.snapshot_files_hbase_records_temp_folder,
+                    seconds_timeout=context.timeout,
+                    fixture_data_folder=folder,
+                    dlq_template_name=dlq_template,
+                    snapshot_record_template_name=snapshot_record_file_name,
+                )
+
+                files_to_send_to_kafka_broker = [
+                    generated_file[0] for generated_file in generated_files
+                ]
+                aws_helper.send_files_to_kafka_producer_sns(
+                    dynamodb_table_name=context.dynamo_db_table_name,
+                    s3_input_bucket=context.s3_ingest_bucket,
+                    aws_acc_id=context.aws_acc,
+                    sns_topic_name=context.aws_sns_topic_name,
+                    fixture_files=files_to_send_to_kafka_broker,
+                    message_key=context.uploaded_id,
+                    topic_name=topic["topic"],
+                    topic_prefix=topic_prefix,
+                    region=context.aws_region_main,
+                    skip_encryption=skip_encryption,
+                    kafka_message_volume=message_volume,
+                    kafka_random_key=random_keys,
+                    wait_for_job_completion=wait_for_sending_bool,
+                )
+
+                dlq_files_for_topic = []
+                for generated_file in generated_files:
+                    if len(generated_file) > 3:
+                        dlq_files_for_topic.append(generated_file[3])
+
+                context.kafka_generated_dlq_output_files.append(
+                    (topic["topic"], dlq_files_for_topic)
+                )
