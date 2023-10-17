@@ -111,7 +111,7 @@ def step_verify_data_egress_content(context):
 def step_verify_stf_content(context):
     time.sleep(10)
     keys = aws_helper.get_s3_file_object_keys_matching_pattern(
-        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, ".*"
+        context.data_ingress_stage_bucket, S3_PREFIX_FOR_SFT_OUTPUT, ".*"
     )
 
     console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
@@ -121,7 +121,7 @@ def step_verify_stf_content(context):
             continue
         output_file_content = (
             aws_helper.get_s3_object(
-                bucket=context.snapshot_s3_output_bucket, key=s3_key, s3_client=None
+                bucket=context.data_ingress_stage_bucket, key=s3_key, s3_client=None
             )
             .decode()
             .strip()
