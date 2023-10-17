@@ -37,7 +37,7 @@ def step_prepare_sft_test(context, template_name, file_location):
     commands = [
         "sudo su",
         f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
-        f"echo {unencrypted_content} >> {template_name}.txt",
+        f"echo {unencrypted_content} >> {template_name}",
     ]
     aws_helper.execute_commands_on_ec2_by_tags_and_wait(
         commands, ["dataworks-aws-data-egress"], 30
