@@ -24,7 +24,7 @@ TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 def step_prepare_sft_test(context, template_name, file_location):
     # remove all sft files currently in the stub nifi output bucket
     aws_helper.clear_s3_prefix(
-        context.snapshot_s3_output_bucket, S3_PREFIX_FOR_SFT_OUTPUT, False
+        context.data_ingress_stage_bucket, S3_PREFIX_FOR_SFT_OUTPUT, False
     )
 
     template_file = os.path.join(
@@ -37,7 +37,7 @@ def step_prepare_sft_test(context, template_name, file_location):
     commands = [
         "sudo su",
         f"cd /var/lib/docker/volumes/data-egress/_data/{file_location}",
-        f"echo {unencrypted_content} >> test1.txt",
+        f"echo {unencrypted_content} >> {template_name}.txt",
     ]
     aws_helper.execute_commands_on_ec2_by_tags_and_wait(
         commands, ["dataworks-aws-data-egress"], 30
@@ -107,17 +107,17 @@ def step_verify_data_egress_content(context):
     )
 
 
-@then("verify content of the SFT output file")
-def step_verify_stf_content(context):
+@then("verify content of the SFT output file '{template_name}'")
+def step_verify_stf_content(context, template_name):
     time.sleep(10)
     keys = aws_helper.get_s3_file_object_keys_matching_pattern(
-        context.data_ingress_stage_bucket, S3_PREFIX_FOR_SFT_OUTPUT, ".*"
+        context.data_ingress_stage_bucket, S3_PREFIX_FOR_SFT_OUTPUT, template_name
     )
 
     console_printer.print_info(f"Keys in data egress SFT output location : {keys}")
     assert len(keys) > 0
     for s3_key in keys:
-        if s3_key == S3_PREFIX_FOR_SFT_OUTPUT:
+        if s3_key == f"S3_PREFIX_FOR_SFT_OUTPUT/{template_name}":
             continue
         output_file_content = (
             aws_helper.get_s3_object(
