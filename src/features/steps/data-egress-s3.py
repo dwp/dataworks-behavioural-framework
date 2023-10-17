@@ -15,7 +15,7 @@ DATAENCRYPTIONKEYID = "datakeyencryptionkeyid"
 CIPHERTEXT = "ciphertext"
 S3_PREFIX_FOR_INPUT = "dataworks-egress-testing-input/"
 S3_PREFIX_FOR_OUTPUT = "data-egress-testing-output/"
-S3_PREFIX_FOR_SFT_OUTPUT = "sft/"
+S3_PREFIX_FOR_SFT_OUTPUT = "e2e/data-egress/startup-test/"
 TEMPLATE_FOLDER = "data_egress_data"
 TEMPLATE_SUCCESS_FILE = "pipeline_success.flag"
 
