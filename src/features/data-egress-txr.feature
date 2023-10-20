@@ -1,7 +1,7 @@
 @data-egress-s3
 Feature: Data egress transfer txr data to S3 end to end test
 
-  Scenario: SFT service to transfer transaction data to HTTP destination end to end test
+  Scenario: SFT service to transfer txr data to S3 destination end to end test
     Given a set of collections:
         |   name                                        |   destination     |
         |   db.core.statement                           |   ris,cre         |
@@ -15,7 +15,7 @@ Feature: Data egress transfer txr data to S3 end to end test
         |   db.agent-core.agent                         |   ris,cre         |
         |   db.core.todo                                |   ris             |
         |   db.accepted-data.other                      |   ris             |
-        |   db.crypto.encryptedData                      |   ris             |
+        |   db.crypto.encryptedData                     |   ris             |
         |   db.calculation.calculationParts             |   ris             |
     When we submit them to the 'RIS' data directory on the SFT service
     Then we verify the collection files are correctly distributed in S3
