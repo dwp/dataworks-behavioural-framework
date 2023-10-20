@@ -111,14 +111,17 @@ def step_verify_data_egress_content(context):
 def step_verify_stf_content(context, template_name):
     time.sleep(5)
 
-    output_file_content = aws_helper.get_s3_object(
-        bucket=context.data_ingress_stage_bucket, 
-        key=f"{S3_PREFIX_FOR_SFT_OUTPUT}{template_name}",
-        s3_client=None
-    ).decode().strip()
+    output_file_content = (
+        aws_helper.get_s3_object(
+            bucket=context.data_ingress_stage_bucket,
+            key=f"{S3_PREFIX_FOR_SFT_OUTPUT}{template_name}",
+            s3_client=None,
+        )
+        .decode()
+        .strip()
+    )
 
     console_printer.print_info(f"sft file content is : {output_file_content}")
     assert (
-        output_file_content
-        == "This is just sample data to test data egress service."
+        output_file_content == "This is just sample data to test data egress service."
     )
