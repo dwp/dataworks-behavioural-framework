@@ -10,6 +10,9 @@ Feature: Data egress transfer txr data to S3 end to end test
         |   db.accepted-data.address                    |   ris,cre         |
         |   db.accepted-data.childrenCircumstances      |   ris,cre         |
         |   db.accepted-data.personDetails              |   ris,cre         |
+        |   db.accepted-data.carerCircumstances         |   ris,cre         |
+        |   db.accepted-data.earningsData               |   ris,cre         |
+        |   db.accepted-data.housingCircumstances       |   ris,cre         |
         |   db.crypto.encryptedData-unencrypted         |   ris,cre         |
         |   db.organisation.organisation                |   ris,cre         |
         |   db.agent-core.agent                         |   ris,cre         |
