@@ -19,6 +19,7 @@ def step_prepare_sft_test(context):
             {
                 "name": row["name"],
                 "file": f"{row['name']}-123-123-123456.12345678.txt.gz.enc",
+                "controlfile": f"{row['name']}-12345678.control",
                 "destination": row["destination"],
             }
         )
@@ -40,6 +41,7 @@ def step_submit_files_to_sft(context, data_directory):
             f"cd /var/lib/docker/volumes/data-egress/_data/{data_directory}"
         )
         commands.append(f"echo 'test content' >> {collection['file']}")
+        commands.append(f"echo 'control test content' >> {collection['controlfile']}")
 
     console_printer.print_info(
         "Executing the following commands:'{}'".format("\n".join(commands))
@@ -73,10 +75,19 @@ def step_verify_stf_content(context):
                     .decode()
                     .strip()
                 )
-                console_printer.print_info(
-                    f"SFT file content is: '{output_file_content}'"
+                control_output_file_content = (
+                    aws_helper.get_s3_object(
+                        bucket=context.data_ingress_stage_bucket,
+                        key=f"{S3_PREFIX_FOR_SFT_OUTPUT}{dest}/{collection['controlfile']}",
+                        s3_client=None,
+                    )
+                    .decode()
+                    .strip()
                 )
-                if output_file_content != "test content":
+                console_printer.print_info(
+                    f"SFT file content is: '{output_file_content}'. sft control file content is : '{control_output_file_content}'"
+                )
+                if output_file_content != "test content" or control_output_file_content != "test control content": 
                     collections_that_do_not_reconcile += 1
             except ClientError as e:
                 error_code = e.response["Error"]["Code"]
