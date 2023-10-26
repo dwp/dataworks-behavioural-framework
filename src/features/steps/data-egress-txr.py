@@ -87,7 +87,10 @@ def step_verify_stf_content(context):
                 console_printer.print_info(
                     f"SFT file content is: '{output_file_content}'. sft control file content is : '{control_output_file_content}'"
                 )
-                if output_file_content != "test content" or control_output_file_content != "test control content": 
+                if (
+                    output_file_content != "test content"
+                    or control_output_file_content != "test control content"
+                ):
                     collections_that_do_not_reconcile += 1
             except ClientError as e:
                 error_code = e.response["Error"]["Code"]
