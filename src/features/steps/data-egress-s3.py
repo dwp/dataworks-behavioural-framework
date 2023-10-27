@@ -109,7 +109,7 @@ def step_verify_data_egress_content(context):
 
 @then("verify content of the SFT output file '{template_name}'")
 def step_verify_stf_content(context, template_name):
-    time.sleep(5)
+    time.sleep(60)
 
     output_file_content = (
         aws_helper.get_s3_object(
