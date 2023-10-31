@@ -89,7 +89,7 @@ def step_verify_stf_content(context):
                 )
                 if (
                     output_file_content != "test content"
-                    or control_output_file_content != "test control content"
+                    or control_output_file_content != "control test content"
                 ):
                     collections_that_do_not_reconcile += 1
             except ClientError as e:
