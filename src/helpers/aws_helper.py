@@ -2311,3 +2311,53 @@ def get_instance_id(instance_name, region_name="eu-west-2"):
     response = client.describe_instances(Filters=filters)
     instance_id = response["Reservations"][0]["Instances"][0]["InstanceId"]
     return instance_id
+
+
+def event_bus_exists(event_bus_name):
+    client = get_client(service_name="events")
+    try:
+        if not bool(event_bus_name):
+            return False
+        client.describe_event_bus(Name=event_bus_name)
+        return True
+    except client.exceptions.ResourceNotFoundException as e:
+        return False
+
+
+def get_event_rule_name_for_event_type(event_type, event_bus_name="default"):
+    client = get_client(service_name="events")
+    paginator = client.get_paginator("list_rules")
+    event_rule_name = None
+    resp_iterator = paginator.paginate(EventBusName=event_bus_name)
+    for resp in resp_iterator:
+        rules = resp["Rules"]
+        for r in rules:
+            event_pattern_str = r.get("EventPattern")
+            event_pattern = json.loads(event_pattern_str)
+            detail_type = event_pattern.get("detail-type")
+            if detail_type and event_type in detail_type:
+                event_rule_name = r["Name"]
+    return event_rule_name
+
+
+def event_rule_has_target(target_arn, event_rule_name, event_bus_name="default"):
+    client = get_client(service_name="events")
+    paginator = client.get_paginator("list_targets_by_rule")
+    target_exists = False
+    resp_iterator = paginator.paginate(
+        Rule=event_rule_name,
+        EventBusName=event_bus_name
+    )
+    for resp in resp_iterator:
+        targets = resp["Targets"]
+        for t in targets:
+            if target_arn == t["Arn"]:
+                target_exists=True
+    return target_exists
+
+
+def put_events(event_entries):
+    client = get_client("events")
+    return client.put_events(
+        Entries = event_entries
+    )
