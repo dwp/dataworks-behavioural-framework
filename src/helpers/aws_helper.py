@@ -2361,3 +2361,28 @@ def put_events(event_entries):
     return client.put_events(
         Entries = event_entries
     )
+
+def get_function_arn(function_name):
+    client = get_client("lambda")
+    resp = client.get_function(
+        FunctionName=function_name
+    )
+    return resp["Configuration"]["FunctionArn"]
+
+
+def get_queue_url(queue_name):
+    client = get_client("sqs")
+    resp = client.get_queue_url(
+        QueueName=queue_name
+    )
+    return resp["QueueUrl"]
+    
+
+def get_message_of_sqs_queue(queue_url):
+    client = get_client("sqs")
+    resp = client.receive_message(
+        QueueUrl=queue_url,
+        MaxNumberOfMessages=1,
+        WaitTimeSeconds=20
+    )
+    return resp["Messages"][0]
