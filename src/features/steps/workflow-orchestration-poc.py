@@ -34,7 +34,15 @@ def step_impl(context, event_detail_type):
             context.workflow_orchestration_event_bus_name
         )
     )
-    
+
+@given("a Table of type '{db_table}' named '{table_name}' exists")
+def step_impl(context, db_table, table_name)
+    pass
+
+@given("an SNS Topic named '{topic_name}' exists")
+def step_impl(context, topic_name):
+    pass
+
 
 @when("an Event of type '{event_type}' is fired to the Event Bus")
 def step_impl(context, event_type):
@@ -68,3 +76,7 @@ def step_impl(context):
     assert(
         msg_json.get("event_type") == context.event_type
     )
+
+@given("an Event of type '{event_type}' is placed on the SNS Topic")
+def step_impl(context, event_type):
+    aws_helper.publish_message_to_sns()
