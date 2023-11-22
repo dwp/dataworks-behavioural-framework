@@ -20,5 +20,7 @@ Feature: Data egress transfer txr data to S3 end to end test
         |   db.accepted-data.other                      |   ris,!cre        |
         |   db.crypto.encryptedData                     |   ris,!cre        |
         |   db.calculation.calculationParts             |   ris,!cre        |
+        |   data.equality                               |   ris,!cre        |
+
     When we submit them to the 'RIS' data directory on the SFT service
     Then we verify the collection files are correctly distributed in S3
